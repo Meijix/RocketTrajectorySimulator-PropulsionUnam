@@ -1,5 +1,5 @@
 # Modelar la atmosfera: Temperatura, desidad, presion vs altura, viento
-
+#este codigo es de Alex 
 import numpy as np
 import matplotlib.pyplot as plt
 
