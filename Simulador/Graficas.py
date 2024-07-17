@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from angulos import *
+
 from simulacion1 import *
 
 # Posiciones
@@ -29,7 +31,7 @@ plt.legend()
 plt.grid(True)
 
 # Mostrar las gráficas
-plt.show()
+#plt.show()
 
 # Graficar angulos contra el tiempo
 plt.figure(figsize=(10, 6))
@@ -57,7 +59,6 @@ plt.plot(tiempos[1:], Tmags, label= "Empuje")
 plt.plot(tiempos[1:], Nmags,label="Normal")
 plt.plot(tiempos[1:], Dmags, label= "Arrastre")
 vuelo1.muestra_tiempos()
-
 
 plt.xlim(0,vuelo1.tiempo_apogeo+10)
 plt.legend()
@@ -102,12 +103,13 @@ vuelo1.muestra_tiempos()
 #plt.xlim(0,vuelo1.tiempo_apogeo+1)
 #plt.ylim(-6,2.2)
 plt.legend()
-
 plt.show()
 
 CGs = np.array(CGs)
 CPs = np.array(CPs)
 
+
+plt.figure(figsize=(18,4))
 #si se definen asi los calibres???
 stab = (CPs-CGs)/diam_ext
 plt.plot(tiempos[1:], CGs[:,2],label="CG")
@@ -123,17 +125,17 @@ plt.plot(tiempos[1:], stab[:,2], color="C2",label="estabilidad")
 plt.ylabel("Estabilidad (calibres)")
 #plt.xlim(0,vuelo1.tiempo_apogeo+10)
 plt.legend()
+plt.show()
 
 # Componentes del brazo de palanca
-palancas = np.array(palancas)
-plt.plot(tiempos[1:], palancas[:,0], label="x")
-plt.plot(tiempos[1:], palancas[:,1], label="y")
-plt.plot(tiempos[1:], palancas[:,2], label="z")
+#palancas = np.array(palancas)
+#plt.plot(tiempos[1:], palancas[:,0], label="x")
+#plt.plot(tiempos[1:], palancas[:,1], label="y")
+#plt.plot(tiempos[1:], palancas[:,2], label="z")
 # plt.plot(tiempo[1:], list(np.linalg.norm(p) for p in palancas))
 #plt.xlim(0,vuelo1.tiempo_apogeo+10)
-plt.legend()
-plt.title("Componentes del brazo de palanca")
-plt.xlabel("Tiempo (s)")
-
-vuelo1.muestra_tiempos()
-plt.show()
+#plt.legend()
+#plt.title("Componentes del brazo de palanca")
+#plt.xlabel("Tiempo (s)")
+#vuelo1.muestra_tiempos()
+#plt.show()
