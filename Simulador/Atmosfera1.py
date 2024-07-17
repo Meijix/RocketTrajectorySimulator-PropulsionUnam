@@ -15,7 +15,7 @@ def calc_gravedad(altura_z):
 
 #Calcular la gravedad en la superficie
 g0 = calc_gravedad(0)
-print("Gravedad en el suelo: ",g0, "[m/s^2]")
+#print("Gravedad en el suelo: ",g0, "[m/s^2]")
 
 class atmosfera:
 
@@ -97,9 +97,11 @@ class atmosfera:
 
 #Creacion del objeto
 atm_actual = atmosfera()
+"""Descomentar para obtener prpiedades a 10 km
 T, rho, presion, cs = atm_actual.calc_propiedades(10000)
 print("Propiedades atmosfericas a 10 km")
 print("Temperatura: ",T,"[K]", T-273.15,"[grados]")
 print("Densidad: ",rho, "[]")
 print("Presion: ",presion,"[Pa]")
 print("Vel del sonido:",cs, "[m/s^2]")
+"""

@@ -1,5 +1,5 @@
 #Simulacion sin paracaidas del Xitle2
-from Xitle import *
+from Simulador.Xitle import *
 from sim1 import *
 from Listas_results import *
 

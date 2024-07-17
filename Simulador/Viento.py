@@ -24,6 +24,7 @@ viento_actual = Viento2D(vel_mean=10, vel_var=0.05)
 print(viento_actual)
 print(viento_actual.vector)
 
+"""""Descomentar para graficar el vector viento 
 # Get the x and z components of the wind vector
 vx = viento_actual.vector[0]
 vz = viento_actual.vector[2]
@@ -45,3 +46,4 @@ ax.set_title('Vector de viento')
 
 # Show the plot
 plt.show()
+"""

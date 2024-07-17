@@ -1,14 +1,13 @@
 #En este SCRIPT: Clase COHETE 
 #Se crea la clase COHETE, con sus atributos y métodos
-#Falta corregir la llamada a boattail,riel, viento2D
 
-from Atmosfera1 import *
-from Componentes import *
-from Viento import *
-from riel import *
+#Importar otros scripts
+from Atmosfera1 import atm_actual,calc_gravedad
+#from Componentes import *
+from Viento import viento_actual,Viento2D
+from riel import riel
 
-from Resultados.Xitle import boattail
-
+#Importar librerias
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -47,7 +46,8 @@ class Cohete:
         self.calc_CP()
         self.calc_CN()
 
-        self.longtotal = boattail.bottom[2]
+        self.boattail=self.componentes["Boattail"]
+        self.longtotal = self.boattail.bottom[2]
 
         self.cargar_tablas_motor()
         self.cargar_tabla_Cd()
@@ -114,15 +114,15 @@ class Cohete:
       print("Vuela porfavor")
 
     def cargar_tabla_Cd(self):
-      self.CdTable = pd.read_csv('cdmachXitle.csv')
+      self.CdTable = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\cdmachXitle.csv')
 
     def cargar_tablas_motor(self):
 
       #self.motorThrustTable = pd.read_csv('MegaPunisherBien.csv') #Importar la curva de empuje
-      self.motorThrustTable = pd.read_csv("pruebaestaica28mayo2024.csv")
+      self.motorThrustTable = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\pruebaestaica28mayo2024.csv')
       self.t_MECO = self.motorThrustTable['time'].max() #tiempo en que se acaba el empuje
 
-      self.motorMassTable = pd.read_csv('MegaPunisherFatMasadot.csv')
+      self.motorMassTable = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\MegaPunisherFatMasadot.csv')
       self.motorMassTable['time'] = self.motorMassTable['Time (s)']
       self.motorMassTable['oxi'] = self.motorMassTable['Oxidizer Mass (kg)']
       self.motorMassTable['grano'] = self.motorMassTable['Fuel Mass (kg)']

@@ -1,5 +1,5 @@
 from cohete import*
-from Xitle import*
+from Simulador.Xitle import*
 
 CG_list=[]
 CP_list=[]

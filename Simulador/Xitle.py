@@ -1,7 +1,8 @@
-from cohete import *
-from Atmosfera1 import * 
-from Componentes import *
 
+from Atmosfera1 import atm_actual
+from Componentes import *
+from cohete import *
+from math import *
 diam_ext = 0.152
 espesor = 0.003
 #Creación de los componentes individuales
@@ -39,10 +40,11 @@ componentes = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup
 
 componentes_externos = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup, 'Transferidor de carga': transfer, 'tanquevacio': tanquevacio,
                'oxidante': oxidante, 'valvulas': valvulas, 'grano': grano, 'Cámara Combustión': CC, 'Boattail': boattail}
+
 Xitle = Cohete("Xitle", "hibrido", componentes, componentes_externos)
 
-#print(Xitle)
 
+print(Xitle)
 #NOTA: en los bottom de todos los componentes tambien se esta sumando la longitud a los ejes x y
 #print(boattail.bottom)
 print("El centro de gravedad es:",Xitle.CG[2], "metros")
