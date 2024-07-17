@@ -1,3 +1,6 @@
+#En este SCRIPT: Clase Vuelo
+#Se crea la clase Vuelo, con sus metodos para simular el vuelo 
+#y calcular cantidades relevantes
 class Vuelo:
 
     def __init__(self, vehiculo_actual, atm_actual, viento_actual):
