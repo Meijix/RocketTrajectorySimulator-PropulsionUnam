@@ -6,7 +6,7 @@ from simulacion1 import *
 
 # Load the data from the CSV file
 #Corregir el path file
-df = pd.read_csv('AlturavsTiempo-Xitle2.csv')
+df = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\AlturavsTiempo-Xitle2.csv')
 
 # Extract the altitude and time columns
 altitude = df['ALTURA [km]']
@@ -22,3 +22,4 @@ plt.legend()
 
 # Show the plot
 plt.show()
+
