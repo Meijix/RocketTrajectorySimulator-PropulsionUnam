@@ -4,6 +4,10 @@
 
 from Atmosfera1 import *
 from Componentes import *
+from Viento import *
+from riel import *
+
+from Resultados.Xitle import boattail
 
 import numpy as np
 import matplotlib.pyplot as plt
