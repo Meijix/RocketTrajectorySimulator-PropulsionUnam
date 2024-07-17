@@ -1,3 +1,7 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from numpy import *
+
 class Euler:
     def __init__(self, fun_derivs):
         self.fun_derivadas = fun_derivs

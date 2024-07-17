@@ -1,9 +1,7 @@
 #Simulacion sin paracaidas del Xitle2
-from Simulador.Xitle import *
-from sim1 import *
-from Listas_results import *
-
-
+from Xitle import *
+from Vuelo import *
+from Integradores import *
 
 #quitar el paracaidas
 Xitle.parachute_added = False
