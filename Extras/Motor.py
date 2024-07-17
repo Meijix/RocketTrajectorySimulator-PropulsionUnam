@@ -5,17 +5,20 @@ import matplotlib.pyplot as plt
 from scipy import *
 import scipy.integrate as integrate
 
-motorThrustTable = pd.read_csv("pruebaestaica28mayo2024.csv")
+motorThrustTable = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\pruebaestaica28mayo2024.csv')
 t_MECO = motorThrustTable['time'].max() #tiempo en que se acaba el empuje
 
-motorMassTable = pd.read_csv('MegaPunisherFatMasadot.csv')
+motorMassTable = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\MegaPunisherFatMasadot.csv')
 motorMassTable['time'] = motorMassTable['Time (s)']
 motorMassTable['oxi'] = motorMassTable['Oxidizer Mass (kg)']
 motorMassTable['grano'] = motorMassTable['Fuel Mass (kg)']
 
-      # Calcular el área de la curva empuje vs tiempo utilizando la regla del trapecio
-      #Vamos a probar otro tipo de integracion para mejorarlo?
+m_prop=motorMassTable['oxi'].max()+motorMassTable['grano'].max()
+# Calcular el área de la curva empuje vs tiempo utilizando la regla del trapecio
+#Vamos a probar otro tipo de integracion para mejorarlo?
 I_total = np.trapz(y=motorThrustTable['thrust'], x=motorThrustTable['time'])
+I=I_total/(m_prop*9.81)
+T_avg=I_total/t_MECO
 
 def calc_empuje(t):
   if t > t_MECO:
@@ -44,3 +47,8 @@ plt.ylabel('Thrust (N)')
 plt.figsize=(25,8)
 # Show the plot
 plt.show()
+
+print("Masa inicial del propelente", m_prop)
+print("Impulso total: ",I_total)
+print("Impulso especifico: ", I)
+print("Empuje promedio", T_avg)
