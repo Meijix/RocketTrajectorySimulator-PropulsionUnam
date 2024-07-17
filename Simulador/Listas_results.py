@@ -44,3 +44,25 @@ print("\n Datos generales")
 print("La longitud total de Xitle es", Xitle.longtotal, "[m]")
 print("La masa total de Xitle es", Xitle.masa, "[kg]")
 print("El impulso total del motor es", Xitle.I_total)
+
+
+print(CG_list)
+print(CP_list)
+print(long_list)
+p=len(CG_list)-1
+
+import matplotlib.pyplot as plt
+
+y = np.zeros_like(CG_list)
+y_long = np.zeros_like(long_list)
+
+plt.figure(figsize=(12,1.5))
+plt.plot(long_list,y_long,color= 'lightblue',alpha=0.9)
+plt.scatter(long_list,y_long,color='navy',marker="|")
+plt.scatter(CG_list[:p],y[:p],color='darkorange')#CGs de los componentes
+plt.scatter(CP_list[:p],y[:p],color='green') #CPs de los componentes
+plt.scatter(CG_list[-1],y[-1],color='red',marker="*", s=100) #CG del cohete complfuncompleto
+plt.scatter(CP_list[-1],y[-1],color='blue',marker= "*", s=100) #CP del cohete complfuncompleto
+
+plt.title("CG y CP posicionados de los componentes en Cohete Xitle2")
+plt.show()
