@@ -1,5 +1,6 @@
 from cohete import *
-from Atmosfera import * 
+from Atmosfera1 import * 
+from Componentes import *
 
 diam_ext = 0.152
 espesor = 0.003
