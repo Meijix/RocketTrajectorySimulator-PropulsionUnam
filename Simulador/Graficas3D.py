@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 from angulos import *
 from simulacion1 import *
-from simulacion2 import *
+#from simulacion2 import *
 
 vuelo_graficar=vuelo1
 #vuelo_graficar=vuelo_paracaidas
