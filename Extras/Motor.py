@@ -48,6 +48,7 @@ plt.figsize=(25,8)
 # Show the plot
 plt.show()
 
+##Impresion en terminal de datos importates del motor
 print("Masa inicial del propelente", m_prop)
 print("Impulso total: ",I_total)
 print("Impulso especifico: ", I)

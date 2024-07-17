@@ -1,3 +1,7 @@
+#En este SCRIPT: Clase COHETE 
+#Se crea la clase COHETE, con sus atributos y métodos
+#Falta corregir la llamada a boattail,riel, viento2D
+
 from Atmosfera1 import *
 from Componentes import *
 

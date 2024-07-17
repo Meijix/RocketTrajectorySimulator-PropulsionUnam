@@ -1,4 +1,6 @@
-
+import numpy as np
+from numpy import *
+import matplotlib.pyplot as plt
 class Componente:
     def __init__(self, nombre, masa, posicion):
         self.nombre = nombre
