@@ -33,6 +33,15 @@ omegas = np.array([state[7] for state in sim])
 
 #print(tiempo)
 #print(posiciones)
-print(vuelo1.tiempo_salida_riel)
-print(vuelo1.tiempo_apogeo)
-print(vuelo1.tiempo_impacto)
+print("Tiempo de salida del riel [s]",vuelo1.tiempo_salida_riel)
+print("Tiempo de MECO [s]",Xitle.t_MECO)
+print("Tiempo de apogeo [s]",vuelo1.tiempo_apogeo)
+print("Tiempo de impacto [s]",vuelo1.tiempo_impacto)
+
+
+max_altitude = max(posiciones[:, 2])
+max_speed = max(np.linalg.norm(velocidades, axis=1))
+
+print("APOGEO:", max_altitude, "metros")
+print("Máxima velocidad:", max_speed, "m/s")
+print("Equivalente a:",max_speed/340, "Mach")
