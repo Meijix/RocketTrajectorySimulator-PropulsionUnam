@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from scipy.signal import savgol_filter
 
-df = pd.read_csv("Copia de vueloSpaceport.csv")
+df = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\Copia de vueloSpaceport.csv')
 
 diffs = df["time"].to_numpy()[1:]-df["time"].to_numpy()[:-1]
 plt.plot(diffs)
