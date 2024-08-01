@@ -1,3 +1,6 @@
+#Analisis de datos de vuelo de la ASYB
+#SPAC 2024-Xitle2
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -31,13 +34,6 @@ def calc_dato(t):
 time_equiesp=np.linspace(3676,3739,2000)
 altura_interp = [calc_dato(t) for t in time_equiesp]
 
-
-#aceleraciones obtenidas
-ax = df["ax"]
-ay = df["ay"]
-az = df["az"]
-atot = np.sqrt(ax**2+ay**2+az**2)
-
 plt.plot(tiempo, altitud, label="Cruda")
 #plt.plot(tiempo, altitud_suave, label="Suavizada")
 plt.plot(time_equiesp,altura_interp, label= "Interpolacion")
@@ -57,9 +53,9 @@ vert_vel = np.gradient(altitud, 0.2)
 vert_vel3 = np.gradient(altura_interp, 0.2)
 plt.figure()
 
-plt.plot(tiempo, vert_vel, label="De datos")
+plt.plot(tiempo-3676, vert_vel, label="De datos")
 #plt.plot(tiempo, savgol_filter(vert_vel, 25, 1))
-plt.plot(time_equiesp, vert_vel3, label="De equiespaciamiento")
+plt.plot(time_equiesp-3676, vert_vel3, label="De equiespaciamiento")
 plt.title("Velocidad vertical numerica")
 plt.legend()
 plt.show()
@@ -73,15 +69,36 @@ vert_acc = np.gradient(savgol_filter(vert_vel, 25, 5))
 
 #plt.show()
 
-acc_vel = np.gradient(vert_vel, 0.2)
-# vert_vel2 = np.gradient(altitud_suave, 0.2)
-acc_vel3 = np.gradient(vert_vel3, 0.2)
-plt.figure()
 
-plt.plot(tiempo, acc_vel, label="De datos")
-#plt.plot(tiempo, savgol_filter(vert_vel, 25, 1))
-plt.plot(time_equiesp, acc_vel3, label="De equiespaciamiento")
-plt.title("Aceleracion vertical numerica")
+
+#aceleraciones obtenidas
+ax = df["ax"]
+ay = df["ay"] #acc vertical de datos
+az = df["az"]
+atot = np.sqrt(ax**2+ay**2+az**2)
+
+plt.figure()
+plt.title("Aceleraciones")
+plt.plot(ax, label="ax")
+plt.plot(ay, label="ay")
+plt.plot(az, label="az")
+plt.plot(atot,label="a total")
 plt.legend()
 plt.show()
 
+
+#Coomparacion: Aceleracion vertical
+acc_vel = np.gradient(vert_vel, 0.2)
+# vert_vel2 = np.gradient(altitud_suave, 0.2)
+acc_vel3 = np.gradient(vert_vel3, 0.2)
+
+
+plt.figure()
+
+plt.plot(tiempo-3676, acc_vel, label="Numerica de datos")
+#plt.plot(tiempo, savgol_filter(vert_vel, 25, 1))
+plt.plot(time_equiesp-3676, acc_vel3, label="Num de equiespaciamiento")
+plt.plot(tiempo-3676,ay,label="Datos directos")
+plt.title("Aceleracion vertical numerica")
+plt.legend()
+plt.show()
