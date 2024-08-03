@@ -13,18 +13,25 @@ class Viento2D:
 
 
         self.magnitud = random.uniform(self.vel_mean - self.vel_var, self.vel_mean + self.vel_var)
-        self.direccion = random.uniform(0, 180)
+        self.direccion = 0 #random.uniform(0, 180)
         self.vector = self.magnitud * np.array([np.cos(np.deg2rad(self.direccion)), 0, np.sin(np.deg2rad(self.direccion))])
 
     def __repr__(self):
         return f"Viento(magnitud={self.magnitud}, direccion={self.direccion})"
     
-#Creacion del viento actual
-viento_actual = Viento2D(vel_mean=10, vel_var=0.05)
-print(viento_actual)
-print(viento_actual.vector)
+    import numpy as np
 
-"""""Descomentar para graficar el vector viento 
+#def update_viento(self, gust_type, magnitude, duration, t_init, t_fin):
+
+    #return viento_variation, time
+    
+#Creacion del viento actual
+#viento_actual = Viento2D(vel_mean=10, vel_var=0.05)
+#print(viento_actual)
+#print(viento_actual.vector)
+
+"""
+#Descomentar para graficar el vector viento 
 # Get the x and z components of the wind vector
 vx = viento_actual.vector[0]
 vz = viento_actual.vector[2]

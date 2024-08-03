@@ -4,7 +4,7 @@
 #Importar otros scripts
 from Atmosfera1 import atm_actual,calc_gravedad
 #from Componentes import *
-from Viento import viento_actual,Viento2D
+from Viento import *
 from riel import riel
 
 #Importar librerias
@@ -256,7 +256,7 @@ class Cohete:
       return palanca, accang, Torca
 
 
-    def fun_derivs(self, t, state):
+    def fun_derivs(self, t, state, v_viento):
 
       # state, posicion y velocidad son estados intermedios
       #no necsariamente los del cohete
@@ -278,14 +278,6 @@ class Cohete:
       zbhat = np.array((np.cos(theta), 0, np.sin(theta)))
       vhat = np.array((np.cos(gamma), 0, np.sin(gamma)))
 
-
-      #vectores para velocidad considerando el viento
-      if pos[2] <= 1000:
-        v_viento = np.array([0,0,0])
-      else:
-        viento_actual =Viento2D( 5, 0.02)
-        v_viento = viento_actual.vector
-      #v_viento = np.array([0,0,0])
       v_rel =  v_viento - vhat
       v_rel_hat = v_rel / np.linalg.norm(v_rel)
       #v_viento = viento_actual.vector

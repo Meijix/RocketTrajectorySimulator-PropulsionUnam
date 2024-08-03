@@ -21,6 +21,9 @@ t_max = 600 #[s]
 #t=0
 #it = 0
 
+#Iniciar viento
+viento_actual = Viento2D(vel_mean=10, vel_var=0.2)
+
 vuelo1 = Vuelo(Xitle,atm_actual,viento_actual)
 tiempos, sim, CPs, CGs, masavuelo = vuelo1.simular_vuelo(estado,t_max, dt)
 

@@ -3,16 +3,16 @@
 #y calcular cantidades relevantes
 from Integradores import *
 from riel import riel
-from Viento import Viento2D
+#from Viento import viento_actual
 from Xitle import *
 
 class Vuelo:
 
-    def __init__(self, vehiculo_actual, atm_actual, viento_actual):
+    def __init__(self, vehiculo_actual, atm_actual,viento_actual):
 
         self.vehiculo = vehiculo_actual #Vehiculo actual
         self.atm = atm_actual #atmosfera actual
-        self.viento = viento_actual
+        self.viento = viento_actual #viento actual
         self.parachute1 = vehiculo_actual.parachute1 #paracaidas
 
         #hacer una lista de etapas de vuelo
@@ -23,14 +23,19 @@ class Vuelo:
       CPs=[]
       CGs=[]
 
+      viento_vuelo=[]
+
       t = 0
       it = 0
 
       self.vehiculo.cargar_estado(estado)
 
+      #Iniciar viento
+      viento_actual = Viento2D(vel_mean=10, vel_var=0.2)
+
       #CAMBIO DE METODO DE INTEGRACIÓN
       #Integracion = Euler(Xitle.fun_derivs)
-      Integracion = RungeKutta4(self.vehiculo.fun_derivs)
+      Integracion = RungeKutta4(self.vehiculo.fun_derivs,v_viento)
       #Integracion = RKF45(self.vehiculo.fun_derivs)
       #Integracion = Leapfrog(self.vehiculo.fun_derivs)
 
@@ -38,10 +43,18 @@ class Vuelo:
       sim=[estado] #lista de estados de vuelo
       tiempos=[0] #lista de tiempos
 
+      #modificar viento
+      #para actualizar el viento de acuerdo a las rafagas
+      #v_viento = viento_actual.actualizar_viento(t)
+      #Viento cte
+      v_viento = self.viento.vector
+      #guardando el vector completo puedo tener el angulo y magnitud
+      viento_vuelo.append(v_viento) 
+
       self.vehiculo.actualizar_masa(t)
       masavuelo=[self.vehiculo.masa]
 
-      ultima_altitud = None
+      ultima_altitud = 0
       self.tiempo_salida_riel = None
       self.tiempo_apogeo = None
       self.tiempo_impacto = None
@@ -125,8 +138,7 @@ class Vuelo:
       Cds=[]
       Machs=[]
 
-      vientomag = []
-      vientodir = []
+
 
       #print(tiempos)
 
@@ -152,18 +164,7 @@ class Vuelo:
         zbhat = np.array((np.cos(theta), 0, np.sin(theta)))
         vhat = np.array((np.cos(gamma), 0, np.sin(gamma)))
 
-        #vectores para velocidad considerando el viento
-        if pos[2] <= 1000: #10 m
-          v_viento = np.array([0,0,0])
-          vientomag.append(0)
-          vientodir.append(0)
-        else:
-          viento_actual = Viento2D(vel_mean=10, vel_var=0.2)
-          v_viento = viento_actual.vector
-          vientomag.append(viento_actual.magnitud)
-          vientodir.append(viento_actual.direccion)
-        #v_viento = np.array([0,0,0])
-
+        
 
 
         v_rel =  v_viento - vhat

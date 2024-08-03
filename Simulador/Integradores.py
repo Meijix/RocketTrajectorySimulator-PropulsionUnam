@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 from numpy import *
 
 class Euler:
-    def __init__(self, fun_derivs):
+    def __init__(self, fun_derivs, v_viento):
         self.fun_derivadas = fun_derivs
+        self.v_viento = v_viento
 
     def step(self, t, state, dt):
         #Aplicar método de Euler para obtener nuevo estado
@@ -13,8 +14,9 @@ class Euler:
     
 
 class RungeKutta4:
-    def __init__(self, fun_derivs):
+    def __init__(self, fun_derivs, v_viento):
         self.fun_derivadas = fun_derivs
+        self.v_viento = v_viento
 
     def step(self, t, state, dt):
         k1 = self.fun_derivadas(t, state)
@@ -26,8 +28,9 @@ class RungeKutta4:
     
 # 3. Método de Runge-Kutt-Fehlberg 45
 class RKF45:
-    def __init__(self, fun_derivs):
+    def __init__(self, fun_derivs,v_viento):
         self.fun_derivadas = fun_derivs
+        self.v_viento = v_viento
 
     def step(self, t, state, dt, tol=1e-4, S=0.9):
 
