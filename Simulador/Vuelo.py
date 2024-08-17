@@ -47,9 +47,9 @@ class Vuelo:
       #para actualizar el viento de acuerdo a las rafagas
       #v_viento = viento_actual.actualizar_viento(t)
       #Viento cte
-      v_viento = self.viento.vector
+      #v_viento = self.viento.vector
       #guardando el vector completo puedo tener el angulo y magnitud
-      viento_vuelo.append(v_viento) 
+      #viento_vuelo.append(v_viento) 
 
       self.vehiculo.actualizar_masa(t)
       masavuelo=[self.vehiculo.masa]
