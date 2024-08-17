@@ -278,12 +278,12 @@ class Cohete:
       zbhat = np.array((np.cos(theta), 0, np.sin(theta)))
       vhat = np.array((np.cos(gamma), 0, np.sin(gamma)))
 
-      v_rel =  v_viento - vhat
-      v_rel_hat = v_rel / np.linalg.norm(v_rel)
+      #v_rel =  v_viento - vhat
+      #v_rel_hat = v_rel / np.linalg.norm(v_rel)
       #v_viento = viento_actual.vector
       #v_viento = np.array([0,0,0])
-      v_rel =  v_viento - vhat
-      v_rel_hat = v_rel / np.linalg.norm(v_rel)
+      #v_rel =  v_viento - vhat
+      #v_rel_hat = v_rel / np.linalg.norm(v_rel)
       #print(v_rel_hat)
 
 

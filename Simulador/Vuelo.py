@@ -35,7 +35,7 @@ class Vuelo:
 
       #CAMBIO DE METODO DE INTEGRACIÓN
       #Integracion = Euler(Xitle.fun_derivs)
-      Integracion = RungeKutta4(self.vehiculo.fun_derivs,v_viento)
+      Integracion = RungeKutta4(self.vehiculo.fun_derivs)
       #Integracion = RKF45(self.vehiculo.fun_derivs)
       #Integracion = Leapfrog(self.vehiculo.fun_derivs)
 
@@ -167,12 +167,12 @@ class Vuelo:
         
 
 
-        v_rel =  v_viento - vhat
-        v_rel_hat = v_rel / np.linalg.norm(v_rel)
+        #v_rel =  v_viento - vhat
+        #v_rel_hat = v_rel / np.linalg.norm(v_rel)
         #v_viento = viento_actual.vector
         #v_viento = np.array([0,0,0])
-        v_rel =  v_viento - vhat
-        v_rel_hat = v_rel / np.linalg.norm(v_rel)
+        #v_rel =  v_viento - vhat
+        #v_rel_hat = v_rel / np.linalg.norm(v_rel)
         #print(v_rel_hat)
 
         #print(vhat, v_viento, v_rel, v_rel_hat)
