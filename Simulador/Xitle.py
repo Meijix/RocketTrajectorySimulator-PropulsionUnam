@@ -3,8 +3,11 @@ from Atmosfera1 import atm_actual
 from Componentes import *
 from cohete import *
 from math import *
+
+#Dimensiones principales del cohete
 diam_ext = 0.152
 espesor = 0.003
+
 #Creación de los componentes individuales
 
 #Componentes externos
@@ -40,15 +43,15 @@ componentes = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup
 
 componentes_externos = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup, 'Transferidor de carga': transfer, 'tanquevacio': tanquevacio,
                'oxidante': oxidante, 'valvulas': valvulas, 'grano': grano, 'Cámara Combustión': CC, 'Boattail': boattail}
-
 Xitle = Cohete("Xitle", "hibrido", componentes, componentes_externos)
 
+#print(Xitle)
 
-print(Xitle)
-#NOTA: en los bottom de todos los componentes tambien se esta sumando la longitud a los ejes x y
-#print(boattail.bottom)
-print("El centro de gravedad es:",Xitle.CG[2], "metros")
-print("El centro de presión es:", Xitle.CP[2], "metros")
-#print(Xitle.CN)
-print("La masa inicial total es:",Xitle.masa, "kg")
-print("El impulso total es:", Xitle.I_total, "N s")
+if __name__ == "__main__":
+    #NOTA: en los bottom de todos los componentes tambien se esta sumando la longitud a los ejes x y
+    #print(boattail.bottom)
+    print("El centro de gravedad es:",Xitle.CG[2], "metros")
+    print("El centro de presión es:", Xitle.CP[2], "metros")
+    #print(Xitle.CN)
+    print("La masa inicial total es:",Xitle.masa, "kg")
+    print("El impulso total es:", Xitle.I_total, "N s")
