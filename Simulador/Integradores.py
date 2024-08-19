@@ -2,22 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy import *
 
+# 1. Método de Euler
 class Euler:
     def __init__(self, fun_derivs):
         self.fun_derivadas = fun_derivs
       
-
     def step(self, t, state, dt):
         #Aplicar método de Euler para obtener nuevo estado
         state_new = state + (dt * self.fun_derivadas(t, state))
         return state_new
     
-
+#2. Runge-Kutta 4
 class RungeKutta4:
     def __init__(self, fun_derivs):
         self.fun_derivadas = fun_derivs
     
-
     def step(self, t, state, dt):
         k1 = self.fun_derivadas(t, state)
         k2 = self.fun_derivadas(t + dt/2, state + k1 * dt/2)
@@ -25,8 +24,19 @@ class RungeKutta4:
         k4 = self.fun_derivadas(t + dt, state + k3 * dt)
         new_state = state + dt * (k1 + 2*k2 + 2*k3 + k4) / 6
         return new_state
-    
-# 3. Método de Runge-Kutt-Fehlberg 45
+
+# 3. Runge-Kutta 2
+class RungeKutta2:
+    def __init__(self, fun_derivs):
+        self.fun_derivadas = fun_derivs
+
+    def step(self, t, state, dt):
+        k1 = self.fun_derivadas(t, state)
+        k2 = self.fun_derivadas(t + dt, state + k1 * dt)
+        new_state = state + dt * (k1 + k2) / 2
+        return new_state
+        
+# 4. Método de Runge-Kutt-Fehlberg 45
 class RKF45:
     def __init__(self, fun_derivs):
         self.fun_derivadas = fun_derivs
@@ -58,3 +68,24 @@ class RKF45:
             retry = True
 
         return zkp, dt_nuevo
+    
+'''
+#No esta bien implementado
+# 5. Método de Leapfrog
+class Leapfrog:
+    def __init__(self, fun_derivs):
+        self.fun_derivadas = fun_derivs
+
+    def step(self, t, state, dt):
+        # Calcular la velocidad en t + dt/2
+        v_half = state + (dt/2) * self.fun_derivadas(t, state)
+
+        # Calcular la posición en t + dt
+        state_new = np.zeros_like(state)
+        state_new = state + dt * v_half
+
+        # Calcular la velocidad en t + dt
+        state_new = v_half + (dt/2) * self.fun_derivadas(t + dt, state_new)
+
+        return state_new
+'''
