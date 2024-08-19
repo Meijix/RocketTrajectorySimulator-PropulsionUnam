@@ -3,10 +3,31 @@ import matplotlib.pyplot as plt
 
 from angulos import *
 from simulacion1 import *
-from simulacion2 import *
+#from simulacion2 import *
+from dibujarCohete import *
 
 vuelo_graficar=vuelo1
 #vuelo_graficar=vuelo_paracaidas
+
+# GRAFICAS
+
+# Graficar trayectoria y orientacion con cohete en diferentes puntos
+plt.xlabel('Alcance (m)')
+plt.ylabel('Altura (m)')
+plt.title('Trayectoria del cohete Xitle en el tiempo')
+plt.plot(posiciones[:, 0], posiciones[:, 2], color='purple')
+
+
+# Dibujar el cohete cada 10 segundos
+for i in range(0, len(tiempos), 800):
+  dibujar_cohete(posiciones[i, 0], posiciones[i, 2], np.rad2deg(thetas[i]), 800)  # Ajusta longitud y altura según sea necesario
+  #dibujar_cohete(posiciones[i, 0], posiciones[i, 2], thetas[i], 500)
+
+plt.gca().set_aspect("equal")
+plt.show()
+
+print(np.rad2deg(thetas))
+###########################
 
 # GRAFICA 1. Posiciones
 plt.figure(figsize=(10, 6))
