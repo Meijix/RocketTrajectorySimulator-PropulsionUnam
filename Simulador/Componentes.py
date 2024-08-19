@@ -1,6 +1,8 @@
 import numpy as np
 from numpy import *
 import matplotlib.pyplot as plt
+
+# Clase base para los componentes del cohete
 class Componente:
     def __init__(self, nombre, masa, posicion):
         self.nombre = nombre
@@ -10,8 +12,8 @@ class Componente:
         self.CP = None
         self.Ix = 0     # Momento de inercia en torno a un eje "horizontal" (perpendicular al eje longitudinal) que pasa por el CG del componente
 
-
-# Cilindro con la punta hacia arriba
+#Subclase para la nariz
+#cono con punta hacia arriba
 class Cono(Componente):
 
     # Las coordenadas locales se miden desde la punta hacia abajo
@@ -54,6 +56,8 @@ class Cono(Componente):
     def calc_Ix(self):
       self.Ix = self.masa * ((3/20)*self.rad**2+(3/80)*self.long**2)
 
+#Subclase para el cuerpo del cohete
+#Cilindro
 class Cilindro(Componente):
 
     def __init__(self, nombre, masa, posicion, longitud, diametroexterior, diametrointerior):
@@ -82,7 +86,7 @@ class Cilindro(Componente):
     def calc_Ix(self):
       self.Ix = (1/12) * self.masa * ((3*(self.rad_int**2 + self.rad_ext**2)) + self.long**2)
 
-
+#Subclase para las aletas
 class Aletas(Componente): #Incluye el arreglo de aletas completo
 
     def __init__(self, nombre, masa, posicion, diametro, numf, semispan, C_r, C_t, X_R,mid_sweep):
@@ -132,7 +136,7 @@ class Aletas(Componente): #Incluye el arreglo de aletas completo
       Ix_m = (1 / (18 * (self.C_r + self.C_t)**2)) * (self.C_r**4 + 2 * self.C_r**3 * self.C_t + 2 * self.C_r * self.C_t**3 + self.C_t **4 - (self.C_r**2 + 4 * self.C_r * self.C_t + self.C_t**2) * self.span * np.tan(self.gamma) * (self.C_r - self.C_t - self.span * np.tan(self.gamma)))
       self.Ix = self.masa * Ix_m
 
-
+#Subclase para el boattail
 class Boattail(Componente):
 
     def __init__(self, nombre, masa, posicion, longitud, diamF_boat, diamR_boat, espesor):
