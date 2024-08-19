@@ -1,4 +1,12 @@
 #Simulacion sin paracaidas del Xitle2
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from scipy.interpolate import interp1d
+import math
+from math import pi
+import random
+
 from Xitle import *
 from Vuelo import *
 from Integradores import *
