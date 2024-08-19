@@ -10,7 +10,7 @@ import math
 from math import pi
 
 #Importar otros scripts
-from Atmosfera1 import atm_actual,calc_gravedad
+#from Atmosfera1 import atm_actual,calc_gravedad
 #from Componentes import *
 from Viento import *
 from riel import *
