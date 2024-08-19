@@ -2,17 +2,15 @@
 #Se crea la clase Vuelo, con sus metodos para simular el vuelo 
 #y calcular cantidades relevantes
 from Integradores import *
-from riel import riel
-#from Viento import viento_actual
-from Xitle import *
+#from condiciones_init import *
+#from Xitle import *
 
 class Vuelo:
 
-    def __init__(self, vehiculo_actual, atm_actual,viento_actual):
+    def __init__(self, vehiculo_actual, atm_actual):
 
         self.vehiculo = vehiculo_actual #Vehiculo actual
         self.atm = atm_actual #atmosfera actual
-        self.viento = viento_actual #viento actual
         self.parachute1 = vehiculo_actual.parachute1 #paracaidas
 
         #hacer una lista de etapas de vuelo
@@ -20,108 +18,6 @@ class Vuelo:
         #para cada etapa guardar el tiempo en que ocurrio y sus valores máximos
 
     def simular_vuelo(self, estado, t_max, dt):
-      CPs=[]
-      CGs=[]
-
-      viento_vuelo=[]
-
-      t = 0
-      it = 0
-
-      self.vehiculo.cargar_estado(estado)
-
-      #Iniciar viento
-      viento_actual = Viento2D(vel_mean=10, vel_var=0.2)
-
-      #CAMBIO DE METODO DE INTEGRACIÓN
-      #Integracion = Euler(Xitle.fun_derivs)
-      Integracion = RungeKutta4(self.vehiculo.fun_derivs)
-      #Integracion = RKF45(self.vehiculo.fun_derivs)
-      #Integracion = Leapfrog(self.vehiculo.fun_derivs)
-
-
-      sim=[estado] #lista de estados de vuelo
-      tiempos=[0] #lista de tiempos
-
-      #modificar viento
-      #para actualizar el viento de acuerdo a las rafagas
-      #v_viento = viento_actual.actualizar_viento(t)
-      #Viento cte
-      #v_viento = self.viento.vector
-      #guardando el vector completo puedo tener el angulo y magnitud
-      #viento_vuelo.append(v_viento) 
-
-      self.vehiculo.actualizar_masa(t)
-      masavuelo=[self.vehiculo.masa]
-
-      ultima_altitud = 0
-      self.tiempo_salida_riel = None
-      self.tiempo_apogeo = None
-      self.tiempo_impacto = None
-
-      while t <= t_max:
-
-        nuevo_estado = Integracion.step(t, estado, dt)
-        self.vehiculo.cargar_estado(nuevo_estado)
-
-        it += 1
-        t+= dt
-
-        self.vehiculo.parachute_active1 = False
-        #print(self.vehiculo.parachute_active1)
-
-        tiempos.append(t)
-        estado = nuevo_estado
-
-
-        CPs.append(self.vehiculo.CP)
-        CGs.append(self.vehiculo.CG)
-
-        self.vehiculo.actualizar_masa(t)
-        #Agregar nueva masa a la lista
-        masavuelo.append(self.vehiculo.masa)
-
-        #FASE 1. VUELO EN RIEL
-
-        if self.tiempo_salida_riel is None:
-          r = np.linalg.norm(estado[0:3])
-          if r > riel.longitud:
-            self.tiempo_salida_riel = t
-       #FASE 2. MECO
-
-        # APOGEO: Determinar tiempo de apogeo
-        altitud = estado[2]
-        if self.tiempo_apogeo is None and altitud > 5 and altitud < ultima_altitud:
-          self.tiempo_apogeo = t
-
-        ultima_altitud = altitud
-
-       #FASE3.RECUPERACIÓN
-        #activar el paracaidas en el apogeo
-        if self.tiempo_apogeo is not None and self.vehiculo.parachute_added == True:
-          #print(self.vehiculo.parachute_active1,"antes")
-          self.vehiculo.parachute_active1 = True
-          #print(self.vehiculo.parachute_active1,"despues")
-          #print("Se ha abierto el paracaídas")
-          #self.vehiculo.activar_paracaidas(self.vehiculo.parachute1)
-        else:
-          pass
-
-
-        #CAIDA: Terminar simulación cuando cae al piso
-        if estado[2] < 0 and t > 1:
-          self.tiempo_impacto = t
-          break
-
-        #Agrega el nuevo estado a la lista
-        sim.append(estado)
-
-
-        #self.vehiculo.parachute_added = False
-
-      return tiempos, sim, CPs, CGs, masavuelo
-
-    def calc_cantidades_secundarias(self, tiempos, estados):
 
       Tvecs = []
       Dvecs = []
@@ -138,14 +34,115 @@ class Vuelo:
       Cds=[]
       Machs=[]
 
+      CPs=[]
+      CGs=[]
+      masavuelo=[]
+
+      viento_vuelo_mags=[]
+      viento_vuelo_dirs=[]
+      viento_vuelo_vecs=[]
 
 
-      #print(tiempos)
+      t = 0.0
+      it = 0
 
-      for i in range(len(tiempos)-1):
+      self.vehiculo.cargar_estado(estado)
 
+      #CAMBIO DE METODO DE INTEGRACIÓN
+      #Integracion = Euler(Xitle.fun_derivs)
+      Integracion = RungeKutta4(self.vehiculo.fun_derivs)
+      # Integracion = RKF45(self.vehiculo.fun_derivs)
+      #Integracion = Leapfrog(self.vehiculo.fun_derivs)
+
+
+      sim=[estado] #lista de estados de vuelo
+      tiempos=[0] #lista de tiempos
+
+      self.vehiculo.actualizar_masa(t)
+      masavuelo=[self.vehiculo.masa]
+
+      ultima_altitud = 0
+      self.tiempo_salida_riel = None
+      self.tiempo_apogeo = None
+      self.tiempo_impacto = None
+
+      while t <= t_max:
+
+        # Actualizar viento_actual
+        global viento_actual
+        #Prueba:Viento constante
+        # viento_actual = Viento2D(vel_mean=10, vel_var=0)
+        # viento_actual = Viento2D(vel_mean=0, vel_var=0)
+        #es necesario aqui o solo en fun_derivs????
+        v_viento = viento_actual.vector
+        #v_viento = np.array([0,0,0])
+
+        nuevo_estado = Integracion.step(t, estado, dt)
+        #print(nuevo_estado)
+        self.vehiculo.cargar_estado(nuevo_estado)
+
+        it += 1
+        t+= dt
+
+        self.vehiculo.parachute_active1 = False
+        #print(self.vehiculo.parachute_active1)
+
+        tiempos.append(t)
+        estado = nuevo_estado
+
+        #Guardar centros de presión y centros de gravedad
+        CPs.append(self.vehiculo.CP)
+        CGs.append(self.vehiculo.CG)
+
+        #Guardar magnitudes y direcciones del viento
+        viento_vuelo_vecs.append(v_viento)
+        viento_vuelo_mags.append(viento_actual.magnitud)
+        viento_vuelo_dirs.append(viento_actual.direccion)
+
+        self.vehiculo.actualizar_masa(t)
+        #Agregar nueva masa a la lista
+        masavuelo.append(self.vehiculo.masa)
+
+        #FASE 1. VUELO EN RIEL
+        if self.tiempo_salida_riel is None:
+          r = np.linalg.norm(estado[0:3])
+          if r > riel.longitud:
+            self.tiempo_salida_riel = t
+       #FASE 2. MECO
+
+        # APOGEO: Determinar tiempo de apogeo
+        altitud = estado[2]
+        if self.tiempo_apogeo is None and altitud > 5 and altitud < ultima_altitud:
+          self.tiempo_apogeo = t
+          self.apogeo = altitud
+
+        ultima_altitud = altitud
+
+       #FASE3.RECUPERACIÓN
+        #activar el paracaidas en el apogeo
+        if self.tiempo_apogeo is not None and self.vehiculo.parachute_added == True:
+          #print(self.vehiculo.parachute_active1,"antes")
+          self.vehiculo.parachute_active1 = True
+          #print(self.vehiculo.parachute_active1,"despues")
+          #print("Se ha abierto el paracaídas")
+          #self.vehiculo.activar_paracaidas(self.vehiculo.parachute1)
+        else:
+          pass
+
+        #Agrega el nuevo estado a la lista
+        sim.append(estado)
+
+
+        #CAIDA: Terminar simulación cuando cae al piso
+        if estado[2] < 0 and t > 1:
+          self.tiempo_impacto = t
+          break
+
+        #self.vehiculo.parachute_added = False
+
+        #CALCULAR CANTIDADES SECUNDARIAS
         # Desempaquetar vector de estado
-        state = estados[i]
+        state = estado
         pos = state[0:3]
         vel = state[3:6]
         #velocidadvector.append(vel)
@@ -164,24 +161,12 @@ class Vuelo:
         zbhat = np.array((np.cos(theta), 0, np.sin(theta)))
         vhat = np.array((np.cos(gamma), 0, np.sin(gamma)))
 
-        
-
-
-        #v_rel =  v_viento - vhat
-        #v_rel_hat = v_rel / np.linalg.norm(v_rel)
-        #v_viento = viento_actual.vector
-        #v_viento = np.array([0,0,0])
-        #v_rel =  v_viento - vhat
-        #v_rel_hat = v_rel / np.linalg.norm(v_rel)
-        #print(v_rel_hat)
-
-        #print(vhat, v_viento, v_rel, v_rel_hat)
-
-
         #Guardar Fuerzas:Empuje,Arrastre y Normal
-        Tvec = self.vehiculo.empuje(tiempos[i], zbhat)
+        Tvec = self.vehiculo.empuje(t, zbhat)
 
-        Dvec, Nvec, Cd, mach = self.vehiculo.calc_aero(pos, vel, vhat, alpha)
+        vrel = np.array(vel) - v_viento
+        Dmag, Nmag, Cd, mach = self.vehiculo.calc_arrastre_normal(pos, vrel, alpha)
+        Dvec, Nvec = self.vehiculo.calc_aero(pos, vrel, alpha)
         Tvecs.append(Tvec)
         Dvecs.append(Dvec)
         Nvecs.append(Nvec)
@@ -203,10 +188,17 @@ class Vuelo:
         accangs.append(accang)
         torcas.append(torca)
 
-      return Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs, vientomag, vientodir
+
+        #Indicar el avance en la simulacion
+        if it%1000==0:
+          print(f"Iteracion {it}, t={t:.1f} s, altitud={altitud:.1f} m, vel vert={estado[5]:.1f}")
+
+      return tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs
 
     def muestra_tiempos(self):
       plt.axvline(self.tiempo_salida_riel, color="orange", ls="--")
       plt.axvline(Xitle.t_MECO, color="darkred", ls="--")
-      plt.axvline(self.tiempo_apogeo, color="navy", ls="--")
-      plt.axvline(self.tiempo_impacto, color="0.2", ls="--")
+      if self.tiempo_apogeo is not None:
+        plt.axvline(self.tiempo_apogeo, color="navy", ls="--")
+      if self.tiempo_impacto is not None:
+        plt.axvline(self.tiempo_impacto, color="0.2", ls="--")
