@@ -1,21 +1,11 @@
-#EN ESTE SCRIPT: CLASE ATMOSFERA Y FUNCION DE GRAVEDAD
+#EN ESTE SCRIPT: CLASE ATMOSFERA
 
 import numpy as np
 from numpy import *
 import matplotlib.pyplot as plt
 
-# Constantes universales
-GravUn = 6.67430E-11  # m^3/kg/s^2 Constante de gravitación universal
-Rg = 8.31447   #[J/(mol·K)] Constante universal de los gases
-R_Tierra = 6371000 #[m] Radio de la Tierra
-M_tierra = 5.972168e24  #[kg] Masa de la Tierra
-
-def calc_gravedad(altura_z):
-  return GravUn * M_tierra / (altura_z + R_Tierra)**2
-
-#Calcular la gravedad en la superficie
-g0 = calc_gravedad(0)
-#print("Gravedad en el suelo: ",g0, "[m/s^2]")
+#Archivos importados
+from funciones import *
 
 class atmosfera:
 
@@ -41,6 +31,8 @@ class atmosfera:
       # Alturas límite de las capas
       self.h_limite = [0, 11000, 20000, 32000, 47000, 51000, 71000, 84852]
 
+      self.h_max = self.h_limite[-1]
+
     def altitud_geopot(self, altura_z):
       return (R_Tierra * altura_z)/(R_Tierra+altura_z)
 
@@ -65,7 +57,7 @@ class atmosfera:
 
       capa = self.determinar_capa(altura_z)
       if capa is None:
-        return None
+        return self.capas[7] #los valores de la ultima capa
 
       # Calcula los valores
       #capa[0]: Altura geopotencial h
@@ -95,13 +87,58 @@ class atmosfera:
       return (T, rho, presion, cs)
 
 
-#Creacion del objeto
-atm_actual = atmosfera()
-"""Descomentar para obtener prpiedades a 10 km
-T, rho, presion, cs = atm_actual.calc_propiedades(10000)
-print("Propiedades atmosfericas a 10 km")
-print("Temperatura: ",T,"[K]", T-273.15,"[grados]")
-print("Densidad: ",rho, "[]")
-print("Presion: ",presion,"[Pa]")
-print("Vel del sonido:",cs, "[m/s^2]")
-"""
+
+if __name__ == "__main__":
+  #Creacion del objeto
+  atmosfera_prueba = atmosfera()
+  #Propiedades a 10 km
+  T, rho, presion, cs = atmosfera_prueba.calc_propiedades(10000)
+  print("Propiedades atmosfericas a 10 km")
+  print("Temperatura: ",T,"[K]", T-273.15,"[grados]")
+  print("Densidad: ",rho, "[]")
+  print("Presion: ",presion,"[Pa]")
+  print("Vel del sonido:",cs, "[m/s^2]")
+
+  #Graficar propiedades hasta 10 km
+  alturas = np.linspace(0,80000,100)
+  temperaturas = []
+  densidades = []
+  presiones = []
+  velocidades = []
+  
+  for altura in alturas:
+    T, rho, presion, cs = atmosfera_prueba.calc_propiedades(altura)
+    temperaturas.append(T)
+    densidades.append(rho)
+    presiones.append(presion)
+    velocidades.append(cs)
+
+  fig, ax = plt.subplots(2, 2, figsize=(8, 6))
+
+  ax[0, 0].plot(temperaturas, alturas, label="Temperatura")
+  ax[0, 0].set_title("Temperatura")
+  ax[0, 0].set_xlabel("Temperatura (K)")
+  ax[0, 0].set_ylabel("Altura (m)")
+
+  ax[0, 1].plot(velocidades, alturas, label="Velocidad del sonido")
+  ax[0, 1].set_title("Velocidad del sonido")
+  ax[0, 1].set_xlabel("Velocidad del sonido (m/s)")
+  ax[0, 1].set_ylabel("Altura (m)")
+
+  ax[1, 0].plot(densidades, alturas, label="Densidad")
+  ax[1, 0].set_title("Densidad")
+  ax[1, 0].set_xlabel("Densidad")
+  ax[1, 0].set_ylabel("Altura (m)")
+
+  ax[1, 1].plot(presiones, alturas, label="Presión")
+  ax[1, 1].set_title("Presión")
+  ax[1, 1].set_xlabel("Presión (Pa)")
+  ax[1, 1].set_ylabel("Altura (m)")
+
+  # Agregar líneas horizontales para las capas de la atmósfera
+  for i in range(2):
+    for j in range(2):
+      for h in atmosfera_prueba.h_limite:
+        ax[i, j].axhline(h, color='gray', linestyle='--')
+
+  plt.show()
