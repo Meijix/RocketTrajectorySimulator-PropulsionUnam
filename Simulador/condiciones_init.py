@@ -4,6 +4,3 @@
 #lugar de lanzamiento
 #viento
 #atmosfera
-
-
-#curva de motor?
