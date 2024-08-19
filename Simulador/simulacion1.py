@@ -1,15 +1,18 @@
 #Simulacion sin paracaidas del Xitle2
+
+##no funciona la importacion de archivos
+
 import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
-from scipy.interpolate import interp1d
+#import matplotlib.pyplot as plt
+#import pandas as pd
+#from scipy.interpolate import interp1d
 import math
 from math import pi
-import random
+#import random
 
-from Xitle import *
-from Vuelo import *
-from Integradores import *
+#from Xitle import *
+#from Vuelo import *
+#from Integradores import *
 
 #quitar el paracaidas
 Xitle.parachute_added = False
@@ -19,23 +22,33 @@ Xitle.parachute_active1 = False
 # Estado inicial
 x0, y0, z0 = 0, 0, 0
 vx0, vy0, vz0 = 0, 0, 0
+
 theta0, omega0 = np.deg2rad(riel.angulo), 0
 estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
-
+#print(estado)
+#estado=list(estado)
+#print(estado)
 #Parametros de la simulacion
-dt=0.01 #[s]
-t_max = 600 #[s]
+dt=0.01 #0.1 #[s]
+t_max = 120 #[s]
 
 #t=0
 #it = 0
 
-#Iniciar viento
-viento_actual = Viento2D(vel_mean=10, vel_var=0.2)
+import time
+inicio = time.time()
 
-vuelo1 = Vuelo(Xitle,atm_actual,viento_actual)
-tiempos, sim, CPs, CGs, masavuelo = vuelo1.simular_vuelo(estado,t_max, dt)
+#viento_actual = Viento2D(vel_mean=10, vel_var=0.05)
+viento_actual = Viento2D(vel_mean=0, vel_var=0)
+print(viento_actual)
+print(viento_actual.vector)
 
-Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs, vientomags, vientodirs = vuelo1.calc_cantidades_secundarias(tiempos, sim)
+vuelo1 = Vuelo(Xitle, atm_actual)
+tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo1.simular_vuelo(estado,t_max, dt)
+
+#Medir tiempo que tarda en correr la simulacion
+fin = time.time()
+print(f"Tiempo de ejecución: {fin-inicio:.1f}s")
 
 posiciones = np.array([state[0:3] for state in sim])
 velocidades = np.array([state[3:6] for state in sim])

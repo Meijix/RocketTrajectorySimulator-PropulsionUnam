@@ -1,4 +1,6 @@
 #Simulacion CON paracaidas del Xitle2
+##NO FUNCIONA. 
+#se debe actualizar usando/modificando simulacion1
 from Xitle import *
 from Vuelo import *
 from Integradores import *
