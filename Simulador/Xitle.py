@@ -1,5 +1,5 @@
 
-from Atmosfera1 import atm_actual
+from condiciones_init import *
 from Componentes import *
 from cohete import *
 from math import *
