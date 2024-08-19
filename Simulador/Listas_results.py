@@ -1,3 +1,7 @@
+##Listas de resultados importantes
+
+import matplotlib.pyplot as plt
+
 #from cohete import*
 from Xitle import *
 from dibujarCohete import *
@@ -52,7 +56,7 @@ print(CP_list)
 print(long_list)
 p=len(CG_list)-1
 
-import matplotlib.pyplot as plt
+
 
 y = np.zeros_like(CG_list)
 y_long = np.zeros_like(long_list)
