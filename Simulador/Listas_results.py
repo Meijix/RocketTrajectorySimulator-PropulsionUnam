@@ -1,5 +1,6 @@
 #from cohete import*
 from Xitle import *
+from dibujarCohete import *
 
 CG_list=[]
 CP_list=[]
@@ -56,6 +57,7 @@ import matplotlib.pyplot as plt
 y = np.zeros_like(CG_list)
 y_long = np.zeros_like(long_list)
 
+'''
 plt.figure(figsize=(12,1.5))
 plt.plot(long_list,y_long,color= 'lightblue',alpha=0.9)
 plt.scatter(long_list,y_long,color='navy',marker="|")
@@ -65,4 +67,23 @@ plt.scatter(CG_list[-1],y[-1],color='red',marker="*", s=100) #CG del cohete comp
 plt.scatter(CP_list[-1],y[-1],color='blue',marker= "*", s=100) #CP del cohete complfuncompleto
 
 plt.title("CG y CP posicionados de los componentes en Cohete Xitle2")
+plt.show()
+'''
+# Dibujar un cohete
+dibujar_cohete(4.2, 0, 180, 3.5)
+
+
+print(CG_list)
+print(CP_list)
+print(long_list)
+p=len(CG_list)-1
+
+#plt.plot(long_list,y_long,color= 'lightblue',alpha=0.9)
+plt.scatter(long_list,y_long,color='navy',marker="|", s=500)
+plt.scatter(CG_list[:p],y[:p],color='darkorange', s=25, alpha=0.7, marker="P")#CGs de los componentes
+plt.scatter(CP_list[:p],y[:p],color='green', s=25, alpha= 0.7, marker="X") #CPs de los componentes
+plt.scatter(CG_list[-1],y[-1],color='red',marker="P", s=100) #CG del cohete complfuncompleto
+plt.scatter(CP_list[-1],y[-1],color='blue',marker= "X", s=100) #CP del cohete complfuncompleto
+
+plt.gca().set_aspect("equal")
 plt.show()
