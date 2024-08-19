@@ -15,4 +15,4 @@ fecha = "2021-05-01"
 #viento
 viento_actual = Viento2D(10,0)
 #atmosfera
-atmosfera_actual = atmosfera(0, 0, 0)
+atmosfera_actual = atmosfera()
