@@ -1,12 +1,6 @@
 #En este SCRIPT: Clase COHETE 
 #Se crea la clase COHETE, con sus atributos y métodos
 
-#Importar otros scripts
-from Atmosfera1 import atm_actual,calc_gravedad
-#from Componentes import *
-from Viento import *
-from riel import riel
-
 #Importar librerias
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,6 +8,15 @@ import pandas as pd
 from scipy.interpolate import interp1d
 import math
 from math import pi
+
+#Importar otros scripts
+from Atmosfera1 import atm_actual,calc_gravedad
+#from Componentes import *
+from Viento import *
+from riel import *
+
+
+
 
 class Cohete:
 
@@ -46,8 +49,7 @@ class Cohete:
         self.calc_CP()
         self.calc_CN()
 
-        self.boattail=self.componentes["Boattail"]
-        self.longtotal = self.boattail.bottom[2]
+        self.longtotal = boattail.bottom[2]
 
         self.cargar_tablas_motor()
         self.cargar_tabla_Cd()
@@ -67,7 +69,7 @@ class Cohete:
     def cargar_estado(self,estado):
       self.state = estado
       self.posicion = estado[0:3]
-      self.velocidad = estado[3:5]
+      self.velocidad = estado[3:6]
       self.pitch = estado[6]
       self.velang = estado[7]
 
@@ -114,15 +116,18 @@ class Cohete:
       print("Vuela porfavor")
 
     def cargar_tabla_Cd(self):
-      self.CdTable = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\cdmachXitle.csv')
+      self.CdTable = pd.read_csv('cdmachXitle.csv')
 
+
+    #Se debe hacer general para agregar cualquier curva de motor 
+    #desde la simulacion
     def cargar_tablas_motor(self):
 
-      #self.motorThrustTable = pd.read_csv('MegaPunisherBien.csv') #Importar la curva de empuje
-      self.motorThrustTable = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\pruebaestaica28mayo2024.csv')
+      self.motorThrustTable = pd.read_csv('MegaPunisherBien.csv') #Importar la curva de empuje
+      # self.motorThrustTable = pd.read_csv("pruebaestaica28mayo2024.csv")
       self.t_MECO = self.motorThrustTable['time'].max() #tiempo en que se acaba el empuje
 
-      self.motorMassTable = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\MegaPunisherFatMasadot.csv')
+      self.motorMassTable = pd.read_csv('MegaPunisherFatMasadot.csv')
       self.motorMassTable['time'] = self.motorMassTable['Time (s)']
       self.motorMassTable['oxi'] = self.motorMassTable['Oxidizer Mass (kg)']
       self.motorMassTable['grano'] = self.motorMassTable['Fuel Mass (kg)']
@@ -205,25 +210,27 @@ class Cohete:
       Tvec = Tmag * zbhat
       return Tvec
 
-    def calc_aero(self, pos, vel, vhat, alpha):
-      if pos[2] <= 85000: #si todavía esta en la atmosfera definida
+    def calc_aero(self, pos, v_rel, alpha):
+      if np.linalg.norm(v_rel) == 0 or pos[2] > atm_actual.h_max:
+        return np.zeros(3), np.zeros(3)
+      else:
+        #si todavía esta en la atmosfera definida
         #print(self.calc_arrastre_normal(pos,vel,alpha))
-        Dmag, Nmag, Cd, mach = self.calc_arrastre_normal(pos, vel, alpha)
+        v_rel_hat = normalized(v_rel)
+        Dmag, Nmag, Cd, mach = self.calc_arrastre_normal(pos, v_rel, alpha)
         #print(Cd,mach)
         #print(Dmag,"mag arrastre")
         #Fuerza normal
         #Falta la variacion, que sea funcion de theta (pitch)
-        Dvec = - Dmag * vhat
+        Dvec = - Dmag * v_rel_hat
         #print(vhat, Dvec)
-        nhat = np.array((vhat[2], vhat[1], -vhat[0]))
+        nhat = np.array((v_rel_hat[2], v_rel_hat[1], -v_rel_hat[0]))
         # Tal vez invertir el vector para que la componente x tenga el
         # mismo signo que la componente x de -vhat
         # DEBUG: apagar normal
-        #Nmag = 0
+        Nmag = 0
         Nvec = Nmag * nhat
-        return Dvec, Nvec, Cd, mach
-      else:
-        return np.zeros(3), np.zeros(3)
+        return Dvec, Nvec
 
     def accangular(self, theta, Dvec, Nvec, Gvec):
       # Calcular brazo de momentos
@@ -250,13 +257,13 @@ class Cohete:
       # se toma la componente y (perpendicular al plano de vuelo ZX) y se
       # multiplica por -1 porque el eje y apunta hacia "adentro"
       Torca = -tau_tot[1]
-      Torca = Torca*10
+      #Torca = Torca*10
       accang = Torca / self.Ix # se debe usar el momento de inercia actualizado
       #angaccels.append(accang)
       return palanca, accang, Torca
 
 
-    def fun_derivs(self, t, state, v_viento):
+    def fun_derivs(self, t, state):
 
       # state, posicion y velocidad son estados intermedios
       #no necsariamente los del cohete
@@ -274,29 +281,29 @@ class Cohete:
       # Angulos
       gamma, alpha = self.calc_angles(pos, vel, theta)
 
-      # Vectores unitarios para la nariz y la velocidad
-      zbhat = np.array((np.cos(theta), 0, np.sin(theta)))
-      vhat = np.array((np.cos(gamma), 0, np.sin(gamma)))
+      # Vectores unitarios para la nariz y la velocidad (no necesariamente estan alineadas)
+      zbhat = np.array((np.cos(theta), 0, np.sin(theta))) #para el empuje
+      vhat = np.array((np.cos(gamma), 0, np.sin(gamma))) #para fuerzas aerodinamicas
 
-      #v_rel =  v_viento - vhat
-      #v_rel_hat = v_rel / np.linalg.norm(v_rel)
-      #v_viento = viento_actual.vector
-      #v_viento = np.array([0,0,0])
-      #v_rel =  v_viento - vhat
-      #v_rel_hat = v_rel / np.linalg.norm(v_rel)
-      #print(v_rel_hat)
+      # vectores para velocidad considerando el viento
+      # viento_actual es una global
+      v_viento = viento_actual.vector
+      #print(v_viento)
+      v_rel =  np.array(vel) - v_viento
+      # if np.linalg.norm(vel) > 0:
+      #   print(normalized(vel), v_viento, normalized(v_rel))
 
+      # Fuerzas aerodinámica: Arrastre y fuerza normal
+      #Para considerar el viento: cambiar vhat por v_rel_hat??
+      #print(self.calc_aero(pos, vel, v_rel_hat, alpha))
+      #Dvec, Nvec, Cd, mach = self.calc_aero(pos, vel, vhat, alpha)
+      # Dmag, Nmag, Cd,mach=self.calc_arrastre_normal(pos, v_rel, alpha)
+      #print("Vectores de arrastre y normal",Dvec, Nvec)
+      Dvec, Nvec = self.calc_aero(pos, v_rel, alpha)
 
       #Calcular las componentes del empuje
       Tvec = self.empuje(t, zbhat)
       #print(Tvec)
-
-      # Arrastre y fuerza normal
-      #Para considerar el viento: cambiar vhat por v_rel_hat??
-      #print(self.calc_aero(pos, vel, v_rel_hat, alpha))
-      Dvec, Nvec, Cd, mach = self.calc_aero(pos, vel, vhat, alpha)
-      #print("Vectores de arrastre y normal",Dvec, Nvec)
-
 
       # Gravedad
       grav = calc_gravedad(z)
@@ -320,6 +327,7 @@ class Cohete:
 
       return derivs
     
+#Clase para Paracaidas
 class Parachute:
     def __init__(self, cd, area_trans):
         self.cd = cd
