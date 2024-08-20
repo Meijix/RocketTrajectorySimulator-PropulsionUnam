@@ -79,8 +79,8 @@ class atmosfera:
         presion = P0 * np.exp((-g0/(self.Rg*T))*(h-h0))
       else:
         T = T0 + L*(h-h0)
-        rho = rho0 * (T/T0)**(-g0/(L*self.Rg))
-        presion = P0 * (T/T0)**(-g0/(L*self.Rg)-1)
+        rho = rho0 * (T/T0)**(-g0/(L*self.Rg)-1)
+        presion = P0 * (T/T0)**(-g0/(L*self.Rg))
 
       cs = np.sqrt(self.cp*self.Rg*T)
 

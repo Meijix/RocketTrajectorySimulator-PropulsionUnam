@@ -35,6 +35,11 @@ aletas= Aletas("Aletas", 1.1, np.array([0.0, 0.0, CC.bottom[2]]), diam_ext, 4, 0
 oxidante = Cilindro("Oxidante", 12.0, np.array([0.0, 0.0, transfer.bottom[2]]), 1.33, 0.1461, 0)
 grano = Cilindro("Grano", 4.0 , np.array([0.0, 0.0, valvulas.bottom[2]]), 0.505 , 0.158, 0.334)
 
+# Tablas de Cd, empuje y masa
+tabla_Cd_fpath = '../Archivos/cdmachXitle.csv'
+tabla_empuje_fpath = '../Archivos/MegaPunisherBien.csv'
+tabla_masa_fpath = '../Archivos/MegaPunisherFatMasadot.csv'
+
 #Lista de componentes y creación del vehículo completo
 #Debe ser un diccionario con un nombre corto para cada componente
 componentes = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup, 'Transferidor de carga': transfer, 'Aviónica': avionica, 'Carga Útil': CU, 'drogue': drogue,
@@ -43,7 +48,8 @@ componentes = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup
 
 componentes_externos = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup, 'Transferidor de carga': transfer, 'tanquevacio': tanquevacio,
                'oxidante': oxidante, 'valvulas': valvulas, 'grano': grano, 'Cámara Combustión': CC, 'Boattail': boattail}
-Xitle = Cohete("Xitle", "hibrido", componentes, componentes_externos)
+
+Xitle = Cohete("Xitle", "hibrido", componentes, componentes_externos, tabla_Cd_fpath, tabla_empuje_fpath, tabla_masa_fpath, riel)
 
 #print(Xitle)
 

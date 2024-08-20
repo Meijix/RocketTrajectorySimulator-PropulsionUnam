@@ -10,8 +10,9 @@ import math
 from math import pi
 #import random
 
-#from Xitle import *
-#from Vuelo import *
+from condiciones_init import *
+from Xitle import *
+from Vuelo import *
 #from Integradores import *
 
 #quitar el paracaidas
@@ -43,7 +44,7 @@ viento_actual = Viento2D(vel_mean=0, vel_var=0)
 print(viento_actual)
 print(viento_actual.vector)
 
-vuelo1 = Vuelo(Xitle, atm_actual)
+vuelo1 = Vuelo(Xitle, atmosfera_actual, viento_actual)
 tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo1.simular_vuelo(estado,t_max, dt)
 
 #Medir tiempo que tarda en correr la simulacion
