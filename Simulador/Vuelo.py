@@ -212,13 +212,14 @@ class Vuelo:
 
       t = 0.0
       it = 0
-
+      #########################################
       #CAMBIO DE METODO DE INTEGRACIÓN
       #Integracion = Euler(Xitle.fun_derivs)
       Integracion = RungeKutta4(self.fun_derivs)
       # Integracion = RKF45(self.vehiculo.fun_derivs)
       #Integracion = Leapfrog(self.vehiculo.fun_derivs)
-
+      ##########################################
+      
       sim=[estado] #lista de estados de vuelo
       tiempos=[0] #lista de tiempos
 
