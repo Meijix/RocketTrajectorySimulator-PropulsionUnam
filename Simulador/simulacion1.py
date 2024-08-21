@@ -33,7 +33,7 @@ import time
 inicio = time.time()
 
 #viento_actual = Viento2D(vel_mean=10, vel_var=0.05)
-viento_actual = Viento2D(vel_mean=10, vel_var=0)
+viento_actual = Viento2D(vel_mean=100, vel_var=0)
 print(viento_actual)
 print(viento_actual.vector)
 

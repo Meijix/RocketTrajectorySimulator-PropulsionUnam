@@ -1,9 +1,19 @@
 #Simulacion CON paracaidas del Xitle2
-##NO FUNCIONA. 
-#se debe actualizar usando/modificando simulacion1
+
+
+import numpy as np
+from math import pi
+
+from condiciones_init import *
 from Xitle import *
 from Vuelo import *
-from Integradores import *
+#####EMPEZAR SIN PARACAIDAS
+#quitar el paracaidas
+Xitle.parachute_added = False
+#desactivar el paracaidas
+Xitle.parachute_active1 = False
+
+
 # Estado inicial
 x0, y0, z0 = 0, 0, 0
 vx0, vy0, vz0 = 0, 0, 0
@@ -14,16 +24,35 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 dt=0.01 #[s]
 t_max = 600 #[s]
 
+######################################
+#####Agregar paracaidas
 Mainchute = Parachute(1.2, 0.802) #Crear paracaidas principal
 #print(Xitle.parachute_active1)
 Xitle.agregar_paracaidas(Mainchute)
 #print(Xitle.parachute_active1)
 #print(Xitle.parachute_added)
-#como le hago para agregar dos paracaidas??? el drogue y el main
-vuelo_paracaidas = Vuelo(Xitle,atm_actual,viento_actual)
-tiempos, sim, CPs, CGs, masavuelo = vuelo_paracaidas.simular_vuelo(estado,t_max, dt)
+#########################################3
 
-Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs, vientomags, vientodirs = vuelo_paracaidas.calc_cantidades_secundarias(tiempos, sim)
+#como le hago para agregar dos paracaidas??? el drogue y el main
+
+import time
+inicio = time.time()
+
+#viento_actual = Viento2D(vel_mean=10, vel_var=0.05)
+viento_actual = Viento2D(vel_mean=10, vel_var=0)
+print(viento_actual)
+print(viento_actual.vector)
+
+vuelo_paracaidas = Vuelo(Xitle, atmosfera_actual, viento_actual)
+tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo_paracaidas.simular_vuelo(estado,t_max, dt)
+
+# Guardar los datos de la simulación
+#datos_simulados = (tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs)
+
+#Medir tiempo que tarda en correr la simulacion
+fin = time.time()
+print(f"Tiempo de ejecución: {fin-inicio:.1f}s")
+
 posiciones = np.array([state[0:3] for state in sim])
 velocidades = np.array([state[3:6] for state in sim])
 thetas = np.array([state[6] for state in sim])

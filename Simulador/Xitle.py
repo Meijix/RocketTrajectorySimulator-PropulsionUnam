@@ -61,8 +61,10 @@ Xitle = Cohete("Xitle", "hibrido", componentes, componentes_externos, tabla_Cd_f
 if __name__ == "__main__":
     #NOTA: en los bottom de todos los componentes tambien se esta sumando la longitud a los ejes x y
     #print(boattail.bottom)
+    print("\n Datos generales")
     print("El centro de gravedad es:",Xitle.CG[2], "metros")
     print("El centro de presión es:", Xitle.CP[2], "metros")
     #print(Xitle.CN)
+    print("La longitud total de Xitle es", Xitle.longtotal, "[m]")
     print("La masa inicial total es:",Xitle.masa, "kg")
     print("El impulso total es:", Xitle.I_total, "N s")

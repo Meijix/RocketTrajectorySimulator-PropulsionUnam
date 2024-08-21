@@ -12,24 +12,9 @@ from dibujarCohete import *
 vuelo_graficar=vuelo1
 #vuelo_graficar=vuelo_paracaidas
 
+import time 
+inicio = time.time()
 # GRAFICAS
-
-# Graficar trayectoria y orientacion con cohete en diferentes puntos
-plt.xlabel('Alcance (m)')
-plt.ylabel('Altura (m)')
-plt.title('Trayectoria del cohete Xitle en el tiempo')
-plt.plot(posiciones[:, 0], posiciones[:, 2], color='purple')
-
-
-# Dibujar el cohete cada 10 segundos
-for i in range(0, len(tiempos), 800):
-  dibujar_cohete(posiciones[i, 0], posiciones[i, 2], np.rad2deg(thetas[i]), 800)  # Ajusta longitud y altura según sea necesario
-  #dibujar_cohete(posiciones[i, 0], posiciones[i, 2], thetas[i], 500)
-
-plt.gca().set_aspect("equal")
-plt.show()
-
-print(np.rad2deg(thetas))
 ###########################
 
 #Graficar el vector viento 
@@ -45,7 +30,27 @@ ax.set_xlabel('x (m)')
 ax.set_ylabel('z (m)')
 ax.set_title('Vector de viento')
 plt.show()
+
 ###########################
+#Grafica 0. Trayectoria y orientacion con cohete en diferentes puntos
+plt.xlabel('Alcance (m)')
+plt.ylabel('Altura (m)')
+plt.title('Trayectoria del cohete Xitle en el tiempo')
+plt.plot(posiciones[:, 0], posiciones[:, 2], color='purple')
+plt.gca().set_aspect("equal")
+
+# Dibujar el cohete cada x segundos
+x = 8
+x = x * 100
+
+for i in range(0, len(tiempos), x):
+  dibujar_cohete(posiciones[i, 0], posiciones[i, 2], np.rad2deg(thetas[i]), 200)  # Ajusta longitud y altura según sea necesario
+  #dibujar_cohete(posiciones[i, 0], posiciones[i, 2], thetas[i], 500)
+
+plt.show()
+
+#print(np.rad2deg(thetas))
+
 
 # GRAFICA 1. Posiciones
 plt.figure(figsize=(10, 6))
@@ -211,7 +216,7 @@ plt.plot(tiempos[1:], palancas[:,0],label= "comp x")
 plt.plot(tiempos[1:], palancas[:,1],label="comp y")
 plt.plot(tiempos[1:], palancas[:,2], label = "comp z")
 plt.title("Componentes del brazo de momento")
-#plt.xlim(0,vuelo1.tiempo_apogeo+10)
+plt.xlim(0,vuelo_graficar.tiempo_apogeo+10)
 vuelo_graficar.muestra_tiempos()
 plt.legend()
 plt.show()
@@ -228,7 +233,7 @@ plt.axvline(vuelo_graficar.tiempo_apogeo, color="0.5")
 plt.axhline(0, ls="--", color="gray")
 plt.axhline(riel.angulo, ls="--", color="lightgray")
 plt.axhline(-90, ls="--", color="lightgray")
-# plt.xlim(0,vuelo1.tiempo_apogeo+20)
+plt.xlim(0,vuelo_graficar.tiempo_apogeo+20)
 vuelo_graficar.muestra_tiempos()
 plt.legend()
 plt.xlim(0,100)
@@ -251,6 +256,50 @@ plt.ylabel('Altura (m)')
 plt.title('Trayectoria del cohete Xitle en el tiempo')
 plt.plot(posiciones[:, 0], posiciones[:, 2])
 # plt.ylim(0, 10000)
-#plt.gca().set_aspect("equal")
+plt.gca().set_aspect("equal")
 plt.show()
 '''
+####################
+# GRAFICAS 3D
+# Extract the launch and impact points
+launch_point = posiciones[0]
+impact_point = posiciones[-1]
+
+# Create the figure and 3D axes
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_subplot(111, projection="3d")
+
+# Plot the trajectory
+ax.plot(posiciones[:, 0], posiciones[:, 1], posiciones[:, 2])
+
+# Plot the launch and impact points with different colors
+ax.scatter(launch_point[0], launch_point[1], launch_point[2], c='blue', label='Punto de lanzamiento')
+ax.scatter(impact_point[0], impact_point[1], impact_point[2], c='red', label='Punto de impacto')
+
+# Create a circle in the xy plane with a diameter of 1000 meters around the impact point
+circle_radius = 1000
+circle_points = np.linspace(0, 2*np.pi, 100)
+circle_x = impact_point[0] + circle_radius * np.cos(circle_points)
+circle_y = impact_point[1] + circle_radius * np.sin(circle_points)
+
+# Plot the circle in the xy plane
+ax.plot(circle_x, circle_y, 0, color='gray', linestyle='--', label='1000 m radio de seguridad')
+
+# Set labels, title, and limits
+ax.set_xlabel("Alcance (m)")
+ax.set_ylabel("Desplazamiento (m)")
+ax.set_zlabel("Altura (m)")
+ax.set_title("Trayectoria del cohete Xitle en el tiempo")
+#ax.set_xlim(0, 10000)
+#ax.set_ylim(0, 10000)
+#ax.set_zlim(0, 10000)
+
+# Add legend and show plot
+ax.legend()
+plt.show()
+
+
+
+##################
+fin = time.time()
+print(f"Tiempo graficando: {fin-inicio:.1f}s")
