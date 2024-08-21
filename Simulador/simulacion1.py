@@ -1,19 +1,12 @@
 #Simulacion sin paracaidas del Xitle2
 
-##no funciona la importacion de archivos
-
 import numpy as np
-#import matplotlib.pyplot as plt
-#import pandas as pd
-#from scipy.interpolate import interp1d
-import math
 from math import pi
-#import random
 
 from condiciones_init import *
 from Xitle import *
 from Vuelo import *
-#from Integradores import *
+
 
 #quitar el paracaidas
 Xitle.parachute_added = False
@@ -40,7 +33,7 @@ import time
 inicio = time.time()
 
 #viento_actual = Viento2D(vel_mean=10, vel_var=0.05)
-viento_actual = Viento2D(vel_mean=0, vel_var=0)
+viento_actual = Viento2D(vel_mean=10, vel_var=0)
 print(viento_actual)
 print(viento_actual.vector)
 

@@ -367,7 +367,7 @@ class Vuelo:
 
     def muestra_tiempos(self):
       plt.axvline(self.tiempo_salida_riel, color="orange", ls="--")
-      plt.axvline(Xitle.t_MECO, color="darkred", ls="--")
+      plt.axvline(self.vehiculo.t_MECO, color="darkred", ls="--")
       if self.tiempo_apogeo is not None:
         plt.axvline(self.tiempo_apogeo, color="navy", ls="--")
       if self.tiempo_impacto is not None:

@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from angulos import *
+#from Xitle import Xitle
 from simulacion1 import *
 #from simulacion2 import *
 from dibujarCohete import *
@@ -29,14 +30,29 @@ plt.show()
 print(np.rad2deg(thetas))
 ###########################
 
+#Graficar el vector viento 
+# Get the x and z components of the wind vector
+vx = viento_actual.vector[0]
+vz = viento_actual.vector[2]
+
+fig, ax = plt.subplots()
+ax.arrow(0, 0, vx, vz, head_width=0.5, head_length=0.5, color='r', zorder=10)
+ax.set_xlim([-15, 15])
+ax.set_ylim([-15, 15])
+ax.set_xlabel('x (m)')
+ax.set_ylabel('z (m)')
+ax.set_title('Vector de viento')
+plt.show()
+###########################
+
 # GRAFICA 1. Posiciones
 plt.figure(figsize=(10, 6))
 plt.title("Posición en el tiempo")
 plt.xlabel("Tiempo (s)")
 plt.ylabel("Posición (m)")
-plt.plot(tiempos[1:], posiciones[:, 0], label="X")
-plt.plot(tiempos[1:], posiciones[:, 1], label="Y")
-plt.plot(tiempos[1:], posiciones[:, 2], label="Z")
+plt.plot(tiempos[:], posiciones[:, 0], label="X")
+plt.plot(tiempos[:], posiciones[:, 1], label="Y")
+plt.plot(tiempos[:], posiciones[:, 2], label="Z")
 vuelo_graficar.muestra_tiempos()
 plt.legend()
 plt.grid(True)
@@ -46,9 +62,9 @@ plt.figure(figsize=(10, 6))
 plt.title("Velocidad en el tiempo")
 plt.xlabel("Tiempo (s)")
 plt.ylabel("Velocidad (m/s)")
-plt.plot(tiempos[1:], velocidades[:, 0], label="Vx")
-plt.plot(tiempos[1:], velocidades[:, 1], label="Vy")
-plt.plot(tiempos[1:], velocidades[:, 2], label="Vz")
+plt.plot(tiempos[:], velocidades[:, 0], label="Vx")
+plt.plot(tiempos[:], velocidades[:, 1], label="Vy")
+plt.plot(tiempos[:], velocidades[:, 2], label="Vz")
 # plt.plot(tiempos[1:], np.linalg.norm(velocidades[:, :]), label="Total", color="black")
 vuelo_graficar.muestra_tiempos()
 plt.legend()
@@ -61,8 +77,8 @@ plt.figure(figsize=(10, 6))
 plt.title("Comportamiento angular en el tiempo")
 plt.xlabel("Tiempo (s)")
 plt.ylabel("Ángulo (grados)")
-plt.plot(tiempos[1:], nice_angle(thetas), label="Theta")
-plt.plot(tiempos[1:], nice_angle(omegas), label="Omega",alpha=0.5)
+plt.plot(tiempos[:], nice_angle(thetas), label="Theta")
+plt.plot(tiempos[:], nice_angle(omegas), label="Omega",alpha=0.5)
 vuelo_graficar.muestra_tiempos()
 plt.axhline(riel.angulo, ls="--", color="lightgray")
 plt.axhline(-90, ls="--", color="lightgray")
@@ -169,13 +185,13 @@ plt.show()
 plt.figure(figsize=(16,5))
 
 plt.subplot(1, 4, 1)
-plt.plot(tiempos[1:], nice_angle(thetas))
+plt.plot(tiempos[:], nice_angle(thetas))
 #plt.xlim(0,vuelo1.tiempo_apogeo+10)
 vuelo_graficar.muestra_tiempos()
 plt.title("Ángulo de inclinación (Pitch)")#pitch (theta)
 
 plt.subplot(1, 4, 2)
-plt.plot(tiempos[1:], nice_angle(omegas))
+plt.plot(tiempos[:], nice_angle(omegas))
 plt.axhline(0, ls="--", color="lightgray")
 #plt.xlim(0,vuelo1.tiempo_apogeo+10)
 vuelo_graficar.muestra_tiempos()
@@ -203,7 +219,7 @@ plt.figure(figsize=(14,4))
 plt.title("Ángulos en el tiempo")
 plt.xlabel("Tiempo (s)")
 plt.ylabel("Ángulo (grados º)")
-plt.plot(tiempos[1:], [normalize_angle(x) for x in np.rad2deg(thetas)], label = 'Ángulo de inclinación (theta)')#pitch
+plt.plot(tiempos[:], [normalize_angle(x) for x in np.rad2deg(thetas)], label = 'Ángulo de inclinación (theta)')#pitch
 plt.plot(tiempos[1:], [normalize_angle(x) for x in np.rad2deg(Gammas)], label = 'Ángulo de vuelo (gamma)')#FPA
 plt.plot(tiempos[1:], [normalize_angle(x) for x in np.rad2deg(Alphas)],label = 'Ángulo de ataque (alpha)')
 plt.axvline(vuelo_graficar.tiempo_apogeo, color="0.5")
@@ -226,6 +242,7 @@ vuelo_graficar.muestra_tiempos()
 plt.plot(tiempos, masavuelo)
 plt.show()
 
+'''
 # GRAFICA 10. Trayectoria
 plt.xlabel('Alcance (m)')
 plt.ylabel('Altura (m)')
@@ -234,4 +251,4 @@ plt.plot(posiciones[:, 0], posiciones[:, 2])
 # plt.ylim(0, 10000)
 #plt.gca().set_aspect("equal")
 plt.show()
-
+'''
