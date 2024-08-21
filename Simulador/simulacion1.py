@@ -40,14 +40,19 @@ print(viento_actual.vector)
 vuelo1 = Vuelo(Xitle, atmosfera_actual, viento_actual)
 tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo1.simular_vuelo(estado,t_max, dt)
 
+# Guardar los datos de la simulación
+#datos_simulados = (tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs)
+
 #Medir tiempo que tarda en correr la simulacion
 fin = time.time()
 print(f"Tiempo de ejecución: {fin-inicio:.1f}s")
+
 
 posiciones = np.array([state[0:3] for state in sim])
 velocidades = np.array([state[3:6] for state in sim])
 thetas = np.array([state[6] for state in sim])
 omegas = np.array([state[7] for state in sim])
+
 
 #print(tiempo)
 #print(posiciones)

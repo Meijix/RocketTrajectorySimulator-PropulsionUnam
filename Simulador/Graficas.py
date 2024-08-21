@@ -3,9 +3,11 @@ import matplotlib.pyplot as plt
 
 from angulos import *
 #from Xitle import Xitle
-from simulacion1 import *
+from simulacion1 import * #datos_simulados,posiciones,velocidades,thetas, omegas
 #from simulacion2 import *
 from dibujarCohete import *
+
+#tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = zip*(datos_simulados)
 
 vuelo_graficar=vuelo1
 #vuelo_graficar=vuelo_paracaidas
