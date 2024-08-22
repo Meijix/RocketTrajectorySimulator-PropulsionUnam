@@ -304,3 +304,55 @@ plt.show()
 ##################
 fin = time.time()
 print(f"Tiempo graficando: {fin-inicio:.1f}s")
+
+#################\
+#ANIMACIONES
+#ANIMACION 1. Trayectoria
+# ...
+
+# Crear figura y axes 3D
+# ...
+
+# Crear figura y axes 3D
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_subplot(111, projection="3d")
+
+# Plotear la trayectoria inicial
+ax.plot(posiciones[:, 0], posiciones[:, 1], posiciones[:, 2])
+
+# Crear un objeto cohete que se va a dibujar en cada frame
+cohete, = ax.plot([], [], [], 'o-', lw=2)
+
+# Crear un objeto trayectoria que se va a dibujar en cada frame
+trayectoria, = ax.plot([], [], [], 'b-', lw=1)
+
+# Crear un objeto quiver para dibujar la orientación del cohete
+quiver, = ax.quiver([], [], [], [], [], [], color='r', length=10)
+
+# Función que se llama en cada frame de la animación
+def animate(i):
+    cohete.set_data(posiciones[:i, 0], posiciones[:i, 1])
+    cohete.set_3d_properties(posiciones[:i, 2])
+    cohete.set_markersize(10)
+    cohete.set_markerfacecolor('b')
+    cohete.set_markeredgecolor('b')
+    cohete.set_linewidth(2)
+    cohete.set_linestyle('-')
+    
+    trayectoria.set_data(posiciones[:i, 0], posiciones[:i, 1])
+    trayectoria.set_3d_properties(posiciones[:i, 2])
+    trayectoria.set_linewidth(1)
+    trayectoria.set_linestyle('-')
+    trayectoria.set_color('b')
+    
+    # Actualizar la posición y dirección del quiver
+    quiver.set_segments([[[posiciones[i, 0], posiciones[i, 1], posiciones[i, 2]], 
+                          [posiciones[i, 0] + np.cos(thetas[i]), posiciones[i, 1] + np.sin(thetas[i]), posiciones[i, 2]]]])
+    
+    return cohete, trayectoria, quiver,
+
+# Crear la animación
+ani = animation.FuncAnimation(fig, animate, frames=len(tiempos), blit=True, interval=50)
+
+# Mostrar la animación
+plt.show()
