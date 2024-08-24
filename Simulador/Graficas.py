@@ -34,10 +34,6 @@ Tvecs = datos_simulacion['Tvecs'].values
 Dvecs = datos_simulacion['Dvecs'].values
 Nvecs = datos_simulacion['Nvecs'].values
 
-Tvecs=np.array(Tvecs)
-Dvecs=np.array(Dvecs)
-Nvecs=np.array(Nvecs)
-
 accels = datos_simulacion['accels'].values
 palancas = datos_simulacion['palancas'].values
 accangs = datos_simulacion['accangs'].values
@@ -46,6 +42,24 @@ Alphas = datos_simulacion['Alphas'].values
 torcas = datos_simulacion['torcas'].values
 Cds = datos_simulacion['Cds'].values
 Machs = datos_simulacion['Machs'].values
+#########################################
+#Obtener magnitudes y separar coordenadas
+Tvecs=np.array(Tvecs)
+Dvecs=np.array(Dvecs)
+Nvecs=np.array(Nvecs)
+
+
+#AYUDA. NO SE PORQUE NO SE HACE :(
+Tmags = np.array([np.linalg.norm(Tvec) for Tvec in Tvecs])
+Dmags = np.array([np.linalg.norm(Dvec) for Dvec in Dvecs])
+Nmags = np.array([np.linalg.norm(Nvec) for Nvec in Nvecs])
+
+Txs, Tys, Tzs = zip(*Tvecs)
+Dxs, Dys, Dzs = zip(*Dvecs)
+Nxs, Nys, Nzs = zip(*Nvecs)
+
+CGs = np.array(CGs)
+CPs = np.array(CPs)
 #########################################
 # Leer los datos de la simulación desde el archivo JSON
 import json
@@ -209,11 +223,6 @@ plt.grid(True)
 # plt.xlim(150,300); plt.ylim(-20, 20)
 plt.show()
 
-
-Tmags = np.array([np.linalg.norm(Tvec) for Tvec in Tvecs])
-Dmags = np.array([np.linalg.norm(Dvec) for Dvec in Dvecs])
-Nmags = np.array([np.linalg.norm(Nvec) for Nvec in Nvecs])
-
 #GRAFICA 4. Fuerzas (magnitudes)
 plt.title("Fuerzas en el tiempo")
 plt.plot(tiempos[1:], Tmags, label= "Empuje")
@@ -226,11 +235,6 @@ plt.legend()
 plt.show()
 
 # GRAFICA 5. Componentes de las fuerzas
-
-Txs, Tys, Tzs = zip(*Tvecs)
-Dxs, Dys, Dzs = zip(*Dvecs)
-Nxs, Nys, Nzs = zip(*Nvecs)
-
 plt.figure(figsize=(18,4))
 
 plt.subplot(1, 3, 1)
@@ -264,9 +268,6 @@ muestra_tiempos(tiempos, plt)
 #plt.ylim(-6,2.2)
 plt.legend()
 plt.show()
-
-CGs = np.array(CGs)
-CPs = np.array(CPs)
 
 #GRAFICA 6. Estabilidad
 plt.figure(figsize=(18,4))
