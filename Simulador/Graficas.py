@@ -423,29 +423,29 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
 
-# Definir la función que dibujará el cohete en cada frame
-def dibujar_cohete(i):
+def dib_cohete(x, y, ax):
     ax.clear()
-    ax.plot(posiciones[:i, 0], posiciones[:i, 2], color='purple')
-    ax.scatter(posiciones[i, 0], posiciones[i, 2], color='blue')
-    dibujar_cohete_en_punto(posiciones[i, 0], posiciones[i, 2], np.rad2deg(thetas[i]), 200)
-    ax.set_xlabel('Alcance (m)')
-    ax.set_ylabel('Altura (m)')
-    ax.set_title('Trayectoria del cohete Xitle en el tiempo')
-    ax.set_aspect("equal")
+    ax.set_xlim(-10, 110)
+    ax.set_ylim(-10, 110)
+    ax.set_title('Trayectoria del cohete')
+    ax.plot(x, y, 'bo-')
+def animar_cohete():
+    fig, ax = plt.subplots()
+    x = posiciones[:, 0]
+    y = posiciones[:, 2]
 
-# Definir la función que dibujará el cohete en un punto específico
-def dibujar_cohete_en_punto(x, y, theta, longitud):
-    cohete_x = [x, x + longitud * np.cos(np.deg2rad(theta))]
-    cohete_y = [y, y + longitud * np.sin(np.deg2rad(theta))]
-    ax.plot(cohete_x, cohete_y, color='black', linewidth=2)
+    # Parámetros de la simulación
+    num_frames = len(tiempos)  # número de frames de la animación
+    velocidad_simulacion = 0.1  # velocidad de la simulación (segundos)
 
-# Crear la figura y el eje
-fig, ax = plt.subplots()
+    def update(frame):
+        ax.clear()
+        ax.set_xlim(-10, 110)
+        ax.set_ylim(-10, 110)
+        ax.set_title('Trayectoria del cohete')
+        ax.plot(x[:frame], y[:frame], 'bo-')
+        dibujar_cohete(x[frame], y[frame], ax)
+        return ax
 
-# Crear la animación
-num_frames= len(tiempos)
-ani = animation.FuncAnimation(fig, dibujar_cohete, frames=num_frames, interval=50)
-
-# Mostrar la animación
-plt.show()
+    ani = animation.FuncAnimation(fig, update, frames=num_frames, interval=50, blit=True)
+    plt.show()
