@@ -253,9 +253,10 @@ class Vuelo:
         self.vehiculo.actualizar_masa(t)
 
         # Actualizar viento_actual
-        #wind = Viento2D(vel_mean=10, vel_var=2)
-        self.viento.actualizar_viento()
-        v_viento = self.viento.vector()
+        wind = Viento2D(vel_mean=10, vel_var=1)
+        wind.actualizar_viento()
+        #print("Nuevos vientos", wind)
+        v_viento = wind.vector
 
         #FASE 1. VUELO EN RIEL
         if self.tiempo_salida_riel is None:
@@ -302,9 +303,10 @@ class Vuelo:
 
         #Guardar magnitudes y direcciones del viento
         viento_vuelo_vecs.append(v_viento)
-        viento_vuelo_mags.append(self.viento.magnitud)
-        viento_vuelo_dirs.append(self.viento.direccion)
-        print("Viento",self.viento.magnitud,self.viento.direccion)
+        #viento_vuelo_mags.append(self.viento.magnitud)
+        viento_vuelo_mags.append(wind.magnitud)
+        #viento_vuelo_dirs.append(self.viento.direccion)
+        viento_vuelo_dirs.append(wind.direccion)
        
         #Agregar nueva masa a la lista
         masavuelo.append(self.vehiculo.masa)    

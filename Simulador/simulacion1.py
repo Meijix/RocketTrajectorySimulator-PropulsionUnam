@@ -6,6 +6,7 @@ from math import pi
 from condiciones_init import *
 from Xitle import *
 from Vuelo import *
+from Viento import Viento2D
 
 
 #quitar el paracaidas
@@ -37,7 +38,7 @@ viento_actual = Viento2D(vel_mean=10, vel_var=2)
 viento_actual.actualizar_viento()
 #viento_actual = Viento2D(vel_mean=100, vel_var=0)
 #print(viento_actual)
-#print(viento_actual.vector)
+print("Viento actual",viento_actual.vector)
 
 vuelo1 = Vuelo(Xitle, atmosfera_actual, viento_actual)
 tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo1.simular_vuelo(estado,t_max, dt)

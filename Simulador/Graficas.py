@@ -48,15 +48,20 @@ Tvecs=np.array(Tvecs)
 Dvecs=np.array(Dvecs)
 Nvecs=np.array(Nvecs)
 
-
-#AYUDA. NO SE PORQUE NO SE HACE :(
+'''
 Tmags = np.array([np.linalg.norm(Tvec) for Tvec in Tvecs])
 Dmags = np.array([np.linalg.norm(Dvec) for Dvec in Dvecs])
 Nmags = np.array([np.linalg.norm(Nvec) for Nvec in Nvecs])
 
+Tmags = np.linalg.norm(Tvecs, axis=1)
+Dmags = np.linalg.norm(Dvecs, axis=1)
+Nmags = np.linalg.norm(Nvecs, axis=1)
+
 Txs, Tys, Tzs = zip(*Tvecs)
 Dxs, Dys, Dzs = zip(*Dvecs)
 Nxs, Nys, Nzs = zip(*Nvecs)
+'''
+
 
 CGs = np.array(CGs)
 CPs = np.array(CPs)
@@ -223,6 +228,7 @@ plt.grid(True)
 # plt.xlim(150,300); plt.ylim(-20, 20)
 plt.show()
 
+'''
 #GRAFICA 4. Fuerzas (magnitudes)
 plt.title("Fuerzas en el tiempo")
 plt.plot(tiempos[1:], Tmags, label= "Empuje")
@@ -233,7 +239,7 @@ muestra_tiempos(tiempos, plt)
 plt.xlim(0,tiempo_apogeo+10)
 plt.legend()
 plt.show()
-
+'''
 # GRAFICA 5. Componentes de las fuerzas
 plt.figure(figsize=(18,4))
 
