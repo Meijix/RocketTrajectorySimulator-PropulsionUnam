@@ -34,19 +34,15 @@ inicio = time.time()
 
 #viento_actual = Viento2D(vel_mean=10, vel_var=0.05)
 viento_actual = Viento2D(vel_mean=100, vel_var=0)
-print(viento_actual)
-print(viento_actual.vector)
+#print(viento_actual)
+#print(viento_actual.vector)
 
 vuelo1 = Vuelo(Xitle, atmosfera_actual, viento_actual)
 tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo1.simular_vuelo(estado,t_max, dt)
 
-# Guardar los datos de la simulación
-#datos_simulados = (tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs)
-
 #Medir tiempo que tarda en correr la simulacion
 fin = time.time()
 print(f"Tiempo de ejecución: {fin-inicio:.1f}s")
-
 
 posiciones = np.array([state[0:3] for state in sim])
 velocidades = np.array([state[3:6] for state in sim])
@@ -56,33 +52,19 @@ omegas = np.array([state[7] for state in sim])
 ####################################
 #print(tiempo)
 #print(posiciones)
-print("Tiempo de salida del riel [s]",vuelo1.tiempo_salida_riel)
-print("Tiempo de MECO [s]",Xitle.t_MECO)
-print("Tiempo de apogeo [s]",vuelo1.tiempo_apogeo)
-print("Tiempo de impacto [s]",vuelo1.tiempo_impacto)
-
+#print("Tiempo de salida del riel [s]",vuelo1.tiempo_salida_riel)
+#print("Tiempo de MECO [s]",Xitle.t_MECO)
+#print("Tiempo de apogeo [s]",vuelo1.tiempo_apogeo)
+#print("Tiempo de impacto [s]",vuelo1.tiempo_impacto)
 
 max_altitude = max(posiciones[:, 2])
 max_speed = max(np.linalg.norm(velocidades, axis=1))
 
-print("APOGEO:", max_altitude, "metros")
-print("Máxima velocidad:", max_speed, "m/s")
-print("Equivalente a:",max_speed/340, "Mach")
-
-
+#print("APOGEO:", max_altitude, "metros")
+#print("Máxima velocidad:", max_speed, "m/s")
+#print("Equivalente a:",max_speed/340, "Mach")
 #########################################
 import pandas as pd
-
-'''
-print(len(tiempos),len(posiciones),len(velocidades), len(thetas),len(omegas))
-print("Masas",len(CPs),len (CGs), len (masavuelo))
-print("Vientos",len(viento_vuelo_mags),len(viento_vuelo_dirs),len(viento_vuelo_vecs))
-print("Fuerzas",len(Tvecs),len(Dvecs),len(Nvecs))
-print("Aceleraciones",len(accels),len(palancas),len(accangs))
-print("Angulos",len(Gammas),len(Alphas),len(torcas))
-print("Cd y Mach", len(Cds),len(Machs))
-'''
-
 # Guardar los datos de la simulación en un archivo .csv
 datos_simulados = pd.DataFrame({
     'tiempos': tiempos[1:],
@@ -114,3 +96,20 @@ datos_simulados = pd.DataFrame({
 })
 
 datos_simulados.to_csv('datos_simulacion.csv', index=False)
+
+############################
+#Guardar datos importantes en un archivo json
+import json
+datos_a_guardar = {
+    't_MECO': Xitle.t_MECO,
+    'tiempo_salida_riel': vuelo1.tiempo_salida_riel,
+    'tiempo_apogeo': vuelo1.tiempo_apogeo,
+    'tiempo_impacto': vuelo1.tiempo_impacto,
+    'max_altitude': max_altitude,
+    'max_speed': max_speed,
+    'max_acceleration_linear': np.max(accels),
+    'max_acceleration_angular': np.max(accangs)
+}
+
+with open('datos_simulacion.json', 'w') as f:
+    json.dump(datos_a_guardar, f, indent=4)
