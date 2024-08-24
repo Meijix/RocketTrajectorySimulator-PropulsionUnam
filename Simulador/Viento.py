@@ -10,8 +10,10 @@ class Viento2D:
     def __init__(self, vel_mean=10, vel_var=2):
         self.vel_mean = vel_mean
         self.vel_var = vel_var
+        self.magnitud= None
+        self.direccion = None
 
-
+    def actualizar_viento(self):
         self.magnitud = random.uniform(self.vel_mean - self.vel_var, self.vel_mean + self.vel_var)
         self.direccion = random.uniform(-45, 45)
         #Elegir hacia que lado sopla con 0.5 de probabilidad

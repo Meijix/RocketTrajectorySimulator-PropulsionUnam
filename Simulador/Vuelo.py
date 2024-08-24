@@ -253,14 +253,9 @@ class Vuelo:
         self.vehiculo.actualizar_masa(t)
 
         # Actualizar viento_actual
-        # global viento_actual
-        #Prueba:Viento constante
-        # viento_actual = Viento2D(vel_mean=10, vel_var=0)
-        # viento_actual = Viento2D(vel_mean=0, vel_var=0)
-        #es necesario aqui o solo en fun_derivs????
         wind = Viento2D(vel_mean=10, vel_var=2)
+        wind.actualizar_viento()
         v_viento = wind.vector
-        #v_viento = np.array([0,0,0])
 
         #FASE 1. VUELO EN RIEL
         if self.tiempo_salida_riel is None:
