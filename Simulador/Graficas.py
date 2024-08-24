@@ -157,6 +157,7 @@ ax.set_xlabel('x (m)')
 ax.set_ylabel('z (m)')
 ax.set_title('Vector de viento')
 plt.show()
+
 ###########################
 #####GRAFICAS DEL COHETE
 ############################
@@ -260,7 +261,7 @@ plt.plot(tiempos[:], Nxs, label="X")
 plt.plot(tiempos[:], Nys, label="Y")
 plt.plot(tiempos[:], Nzs, label="Z")
 muestra_tiempos(tiempos, plt)
-#plt.xlim(0,vuelo1.tiempo_apogeo+1)
+plt.xlim(0,tiempo_apogeo+1)
 #plt.ylim(-6,2.2)
 plt.legend()
 plt.show()
@@ -271,6 +272,7 @@ plt.figure(figsize=(18,4))
 plt.subplot(1, 2, 1)
 plt.plot(tiempos[:], CGs[:],label="CG")
 plt.plot(tiempos[:], CPs[:],label="CP")
+plt.plot(tiempos[:],estabilidad[:], label = "estabilidad")
 plt.title("Posición axial del CG y del CP")
 plt.xlabel("Tiempo (s)")
 plt.ylabel("Posición axial (m)")
@@ -315,21 +317,23 @@ muestra_tiempos(tiempos, plt)
 plt.title("Velocidad angular(omega)")
 
 plt.subplot(1, 4, 3)
-plt.plot(tiempos[1:], nice_angle(accangs))
+plt.plot(tiempos[:], nice_angle(accangs))
 #plt.xlim(0,vuelo1.tiempo_apogeo+10)
 muestra_tiempos(tiempos, plt)
 plt.title("Aceleración angular")
 
+'''
 plt.subplot(1, 4, 4)
 palancas = np.array(palancas)
-plt.plot(tiempos[1:], palancas[:,0],label= "comp x")
-plt.plot(tiempos[1:], palancas[:,1],label="comp y")
-plt.plot(tiempos[1:], palancas[:,2], label = "comp z")
+plt.plot(tiempos[:], palancas[:,0],label= "comp x")
+plt.plot(tiempos[:], palancas[:,1],label="comp y")
+plt.plot(tiempos[:], palancas[:,2], label = "comp z")
 plt.title("Componentes del brazo de momento")
 plt.xlim(0,tiempo_apogeo+10)
 muestra_tiempos(tiempos, plt)
 plt.legend()
 plt.show()
+'''
 
 #GRAFICA 8. Angulos
 plt.figure(figsize=(14,4))
@@ -337,13 +341,13 @@ plt.title("Ángulos en el tiempo")
 plt.xlabel("Tiempo (s)")
 plt.ylabel("Ángulo (grados º)")
 plt.plot(tiempos[:], [normalize_angle(x) for x in np.rad2deg(thetas)], label = 'Ángulo de inclinación (theta)')#pitch
-plt.plot(tiempos[1:], [normalize_angle(x) for x in np.rad2deg(Gammas)], label = 'Ángulo de vuelo (gamma)')#FPA
-plt.plot(tiempos[1:], [normalize_angle(x) for x in np.rad2deg(Alphas)],label = 'Ángulo de ataque (alpha)')
+plt.plot(tiempos[:], [normalize_angle(x) for x in np.rad2deg(Gammas)], label = 'Ángulo de vuelo (gamma)')#FPA
+plt.plot(tiempos[:], [normalize_angle(x) for x in np.rad2deg(Alphas)],label = 'Ángulo de ataque (alpha)')
 plt.axvline(tiempo_apogeo, color="0.5")
 plt.axhline(0, ls="--", color="gray")
 plt.axhline(riel.angulo, ls="--", color="lightgray")
 plt.axhline(-90, ls="--", color="lightgray")
-plt.xlim(0,tiempo_apogeo+20)
+#plt.xlim(0,tiempo_apogeo+20)
 muestra_tiempos(tiempos, plt)
 plt.legend()
 plt.xlim(0,100)
@@ -408,8 +412,6 @@ ax.set_title("Trayectoria del cohete Xitle en el tiempo")
 ax.legend()
 plt.show()
 
-
-
 ##################
 fin = time.time()
 print(f"Tiempo graficando: {fin-inicio:.1f}s")
@@ -417,51 +419,33 @@ print(f"Tiempo graficando: {fin-inicio:.1f}s")
 #################\
 #ANIMACIONES
 #ANIMACION 1. Trayectoria
-# ...
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import numpy as np
 
-# Crear figura y axes 3D
-# ...
+# Definir la función que dibujará el cohete en cada frame
+def dibujar_cohete(i):
+    ax.clear()
+    ax.plot(posiciones[:i, 0], posiciones[:i, 2], color='purple')
+    ax.scatter(posiciones[i, 0], posiciones[i, 2], color='blue')
+    dibujar_cohete_en_punto(posiciones[i, 0], posiciones[i, 2], np.rad2deg(thetas[i]), 200)
+    ax.set_xlabel('Alcance (m)')
+    ax.set_ylabel('Altura (m)')
+    ax.set_title('Trayectoria del cohete Xitle en el tiempo')
+    ax.set_aspect("equal")
 
-# Crear figura y axes 3D
-fig = plt.figure(figsize=(12, 8))
-ax = fig.add_subplot(111, projection="3d")
+# Definir la función que dibujará el cohete en un punto específico
+def dibujar_cohete_en_punto(x, y, theta, longitud):
+    cohete_x = [x, x + longitud * np.cos(np.deg2rad(theta))]
+    cohete_y = [y, y + longitud * np.sin(np.deg2rad(theta))]
+    ax.plot(cohete_x, cohete_y, color='black', linewidth=2)
 
-# Plotear la trayectoria inicial
-ax.plot(posiciones[:, 0], posiciones[:, 1], posiciones[:, 2])
-
-# Crear un objeto cohete que se va a dibujar en cada frame
-cohete, = ax.plot([], [], [], 'o-', lw=2)
-
-# Crear un objeto trayectoria que se va a dibujar en cada frame
-trayectoria, = ax.plot([], [], [], 'b-', lw=1)
-
-# Crear un objeto quiver para dibujar la orientación del cohete
-quiver, = ax.quiver([], [], [], [], [], [], color='r', length=10)
-
-# Función que se llama en cada frame de la animación
-def animate(i):
-    cohete.set_data(posiciones[:i, 0], posiciones[:i, 1])
-    cohete.set_3d_properties(posiciones[:i, 2])
-    cohete.set_markersize(10)
-    cohete.set_markerfacecolor('b')
-    cohete.set_markeredgecolor('b')
-    cohete.set_linewidth(2)
-    cohete.set_linestyle('-')
-    
-    trayectoria.set_data(posiciones[:i, 0], posiciones[:i, 1])
-    trayectoria.set_3d_properties(posiciones[:i, 2])
-    trayectoria.set_linewidth(1)
-    trayectoria.set_linestyle('-')
-    trayectoria.set_color('b')
-    
-    # Actualizar la posición y dirección del quiver
-    quiver.set_segments([[[posiciones[i, 0], posiciones[i, 1], posiciones[i, 2]], 
-                          [posiciones[i, 0] + np.cos(thetas[i]), posiciones[i, 1] + np.sin(thetas[i]), posiciones[i, 2]]]])
-    
-    return cohete, trayectoria, quiver,
+# Crear la figura y el eje
+fig, ax = plt.subplots()
 
 # Crear la animación
-ani = animation.FuncAnimation(fig, animate, frames=len(tiempos), blit=True, interval=50)
+num_frames= len(tiempos)
+ani = animation.FuncAnimation(fig, dibujar_cohete, frames=num_frames, interval=50)
 
 # Mostrar la animación
 plt.show()
