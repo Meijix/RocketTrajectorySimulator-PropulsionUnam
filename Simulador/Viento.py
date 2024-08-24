@@ -12,6 +12,7 @@ class Viento2D:
         self.vel_var = vel_var
         self.magnitud= None
         self.direccion = None
+        self.vector = None
 
     def actualizar_viento(self):
         self.magnitud = random.uniform(self.vel_mean - self.vel_var, self.vel_mean + self.vel_var)
