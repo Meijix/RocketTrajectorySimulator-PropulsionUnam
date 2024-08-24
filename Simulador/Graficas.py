@@ -1,12 +1,10 @@
+#Graficar los resultados de la simulacion
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
 from angulos import *
 from condiciones_init import *
-#from Xitle import Xitle
-#from simulacion1 import * #datos_simulados,posiciones,velocidades,thetas, omegas
-#from simulacion2 import *
 from dibujarCohete import *
 
 #Para usar si se va a simular apenas
@@ -20,48 +18,53 @@ datos_simulacion = pd.read_csv('datos_simulacion.csv')
 
 # Convertir los datos a arrays de numpy
 tiempos = datos_simulacion['tiempos'].values
+
 posiciones = datos_simulacion[['posiciones_x', 'posiciones_y', 'posiciones_z']].values
 velocidades = datos_simulacion[['velocidades_x', 'velocidades_y', 'velocidades_z']].values
 thetas = datos_simulacion['thetas'].values
 omegas = datos_simulacion['omegas'].values
+
 CPs = datos_simulacion['CPs'].values
 CGs = datos_simulacion['CGs'].values
 masavuelo = datos_simulacion['masavuelo'].values
+estabilidad = datos_simulacion['estabilidad'].values
+
 viento_vuelo_mags = datos_simulacion['viento_vuelo_mags'].values
 viento_vuelo_dirs = datos_simulacion['viento_vuelo_dirs'].values
 viento_vuelo_vecs = datos_simulacion['viento_vuelo_vecs'].values
-Tvecs = datos_simulacion['Tvecs'].values
-Dvecs = datos_simulacion['Dvecs'].values
-Nvecs = datos_simulacion['Nvecs'].values
+wind_xs = datos_simulacion['wind_xs'].values
+wind_ys = datos_simulacion['wind_ys'].values
+wind_zs = datos_simulacion['wind_zs'].values
+
+Tmags = datos_simulacion['Tmags'].values
+Dmags = datos_simulacion['Dmags'].values
+Nmags = datos_simulacion['Nmags'].values
+Txs = datos_simulacion['Txs'].values
+Tys = datos_simulacion['Tys'].values
+Tzs = datos_simulacion['Tzs'].values
+Dxs = datos_simulacion['Dxs'].values
+Dys = datos_simulacion['Dys'].values
+Dzs = datos_simulacion['Dzs'].values
+Nxs = datos_simulacion['Nxs'].values
+Nys = datos_simulacion['Nys'].values
+Nzs = datos_simulacion['Nzs'].values
 
 accels = datos_simulacion['accels'].values
 palancas = datos_simulacion['palancas'].values
 accangs = datos_simulacion['accangs'].values
+
 Gammas = datos_simulacion['Gammas'].values
 Alphas = datos_simulacion['Alphas'].values
 torcas = datos_simulacion['torcas'].values
+
 Cds = datos_simulacion['Cds'].values
 Machs = datos_simulacion['Machs'].values
 #########################################
 #Obtener magnitudes y separar coordenadas
-Tvecs=np.array(Tvecs)
-Dvecs=np.array(Dvecs)
-Nvecs=np.array(Nvecs)
-
-'''
-Tmags = np.array([np.linalg.norm(Tvec) for Tvec in Tvecs])
-Dmags = np.array([np.linalg.norm(Dvec) for Dvec in Dvecs])
-Nmags = np.array([np.linalg.norm(Nvec) for Nvec in Nvecs])
-
-Tmags = np.linalg.norm(Tvecs, axis=1)
-Dmags = np.linalg.norm(Dvecs, axis=1)
-Nmags = np.linalg.norm(Nvecs, axis=1)
-
-Txs, Tys, Tzs = zip(*Tvecs)
-Dxs, Dys, Dzs = zip(*Dvecs)
-Nxs, Nys, Nzs = zip(*Nvecs)
-'''
-
+Tvecs = np.column_stack((Txs, Tys, Tzs))
+Dvecs = np.column_stack((Dxs, Dys, Dzs))
+Nvecs = np.column_stack((Nxs, Nys, Nzs))
+print(Tvecs)
 
 CGs = np.array(CGs)
 CPs = np.array(CPs)
@@ -84,7 +87,7 @@ max_acceleration_linear = datos["max_acceleration_linear"]
 max_acceleration_angular = datos["max_acceleration_angular"]
 
 ##########################################
-# Clase para graficar los tiempos importantes
+# Funcion para graficar los tiempos importantes
 def muestra_tiempos(tiempos, ax):
     ax.axvline(tiempo_salida_riel, color="orange", ls="--")
     ax.axvline(t_MECO, color="darkred", ls="--")
@@ -100,22 +103,7 @@ import time
 inicio = time.time()
 # GRAFICAS
 ###########################
-#GRAFICA 0. Viento
-'''
-#Graficar el vector viento 
-# Get the x and z components of the wind vector
-vx = viento_actual.vector[0]
-vz = viento_actual.vector[2]
-
-fig, ax = plt.subplots()
-ax.arrow(0, 0, vx, vz, head_width=0.5, head_length=0.5, color='r', zorder=10)
-ax.set_xlim([-15, 15])
-ax.set_ylim([-15, 15])
-ax.set_xlabel('x (m)')
-ax.set_ylabel('z (m)')
-ax.set_title('Vector de viento')
-plt.show()
-'''
+#VIENTO
 #Magnitudes en el tiempo
 plt.plot(tiempos, viento_vuelo_mags)
 plt.xlabel('Tiempo (s)')
@@ -146,25 +134,28 @@ plt.ylabel('Frecuencia')
 plt.title('Histograma de la dirección del viento')
 plt.show()
 
+#Rosa de los vientos
+plt.figure(figsize=(8, 6))
+ax = plt.subplot(111, polar=True)
+ax.set_theta_zero_location("N")
+ax.set_theta_direction(-1)
+bars = ax.bar(np.deg2rad(viento_vuelo_dirs), viento_vuelo_mags, width=0.5, bottom=0.0)
+plt.title('Rosa de los vientos')
+ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
+plt.show()
+
 #Vectores viento en el tiempo
 #Falta corregir esta grafica
-wind_xs = [vec[0] for vec in viento_vuelo_vecs]
-wind_ys = [vec[1] for vec in viento_vuelo_vecs]
-wind_zs = [vec[2] for vec in viento_vuelo_vecs]
-
+# Vectores viento en el tiempo
 fig, ax = plt.subplots()
-ax.plot(wind_xs, wind_zs, color='b', label='Viento')
-#wind_xs, wind_ys, wind_zs = viento_vuelo_vecs[:, 0], viento_vuelo_vecs[:, 1], viento_vuelo_vecs[:, 2]
-#print(wind_xs)
-# Graficar los vectores de viento como flechas
-#ax.quiver(wind_xs, wind_ys, wind_zs, angles='xy', scale_units='xy', scale=1)
+for i in range(len(tiempos)):
+    ax.arrow(0, 0, wind_xs[i], wind_zs[i], head_width=0.5, head_length=0.5, color='pink', zorder=10, alpha=0.3)
 
-# Configurar ejes y título
-ax.set_xlabel('Tiempo (s)')
-ax.set_ylabel('Viento (m/s)')
-ax.set_title('Vectores de viento en el tiempo')
-
-# Mostrar la gráfica
+ax.set_xlim([-15, 15])
+ax.set_ylim([-15, 15])
+ax.set_xlabel('x (m)')
+ax.set_ylabel('z (m)')
+ax.set_title('Vector de viento')
 plt.show()
 ###########################
 #####GRAFICAS DEL COHETE
@@ -228,27 +219,26 @@ plt.grid(True)
 # plt.xlim(150,300); plt.ylim(-20, 20)
 plt.show()
 
-'''
+
 #GRAFICA 4. Fuerzas (magnitudes)
 plt.title("Fuerzas en el tiempo")
-plt.plot(tiempos[1:], Tmags, label= "Empuje")
-plt.plot(tiempos[1:], Nmags,label="Normal")
-plt.plot(tiempos[1:], Dmags, label= "Arrastre")
+plt.plot(tiempos[:], Tmags, label= "Empuje")
+plt.plot(tiempos[:], Nmags,label="Normal")
+plt.plot(tiempos[:], Dmags, label= "Arrastre")
 muestra_tiempos(tiempos, plt)
-
 plt.xlim(0,tiempo_apogeo+10)
 plt.legend()
 plt.show()
-'''
+
 # GRAFICA 5. Componentes de las fuerzas
 plt.figure(figsize=(18,4))
 
 plt.subplot(1, 3, 1)
 plt.title("Empuje [N]")
 plt.ylabel("Newtons")
-plt.plot(tiempos[1:], Txs, label="X")
-plt.plot(tiempos[1:], Tys, label="Y")
-plt.plot(tiempos[1:], Tzs, label="Z")
+plt.plot(tiempos[:], Txs, label="X")
+plt.plot(tiempos[:], Tys, label="Y")
+plt.plot(tiempos[:], Tzs, label="Z")
 muestra_tiempos(tiempos, plt)
 plt.xlim(0,t_MECO+1)
 plt.legend()
@@ -256,9 +246,9 @@ plt.legend()
 plt.subplot(1, 3, 2)
 plt.title("Arrastre [N]")
 #plt.ylabel("Newtons")
-plt.plot(tiempos[1:], Dxs, label="X")
-plt.plot(tiempos[1:], Dys, label="Y")
-plt.plot(tiempos[1:], Dzs, label="Z")
+plt.plot(tiempos[:], Dxs, label="X")
+plt.plot(tiempos[:], Dys, label="Y")
+plt.plot(tiempos[:], Dzs, label="Z")
 muestra_tiempos(tiempos, plt)
 plt.xlim(0,tiempo_apogeo+1)
 plt.legend()
@@ -266,9 +256,9 @@ plt.legend()
 plt.subplot(1, 3, 3)
 plt.title("Normal [N]")
 #plt.ylabel("Newtons")
-plt.plot(tiempos[1:], Nxs, label="X")
-plt.plot(tiempos[1:], Nys, label="Y")
-plt.plot(tiempos[1:], Nzs, label="Z")
+plt.plot(tiempos[:], Nxs, label="X")
+plt.plot(tiempos[:], Nys, label="Y")
+plt.plot(tiempos[:], Nzs, label="Z")
 muestra_tiempos(tiempos, plt)
 #plt.xlim(0,vuelo1.tiempo_apogeo+1)
 #plt.ylim(-6,2.2)
@@ -277,22 +267,22 @@ plt.show()
 
 #GRAFICA 6. Estabilidad
 plt.figure(figsize=(18,4))
-#si se definen asi los calibres???
-stab = (CPs-CGs)/diam_ext
+
 plt.subplot(1, 2, 1)
-plt.plot(tiempos[1:], CGs[:,2],label="CG")
-plt.plot(tiempos[1:], CPs[:,2],label="CP")
+plt.plot(tiempos[:], CGs[:],label="CG")
+plt.plot(tiempos[:], CPs[:],label="CP")
 plt.title("Posición axial del CG y del CP")
 plt.xlabel("Tiempo (s)")
 plt.ylabel("Posición axial (m)")
 muestra_tiempos(tiempos, plt)
 plt.legend()
-
+'''
 plt.subplot(1, 2, 2)
-plt.plot(tiempos[1:], stab[:,2], color="C2",label="estabilidad")
+plt.plot(tiempos[:], stab[:,2], color="C2",label="estabilidad")
 plt.title("Estabilidad (calibres)")
-#plt.xlim(0,vuelo1.tiempo_apogeo+10)
+#plt.xlim(0,tiempo_apogeo+10)
 plt.legend()
+'''
 plt.show()
 
 # Componentes del brazo de palanca

@@ -52,6 +52,27 @@ velocidades = np.array([state[3:6] for state in sim])
 thetas = np.array([state[6] for state in sim])
 omegas = np.array([state[7] for state in sim])
 
+Tmags = np.array([np.linalg.norm(Tvec) for Tvec in Tvecs])
+Dmags = np.array([np.linalg.norm(Dvec) for Dvec in Dvecs])
+Nmags = np.array([np.linalg.norm(Nvec) for Nvec in Nvecs])
+
+Txs, Tys, Tzs = zip(*Tvecs)
+Dxs, Dys, Dzs = zip(*Dvecs)
+Nxs, Nys, Nzs = zip(*Nvecs)
+
+wind_xs = [vec[0] for vec in viento_vuelo_vecs]
+wind_ys = [vec[1] for vec in viento_vuelo_vecs]
+wind_zs = [vec[2] for vec in viento_vuelo_vecs]
+
+stability=[]
+
+for i in range(len(tiempos)-1):
+    stab= CPs[i]-CGs[i]/diam_ext
+    stability.append(stab)
+
+
+max_altitude = max(posiciones[:, 2])
+max_speed = max(np.linalg.norm(velocidades, axis=1))
 ####################################
 #print(tiempo)
 #print(posiciones)
@@ -59,9 +80,6 @@ omegas = np.array([state[7] for state in sim])
 #print("Tiempo de MECO [s]",Xitle.t_MECO)
 #print("Tiempo de apogeo [s]",vuelo1.tiempo_apogeo)
 #print("Tiempo de impacto [s]",vuelo1.tiempo_impacto)
-
-max_altitude = max(posiciones[:, 2])
-max_speed = max(np.linalg.norm(velocidades, axis=1))
 
 #print("APOGEO:", max_altitude, "metros")
 #print("Máxima velocidad:", max_speed, "m/s")
@@ -85,9 +103,24 @@ datos_simulados = pd.DataFrame({
     'viento_vuelo_mags': viento_vuelo_mags,
     'viento_vuelo_dirs': viento_vuelo_dirs,
     'viento_vuelo_vecs': viento_vuelo_vecs,
-    'Tvecs': Tvecs,
-    'Dvecs': Dvecs,
-    'Nvecs': Nvecs,
+    'wind_xs': wind_xs,
+    'wind_ys': wind_ys,
+    'wind_zs': wind_zs,
+    #'Tvecs': Tvecs,
+    #'Dvecs': Dvecs,
+    #'Nvecs': Nvecs,
+    'Tmags': Tmags,
+    'Dmags': Dmags,
+    'Nmags': Nmags,
+    'Txs': Txs,
+    'Tys': Tys,
+    'Tzs': Tzs,
+    'Dxs': Dxs,
+    'Dys': Dys,
+    'Dzs': Dzs,
+    'Nxs': Nxs,
+    'Nys': Nys,
+    'Nzs': Nzs,
     'accels': accels,
     'palancas': palancas,
     'accangs': accangs,
@@ -95,7 +128,8 @@ datos_simulados = pd.DataFrame({
     'Alphas': Alphas,
     'torcas': torcas,
     'Cds': Cds,
-    'Machs': Machs
+    'Machs': Machs,
+    'estabilidad': stability
 })
 
 datos_simulados.to_csv('datos_simulacion.csv', index=False)

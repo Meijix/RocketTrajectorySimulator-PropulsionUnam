@@ -298,8 +298,8 @@ class Vuelo:
         tiempos.append(t)
 
         #Guardar centros de presión y centros de gravedad
-        CPs.append(self.vehiculo.CP)
-        CGs.append(self.vehiculo.CG)
+        CPs.append(self.vehiculo.CP[2])
+        CGs.append(self.vehiculo.CG[2])
 
         #Guardar magnitudes y direcciones del viento
         viento_vuelo_vecs.append(v_viento)
