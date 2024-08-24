@@ -5,6 +5,7 @@ from Integradores import *
 from funciones import *
 #from condiciones_init import *
 #from Xitle import *
+from Viento import Viento2D
 
 class Vuelo:
 
@@ -257,7 +258,8 @@ class Vuelo:
         # viento_actual = Viento2D(vel_mean=10, vel_var=0)
         # viento_actual = Viento2D(vel_mean=0, vel_var=0)
         #es necesario aqui o solo en fun_derivs????
-        v_viento = self.viento.vector
+        wind = Viento2D(vel_mean=10, vel_var=2)
+        v_viento = wind.vector
         #v_viento = np.array([0,0,0])
 
         #FASE 1. VUELO EN RIEL
