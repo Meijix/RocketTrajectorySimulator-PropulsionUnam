@@ -365,7 +365,7 @@ class Vuelo:
           print(f"Iteracion {it}, t={t:.1f} s, altitud={altitud:.1f} m, vel vert={estado[5]:.1f}")
 
       return tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs
-
+'''
     def muestra_tiempos(self):
       plt.axvline(self.tiempo_salida_riel, color="orange", ls="--")
       plt.axvline(self.vehiculo.t_MECO, color="darkred", ls="--")
@@ -373,3 +373,4 @@ class Vuelo:
         plt.axvline(self.tiempo_apogeo, color="navy", ls="--")
       if self.tiempo_impacto is not None:
         plt.axvline(self.tiempo_impacto, color="0.2", ls="--")
+'''
