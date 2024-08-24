@@ -7,7 +7,34 @@ from angulos import *
 from simulacion2 import *
 from dibujarCohete import *
 
-#tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = zip*(datos_simulados)
+###########################################################333
+# Leer los datos de la simulación desde el archivo CSV
+datos_simulacion = pd.read_csv('datos_simulacion.csv')
+
+# Convertir los datos a arrays de numpy
+tiempos = datos_simulacion['tiempos'].values
+posiciones = datos_simulacion[['posiciones_x', 'posiciones_y', 'posiciones_z']].values
+velocidades = datos_simulacion[['velocidades_x', 'velocidades_y', 'velocidades_z']].values
+thetas = datos_simulacion['thetas'].values
+omegas = datos_simulacion['omegas'].values
+CPs = datos_simulacion['CPs'].values
+CGs = datos_simulacion['CGs'].values
+masavuelo = datos_simulacion['masavuelo'].values
+viento_vuelo_mags = datos_simulacion['viento_vuelo_mags'].values
+viento_vuelo_dirs = datos_simulacion['viento_vuelo_dirs'].values
+viento_vuelo_vecs = datos_simulacion['viento_vuelo_vecs'].values
+Tvecs = datos_simulacion['Tvecs'].values
+Dvecs = datos_simulacion['Dvecs'].values
+Nvecs = datos_simulacion['Nvecs'].values
+accels = datos_simulacion['accels'].values
+palancas = datos_simulacion['palancas'].values
+accangs = datos_simulacion['accangs'].values
+Gammas = datos_simulacion['Gammas'].values
+Alphas = datos_simulacion['Alphas'].values
+torcas = datos_simulacion['torcas'].values
+Cds = datos_simulacion['Cds'].values
+Machs = datos_simulacion['Machs'].values
+#########################################
 
 #Cambiar el vuelo a graficar
 #vuelo_graficar=vuelo1
