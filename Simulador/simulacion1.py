@@ -102,6 +102,7 @@ datos_simulados.to_csv('datos_simulacion.csv', index=False)
 #Guardar datos importantes en un archivo json
 import json
 datos_a_guardar = {
+    'd_ext': Xitle.d_ext,
     't_MECO': Xitle.t_MECO,
     'tiempo_salida_riel': vuelo1.tiempo_salida_riel,
     'tiempo_apogeo': vuelo1.tiempo_apogeo,

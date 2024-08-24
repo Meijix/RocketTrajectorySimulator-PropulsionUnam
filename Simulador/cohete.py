@@ -20,6 +20,7 @@ class Cohete:
     def __init__(self, nombre, tipo, componentes, componentes_externos, tabla_Cd_fpath, tabla_empuje_fpath, tabla_masa_fpath, riel):
 
         self.nombre = nombre
+        self.d_ext = None
         self.tipo = tipo    # El tipo de cohete (string)
         self.componentes = componentes   # Una lista de objetos Componente (o derivados)
         self.num_comp = len(self.componentes)

@@ -55,7 +55,7 @@ componentes_externos = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': t
                'oxidante': oxidante, 'valvulas': valvulas, 'grano': grano, 'Cámara Combustión': CC, 'Boattail': boattail}
 
 Xitle = Cohete("Xitle", "hibrido", componentes, componentes_externos, tabla_Cd_fpath, tabla_empuje_fpath, tabla_masa_fpath, riel)
-
+Xitle.d_ext=diam_ext
 #print(Xitle)
 
 if __name__ == "__main__":
@@ -68,3 +68,5 @@ if __name__ == "__main__":
     print("La longitud total de Xitle es", Xitle.longtotal, "[m]")
     print("La masa inicial total es:",Xitle.masa, "kg")
     print("El impulso total es:", Xitle.I_total, "N s")
+    print("El área transversal del cohete es:", Xitle.A, "m^2")
+    print("El diámetro exterior del cohete es:", Xitle.d_ext, "m")
