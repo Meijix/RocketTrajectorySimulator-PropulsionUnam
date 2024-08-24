@@ -1,11 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from angulos import *
 #from Xitle import Xitle
 #from simulacion1 import * #datos_simulados,posiciones,velocidades,thetas, omegas
-from simulacion2 import *
+#from simulacion2 import *
 from dibujarCohete import *
+
+#Para usar si se va a simular apenas
+#Cambiar el vuelo a graficar
+#vuelo_graficar=vuelo1
+#vuelo_graficar=vuelo_paracaidas
 
 ###########################################################333
 # Leer los datos de la simulación desde el archivo CSV
@@ -35,16 +41,41 @@ torcas = datos_simulacion['torcas'].values
 Cds = datos_simulacion['Cds'].values
 Machs = datos_simulacion['Machs'].values
 #########################################
+# Leer los datos de la simulación desde el archivo JSON
+import json
 
-#Cambiar el vuelo a graficar
-#vuelo_graficar=vuelo1
-vuelo_graficar=vuelo_paracaidas
+with open('datos_simulacion.json', 'r') as f:
+    datos = json.load(f)
 
+#print(datos)
+t_MECO = datos["t_MECO"]
+tiempo_salida_riel = datos["tiempo_salida_riel"]
+tiempo_apogeo = datos["tiempo_apogeo"]
+tiempo_impacto = datos["tiempo_impacto"]
+max_altitude = datos["max_altitude"]
+max_speed = datos["max_speed"]
+max_acceleration_linear = datos["max_acceleration_linear"]
+max_acceleration_angular = datos["max_acceleration_angular"]
+
+##########################################
+# Clase para graficar los tiempos importantes
+def muestra_tiempos(tiempos, ax):
+    ax.axvline(tiempo_salida_riel, color="orange", ls="--")
+    ax.axvline(t_MECO, color="darkred", ls="--")
+    if tiempo_apogeo is not None:
+        ax.axvline(tiempo_apogeo, color="navy", ls="--")
+    if tiempo_impacto is not None:
+        ax.axvline(tiempo_impacto, color="0.2", ls="--")
+    #if tiempo_despliegue is not None:
+        #ax.axvline(tiempo_despliegue, color="green", ls="--")
+    ax.legend()
+#########################################
 import time 
 inicio = time.time()
 # GRAFICAS
 ###########################
-
+#GRAFICA 0. Viento
+'''
 #Graficar el vector viento 
 # Get the x and z components of the wind vector
 vx = viento_actual.vector[0]
@@ -58,7 +89,57 @@ ax.set_xlabel('x (m)')
 ax.set_ylabel('z (m)')
 ax.set_title('Vector de viento')
 plt.show()
+'''
+#Magnitudes en el tiempo
+plt.plot(tiempos, viento_vuelo_mags)
+plt.xlabel('Tiempo (s)')
+plt.ylabel('Magnitud del viento (m/s)')
+plt.title('Magnitud del viento en el tiempo')
+muestra_tiempos(tiempos, plt)
+plt.show()
 
+#Histograma de las magnitudes
+plt.hist(viento_vuelo_mags, bins=20)
+plt.xlabel('Magnitud del viento (m/s)')
+plt.ylabel('Frecuencia')
+plt.title('Histograma de la magnitud del viento')
+plt.show()
+
+#Direcciones en el tiempo
+plt.plot(tiempos,viento_vuelo_dirs)
+plt.xlabel('Tiempo (s)')
+plt.ylabel('Dirección del viento (grados)')
+plt.title('Dirección del viento en el tiempo')
+muestra_tiempos(tiempos, plt)
+plt.show()
+
+#Histograma de las direcciones
+plt.hist(viento_vuelo_dirs, bins=20)
+plt.xlabel('Dirección del viento (grados)')
+plt.ylabel('Frecuencia')
+plt.title('Histograma de la dirección del viento')
+plt.show()
+
+#Vectores viento en el tiempo
+#Falta corregir esta grafica
+wind_xs = [vec[0] for vec in viento_vuelo_vecs]
+wind_ys = [vec[1] for vec in viento_vuelo_vecs]
+wind_zs = [vec[2] for vec in viento_vuelo_vecs]
+
+fig, ax = plt.subplots()
+ax.plot(wind_xs, wind_zs, color='b', label='Viento')
+#wind_xs, wind_ys, wind_zs = viento_vuelo_vecs[:, 0], viento_vuelo_vecs[:, 1], viento_vuelo_vecs[:, 2]
+#print(wind_xs)
+# Graficar los vectores de viento como flechas
+#ax.quiver(wind_xs, wind_ys, wind_zs, angles='xy', scale_units='xy', scale=1)
+
+# Configurar ejes y título
+ax.set_xlabel('Tiempo (s)')
+ax.set_ylabel('Viento (m/s)')
+ax.set_title('Vectores de viento en el tiempo')
+
+# Mostrar la gráfica
+plt.show()
 ###########################
 #Grafica 0. Trayectoria y orientacion con cohete en diferentes puntos
 plt.xlabel('Alcance (m)')
