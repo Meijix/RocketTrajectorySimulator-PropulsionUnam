@@ -53,7 +53,7 @@ velocidades = np.array([state[3:6] for state in sim])
 thetas = np.array([state[6] for state in sim])
 omegas = np.array([state[7] for state in sim])
 
-
+####################################
 #print(tiempo)
 #print(posiciones)
 print("Tiempo de salida del riel [s]",vuelo1.tiempo_salida_riel)
@@ -68,3 +68,49 @@ max_speed = max(np.linalg.norm(velocidades, axis=1))
 print("APOGEO:", max_altitude, "metros")
 print("Máxima velocidad:", max_speed, "m/s")
 print("Equivalente a:",max_speed/340, "Mach")
+
+
+#########################################
+import pandas as pd
+
+'''
+print(len(tiempos),len(posiciones),len(velocidades), len(thetas),len(omegas))
+print("Masas",len(CPs),len (CGs), len (masavuelo))
+print("Vientos",len(viento_vuelo_mags),len(viento_vuelo_dirs),len(viento_vuelo_vecs))
+print("Fuerzas",len(Tvecs),len(Dvecs),len(Nvecs))
+print("Aceleraciones",len(accels),len(palancas),len(accangs))
+print("Angulos",len(Gammas),len(Alphas),len(torcas))
+print("Cd y Mach", len(Cds),len(Machs))
+'''
+
+# Guardar los datos de la simulación en un archivo .csv
+datos_simulados = pd.DataFrame({
+    'tiempos': tiempos[1:],
+    'posiciones_x': posiciones[1:, 0],
+    'posiciones_y': posiciones[1:, 1],
+    'posiciones_z': posiciones[1:, 2],
+    'velocidades_x': velocidades[1:, 0],
+    'velocidades_y': velocidades[1:, 1],
+    'velocidades_z': velocidades[1:, 2],
+    'thetas': thetas[1:],
+    'omegas': omegas[1:],
+    'CPs': CPs,
+    'CGs': CGs,
+    'masavuelo': masavuelo[1:],
+    'viento_vuelo_mags': viento_vuelo_mags,
+    'viento_vuelo_dirs': viento_vuelo_dirs,
+    'viento_vuelo_vecs': viento_vuelo_vecs,
+    'Tvecs': Tvecs,
+    'Dvecs': Dvecs,
+    'Nvecs': Nvecs,
+    'accels': accels,
+    'palancas': palancas,
+    'accangs': accangs,
+    'Gammas': Gammas,
+    'Alphas': Alphas,
+    'torcas': torcas,
+    'Cds': Cds,
+    'Machs': Machs
+})
+
+datos_simulados.to_csv('datos_simulacion.csv', index=False)
