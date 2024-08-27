@@ -8,6 +8,7 @@ from Xitle import *
 from Vuelo import *
 from Viento import Viento2D
 
+input()
 
 #quitar el paracaidas
 Xitle.parachute_added = False
@@ -26,6 +27,8 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 #Parametros de la simulacion
 dt=0.01 #0.1 #[s]
 t_max = 120 #[s]
+# t_max = 1200 #[s]
+# t_max = 5 #[s]
 
 #t=0
 #it = 0
@@ -34,7 +37,7 @@ import time
 inicio = time.time()
 print("Simulando...")
 
-viento_actual = Viento2D(vel_mean=10, vel_var=2)
+viento_actual = Viento2D(vel_mean=0, vel_var=0)
 viento_actual.actualizar_viento()
 #viento_actual = Viento2D(vel_mean=100, vel_var=0)
 #print(viento_actual)
@@ -67,9 +70,8 @@ wind_zs = [vec[2] for vec in viento_vuelo_vecs]
 stability=[]
 
 for i in range(len(tiempos)-1):
-    stab= CPs[i]-CGs[i]/diam_ext
+    stab= (CPs[i]-CGs[i])/diam_ext
     stability.append(stab)
-
 
 max_altitude = max(posiciones[:, 2])
 max_speed = max(np.linalg.norm(velocidades, axis=1))

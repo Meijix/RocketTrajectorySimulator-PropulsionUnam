@@ -103,60 +103,61 @@ import time
 inicio = time.time()
 # GRAFICAS
 ###########################
-#VIENTO
-#Magnitudes en el tiempo
-plt.plot(tiempos, viento_vuelo_mags)
-plt.xlabel('Tiempo (s)')
-plt.ylabel('Magnitud del viento (m/s)')
-plt.title('Magnitud del viento en el tiempo')
-muestra_tiempos(tiempos, plt)
-plt.show()
+if False:
+    #VIENTO
+    #Magnitudes en el tiempo
+    plt.plot(tiempos, viento_vuelo_mags)
+    plt.xlabel('Tiempo (s)')
+    plt.ylabel('Magnitud del viento (m/s)')
+    plt.title('Magnitud del viento en el tiempo')
+    muestra_tiempos(tiempos, plt)
+    plt.show()
 
-#Histograma de las magnitudes
-plt.hist(viento_vuelo_mags, bins=20)
-plt.xlabel('Magnitud del viento (m/s)')
-plt.ylabel('Frecuencia')
-plt.title('Histograma de la magnitud del viento')
-plt.show()
+    #Histograma de las magnitudes
+    plt.hist(viento_vuelo_mags, bins=20)
+    plt.xlabel('Magnitud del viento (m/s)')
+    plt.ylabel('Frecuencia')
+    plt.title('Histograma de la magnitud del viento')
+    plt.show()
 
-#Direcciones en el tiempo
-plt.plot(tiempos,viento_vuelo_dirs)
-plt.xlabel('Tiempo (s)')
-plt.ylabel('Dirección del viento (grados)')
-plt.title('Dirección del viento en el tiempo')
-muestra_tiempos(tiempos, plt)
-plt.show()
+    #Direcciones en el tiempo
+    plt.plot(tiempos,viento_vuelo_dirs)
+    plt.xlabel('Tiempo (s)')
+    plt.ylabel('Dirección del viento (grados)')
+    plt.title('Dirección del viento en el tiempo')
+    muestra_tiempos(tiempos, plt)
+    plt.show()
 
-#Histograma de las direcciones
-plt.hist(viento_vuelo_dirs, bins=20)
-plt.xlabel('Dirección del viento (grados)')
-plt.ylabel('Frecuencia')
-plt.title('Histograma de la dirección del viento')
-plt.show()
+    #Histograma de las direcciones
+    plt.hist(viento_vuelo_dirs, bins=20)
+    plt.xlabel('Dirección del viento (grados)')
+    plt.ylabel('Frecuencia')
+    plt.title('Histograma de la dirección del viento')
+    plt.show()
 
-#Rosa de los vientos
-plt.figure(figsize=(8, 6))
-ax = plt.subplot(111, polar=True)
-ax.set_theta_zero_location("N")
-ax.set_theta_direction(-1)
-bars = ax.bar(np.deg2rad(viento_vuelo_dirs), viento_vuelo_mags, width=0.5, bottom=0.0)
-plt.title('Rosa de los vientos')
-ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
-plt.show()
+    #Rosa de los vientos
+    plt.figure(figsize=(8, 6))
+    ax = plt.subplot(111, polar=True)
+    ax.set_theta_zero_location("N")
+    ax.set_theta_direction(-1)
+    bars = ax.bar(np.deg2rad(viento_vuelo_dirs), viento_vuelo_mags, width=0.5, bottom=0.0)
+    plt.title('Rosa de los vientos')
+    ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
+    plt.show()
 
-#Vectores viento en el tiempo
-#Falta corregir esta grafica
-# Vectores viento en el tiempo
-fig, ax = plt.subplots()
-for i in range(len(tiempos)):
-    ax.arrow(0, 0, wind_xs[i], wind_zs[i], head_width=0.5, head_length=0.5, color='pink', zorder=10, alpha=0.3)
+    #Vectores viento en el tiempo
+    #Falta corregir esta grafica
+    # Vectores viento en el tiempo
+    fig, ax = plt.subplots()
+    for i in range(len(tiempos)):
+        ax.arrow(0, 0, wind_xs[i], wind_zs[i], head_width=0.5, head_length=0.5, color='pink', zorder=10, alpha=0.3)
 
-ax.set_xlim([-15, 15])
-ax.set_ylim([-15, 15])
-ax.set_xlabel('x (m)')
-ax.set_ylabel('z (m)')
-ax.set_title('Vector de viento')
-plt.show()
+    ax.set_xlim([-15, 15])
+    ax.set_ylim([-15, 15])
+    ax.set_xlabel('x (m)')
+    ax.set_ylabel('z (m)')
+    ax.set_title('Vector de viento')
+    plt.show()
 
 ###########################
 #####GRAFICAS DEL COHETE
@@ -169,14 +170,14 @@ plt.plot(posiciones[:, 0], posiciones[:, 2], color='purple')
 plt.gca().set_aspect("equal")
 
 # Dibujar el cohete cada x segundos
-x = 5
+x = 1
 x = x * 100
 
 for i in range(0, len(tiempos), x):
   dibujar_cohete(posiciones[i, 0], posiciones[i, 2], np.rad2deg(thetas[i]), 200)  # Ajusta longitud y altura según sea necesario
   #dibujar_cohete(posiciones[i, 0], posiciones[i, 2], thetas[i], 500)
 
-plt.show()
+# plt.show()
 
 # GRAFICA 1. Posiciones
 plt.figure(figsize=(10, 6))
@@ -203,7 +204,7 @@ muestra_tiempos(tiempos, plt)
 plt.legend()
 plt.grid(True)
 # Mostrar las gráficas
-plt.show()
+# plt.show()
 
 # GRAFICA 3. Angulos contra el tiempo
 plt.figure(figsize=(10, 6))
@@ -218,18 +219,20 @@ plt.axhline(-90, ls="--", color="lightgray")
 plt.legend()
 plt.grid(True)
 # plt.xlim(150,300); plt.ylim(-20, 20)
-plt.show()
+# plt.show()
 
 
 #GRAFICA 4. Fuerzas (magnitudes)
+plt.figure()
 plt.title("Fuerzas en el tiempo")
 plt.plot(tiempos[:], Tmags, label= "Empuje")
 plt.plot(tiempos[:], Nmags,label="Normal")
 plt.plot(tiempos[:], Dmags, label= "Arrastre")
 muestra_tiempos(tiempos, plt)
-plt.xlim(0,tiempo_apogeo+10)
+if tiempo_apogeo is not None:
+    plt.xlim(0,tiempo_apogeo+10)
 plt.legend()
-plt.show()
+# plt.show()
 
 # GRAFICA 5. Componentes de las fuerzas
 plt.figure(figsize=(18,4))
@@ -251,7 +254,8 @@ plt.plot(tiempos[:], Dxs, label="X")
 plt.plot(tiempos[:], Dys, label="Y")
 plt.plot(tiempos[:], Dzs, label="Z")
 muestra_tiempos(tiempos, plt)
-plt.xlim(0,tiempo_apogeo+1)
+if tiempo_apogeo is not None:
+    plt.xlim(0,tiempo_apogeo+1)
 plt.legend()
 
 plt.subplot(1, 3, 3)
@@ -261,10 +265,11 @@ plt.plot(tiempos[:], Nxs, label="X")
 plt.plot(tiempos[:], Nys, label="Y")
 plt.plot(tiempos[:], Nzs, label="Z")
 muestra_tiempos(tiempos, plt)
-plt.xlim(0,tiempo_apogeo+1)
+if tiempo_apogeo is not None:
+    plt.xlim(0,tiempo_apogeo+1)
 #plt.ylim(-6,2.2)
 plt.legend()
-plt.show()
+# plt.show()
 
 #GRAFICA 6. Estabilidad
 plt.figure(figsize=(18,4))
@@ -285,7 +290,7 @@ plt.title("Estabilidad (calibres)")
 #plt.xlim(0,tiempo_apogeo+10)
 plt.legend()
 '''
-plt.show()
+# plt.show()
 
 # Componentes del brazo de palanca
 #palancas = np.array(palancas)
@@ -343,25 +348,28 @@ plt.ylabel("Ángulo (grados º)")
 plt.plot(tiempos[:], [normalize_angle(x) for x in np.rad2deg(thetas)], label = 'Ángulo de inclinación (theta)')#pitch
 plt.plot(tiempos[:], [normalize_angle(x) for x in np.rad2deg(Gammas)], label = 'Ángulo de vuelo (gamma)')#FPA
 plt.plot(tiempos[:], [normalize_angle(x) for x in np.rad2deg(Alphas)],label = 'Ángulo de ataque (alpha)')
-plt.axvline(tiempo_apogeo, color="0.5")
+if tiempo_apogeo is not None:
+    plt.axvline(tiempo_apogeo, color="0.5")
 plt.axhline(0, ls="--", color="gray")
 plt.axhline(riel.angulo, ls="--", color="lightgray")
 plt.axhline(-90, ls="--", color="lightgray")
 #plt.xlim(0,tiempo_apogeo+20)
 muestra_tiempos(tiempos, plt)
 plt.legend()
-plt.xlim(0,100)
+# plt.xlim(0,100)
 #plt.ylim(75,80.5)
-plt.show()
+# plt.show()
 
 #GRAFICA 9. Variacion de masa
+plt.figure()
 plt.xlabel('Tiempo (s)')
 plt.ylabel('Masa (kg)')
 plt.title('Masa del cohete Xitle en el tiempo')
-plt.xlim(0,tiempo_apogeo+5)
+if tiempo_apogeo is not None:
+    plt.xlim(0,tiempo_apogeo+5)
 muestra_tiempos(tiempos, plt)
 plt.plot(tiempos, masavuelo)
-plt.show()
+# plt.show()
 
 '''
 # GRAFICA 10. Trayectoria

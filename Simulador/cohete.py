@@ -102,6 +102,7 @@ class Cohete:
     def calc_CN(self):
       self.CN = 0
       for comp in self.componentes.values():
+        # print(comp.nombre, comp.CN)
         self.CN += comp.CN
 
     def cargar_tabla_Cd(self, tabla_Cd_fpath):
@@ -127,7 +128,7 @@ class Cohete:
     def calc_Cd(self, mach):
       return np.interp(mach, self.CdTable['mach'], self.CdTable['cd'])
 
-    def calc_empuje(self, t):
+    def calc_empuje_magn(self, t):
       if t > self.t_MECO:
         return 0
       else:
