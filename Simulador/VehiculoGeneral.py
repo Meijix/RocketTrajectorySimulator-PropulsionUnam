@@ -60,29 +60,25 @@ boattail_diam_int = 0.132
 avionica_masa = 1.8
 avionica_longitud = 0.21
 avionica_diam_ext = 0.14
-avionica_diam_int = 0
-#avionica_posicion = np.array([0.0, 0.0, 0.20])
+avionica_posicion = 0.20
 
 #10. Carga Util (CU)
 CU_masa = 4.3
 CU_longitud = 0.3
 CU_diam_ext = 0.14
-CU_diam_int = 0
-#CU_posicion = np.array([0.0, 0.0, 0.50])
+CU_posicion = 0.50
 
 #11. Droguechute
 drogue_masa = 0.6
 drogue_longitud = 0.17
 drogue_diam_ext = 0.14
-drogue_diam_int = 0
-#drogue_posicion = np.array([0.0, 0.0, 1.0])
+drogue_posicion = 1.0
 
 #12. Mainchute
 main_masa = 1.7
 main_longitud = 0.30
 main_diam_ext = 0.14
-main_diam_int = 0
-#main_posicion = np.array([0.0, 0.0, 1.4])
+main_posicion = 1.4
 
 #13. Aletas
 aletas_masa = 1.1
@@ -108,31 +104,31 @@ grano_diam_ext = 0.158
 grano_diam_int = 0.334
 #grano_posicion = np.array([0.0, 0.0, valvulas.bottom[2]])
 
-
 #Componentes externos
-nariz = Cono("Nariz", 0.8 , np.array([0.0, 0.0, 0.0]), 0.81, diam_ext, "ogiva")
-coples = Cilindro("Coples",1.5, np.array([0.0,0.0, nariz.bottom[2]]),0.176, diam_ext, diam_ext-espesor)
-tubo_recup = Cilindro("Tubo recuperación", 2.3, np.array([0.0, 0.0, coples.bottom[2]]), 0.92, diam_ext, diam_ext-espesor)
-transfer = Cilindro("Transferidor", 1, np.array([0.0, 0.0, tubo_recup.bottom[2]]), 0.25, diam_ext, diam_ext-espesor)
+nariz = Cono("Nariz", nariz_masa , np.array([0.0, 0.0, 0.0]), nariz_longitud , diam_ext, nariz_tipo)
+coples = Cilindro("Coples", coples_masa, np.array([0.0,0.0, nariz.bottom[2]]),coples_longitud, diam_ext, diam_ext-espesor)
+tubo_recup = Cilindro("Tubo recuperación", tubo_recup_masa, np.array([0.0, 0.0, coples.bottom[2]]), tubo_recup_longitud, diam_ext, diam_ext-espesor)
+transfer = Cilindro("Transferidor", transfer_masa, np.array([0.0, 0.0, tubo_recup.bottom[2]]), transfer_longitud, diam_ext, diam_ext-espesor)
 #tanquelleno = Cilindro("Tanquelleno", 22.0, np.array([0.0, 0.0, fuselaje.bottom[2]]), 1.33, diam_ext, 0)
-tanquevacio = Cilindro("Tanquevacio", 8.7, np.array([0.0, 0.0, transfer.bottom[2]]), 1.25, diam_ext, diam_ext-espesor)
+tanquevacio = Cilindro("Tanquevacio", tanquevacio_masa, np.array([0.0, 0.0, transfer.bottom[2]]), tanquevacio_longitud, diam_ext, diam_ext-espesor)
 #NOX
-valvulas = Cilindro("Valvulas", 2.4 , np.array([0.0, 0.0, tanquevacio.bottom[2]]), 0.167, diam_ext, diam_ext-espesor)
+valvulas = Cilindro("Valvulas", valvulas_masa , np.array([0.0, 0.0, tanquevacio.bottom[2]]), valvulas_longitud, diam_ext, diam_ext-espesor)
 #Grano
-CC = Cilindro("Camara de Combustión", 4.3, np.array([0.0, 0.0,valvulas.bottom[2]]),0.573,diam_ext, 0.102)
+CC = Cilindro("Camara de Combustión", CC_masa, np.array([0.0, 0.0,valvulas.bottom[2]]),CC_longitud,diam_ext, CC_diam_int)
 
-boattail = Boattail("Boattail", 0.251, np.array([0.0, 0.0, CC.bottom[2]]), 0.12, diam_ext, 0.132, espesor)
+boattail = Boattail("Boattail", boattail_masa, np.array([0.0, 0.0, CC.bottom[2]]), boattail_longitud, diam_ext, boattail_diam_int, espesor)
 
 #Componentes internos
-avionica = Cilindro("Aviónica", 1.8, np.array([0.0, 0.0, 0.20]), 0.21, 0.14, 0)
-CU = Cilindro("CU", 4.3, np.array([0.0, 0.0, 0.50]), 0.3, 0.14, 0)
-drogue = Cilindro("Drogue", 0.6, np.array([0.0, 0.0, 1.0]), 0.17, 0.14, 0)
-main = Cilindro("Main", 1.7, np.array([0.0, 0.0, 1.4]), 0.30, 0.14, 0)
-aletas= Aletas("Aletas", 1.1, np.array([0.0, 0.0, CC.bottom[2]]), diam_ext, 4, 0.11, 0.3, 0.1, 0.2, 25)
+avionica = Cilindro("Aviónica", avionica_masa, np.array([0.0, 0.0, avionica_posicion]), avionica_longitud, avionica_diam_ext, 0)
+CU = Cilindro("CU", CU_masa, np.array([0.0, 0.0, CU_posicion]), CU_longitud, CU_diam_ext, 0)
+drogue = Cilindro("Drogue", drogue_masa, np.array([0.0, 0.0, drogue_posicion]), drogue_longitud, drogue_diam_ext, 0)
+main = Cilindro("Main", main_masa, np.array([0.0, 0.0, main_posicion]), main_longitud, main_diam_ext, 0)
+
+aletas= Aletas("Aletas", aletas_masa, np.array([0.0, 0.0, CC.bottom[2]]), diam_ext, aletas_n, aletas_longitud, aletas_cuerda, aletas_altura, aletas_base, aletas_angulo)
 
 #Combustibles del cohete
-oxidante = Cilindro("Oxidante", 12.0, np.array([0.0, 0.0, transfer.bottom[2]]), 1.33, 0.1461, 0)
-grano = Cilindro("Grano", 4.0 , np.array([0.0, 0.0, valvulas.bottom[2]]), 0.505 , 0.158, 0.334)
+oxidante = Cilindro("Oxidante", oxidante_masa, np.array([0.0, 0.0, transfer.bottom[2]]), oxidante_longitud, oxidante_diam_ext, 0)
+grano = Cilindro("Grano", grano_masa , np.array([0.0, 0.0, valvulas.bottom[2]]), grano_longitud , grano_diam_ext, grano_diam_int)
 
 # Tablas de Cd, empuje y masa
 tabla_Cd_fpath = '../Archivos/cdmachXitle.csv'
