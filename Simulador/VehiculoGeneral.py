@@ -149,19 +149,20 @@ componentes = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup
 componentes_externos = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup, 'Transferidor de carga': transfer, 'tanquevacio': tanquevacio,
                'oxidante': oxidante, 'valvulas': valvulas, 'grano': grano, 'Cámara Combustión': CC, 'Boattail': boattail}
 
-Xitle = Cohete("Xitle", "hibrido", componentes, componentes_externos, tabla_Cd_fpath, tabla_empuje_fpath, tabla_masa_fpath, riel)
-Xitle.d_ext=diam_ext
+Vehiculo = Cohete("Xitle", "hibrido", componentes, componentes_externos, tabla_Cd_fpath, tabla_empuje_fpath, tabla_masa_fpath, riel)
+Vehiculo.d_ext=diam_ext
 #print(Xitle)
 
 if __name__ == "__main__":
     #NOTA: en los bottom de todos los componentes tambien se esta sumando la longitud a los ejes x y
     #print(boattail.bottom)
     print("\n Datos generales")
-    print("El centro de gravedad es:",Xitle.CG[2], "metros")
-    print("El centro de presión es:", Xitle.CP[2], "metros")
+    print("Nombre del cohete: ", Vehiculo.nombre)
+    print("El centro de gravedad es:",Vehiculo.CG[2], "metros")
+    print("El centro de presión es:", Vehiculo.CP[2], "metros")
     #print(Xitle.CN)
-    print("La longitud total de Xitle es", Xitle.longtotal, "[m]")
-    print("La masa inicial total es:",Xitle.masa, "kg")
-    print("El impulso total es:", Xitle.I_total, "N s")
-    print("El área transversal del cohete es:", Xitle.A, "m^2")
-    print("El diámetro exterior del cohete es:", Xitle.d_ext, "m")
+    print("La longitud total de Xitle es", Vehiculo.longtotal, "[m]")
+    print("La masa inicial total es:",Vehiculo.masa, "kg")
+    print("El impulso total es:", Vehiculo.I_total, "N s")
+    print("El área transversal del cohete es:", Vehiculo.A, "m^2")
+    print("El diámetro exterior del cohete es:", Vehiculo.d_ext, "m")
