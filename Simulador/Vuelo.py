@@ -211,6 +211,7 @@ class Vuelo:
       #Integracion = Euler(self.fun_derivs) ocupa dt=0.005
       Integracion = RungeKutta4(self.fun_derivs) #ocupa dt=0.1
       #Integracion = RKF45(self.fun_derivs)
+      
       #Integracion = Leapfrog(self.vehiculo.fun_derivs)
       ##########################################
       
@@ -234,7 +235,12 @@ class Vuelo:
 
         # -------------------------
         # Integracion numérica del estado actual
+        #el dt_new se usa para que el inetgrador actualize el paso de tiempo
         nuevo_estado = Integracion.step(t, estado, dt)
+        #nuevo_estado, dt_new = Integracion.step(t, estado, dt)
+        #print(dt_new,dt)
+        #dt = dt_new
+        #print("dt= ", dt)
 
         # Avanzar estado
         it += 1
