@@ -208,9 +208,9 @@ class Vuelo:
       it = 0
       #########################################
       #CAMBIO DE METODO DE INTEGRACIÓN
-      #Integracion = Euler(Xitle.fun_derivs)
-      Integracion = RungeKutta4(self.fun_derivs)
-      # Integracion = RKF45(self.vehiculo.fun_derivs)
+      #Integracion = Euler(self.fun_derivs) ocupa dt=0.005
+      Integracion = RungeKutta4(self.fun_derivs) #ocupa dt=0.1
+      #Integracion = RKF45(self.fun_derivs)
       #Integracion = Leapfrog(self.vehiculo.fun_derivs)
       ##########################################
       
@@ -352,7 +352,7 @@ class Vuelo:
         torcas.append(torca)
 
         #Indicar el avance en la simulacion
-        if it%1000==0:
+        if it%500==0:
           print(f"Iteracion {it}, t={t:.1f} s, altitud={altitud:.1f} m, vel vert={estado[5]:.1f}")
 
       return tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs

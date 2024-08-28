@@ -8,7 +8,7 @@ from Xitle import *
 from Vuelo import *
 from Viento import Viento2D
 
-input()
+#input()
 
 #quitar el paracaidas
 Xitle.parachute_added = False
@@ -25,7 +25,7 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 #estado=list(estado)
 #print(estado)
 #Parametros de la simulacion
-dt=0.01 #0.1 #[s]
+dt = 0.01 #0.1 #[s]
 t_max = 120 #[s]
 # t_max = 1200 #[s]
 # t_max = 5 #[s]

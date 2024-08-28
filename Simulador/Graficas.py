@@ -277,15 +277,15 @@ plt.figure(figsize=(18,4))
 plt.subplot(1, 2, 1)
 plt.plot(tiempos[:], CGs[:],label="CG")
 plt.plot(tiempos[:], CPs[:],label="CP")
-plt.plot(tiempos[:],estabilidad[:], label = "estabilidad")
+#plt.plot(tiempos[:],estabilidad[:], label = "estabilidad")
 plt.title("Posición axial del CG y del CP")
 plt.xlabel("Tiempo (s)")
 plt.ylabel("Posición axial (m)")
 muestra_tiempos(tiempos, plt)
 plt.legend()
-'''
+
 plt.subplot(1, 2, 2)
-plt.plot(tiempos[:], stab[:,2], color="C2",label="estabilidad")
+plt.plot(tiempos[:], estabilidad[:], color="C2",label="estabilidad")
 plt.title("Estabilidad (calibres)")
 #plt.xlim(0,tiempo_apogeo+10)
 plt.legend()
@@ -304,7 +304,7 @@ plt.legend()
 #plt.xlabel("Tiempo (s)")
 #vuelo1.muestra_tiempos()
 #plt.show()
-
+'''
 # GRAFICA 7. Theta, Velocidad y aceleración angular (derivada de theta)
 plt.figure(figsize=(16,5))
 
@@ -424,6 +424,7 @@ plt.show()
 fin = time.time()
 print(f"Tiempo graficando: {fin-inicio:.1f}s")
 
+'''
 #################\
 #ANIMACIONES
 #ANIMACION 1. Trayectoria
@@ -457,3 +458,4 @@ def animar_cohete():
 
     ani = animation.FuncAnimation(fig, update, frames=num_frames, interval=50, blit=True)
     plt.show()
+'''
