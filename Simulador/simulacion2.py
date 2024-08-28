@@ -39,7 +39,8 @@ import time
 inicio = time.time()
 
 print("Simulando...")
-viento_actual = Viento2D(vel_mean=10, vel_var=0.05)
+viento_actual = Viento2D(vel_mean=0, vel_var=0)
+viento_actual.actualizar_viento()
 #viento_actual = Viento2D(vel_mean=30, vel_var=0)
 #print(viento_actual)
 #print(viento_actual.vector)
@@ -114,9 +115,9 @@ datos_simulados.to_csv('datos_simulacion.csv', index=False)
 import json
 datos_a_guardar = {
     't_MECO': Xitle.t_MECO,
-    'tiempo_salida_riel': vuelo1.tiempo_salida_riel,
-    'tiempo_apogeo': vuelo1.tiempo_apogeo,
-    'tiempo_impacto': vuelo1.tiempo_impacto,
+    'tiempo_salida_riel': vuelo_paracaidas.tiempo_salida_riel,
+    'tiempo_apogeo': vuelo_paracaidas.tiempo_apogeo,
+    'tiempo_impacto': vuelo_paracaidas.tiempo_impacto,
     'max_altitude': max_altitude,
     'max_speed': max_speed,
     'max_acceleration_linear': np.max(accels),

@@ -209,10 +209,9 @@ class Vuelo:
       #########################################
       #CAMBIO DE METODO DE INTEGRACIÓN
       #Integracion = Euler(self.fun_derivs) ocupa dt=0.005
-      Integracion = RungeKutta4(self.fun_derivs) #ocupa dt=0.1
+      #Integracion = RungeKutta4(self.fun_derivs) #ocupa dt=0.1
       #Integracion = RKF45(self.fun_derivs)
-      
-      #Integracion = Leapfrog(self.vehiculo.fun_derivs)
+      Integracion = RungeKutta2(self.fun_derivs)
       ##########################################
       
       sim=[estado] #lista de estados de vuelo
@@ -275,6 +274,7 @@ class Vuelo:
         ultima_altitud = altitud
 
        #FASE3.RECUPERACIÓN
+       #FALTA IMPLEMENTAR RECUPERACION DE DOS ETAPAS JE
         #activar el paracaidas en el apogeo
         if self.tiempo_apogeo is not None and self.vehiculo.parachute_added == True:
           #print(self.vehiculo.parachute_active1,"antes")
@@ -303,25 +303,20 @@ class Vuelo:
 
         #Guardar magnitudes y direcciones del viento
         viento_vuelo_vecs.append(v_viento)
-        #viento_vuelo_mags.append(self.viento.magnitud)
         viento_vuelo_mags.append(self.viento.magnitud)
-        #viento_vuelo_dirs.append(self.viento.direccion)
         viento_vuelo_dirs.append(self.viento.direccion)
        
         #Agregar nueva masa a la lista
         masavuelo.append(self.vehiculo.masa)    
 
-        #self.vehiculo.parachute_added = False
-
         #CALCULAR CANTIDADES SECUNDARIAS
         # Desempaquetar vector de estado      
         pos = nuevo_estado[0:3]
         vel = nuevo_estado[3:6]
-        #velocidadvector.append(vel)
         theta = nuevo_estado[6]   # En radianes internamente siempre
         omega = nuevo_estado[7] #omeg a= theta dot
         r = np.linalg.norm(pos)
-        v = np.linalg.norm(vel)
+        #v = np.linalg.norm(vel)
         z = pos[2] #Coordenada z
 
         vrel = np.array(vel) - v_viento
@@ -334,7 +329,7 @@ class Vuelo:
 
         #Guardar Fuerzas:Empuje,Arrastre y Normal
         Tvec = self.calc_empuje(t, theta)
-        Dmag, Nmag, Cd, mach = self.calc_arrastre_normal(pos, vrel, alpha)
+        _, _, Cd, mach = self.calc_arrastre_normal(pos, vrel, alpha)
         Dvec, Nvec = self.calc_aero(pos, vrel, theta)
         Tvecs.append(Tvec)
         Dvecs.append(Dvec)
@@ -362,12 +357,3 @@ class Vuelo:
           print(f"Iteracion {it}, t={t:.1f} s, altitud={altitud:.1f} m, vel vert={estado[5]:.1f}")
 
       return tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs
-'''
-    def muestra_tiempos(self):
-      plt.axvline(self.tiempo_salida_riel, color="orange", ls="--")
-      plt.axvline(self.vehiculo.t_MECO, color="darkred", ls="--")
-      if self.tiempo_apogeo is not None:
-        plt.axvline(self.tiempo_apogeo, color="navy", ls="--")
-      if self.tiempo_impacto is not None:
-        plt.axvline(self.tiempo_impacto, color="0.2", ls="--")
-'''
