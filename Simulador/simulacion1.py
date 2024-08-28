@@ -149,6 +149,7 @@ datos_a_guardar = {
     'max_speed': max_speed,
     'max_acceleration_linear': np.max(accels),
     'max_acceleration_angular': np.max(accangs)
+    #'velocidad de impacto': velocidades[-1]
 }
 
 with open('datos_simulacion.json', 'w') as f:

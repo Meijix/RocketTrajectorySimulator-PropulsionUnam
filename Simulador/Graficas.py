@@ -64,7 +64,7 @@ Machs = datos_simulacion['Machs'].values
 Tvecs = np.column_stack((Txs, Tys, Tzs))
 Dvecs = np.column_stack((Dxs, Dys, Dzs))
 Nvecs = np.column_stack((Nxs, Nys, Nzs))
-print(Tvecs)
+#print(Tvecs)
 
 CGs = np.array(CGs)
 CPs = np.array(CPs)
