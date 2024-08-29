@@ -103,61 +103,61 @@ import time
 inicio = time.time()
 # GRAFICAS
 ###########################
-if False:
-    #VIENTO
-    #Magnitudes en el tiempo
-    plt.plot(tiempos, viento_vuelo_mags)
-    plt.xlabel('Tiempo (s)')
-    plt.ylabel('Magnitud del viento (m/s)')
-    plt.title('Magnitud del viento en el tiempo')
-    muestra_tiempos(tiempos, plt)
-    plt.show()
 
-    #Histograma de las magnitudes
-    plt.hist(viento_vuelo_mags, bins=20)
-    plt.xlabel('Magnitud del viento (m/s)')
-    plt.ylabel('Frecuencia')
-    plt.title('Histograma de la magnitud del viento')
-    plt.show()
+#VIENTO
+#Magnitudes en el tiempo
+plt.plot(tiempos, viento_vuelo_mags)
+plt.xlabel('Tiempo (s)')
+plt.ylabel('Magnitud del viento (m/s)')
+plt.title('Magnitud del viento en el tiempo')
+muestra_tiempos(tiempos, plt)
+plt.show()
 
-    #Direcciones en el tiempo
-    plt.plot(tiempos,viento_vuelo_dirs)
-    plt.xlabel('Tiempo (s)')
-    plt.ylabel('Dirección del viento (grados)')
-    plt.title('Dirección del viento en el tiempo')
-    muestra_tiempos(tiempos, plt)
-    plt.show()
+#Histograma de las magnitudes
+plt.hist(viento_vuelo_mags, bins=20)
+plt.xlabel('Magnitud del viento (m/s)')
+plt.ylabel('Frecuencia')
+plt.title('Histograma de la magnitud del viento')
+plt.show()
 
-    #Histograma de las direcciones
-    plt.hist(viento_vuelo_dirs, bins=20)
-    plt.xlabel('Dirección del viento (grados)')
-    plt.ylabel('Frecuencia')
-    plt.title('Histograma de la dirección del viento')
-    plt.show()
+#Direcciones en el tiempo
+plt.plot(tiempos,viento_vuelo_dirs)
+plt.xlabel('Tiempo (s)')
+plt.ylabel('Dirección del viento (grados)')
+plt.title('Dirección del viento en el tiempo')
+muestra_tiempos(tiempos, plt)
+plt.show()
 
-    #Rosa de los vientos
-    plt.figure(figsize=(8, 6))
-    ax = plt.subplot(111, polar=True)
-    ax.set_theta_zero_location("N")
-    ax.set_theta_direction(-1)
-    bars = ax.bar(np.deg2rad(viento_vuelo_dirs), viento_vuelo_mags, width=0.5, bottom=0.0)
-    plt.title('Rosa de los vientos')
-    ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
-    plt.show()
+#Histograma de las direcciones
+plt.hist(viento_vuelo_dirs, bins=20)
+plt.xlabel('Dirección del viento (grados)')
+plt.ylabel('Frecuencia')
+plt.title('Histograma de la dirección del viento')
+plt.show()
 
-    #Vectores viento en el tiempo
-    #Falta corregir esta grafica
-    # Vectores viento en el tiempo
-    fig, ax = plt.subplots()
-    for i in range(len(tiempos)):
-        ax.arrow(0, 0, wind_xs[i], wind_zs[i], head_width=0.5, head_length=0.5, color='pink', zorder=10, alpha=0.3)
+#Rosa de los vientos
+plt.figure(figsize=(8, 6))
+ax = plt.subplot(111, polar=True)
+ax.set_theta_zero_location("N")
+ax.set_theta_direction(-1)
+bars = ax.bar(np.deg2rad(viento_vuelo_dirs), viento_vuelo_mags, width=0.5, bottom=0.0)
+plt.title('Rosa de los vientos')
+ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
+plt.show()
 
-    ax.set_xlim([-15, 15])
-    ax.set_ylim([-15, 15])
-    ax.set_xlabel('x (m)')
-    ax.set_ylabel('z (m)')
-    ax.set_title('Vector de viento')
-    plt.show()
+#Vectores viento en el tiempo
+#Falta corregir esta grafica
+# Vectores viento en el tiempo
+fig, ax = plt.subplots()
+for i in range(len(tiempos)):
+    ax.arrow(0, 0, wind_xs[i], wind_zs[i], head_width=0.5, head_length=0.5, color='pink', zorder=10, alpha=0.3)
+
+ax.set_xlim([-15, 15])
+ax.set_ylim([-15, 15])
+ax.set_xlabel('x (m)')
+ax.set_ylabel('z (m)')
+ax.set_title('Vector de viento')
+plt.show()
 
 ###########################
 #####GRAFICAS DEL COHETE

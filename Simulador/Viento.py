@@ -17,10 +17,11 @@ class Viento2D:
     def actualizar_viento(self):
         self.magnitud = random.uniform(self.vel_mean - self.vel_var, self.vel_mean + self.vel_var)
         self.direccion = random.uniform(-45, 45)
+        #self.angulo = random.uniform(0,180)
         #Elegir hacia que lado sopla con 0.5 de probabilidad
         if (random.random() >= 0.5):
           self.direccion *= -1
-        self.vector = self.magnitud * np.array([np.cos(np.deg2rad(self.direccion)), 0, np.sin(np.deg2rad(self.direccion))])
+        self.vector = self.magnitud * np.array([np.cos(np.deg2rad(self.direccion)),0, np.sin(np.deg2rad(self.direccion))])
 
     def __repr__(self):
         return f"Viento(magnitud={self.magnitud}, direccion={self.direccion})"
