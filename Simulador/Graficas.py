@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import json
 
 from angulos import *
 from condiciones_init import *
@@ -12,6 +13,7 @@ from dibujarCohete import *
 #vuelo_graficar=vuelo1
 #vuelo_graficar=vuelo_paracaidas
 
+#Funciones que extraen datos de los archivos 
 def extraer_datoscsv(datos_simulacion):
     # Convertir los datos a arrays de numpy
     tiempos = datos_simulacion['tiempos'].values
@@ -83,28 +85,6 @@ def extraer_datosjson(datos):
     max_acceleration_angular = datos["max_acceleration_angular"]
     return (diam_ext, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto, 
             max_altitude, max_speed, max_acceleration_linear, max_acceleration_angular)
-
-
-###########################################################333
-# Leer los datos de la simulación desde el archivo CSV
-datos_simulacion = pd.read_csv('datos_simulacion.csv')
-# Extarer los datos del csv
-(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo,estabilidad,
-viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, wind_xs, wind_ys, wind_zs,
-Dmags, Nmags, Tmags, Dxs, Dys, Dzs, Nxs, Nys, Nzs, Txs, Tys, Tzs, Tvecs, Dvecs, Nvecs,
-accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs) = extraer_datoscsv(datos_simulacion)
-
-#########################################
-# Leer los datos de la simulación desde el archivo JSON
-import json
-
-with open('datos_simulacion.json', 'r') as f:
-    datos = json.load(f)
-# Extraer los datos del json
-(d_ext, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto,
-    max_altitude, max_speed, max_acceleration_linear, max_acceleration_angular) = extraer_datosjson(datos)
-
-
 ##########################################
 # Funcion para graficar los tiempos importantes
 def muestra_tiempos(tiempos, ax):
@@ -117,12 +97,31 @@ def muestra_tiempos(tiempos, ax):
     #if tiempo_despliegue is not None:
         #ax.axvline(tiempo_despliegue, color="green", ls="--")
     ax.legend()
+###############################################
+
+
+###############################################
+# Leer los datos de la simulación desde el archivo CSV
+datos_simulacion = pd.read_csv('datos_simulacion.csv')
+# Extarer los datos del csv
+(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo,estabilidad,
+viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, wind_xs, wind_ys, wind_zs,
+Dmags, Nmags, Tmags, Dxs, Dys, Dzs, Nxs, Nys, Nzs, Txs, Tys, Tzs, Tvecs, Dvecs, Nvecs,
+accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs) = extraer_datoscsv(datos_simulacion)
+
 #########################################
+# Leer los datos de la simulación desde el archivo JSON
+with open('datos_simulacion.json', 'r') as f:
+    datos = json.load(f)
+# Extraer los datos del json
+(d_ext, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto,
+    max_altitude, max_speed, max_acceleration_linear, max_acceleration_angular) = extraer_datosjson(datos)
+
+############################################
 import time 
 inicio = time.time()
 # GRAFICAS
-###########################
-
+############################################
 #VIENTO
 #Magnitudes en el tiempo
 plt.plot(tiempos, viento_vuelo_mags)
