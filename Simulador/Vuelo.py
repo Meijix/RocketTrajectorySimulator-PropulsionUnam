@@ -253,7 +253,8 @@ class Vuelo:
         self.vehiculo.actualizar_masa(t)
 
         # Actualizar viento_actual
-        self.viento.actualizar_viento()
+        self.viento.actualizar_viento2D()
+        #self.viento.actualizar_viento3D()
         #print("Nuevos vientos", self.viento)
         v_viento = self.viento.vector
 
