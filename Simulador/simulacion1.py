@@ -26,7 +26,7 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 #print(estado)
 #Parametros de la simulacion
 dt = 0.01 #0.1 #[s]
-t_max = 120 #[s]
+t_max = 800 #[s]
 # t_max = 1200 #[s]
 # t_max = 5 #[s]
 
@@ -37,7 +37,7 @@ import time
 inicio = time.time()
 print("Simulando...")
 
-viento_actual = Viento2D(vel_mean=30, vel_var=0)
+viento_actual = Viento2D(vel_mean=10, vel_var=0)
 viento_actual.actualizar_viento2D()
 #viento_actual.actualizar_viento3D()
 #viento_actual = Viento2D(vel_mean=100, vel_var=0)

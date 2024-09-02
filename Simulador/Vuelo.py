@@ -209,9 +209,9 @@ class Vuelo:
       #########################################
       #CAMBIO DE METODO DE INTEGRACIÓN
       #Integracion = Euler(self.fun_derivs) ocupa dt=0.005
-      #Integracion = RungeKutta4(self.fun_derivs) #ocupa dt=0.1
+      Integracion = RungeKutta4(self.fun_derivs) #ocupa dt=0.1
       #Integracion = RKF45(self.fun_derivs)
-      Integracion = RungeKutta2(self.fun_derivs)
+      #Integracion = RungeKutta2(self.fun_derivs)
       ##########################################
       
       sim=[estado] #lista de estados de vuelo

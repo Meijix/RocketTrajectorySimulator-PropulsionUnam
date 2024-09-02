@@ -134,7 +134,7 @@ plt.xlabel('Dirección del viento (grados)')
 plt.ylabel('Frecuencia')
 plt.title('Histograma de la dirección del viento')
 plt.show()
-
+'''
 #Rosa de los vientos
 plt.figure(figsize=(8, 6))
 ax = plt.subplot(111, polar=True)
@@ -158,7 +158,7 @@ ax.set_xlabel('x (m)')
 ax.set_ylabel('z (m)')
 ax.set_title('Vector de viento')
 plt.show()
-
+'''
 ###########################
 #####GRAFICAS DEL COHETE
 ############################
