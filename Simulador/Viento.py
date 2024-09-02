@@ -10,21 +10,26 @@ class Viento2D:
     def __init__(self, vel_mean=10, vel_var=2):
         self.vel_mean = vel_mean
         self.vel_var = vel_var
+        self.magnitud = None
+        self.direccion = None
+        self.giro = None
+        self.vector = None
         ###################
+    def random_values(self):
         self.magnitud = random.uniform(self.vel_mean - self.vel_var, self.vel_mean + self.vel_var)
         self.direccion = random.uniform(-45, 45) #kappa
+        self.giro = random.uniform(0,180) #phi
         #self.angulo = random.uniform(0,180)
         #Elegir hacia que lado sopla con 0.5 de probabilidad
         if (random.random() >= 0.5):
           self.direccion *= -1
-        self.giro = random.uniform(0,360) #phi
-        ###################
-        self.vector = None
 
     def actualizar_viento2D(self):
+        self.random_values()
         self.vector = self.magnitud * np.array([np.cos(np.deg2rad(self.direccion)),0, np.sin(np.deg2rad(self.direccion))])
 
     def actualizar_viento3D(self):
+        self.random_values()
         self.vector = self.magnitud * np.array([np.cos(self.giro)*np.cos(self.direccion), np.sin(self.giro)*np.cos(self.direccion) , np.sin(self.direccion)])
 
     def __repr__(self):
@@ -78,6 +83,11 @@ class Rafaga1Coseno(Rafaga):
 if __name__ == "__main__":
     #Creacion del viento actual de prueba
     viento = Viento2D(vel_mean=10, vel_var=0.05)
+    #viento.actualizar_viento2D()
+    viento.actualizar_viento3D()
+    print(viento)
+    print(viento.vector)  
+    viento.actualizar_viento3D()
     print(viento)
     print(viento.vector)  
         
@@ -103,6 +113,8 @@ if __name__ == "__main__":
 
     # Show the plot
     plt.show()
+
+    '''
 
     ############################
     # Ejemplo de uso de rafagas
@@ -186,5 +198,6 @@ if __name__ == "__main__":
     plt.show()
     #se debe apagar la rafaga cuando no este activada y regresar al viento normal
     #agregar boolean de rafaga_activa
+    '''
 
 

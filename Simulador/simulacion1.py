@@ -37,7 +37,7 @@ import time
 inicio = time.time()
 print("Simulando...")
 
-viento_actual = Viento2D(vel_mean=10, vel_var=0)
+viento_actual = Viento2D(vel_mean=30, vel_var=5)
 #viento_actual.actualizar_viento2D()
 viento_actual.actualizar_viento3D()
 #viento_actual = Viento2D(vel_mean=100, vel_var=0)
@@ -46,7 +46,7 @@ print("Viento actual",viento_actual.vector)
 
 vuelo1 = Vuelo(Xitle, atmosfera_actual, viento_actual)
 tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo1.simular_vuelo(estado,t_max, dt)
-
+#print(viento_vuelo_mags)
 #Medir tiempo que tarda en correr la simulacion
 fin = time.time()
 print(f"Tiempo de ejecución: {fin-inicio:.1f}s")
