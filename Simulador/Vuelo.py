@@ -160,6 +160,7 @@ class Vuelo:
 
       # Parte angular
       r = np.linalg.norm(pos)
+      #esto esta bien?
       if r <= self.vehiculo.riel.longitud:
         omega = 0
         accang = 0
@@ -321,6 +322,7 @@ class Vuelo:
         z = pos[2] #Coordenada z
 
         vrel = np.array(vel) - v_viento
+        #print("viento relativo: ", vrel)
 
         #Guardar Angulos
         gamma = math.atan2(vel[2], vel[0])
@@ -340,6 +342,8 @@ class Vuelo:
 
         # Gravedad
         grav = calc_gravedad(z)
+        #Cambiar la direccion de la gravedad cuando esta en el riel
+        #if r< #longitud del riel
         Gvec = np.array([0,0,-grav])
 
         # Aceleración resultante

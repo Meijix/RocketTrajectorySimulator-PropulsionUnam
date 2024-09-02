@@ -120,6 +120,8 @@ with open('datos_simulacion.json', 'r') as f:
 ############################################
 import time 
 inicio = time.time()
+#print("Posiciones (x,y,z):",posiciones[1,:])
+print("Graficando...")
 # GRAFICAS
 ############################################
 #VIENTO

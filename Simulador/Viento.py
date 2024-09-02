@@ -16,8 +16,9 @@ class Viento2D:
         self.vector = None
         ###################
     def random_values(self):
-        self.magnitud = random.uniform(self.vel_mean - self.vel_var, self.vel_mean + self.vel_var)
+        self.magnitud = random.normal(self.vel_mean, self.vel_var)
         self.direccion = random.uniform(-45, 45) #kappa
+        #self.direccion = random.rand(0,180)
         self.giro = random.uniform(0,180) #phi
         #self.angulo = random.uniform(0,180)
         #Elegir hacia que lado sopla con 0.5 de probabilidad
