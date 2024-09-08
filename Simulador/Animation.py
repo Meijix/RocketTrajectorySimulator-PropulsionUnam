@@ -70,7 +70,7 @@ def update(frame):
     ax3d.set_zlabel("Altura (m)")
 
     # Plot the trajectory
-    ax3d.plot(x[:frame], y[:frame], z[:frame], 'b')
+    ax3d.plot(x[:t[frame]], y[:t[frame]], z[:t[frame]], 'b')
     #ax3d.plot(posiciones[:frame, 0], posiciones[:frame, 1], posiciones[:frame, 2])
     # Plot the launch and impact points with different colors
     ax3d.scatter(launch_point[0], launch_point[1], launch_point[2], c='blue', label='Punto de lanzamiento')
@@ -86,20 +86,20 @@ def update(frame):
     #ax3d.plot(circle_x, circle_y, 0, color='gray', linestyle='--', label='1000 m radio de seguridad')
 
   
-    ax3d.scatter(x[frame], y[frame], z[frame], 'g', size= 20)
+    ax3d.scatter(x[t[frame]], y[t[frame]], z[t[frame]], 'g', size= 20)
     ax3d.legend()
 
     ax2d.clear()
     ax2d.set_xlim([0, 80])
     ax2d.set_ylim([-10, 8000])
     #ax2d.plot(t[:frame], z[:frame], 'b-')
-    ax2d.plot(t[:],x[:], 'purple')
+    ax2d.plot(t,x, 'g')
     #ax2d.scatter(t[frame], z[frame], 'r')
 
     return ax3d, ax2d
 
 # Crear la animación
-animation = FuncAnimation(fig, update, frames=len(t), interval=1)
+animation = FuncAnimation(fig, update, frames=len(t), interval=5)
 
 plt.show()
 plt.savefig("TrayectoriaAnimada.gif")
