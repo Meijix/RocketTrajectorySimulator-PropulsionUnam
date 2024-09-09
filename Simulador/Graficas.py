@@ -5,7 +5,7 @@ import pandas as pd
 import json
 
 from angulos import *
-from condiciones_init import *
+#from condiciones_init import *
 from dibujarCohete import *
 from funciones import *
 
@@ -25,7 +25,7 @@ def muestra_tiempos(tiempos, ax):
         ax.axvline(tiempo_impacto, color="0.2", ls="--")
     #if tiempo_despliegue is not None:
         #ax.axvline(tiempo_despliegue, color="green", ls="--")
-    ax.legend()
+    #ax.legend()
 ###############################################
 
 
@@ -55,45 +55,50 @@ print("Graficando...")
 ############################################
 #VIENTO
 #Magnitudes en el tiempo
+plt.figure(figsize=(8, 6))
 plt.plot(tiempos, viento_vuelo_mags)
 plt.xlabel('Tiempo (s)')
 plt.ylabel('Magnitud del viento (m/s)')
 plt.title('Magnitud del viento en el tiempo')
 muestra_tiempos(tiempos, plt)
-plt.show()
+#plt.show()
 
 #Histograma de las magnitudes
+plt.figure(figsize=(8, 6))
 plt.hist(viento_vuelo_mags, bins=20)
 plt.xlabel('Magnitud del viento (m/s)')
 plt.ylabel('Frecuencia')
 plt.title('Histograma de la magnitud del viento')
-plt.show()
+#plt.show()
 
 #Direcciones en el tiempo
-plt.plot(tiempos,viento_vuelo_dirs)
+plt.figure(figsize=(8, 6))
+plt.plot(tiempos, viento_vuelo_dirs)
 plt.xlabel('Tiempo (s)')
 plt.ylabel('Dirección del viento (grados)')
 plt.title('Dirección del viento en el tiempo')
 muestra_tiempos(tiempos, plt)
-plt.show()
+#plt.show()
 
 #Histograma de las direcciones
+plt.figure(figsize=(8, 6))
 plt.hist(viento_vuelo_dirs, bins=20)
 plt.xlabel('Dirección del viento (grados)')
 plt.ylabel('Frecuencia')
 plt.title('Histograma de la dirección del viento')
-plt.show()
-'''
-#Rosa de los vientos
-plt.figure(figsize=(8, 6))
-ax = plt.subplot(111, polar=True)
-ax.set_theta_zero_location("N")
-ax.set_theta_direction(-1)
-bars = ax.bar(np.deg2rad(viento_vuelo_dirs), viento_vuelo_mags, width=0.5, bottom=0.0)
-plt.title('Rosa de los vientos')
-ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
-plt.show()
+#plt.show()
 
+#Rosa de los vientos
+#plt.figure(figsize=(8, 6))
+#ax = plt.subplot(111, polar=True)
+#ax.set_theta_zero_location("N")
+#ax.set_theta_direction(-1)
+#bars = ax.bar(np.deg2rad(viento_vuelo_dirs), viento_vuelo_mags, width=0.5, bottom=0.0)
+#plt.title('Rosa de los vientos')
+#ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
+#plt.show()
+
+'''
 #Vectores viento en el tiempo
 #Falta corregir esta grafica
 # Vectores viento en el tiempo
@@ -119,7 +124,7 @@ plt.plot(posiciones[:, 0], posiciones[:, 2], color='purple')
 plt.gca().set_aspect("equal")
 
 # Dibujar el cohete cada x segundos
-x = 1
+x = 10
 x = x * 100
 
 for i in range(0, len(tiempos), x):
@@ -161,7 +166,7 @@ plt.title("Comportamiento angular en el tiempo")
 plt.xlabel("Tiempo (s)")
 plt.ylabel("Ángulo (grados)")
 plt.plot(tiempos[:], nice_angle(thetas), label="Theta")
-plt.plot(tiempos[:], nice_angle(omegas), label="Omega",alpha=0.5)
+plt.plot(tiempos[:], nice_angle(omegas), label="Omega", alpha=0.5)
 muestra_tiempos(tiempos, plt)
 plt.axhline(riel.angulo, ls="--", color="lightgray")
 plt.axhline(-90, ls="--", color="lightgray")
@@ -238,22 +243,8 @@ plt.plot(tiempos[:], estabilidad[:], color="C2",label="estabilidad")
 plt.title("Estabilidad (calibres)")
 #plt.xlim(0,tiempo_apogeo+10)
 plt.legend()
-'''
-# plt.show()
+plt.show()
 
-# Componentes del brazo de palanca
-#palancas = np.array(palancas)
-#plt.plot(tiempos[1:], palancas[:,0], label="x")
-#plt.plot(tiempos[1:], palancas[:,1], label="y")
-#plt.plot(tiempos[1:], palancas[:,2], label="z")
-# plt.plot(tiempo[1:], list(np.linalg.norm(p) for p in palancas))
-#plt.xlim(0,vuelo1.tiempo_apogeo+10)
-#plt.legend()
-#plt.title("Componentes del brazo de palanca")
-#plt.xlabel("Tiempo (s)")
-#vuelo1.muestra_tiempos()
-#plt.show()
-'''
 # GRAFICA 7. Theta, Velocidad y aceleración angular (derivada de theta)
 plt.figure(figsize=(16,5))
 
@@ -276,18 +267,17 @@ plt.plot(tiempos[:], nice_angle(accangs))
 muestra_tiempos(tiempos, plt)
 plt.title("Aceleración angular")
 
-'''
 plt.subplot(1, 4, 4)
-palancas = np.array(palancas)
-plt.plot(tiempos[:], palancas[:,0],label= "comp x")
-plt.plot(tiempos[:], palancas[:,1],label="comp y")
-plt.plot(tiempos[:], palancas[:,2], label = "comp z")
+plt.plot(tiempos[:],)
+#plt.plot(tiempos[:], palancas[:,0],label= "comp x")
+#plt.plot(tiempos[:], palancas[:,1],label="comp y")
+#plt.plot(tiempos[:], palancas[:,2], label = "comp z")
 plt.title("Componentes del brazo de momento")
 plt.xlim(0,tiempo_apogeo+10)
 muestra_tiempos(tiempos, plt)
-plt.legend()
-plt.show()
-'''
+#plt.legend()
+#plt.show()
+
 
 #GRAFICA 8. Angulos
 plt.figure(figsize=(14,4))

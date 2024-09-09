@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
+from Xitle import *
 
 def dibujar_cohete(x, y, theta, tamaño):
   theta = theta-90
@@ -121,6 +121,6 @@ def dibujar_cohete(x, y, theta, tamaño):
 if __name__ == "__main__":
     # Dibujar un cohete
     #dibujar_cohete(0, 0, 0, 5)
-    dibujar_cohete(0, 0, 90, 5)
+    dibujar_cohete(0, 0, 45, 5)
     plt.gca().set_aspect("equal")
     plt.show()
