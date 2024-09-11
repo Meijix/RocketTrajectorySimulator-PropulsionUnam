@@ -88,15 +88,22 @@ t_max = 80 #[s]
 
 #Solucion analitica
 Ts = np.linspace(0,t_max, 100)
-pos_analitica=[estado[0:3]]
-vel_analitica=[estado[3:5]]
+pos_analitica_x = []
+pos_analitica_y = []
+pos_analitica_z = []
+vel_analitica_x = []
+vel_analitica_y = []
+vel_analitica_z = []
 
 for t in Ts:
-    pos, vel = sol_analitica_gravedad_masa_cte(t,estado)
-    pos_analitica.append(pos)
-    vel_analitica.append(vel)
+    pos, vel = sol_analitica_gravedad_masa_cte(t, estado)
+    pos_analitica_x.append(pos[0])
+    pos_analitica_y.append(pos[1])
+    pos_analitica_z.append(pos[2])
+    vel_analitica_x.append(vel[0])
+    vel_analitica_y.append(vel[1])
+    vel_analitica_z.append(vel[2])
 
-print(pos_analitica[0])
 
 #Simulacion
 tiempos, simulacion = simular_dinamica(estado, t_max, dt)
@@ -106,9 +113,9 @@ plt.figure(figsize=(8, 6))
 plt.plot(tiempos, [sim[0] for sim in simulacion], label='x(t)')
 plt.plot(tiempos, [sim[1] for sim in simulacion], label='y(t)')
 plt.plot(tiempos, [sim[2] for sim in simulacion], label='Altura [m] z(t)')
-plt.plot(Ts, pos_analitica[0], label='x(t) analitica', linestyle='--')
-plt.plot(Ts, pos_analitica[1], label='y(t) analitica', linestyle='--')
-plt.plot(Ts, pos_analitica[2], label='z(t) analitica', linestyle='--')
+plt.plot(Ts, pos_analitica_x, label='x(t) analitica', linestyle='--')
+plt.plot(Ts, pos_analitica_y, label='y(t) analitica', linestyle='--')
+plt.plot(Ts, pos_analitica_z, label='z(t) analitica', linestyle='--')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Posicion [m]')
 plt.legend()
