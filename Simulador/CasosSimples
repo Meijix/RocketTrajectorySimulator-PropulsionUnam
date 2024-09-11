@@ -4,28 +4,34 @@ import numpy as np
 import matplotlib.pyplot as plt
 #from scipy.integrate import odeint
 
-from Simulador.Integradores import *
+from Integradores import *
 
 g=9.81 #Aceleracion de gravedad cte
 
 #Caso 1: Gravedad y masa cte
 #no aplica parte angular
-def der_gravedad_masa_cte( t, state):
 
-    pos = state[0:3]
+#no depende de t porque nada es variable
+def der_gravedad_masa_cte(t, state):
+
     vel = state[3:6]
-
-    # r = np.linalg.norm(pos)
-    # v = np.linalg.norm(vel)
-    z = pos[2] #Coordenada z
-
-    accel = np.array([0,0,-g])
-    derivs = np.concatenate((vel, accel))
+    gravedad = np.array([0,0,-g])
+    derivs = np.concatenate((vel, gravedad))
     #print(derivs)
 
     return derivs
 
-def simular_vuelo(estado, t_max, dt):
+def sol_analitica_gravedad_masa_cte(t,state):
+    pos = state[0:3]
+    vel = state[3:6]
+
+    gravedad = np.array([0,0,-g])
+    nueva_pos = pos + vel * t - 0.5 * gravedad * (t **2)
+    nueva_vel = vel -gravedad * t
+
+    return nueva_pos, nueva_vel
+
+def simular_dinamica(estado, t_max, dt):
     #print(estado)
     t = 0.0
     it = 0
@@ -68,13 +74,38 @@ def simular_vuelo(estado, t_max, dt):
 #Solucion de ese caso
 # Estado inicial
 x0, y0, z0 = 0, 0, 0
-vx0, vy0, vz0 = 0, 0, 0
+vx0, vy0, vz0 = 80, 20, 50
+
+#esto donde lo meto?
+m = 1.0 #masa cte
 
 estado=np.array([x0, y0, z0, vx0, vy0, vz0])
 #print(estado)
 
 #Parametros de la simulacion
-dt = 0.01 #0.1 #[s]
-t_max = 800 #[s]
+dt = 0.1 #0.1 #[s]
+t_max = 80 #[s]
 
+Ts = np.linspace(0,t_max, 100)
+
+# ...
+
+#Solucion analitica
+sol_analitica = [(sol_analitica_gravedad_masa_cte(t, estado)[0], sol_analitica_gravedad_masa_cte(t, estado)[1]) for t in Ts]
+print("Solucion analitica:",sol_analitica)
+#Simulacion
+tiempos, simulacion = simular_dinamica(estado, t_max, dt)
+
+#Graficar
+plt.figure(figsize=(8, 6))
+plt.plot(tiempos, [sim[0] for sim in simulacion], label='x(t)')
+plt.plot(tiempos, [sim[1] for sim in simulacion], label='y(t)')
+plt.plot(tiempos, [sim[2] for sim in simulacion], label='Altura [m] z(t)')
+
+plt.plot(tiempos, [sim[5] for sim in simulacion], label='Velocidad vertical [m/s]')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Altura [m] / Velocidad [m/s]')
+plt.legend()
+plt.show()
+##############################################################################
 #Caso 2: Gravedad y masa variable
