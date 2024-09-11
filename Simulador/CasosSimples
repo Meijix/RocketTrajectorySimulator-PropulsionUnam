@@ -76,7 +76,7 @@ def simular_dinamica(estado, t_max, dt):
 x0, y0, z0 = 0, 0, 0
 vx0, vy0, vz0 = 80, 20, 50
 
-#esto donde lo meto?
+#no afecta la masa la dinamica
 m = 1.0 #masa cte
 
 estado=np.array([x0, y0, z0, vx0, vy0, vz0])
@@ -86,13 +86,18 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0])
 dt = 0.1 #0.1 #[s]
 t_max = 80 #[s]
 
-Ts = np.linspace(0,t_max, 100)
-
-# ...
-
 #Solucion analitica
-sol_analitica = [(sol_analitica_gravedad_masa_cte(t, estado)[0], sol_analitica_gravedad_masa_cte(t, estado)[1]) for t in Ts]
-print("Solucion analitica:",sol_analitica)
+Ts = np.linspace(0,t_max, 100)
+pos_analitica=[estado[0:3]]
+vel_analitica=[estado[3:5]]
+
+for t in Ts:
+    pos, vel = sol_analitica_gravedad_masa_cte(t,estado)
+    pos_analitica.append(pos)
+    vel_analitica.append(vel)
+
+print(pos_analitica[0])
+
 #Simulacion
 tiempos, simulacion = simular_dinamica(estado, t_max, dt)
 
@@ -101,7 +106,17 @@ plt.figure(figsize=(8, 6))
 plt.plot(tiempos, [sim[0] for sim in simulacion], label='x(t)')
 plt.plot(tiempos, [sim[1] for sim in simulacion], label='y(t)')
 plt.plot(tiempos, [sim[2] for sim in simulacion], label='Altura [m] z(t)')
+plt.plot(Ts, pos_analitica[0], label='x(t) analitica', linestyle='--')
+plt.plot(Ts, pos_analitica[1], label='y(t) analitica', linestyle='--')
+plt.plot(Ts, pos_analitica[2], label='z(t) analitica', linestyle='--')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Posicion [m]')
+plt.legend()
+plt.show()
 
+plt.figure(figsize=(8, 6))
+plt.plot(tiempos, [sim[3] for sim in simulacion], label='Velocidad vertical [m/s]')
+plt.plot(tiempos, [sim[4] for sim in simulacion], label='Velocidad vertical [m/s]')
 plt.plot(tiempos, [sim[5] for sim in simulacion], label='Velocidad vertical [m/s]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Altura [m] / Velocidad [m/s]')
