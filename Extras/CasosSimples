@@ -1,0 +1,80 @@
+#Simulacion Numerica de los casos simplificados
+
+import numpy as np
+import matplotlib.pyplot as plt
+#from scipy.integrate import odeint
+
+from Simulador.Integradores import *
+
+g=9.81 #Aceleracion de gravedad cte
+
+#Caso 1: Gravedad y masa cte
+#no aplica parte angular
+def der_gravedad_masa_cte( t, state):
+
+    pos = state[0:3]
+    vel = state[3:6]
+
+    # r = np.linalg.norm(pos)
+    # v = np.linalg.norm(vel)
+    z = pos[2] #Coordenada z
+
+    accel = np.array([0,0,-g])
+    derivs = np.concatenate((vel, accel))
+    #print(derivs)
+
+    return derivs
+
+def simular_vuelo(estado, t_max, dt):
+    #print(estado)
+    t = 0.0
+    it = 0
+    #########################################
+    #CAMBIO DE METODO DE INTEGRACIÓN
+    #Integracion = Euler(self.fun_derivs) ocupa dt=0.005
+    Integracion = RungeKutta4(der_gravedad_masa_cte) #ocupa dt=0.1
+    #Integracion = RKF45(self.fun_derivs)
+    #Integracion = RungeKutta2(self.fun_derivs)
+    ##########################################
+    
+    sim=[estado] #lista de estados de vuelo
+    tiempos=[0] #lista de tiempos
+    while t < t_max:
+        #print(t)
+        # Integracion numérica del estado actual
+        #el dt_new se usa para que el inetgrador actualize el paso de tiempo
+        nuevo_estado = Integracion.step(t, estado, dt)
+        #nuevo_estado, dt_new = Integracion.step(t, estado, dt)
+        #print(dt_new,dt)
+        #dt = dt_new
+        #print("dt= ", dt)
+
+        # Avanzar estado
+        it += 1
+        t += dt
+        estado = nuevo_estado
+
+        sim.append(estado)
+        tiempos.append(t)
+
+        #Indicar el avance en la simulacion
+        if it%500==0:
+            print(f"Iteracion {it}, t={t:.1f} s, altitud={estado[2]:.1f} m, vel vert={estado[5]:.1f}")
+
+    return tiempos, sim
+
+
+
+#Solucion de ese caso
+# Estado inicial
+x0, y0, z0 = 0, 0, 0
+vx0, vy0, vz0 = 0, 0, 0
+
+estado=np.array([x0, y0, z0, vx0, vy0, vz0])
+#print(estado)
+
+#Parametros de la simulacion
+dt = 0.01 #0.1 #[s]
+t_max = 800 #[s]
+
+#Caso 2: Gravedad y masa variable
