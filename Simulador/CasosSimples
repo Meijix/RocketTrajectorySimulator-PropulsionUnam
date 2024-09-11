@@ -15,7 +15,7 @@ g=9.81 #Aceleracion de gravedad cte
 def der_gravedad_masa_cte(t, state):
 
     vel = state[3:6]
-    gravedad = np.array([0,0,-g])
+    gravedad = np.array([0,0,g])
     derivs = np.concatenate((vel, gravedad))
     #print(derivs)
 
@@ -37,8 +37,8 @@ def simular_dinamica(estado, t_max, dt):
     it = 0
     #########################################
     #CAMBIO DE METODO DE INTEGRACIÓN
-    #Integracion = Euler(self.fun_derivs) ocupa dt=0.005
-    Integracion = RungeKutta4(der_gravedad_masa_cte) #ocupa dt=0.1
+    Integracion = Euler(der_gravedad_masa_cte) #ocupa dt=0.005
+    #Integracion = RungeKutta4(der_gravedad_masa_cte) #ocupa dt=0.1
     #Integracion = RKF45(self.fun_derivs)
     #Integracion = RungeKutta2(self.fun_derivs)
     ##########################################
@@ -83,11 +83,11 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0])
 #print(estado)
 
 #Parametros de la simulacion
-dt = 0.1 #0.1 #[s]
+dt = 1 #0.1 #[s]
 t_max = 80 #[s]
-
+divisiones = t_max+1
 #Solucion analitica
-Ts = np.linspace(0,t_max, 100)
+Ts = np.linspace(0,t_max, divisiones)
 pos_analitica_x = []
 pos_analitica_y = []
 pos_analitica_z = []
@@ -129,5 +129,28 @@ plt.xlabel('Tiempo [s]')
 plt.ylabel('Altura [m] / Velocidad [m/s]')
 plt.legend()
 plt.show()
+
+#Calcular y graficar el error numerico
+#error en metros
+error_x = np.array([sim[0] for sim in simulacion]) - np.array(pos_analitica_x)
+error_y = np.array([sim[1] for sim in simulacion]) - np.array(pos_analitica_y)
+error_z = np.array([sim[2] for sim in simulacion]) - np.array(pos_analitica_z)
+error = np.array([error_x,error_y, error_z])
+
+#error relativo
+#corregir
+rel_error = np.linalg.norm(error)/np.linalg.norm(np.array([pos_analitica_x,pos_analitica_y,pos_analitica_z]))
+plt.plot(tiempos, rel_error, label="error relativo")
+
+plt.figure(figsize=(8, 6))
+plt.plot(tiempos, error_x, label='Error x(t)')
+plt.plot(tiempos, error_y, label='Error y(t)')
+plt.plot(tiempos, error_z, label='Error z(t)')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Error [m]')
+plt.legend()
+plt.show()
+
+
 ##############################################################################
 #Caso 2: Gravedad y masa variable
