@@ -30,7 +30,7 @@ with open('datos_simulacion.json', 'r') as f:
 x = posiciones[:, 0]
 y = posiciones[:, 1]
 z = posiciones[:, 2]
-t = tiempos[::20]
+t = tiempos[:]
 
 launch_point = posiciones[0]
 impact_point = posiciones[-1]
@@ -50,7 +50,6 @@ ax3d.set_zlabel("Altura (m)")
 
 #ax3d.plot(x[:100], y[:100], z[:100], 'b')
 
-
 # Eje 2D para la visualización
 ax2d = fig.add_subplot(122)
 ax2d.set_xlim([0, 80])
@@ -58,8 +57,14 @@ ax2d.set_ylim([-10, 5000])
 ax2d.set_title('Trayectoria 2D del cohete')
 ax2d.grid()
 
+# Cada cuantos frames graficar
+every = 100
+
 # Función de actualización para la animación
 def update(frame):
+
+    print(frame)
+
     ax3d.clear()
     ax3d.set_xlim([-500, 5000])
     ax3d.set_ylim([-1000, 2000])
@@ -70,7 +75,8 @@ def update(frame):
     ax3d.set_zlabel("Altura (m)")
 
     # Plot the trajectory
-    ax3d.plot(x[:t[frame]], y[:t[frame]], z[:t[frame]], 'b')
+    ax3d.plot(x[:frame], y[:frame], z[:frame], 'b')
+    ax3d.scatter(x[frame], y[frame], z[frame], 'g', s=20)
     #ax3d.plot(posiciones[:frame, 0], posiciones[:frame, 1], posiciones[:frame, 2])
     # Plot the launch and impact points with different colors
     ax3d.scatter(launch_point[0], launch_point[1], launch_point[2], c='blue', label='Punto de lanzamiento')
@@ -85,21 +91,22 @@ def update(frame):
     # Plot the circle in the xy plane
     #ax3d.plot(circle_x, circle_y, 0, color='gray', linestyle='--', label='1000 m radio de seguridad')
 
-  
-    ax3d.scatter(x[t[frame]], y[t[frame]], z[t[frame]], 'g', size= 20)
     ax3d.legend()
 
     ax2d.clear()
-    ax2d.set_xlim([0, 80])
+    ax2d.set_xlim([0, 120])
     ax2d.set_ylim([-10, 8000])
-    #ax2d.plot(t[:frame], z[:frame], 'b-')
-    ax2d.plot(t,x, 'g')
+    ax2d.plot(t[:frame], z[:frame], 'b-')
+    # ax2d.plot(t,x, 'g')
     #ax2d.scatter(t[frame], z[frame], 'r')
 
     return ax3d, ax2d
 
 # Crear la animación
-animation = FuncAnimation(fig, update, frames=len(t), interval=5)
+frames = np.arange(0, len(t)+every, every)
+if frames[-1] > len(t): frames[-1] = len(t)-1
+print(frames)
+animation = FuncAnimation(fig, update, frames=frames, interval=5, repeat=False)
 
 plt.show()
 plt.savefig("TrayectoriaAnimada.gif")

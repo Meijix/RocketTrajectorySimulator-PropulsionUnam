@@ -243,7 +243,7 @@ plt.plot(tiempos[:], estabilidad[:], color="C2",label="estabilidad")
 plt.title("Estabilidad (calibres)")
 #plt.xlim(0,tiempo_apogeo+10)
 plt.legend()
-plt.show()
+# plt.show()
 
 # GRAFICA 7. Theta, Velocidad y aceleración angular (derivada de theta)
 plt.figure(figsize=(16,5))

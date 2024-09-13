@@ -39,14 +39,14 @@ import time
 inicio = time.time()
 
 print("Simulando...")
-viento_actual = Viento2D(vel_mean=0, vel_var=0)
-viento_actual.actualizar_viento()
+viento_actual = Viento2D(vel_mean=30, vel_var=0)
+viento_actual.actualizar_viento3D()
 #viento_actual = Viento2D(vel_mean=30, vel_var=0)
 #print(viento_actual)
 #print(viento_actual.vector)
 
 vuelo_paracaidas = Vuelo(Xitle, atmosfera_actual, viento_actual)
-tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo_paracaidas.simular_vuelo(estado,t_max, dt)
+tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo_paracaidas.simular_vuelo(estado,t_max, dt, dt_out=dt)
 
 # Guardar los datos de la simulación
 #datos_simulados = (tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs)
