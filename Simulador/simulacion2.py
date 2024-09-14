@@ -22,7 +22,7 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 
 #Parametros de la simulacion
 dt=0.01 #[s]
-t_max = 600 #[s]
+t_max = 1000 #[s]
 
 ######################################
 #####Agregar paracaidas
@@ -39,7 +39,7 @@ import time
 inicio = time.time()
 
 print("Simulando...")
-viento_actual = Viento2D(vel_mean=30, vel_var=0)
+viento_actual = Viento2D(vel_mean=30, vel_var=5)
 viento_actual.actualizar_viento3D()
 #viento_actual = Viento2D(vel_mean=30, vel_var=0)
 #print(viento_actual)
@@ -93,6 +93,7 @@ max_speed = max(np.linalg.norm(velocidades, axis=1))
 #print("Equivalente a:",max_speed/340, "Mach")
 #########################################
 import pandas as pd
+print("Guardando datos...")
 # Guardar los datos de la simulación en un archivo .csv
 datos_simulados = pd.DataFrame({
     'tiempos': tiempos[1:],
@@ -159,3 +160,5 @@ datos_a_guardar = {
 
 with open('datos_simulacion.json', 'w') as f:
     json.dump(datos_a_guardar, f, indent=4)
+
+print("LISTO")

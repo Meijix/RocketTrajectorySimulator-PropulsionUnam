@@ -36,14 +36,14 @@ oxidante = Cilindro("Oxidante", 12.0, np.array([0.0, 0.0, transfer.bottom[2]]), 
 grano = Cilindro("Grano", 4.0 , np.array([0.0, 0.0, valvulas.bottom[2]]), 0.505 , 0.158, 0.334)
 
 # Tablas de Cd, empuje y masa
-tabla_Cd_fpath = '../Archivos/cdmachXitle.csv'
-# tabla_Cd_fpath = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\cdmachXitle.csv'
+#tabla_Cd_fpath = '../Archivos/cdmachXitle.csv'
+tabla_Cd_fpath = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\cdmachXitle.csv'
 
-tabla_empuje_fpath = '../Archivos/MegaPunisherBien.csv'
-# tabla_empuje_fpath = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\MegaPunisherBien.csv'
+#tabla_empuje_fpath = '../Archivos/MegaPunisherBien.csv'
+tabla_empuje_fpath = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\MegaPunisherBien.csv'
 
-tabla_masa_fpath = '../Archivos/MegaPunisherFatMasadot.csv'
-# tabla_masa_fpath = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\MegaPunisherFatMasadot.csv'
+#tabla_masa_fpath = '../Archivos/MegaPunisherFatMasadot.csv'
+tabla_masa_fpath = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\MegaPunisherFatMasadot.csv'
 
 #Lista de componentes y creación del vehículo completo
 #Debe ser un diccionario con un nombre corto para cada componente

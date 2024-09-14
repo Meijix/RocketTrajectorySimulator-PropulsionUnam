@@ -32,6 +32,9 @@ y = posiciones[:, 1]
 z = posiciones[:, 2]
 t = tiempos[:]
 
+t_fin = tiempos[-1]
+apogeo = z.max()
+alcance = x.max()
 launch_point = posiciones[0]
 impact_point = posiciones[-1]
 
@@ -40,73 +43,70 @@ fig = plt.figure(figsize=(12, 6))
 
 # Eje 3D para la trayectoria del cohete
 ax3d = fig.add_subplot(121, projection='3d')
-ax3d.set_xlim([-500, 2000])
-ax3d.set_ylim([-1000, 5000])
-ax3d.set_zlim([0, 8000])
+ax3d.set_xlim([-500, alcance+200])
+ax3d.set_ylim([-1000, 2000])
+ax3d.set_zlim([0, apogeo+200])
 ax3d.set_title('Trayectoria 3D del cohete')
 ax3d.set_xlabel("Alcance (m)")
 ax3d.set_ylabel("Desplazamiento (m)")
 ax3d.set_zlabel("Altura (m)")
 
-#ax3d.plot(x[:100], y[:100], z[:100], 'b')
-
 # Eje 2D para la visualización
 ax2d = fig.add_subplot(122)
-ax2d.set_xlim([0, 80])
-ax2d.set_ylim([-10, 5000])
+ax2d.set_xlim([0, t_fin])
+ax2d.set_ylim([-10, apogeo+200])
 ax2d.set_title('Trayectoria 2D del cohete')
+ax2d.set_xlabel("Tiempo (s)")
+ax2d.set_ylabel("Altura (m)")
 ax2d.grid()
 
 # Cada cuantos frames graficar
-every = 100
+every = 500
 
 # Función de actualización para la animación
 def update(frame):
 
-    print(frame)
-
-    ax3d.clear()
-    ax3d.set_xlim([-500, 5000])
+    #print(frame)
+    ax3d.set_xlim([-500, alcance+200])
     ax3d.set_ylim([-1000, 2000])
-    ax3d.set_zlim([-1000, 8000])
-    ax3d.set_title('Trayectoria 3D del cohete')
-    ax3d.set_xlabel("Alcance (m)")
-    ax3d.set_ylabel("Desplazamiento (m)")
-    ax3d.set_zlabel("Altura (m)")
+    ax3d.set_zlim([-1000, apogeo+200])
 
     # Plot the trajectory
     ax3d.plot(x[:frame], y[:frame], z[:frame], 'b')
-    ax3d.scatter(x[frame], y[frame], z[frame], 'g', s=20)
-    #ax3d.plot(posiciones[:frame, 0], posiciones[:frame, 1], posiciones[:frame, 2])
+    ax3d.scatter(x[frame], y[frame], z[frame], 'g', s=20, marker='*')
+
     # Plot the launch and impact points with different colors
     ax3d.scatter(launch_point[0], launch_point[1], launch_point[2], c='blue', label='Punto de lanzamiento')
     ax3d.scatter(impact_point[0], impact_point[1], impact_point[2], c='red', label='Punto de impacto')
     
-    # Create a circle in the xy plane with a diameter of 1000 meters around the impact point
-    #circle_radius = 1000
-    #circle_points = np.linspace(0, 2*np.pi, 100)
-    #circle_x = impact_point[0] + circle_radius * np.cos(circle_points)
-    #circle_y = impact_point[1] + circle_radius * np.sin(circle_points)
+    if frame == frames[-1]:
+        #Create a circle in the xy plane with a diameter of 1000 meters around the impact point
+        circle_radius = 1000
+        circle_points = np.linspace(0, 2*np.pi, 100)
+        circle_x = impact_point[0] + circle_radius * np.cos(circle_points)
+        circle_y = impact_point[1] + circle_radius * np.sin(circle_points)
 
-    # Plot the circle in the xy plane
-    #ax3d.plot(circle_x, circle_y, 0, color='gray', linestyle='--', label='1000 m radio de seguridad')
+        # Plot the circle in the xy plane
+        ax3d.plot(circle_x, circle_y, 0, color='gray', linestyle='--', label='1000 m radio de seguridad')
 
-    ax3d.legend()
+    #######################################
+    ## Grafica 2D
 
-    ax2d.clear()
-    ax2d.set_xlim([0, 120])
-    ax2d.set_ylim([-10, 8000])
+    #ax2d.clear()
+    ax2d.set_xlim([0, t_fin])
+    ax2d.set_ylim([0, apogeo+200])
     ax2d.plot(t[:frame], z[:frame], 'b-')
-    # ax2d.plot(t,x, 'g')
-    #ax2d.scatter(t[frame], z[frame], 'r')
+    ax2d.scatter(t[frame], z[frame])
 
     return ax3d, ax2d
 
 # Crear la animación
 frames = np.arange(0, len(t)+every, every)
 if frames[-1] > len(t): frames[-1] = len(t)-1
-print(frames)
+#print(frames)
 animation = FuncAnimation(fig, update, frames=frames, interval=5, repeat=False)
 
 plt.show()
-plt.savefig("TrayectoriaAnimada.gif")
+
+animation.save("TrayectoriaAnimada.gif")
+print("GIF Guardado")
