@@ -1,27 +1,30 @@
-#Caso 2: Gravedad + Arrastre cuadratico y masa cte
+# Caso 3: Gravedad + Empuje constante y masa variable
 
 import numpy as np
 import matplotlib.pyplot as plt
-#from scipy.integrate import odeint
 from Integradores import *
 
+# Función para la masa variable
+def masa_variable(t, m0, beta):
+    return m0 * np.exp(-beta * t)
 
-
-#no depende de t porque nada es variable
-def der_gravedad_masa_cte(t, state):
-    _, v = state
-    Drag = (D_mag/m)* (v**2) 
-    derivs = np.array((v, -g - Drag))
-    #print(derivs)
+# Función para la derivada del sistema
+def der_gravedad_empuje_masa_var(t, state):
+    z, v = state
+    m = masa_variable(t, m0, beta)
+    F_empuje = F0
+    Drag = (D_mag/m) * (v**2)
+    derivs = np.array((v, F_empuje/m - g - Drag))
     return derivs
 
-def sol_analitica_gravedad_masa_cte(z0, v0, t):
-    root = np.sqrt(D_mag / m * g)
-    root2 = np.sqrt(m*g / D_mag)
-    num= -g*t + np.arctan(root*v0)
-    v = root2 * np.tan(num)
-    z = z0 - (root2/ g) * np.log(np.cos(num) / np.cos(np.arctan(v0 *root)))
+# Función para la solución analítica
+def sol_analitica_gravedad_empuje_masa_var(z0, v0, t, m0, beta, F0):
+    m = masa_variable(t, m0, beta)
+    v = v0 + (F0/m0) * (1 - np.exp(-beta * t)) - g * t
+    z = z0 + v0 * t + (F0/(2*m0*beta)) * (1 - np.exp(-2*beta * t)) - (g/2) * t**2
     return z, v
+
+
 
 def simular_dinamica(estado, t_max, dt):
     #print(estado)
@@ -30,7 +33,7 @@ def simular_dinamica(estado, t_max, dt):
     #########################################
     #CAMBIO DE METODO DE INTEGRACIÓN
     # Integracion = Euler(der_gravedad_masa_cte) #ocupa dt=0.005
-    Integracion = RungeKutta4(der_gravedad_masa_cte) #ocupa dt=0.1
+    Integracion = RungeKutta4(der_gravedad_empuje_masa_var) #ocupa dt=0.1
     # Integracion = RKF45(der_gravedad_masa_cte)
     #Integracion = RungeKutta2(self.fun_derivs)
     ##########################################
@@ -66,54 +69,48 @@ def simular_dinamica(estado, t_max, dt):
     return tiempos, sim
 
 
-
-#Solucion de ese caso
-# Estado inicial
-z0 = 0
-v0 = 80
-
-#no afecta la masa la dinamica
-m = 5.0 #masa cte
-g = 9.81 #Aceleracion de gravedad cte
+# Parámetros del sistema
+m0 = 5.0  # masa inicial
+beta = 0.1  # tasa de cambio de masa
+F0 = 10.0  # empuje constante
+g = 9.81  # aceleración de gravedad
 rho = 1.225
 A = 1
 cd = 0.45
 D_mag = 0.5 * cd * A * rho
 
-estado=np.array([z0, v0])
-#print(estado)
+# Estado inicial
+z0 = 0
+v0 = 80
 
-#Parametros de la simulacion
-dt = 0.01 #0.1 #[s]
-t_max = 80 #[s]
-divisiones = t_max+1
+# Parámetros de la simulación
+dt = 0.01  # paso de tiempo
+t_max = 80  # tiempo máximo
+divisiones = t_max + 1
 
-#Simulacion
+# Simulación
+estado = np.array([z0, v0])
 tiempos, simulacion = simular_dinamica(estado, t_max, dt)
 
 pos_simul = [sim[0] for sim in simulacion]
 vel_simul = [sim[1] for sim in simulacion]
 
-#Solucion analitica
+# Solución analítica
 pos_analitica = []
 vel_analitica = []
 
 for t in tiempos:
-    pos, vel = sol_analitica_gravedad_masa_cte(z0, v0, t)
+    pos, vel = sol_analitica_gravedad_empuje_masa_var(z0, v0, t, m0, beta, F0)
     pos_analitica.append(pos)
     vel_analitica.append(vel)
 
-#print(pos_analitica, pos_simul)
-#print(vel_analitica, vel_simul)
-#print(tiempos)
-
-#Graficar
+# Graficar
 plt.figure(figsize=(8, 6))
 plt.scatter(tiempos, pos_simul, label='Numérica', color="C1")
 plt.plot(tiempos, pos_analitica, label='Analitica', ls='-')
 plt.title('Posición vertical [m/s]')
 plt.xlabel('Tiempo [s]')
-plt.ylabel('Posicion [m]')
+plt.ylabel('Posición [m]')
 plt.legend()
 
 plt.figure(figsize=(8, 6))
@@ -125,33 +122,3 @@ plt.ylabel('Velocidad [m/s]')
 plt.legend()
 
 plt.show()
-
-'''
-#Calcular y graficar el error numerico
-#error en metros
-error_pos = [pos_simul[i] - pos_analitica[i] for i in range(len(tiempos))]
-error_vel = [vel_simul[i] - vel_analitica[i] for i in range(len(tiempos))]
-
-#error relativo
-error_pos_rel = [abs(error_pos[i]/pos_analitica[i]) for i in range(len(tiempos))]
-error_vel_rel = [abs(error_vel[i]/vel_analitica[i]) for i in range(len(tiempos))]
-
-plt.figure(figsize=(8, 6))
-plt.plot(tiempos, error_pos, label='Error z(t)')
-plt.plot(tiempos, error_vel, label='Error v(t)')
-plt.title("Error absoluto")
-plt.xlabel('Tiempo [s]')
-plt.ylabel('Errorres absolutos [m],[m/s]')
-plt.legend()
-
-plt.figure(figsize=(8, 6))
-plt.plot(tiempos, error_pos_rel, label='Error z(t)')
-plt.plot(tiempos, error_vel_rel, label='Error v(t)')
-plt.title("Error relativo")
-plt.xlabel('Tiempo [s]')
-plt.ylabel('Errores relativos')
-plt.legend()
-
-plt.show()
-
-'''
