@@ -11,16 +11,15 @@ from Integradores import *
 #no depende de t porque nada es variable
 def der_gravedad_masa_cte(t, state):
     _, v = state
-    Drag = D_mag* (v**2) 
+    Drag = (D_mag/m)* (v**2) 
     derivs = np.array((v, -g - Drag))
     #print(derivs)
     return derivs
 
 def sol_analitica_gravedad_masa_cte(z0, v0, t):
-    root = np.sqrt(m * g / D_mag)
-    root2 = np.sqrt(D_mag/ m*g)
-    v = root * np.tan((-g *t) + (np.arctan(v0 * root2)))
-    z = z0 + root * (-1/g) * np.log((np.abs(np.cos((-g *t) + (np.arctan(v0 * root2))/(np.abs(np.cos(np.arctan(root2 *v0))))))))
+    root = np.sqrt(D_mag / m * g)
+    v = root * np.tan((-root * t) + np.arctan(v0*root))
+    z = z0 - (m / D_mag) * np.log(np.cos(root * t) / np.cos(np.arctan(v0 *root)))
     return z, v
 
 def simular_dinamica(estado, t_max, dt):
@@ -73,7 +72,7 @@ z0 = 0
 v0 = 80
 
 #no afecta la masa la dinamica
-m = 5.0 #masa cte
+m = 8.0 #masa cte
 g = 9.81 #Aceleracion de gravedad cte
 rho = 1.225
 A = 1
@@ -84,7 +83,7 @@ estado=np.array([z0, v0])
 #print(estado)
 
 #Parametros de la simulacion
-dt = 0.1 #0.1 #[s]
+dt = 0.01 #0.1 #[s]
 t_max = 80 #[s]
 divisiones = t_max+1
 
@@ -123,6 +122,8 @@ plt.title('Velocidad vertical [m/s]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
 plt.legend()
+
+plt.show()
 
 '''
 #Calcular y graficar el error numerico
