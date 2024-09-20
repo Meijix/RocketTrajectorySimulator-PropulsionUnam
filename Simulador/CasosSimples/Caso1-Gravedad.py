@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 #from scipy.integrate import odeint
 
-from Integradores import *
+from IntegradoresCasos import *
 
 g=9.81 #Aceleracion de gravedad cte
 
