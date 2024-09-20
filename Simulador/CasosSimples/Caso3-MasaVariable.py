@@ -2,7 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from Integradores import *
+from IntegradoresCasos import *
 
 # Función para la masa variable
 def masa_variable(t, m0, beta):
