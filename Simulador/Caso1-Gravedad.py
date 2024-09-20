@@ -73,7 +73,7 @@ z0 = 0
 v0 = 80
 
 #no afecta la masa la dinamica
-m = 1.0 #masa cte
+#m = 1.0 #masa cte
 
 estado=np.array([z0, v0])
 #print(estado)

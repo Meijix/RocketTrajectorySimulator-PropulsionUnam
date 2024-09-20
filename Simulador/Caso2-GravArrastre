@@ -6,25 +6,21 @@ import matplotlib.pyplot as plt
 
 from Integradores import *
 
-g=9.81 #Aceleracion de gravedad cte
-rho= 1
-A= 1
-cd = 0.45
-
-#Caso 1: Gravedad y masa cte
-#no aplica parte angular
+#Caso 2: Gravedad + Arrastre cuadratico y masa cte
 
 #no depende de t porque nada es variable
 def der_gravedad_masa_cte(t, state):
-    z, v = state
-    D = 0.5 * rho * A * cd * (v**2) 
-    derivs = np.array((v, -g+D))
+    _, v = state
+    Drag = D_mag* (v**2) 
+    derivs = np.array((v, -g - Drag))
     #print(derivs)
     return derivs
 
 def sol_analitica_gravedad_masa_cte(z0, v0, t):
-    z = z0 + v0*t -0.5*g*t**2
-    v = v0 - g*t
+    root = np.sqrt(m * g / D_mag)
+    root2 = np.sqrt(D_mag/ m*g)
+    v = root * np.tan((-g *t) + (np.arctan(v0 * root2)))
+    z = z0 + root * (-1/g) * np.log((np.abs(np.cos((-g *t) + (np.arctan(v0 * root2))/(np.abs(np.cos(np.arctan(root2 *v0))))))))
     return z, v
 
 def simular_dinamica(estado, t_max, dt):
@@ -77,13 +73,18 @@ z0 = 0
 v0 = 80
 
 #no afecta la masa la dinamica
-m = 1.0 #masa cte
+m = 5.0 #masa cte
+g = 9.81 #Aceleracion de gravedad cte
+rho = 1.225
+A = 1
+cd = 0.45
+D_mag = 0.5 * cd * A * rho
 
 estado=np.array([z0, v0])
 #print(estado)
 
 #Parametros de la simulacion
-dt = 0.01 #0.1 #[s]
+dt = 0.1 #0.1 #[s]
 t_max = 80 #[s]
 divisiones = t_max+1
 
@@ -96,10 +97,15 @@ vel_simul = [sim[1] for sim in simulacion]
 #Solucion analitica
 pos_analitica = []
 vel_analitica = []
+
 for t in tiempos:
     pos, vel = sol_analitica_gravedad_masa_cte(z0, v0, t)
     pos_analitica.append(pos)
     vel_analitica.append(vel)
+
+#print(pos_analitica, pos_simul)
+#print(vel_analitica, vel_simul)
+#print(tiempos)
 
 #Graficar
 plt.figure(figsize=(8, 6))
