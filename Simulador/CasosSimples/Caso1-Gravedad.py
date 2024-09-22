@@ -225,23 +225,24 @@ for integrador, label in zip(integradores, labels):
         pos_rkf45 = pos
         vel_rkf45 = vel
 
+opacidad=0.8
 # Graficar resultados
 plt.figure(figsize=(8, 6))
-plt.plot(tiempos, pos_analitica, label='Analitica', ls='-')
-plt.plot(tiempos_euler, pos_euler, label='Euler', marker='o')
-plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*')
-plt.plot(tiempos_rk2, pos_rk2, label='RK2', marker ='v')
-plt.plot(tiempos_rkf45, pos_rkf45, label='RKF45', marker='X')
+#plt.plot(tiempos, pos_analitica, label='Analitica', ls='-')
+plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
+plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
+plt.plot(tiempos_rk2, pos_rk2, label='RK2', linestyle='dashed', alpha=opacidad) #marker ='v', alpha= opacidad)
+plt.plot(tiempos_rkf45, pos_rkf45, label='RKF45', marker='X',alpha=opacidad)
 plt.title('Posición vertical [m]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Posición [m]')
 plt.legend()
 
 plt.figure(figsize=(8, 6))
-plt.plot(tiempos, vel_analitica, label='Analitica', ls='-')
+#plt.plot(tiempos, vel_analitica, label='Analitica', ls='-')
 plt.plot(tiempos_euler, vel_euler, label='Euler', marker='o')
 plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*')
-plt.plot(tiempos_rk2, vel_rk2, label='RK2', marker ='v')
+plt.plot(tiempos_rk2, vel_rk2, label='RK2', linestyle='dashed', alpha=opacidad) 
 plt.plot(tiempos_rkf45, vel_rkf45, label='RKF45',marker='X')
 plt.title('Velocidad vertical [m/s]')
 plt.xlabel('Tiempo [s]')
