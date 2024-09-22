@@ -7,14 +7,20 @@ from IntegradoresCasos import *
 
 
 def der_gravedad_arrastre(t, state):
-    _, v = state
-    Drag = (D_mag/m)* (v**2) *np.sign(v)
+    v = state[1]
+    if v == 0:
+        Drag = 0
+    else:
+        Drag = (D_mag/m) * (v**2) * np.sign(v)
+    
     derivs = np.array((v, -g - Drag))
     #print(derivs)
     return derivs
 import numpy as np
 
-def sol_analitica_gravedad_arrastre(z0, v0, t, m, g, D_mag):
+def sol_analitica_gravedad_arrastre(state, t, m, g, D_mag):
+    z0= state[0]
+    v0= state[1]
     k = np.sqrt(g * D_mag / m)
     
     v = (v0 + (g / k)) * np.exp(-k * t) - (g / k)
@@ -98,7 +104,7 @@ pos_analitica = []
 vel_analitica = []
 
 for t in tiempos:
-    pos, vel = sol_analitica_gravedad_arrastre(z0, v0, t, m, g, D_mag)
+    pos, vel = sol_analitica_gravedad_arrastre(estado, t, m, g, D_mag)
     pos_analitica.append(pos)
     vel_analitica.append(vel)
 
@@ -153,3 +159,42 @@ plt.legend()
 
 plt.show()
 
+
+##############################
+# Simulación con scipy
+##############################
+from scipy.integrate import odeint
+
+def simular_dinamica_scipy(estado, t_max, dt):
+    t = np.arange(0, t_max, dt)
+    sol = odeint(der_gravedad_arrastre, estado, t)
+    return t, sol
+
+# ...
+
+# Simulación con scipy
+t_scipy, sol_scipy = simular_dinamica_scipy(estado, t_max, dt)
+
+pos_scipy = sol_scipy[:, 0]
+vel_scipy = sol_scipy[:, 1]
+
+# Graficar resultados
+plt.figure(figsize=(8, 6))
+plt.plot(t_scipy, pos_scipy, label='Scipy')
+plt.plot(tiempos, pos_analitica, label='Analítica')
+plt.plot(tiempos, pos_simul, label='Simulación')
+plt.title('Posición vertical [m/s]')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Posición [m]')
+plt.legend()
+
+plt.figure(figsize=(8, 6))
+plt.plot(t_scipy, vel_scipy, label='Scipy')
+plt.plot(tiempos, vel_analitica, label='Analítica')
+plt.plot(tiempos, vel_simul, label='Simulación')
+plt.title('Velocidad vertical [m/s]')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Velocidad [m/s]')
+plt.legend()
+
+plt.show()
