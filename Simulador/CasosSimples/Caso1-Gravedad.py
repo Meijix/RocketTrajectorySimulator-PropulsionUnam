@@ -70,7 +70,7 @@ def simular_dinamica(estado, t_max, dt):
 #Solucion de ese caso
 # Estado inicial
 z0 = 0
-v0 = 80
+v0 = 100
 
 #no afecta la masa la dinamica
 #m = 1.0 #masa cte
@@ -79,7 +79,7 @@ estado=np.array([z0, v0])
 #print(estado)
 
 #Parametros de la simulacion
-dt = 0.1 #0.1 #[s]
+dt = 0.01 #0.1 #[s]
 t_max = 80 #[s]
 divisiones = t_max+1
 
@@ -172,8 +172,8 @@ def simular_dinamica(estado, t_max, dt, integrador):
         if it%500==0:
             print(f"Iteracion {it}, t={t:.1f} s, altitud={estado[0]:.1f} m, vel vert={estado[1]:.1f}")
             
-        #if estado[0] < 0:
-            #break
+        if estado[0] < 0:
+            break
 
     return tiempos, sim
 
@@ -192,7 +192,7 @@ vel_rkf45 = []
 
 # Estado inicial
 z0 = 0
-v0 = 80
+v0 = 100
 estado = np.array([z0, v0])
 
 # Parametros de la simulacion
@@ -225,9 +225,10 @@ for integrador, label in zip(integradores, labels):
         pos_rkf45 = pos
         vel_rkf45 = vel
 
-opacidad=0.8
+opacidad=1
 # Graficar resultados
 plt.figure(figsize=(8, 6))
+#Checar el tamano de la solcion analitica?
 #plt.plot(tiempos, pos_analitica, label='Analitica', ls='-')
 plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
 plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
