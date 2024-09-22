@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from IntegradoresCasos import *
 
 
-def der_gravedad_masa_cte(t, state):
+def der_gravedad_arrastre(t, state):
     _, v = state
     Drag = (D_mag/m)* (v**2) *np.sign(v)
     derivs = np.array((v, -g - Drag))
@@ -15,20 +15,6 @@ def der_gravedad_masa_cte(t, state):
 import numpy as np
 
 def sol_analitica_gravedad_arrastre(z0, v0, t, m, g, D_mag):
-    """
-    Calculates the analytical solution for vertical movement with drag and quadratic drag.
-    
-    Parameters:
-    z0 (float): Initial height
-    v0 (float): Initial velocity
-    t (float): Time
-    m (float): Mass
-    g (float): Gravitational acceleration
-    D_mag (float): Magnitude of drag coefficient
-    
-    Returns:
-    tuple: (z, v) where z is height and v is velocity at time t
-    """
     k = np.sqrt(g * D_mag / m)
     
     v = (v0 + (g / k)) * np.exp(-k * t) - (g / k)
@@ -42,10 +28,10 @@ def simular_dinamica(estado, t_max, dt):
     it = 0
     #########################################
     #CAMBIO DE METODO DE INTEGRACIÓN
-    # Integracion = Euler(der_gravedad_masa_cte) #ocupa dt=0.005
-    Integracion = RungeKutta4(der_gravedad_masa_cte) #ocupa dt=0.1
-    # Integracion = RKF45(der_gravedad_masa_cte)
-    #Integracion = RungeKutta2(self.fun_derivs)
+    Integracion = Euler(der_gravedad_arrastre) #ocupa dt=0.005
+    #Integracion = RungeKutta4(der_gravedad_arrastre) #ocupa dt=0.1
+    # Integracion = RKF45(der_gravedad_arrastre)
+    #Integracion = RungeKutta2(der_gravedad_arrastre)
     ##########################################
     
     sim=[estado] #lista de estados de vuelo
@@ -139,7 +125,7 @@ plt.legend()
 
 plt.show()
 
-'''
+
 #Calcular y graficar el error numerico
 #error en metros
 error_pos = [pos_simul[i] - pos_analitica[i] for i in range(len(tiempos))]
@@ -167,4 +153,3 @@ plt.legend()
 
 plt.show()
 
-'''
