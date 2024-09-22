@@ -200,8 +200,8 @@ dt = 0.1
 t_max = 80
 
 # Simulaciones con diferentes integradores
-integradores = [Euler(der_gravedad_masa_cte), RungeKutta4(der_gravedad_masa_cte), RungeKutta2(der_gravedad_masa_cte), RKF45(der_gravedad_masa_cte)]
-labels = ['Euler', 'RK4', 'RK2', 'RKF45']
+integradores = [Euler, RungeKutta4, RungeKutta2]#, RKF45]
+labels = ['Euler', 'RK4', 'RK2'] #, 'RKF45']
 
 for integrador, label in zip(integradores, labels):
     tiempos, sim = simular_dinamica(estado, t_max, dt, integrador)
@@ -212,10 +212,14 @@ for integrador, label in zip(integradores, labels):
         tiempos_euler = tiempos
         pos_euler = pos
         vel_euler = vel
-    elif label == 'Runge-Kutta 4':
+    elif label == 'RK4':
         tiempos_rk4 = tiempos
         pos_rk4 = pos
         vel_rk4 = vel
+    elif label =='RK2':
+        tiempos_rk2 = tiempos
+        pos_rk2 = pos
+        vel_rk2 = vel
     elif label == 'RKF45':
         tiempos_rkf45 = tiempos
         pos_rkf45 = pos
@@ -223,18 +227,22 @@ for integrador, label in zip(integradores, labels):
 
 # Graficar resultados
 plt.figure(figsize=(8, 6))
-plt.plot(tiempos_euler, pos_euler, label='Euler')
-plt.plot(tiempos_rk4, pos_rk4, label='Runge-Kutta 4')
-plt.plot(tiempos_rkf45, pos_rkf45, label='RKF45')
+plt.plot(tiempos, pos_analitica, label='Analitica', ls='-')
+plt.plot(tiempos_euler, pos_euler, label='Euler', marker='o')
+plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*')
+plt.plot(tiempos_rk2, pos_rk2, label='RK2', marker ='v')
+plt.plot(tiempos_rkf45, pos_rkf45, label='RKF45', marker='X')
 plt.title('Posición vertical [m]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Posición [m]')
 plt.legend()
 
 plt.figure(figsize=(8, 6))
-plt.plot(tiempos_euler, vel_euler, label='Euler')
-plt.plot(tiempos_rk4, vel_rk4, label='Runge-Kutta 4')
-plt.plot(tiempos_rkf45, vel_rkf45, label='RKF45')
+plt.plot(tiempos, vel_analitica, label='Analitica', ls='-')
+plt.plot(tiempos_euler, vel_euler, label='Euler', marker='o')
+plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*')
+plt.plot(tiempos_rk2, vel_rk2, label='RK2', marker ='v')
+plt.plot(tiempos_rkf45, vel_rkf45, label='RKF45',marker='X')
 plt.title('Velocidad vertical [m/s]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
