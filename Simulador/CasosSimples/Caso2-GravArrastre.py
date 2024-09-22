@@ -29,13 +29,10 @@ def sol_analitica_gravedad_arrastre(z0, v0, t, m, g, D_mag):
     Returns:
     tuple: (z, v) where z is height and v is velocity at time t
     """
-    root = np.sqrt(D_mag / m * g)
-    root2 = np.sqrt(m * g / D_mag)
+    k = np.sqrt(g * D_mag / m)
     
-    num = -g * t + np.arctan(root * v0)
-    
-    v = root2 * np.tan(num)
-    z = z0 - (root2 / g) * np.log(np.cos(num) / np.cos(np.arctan(v0 * root)))
+    v = (v0 + (g / k)) * np.exp(-k * t) - (g / k)
+    z = z0 + (v0 + (g / k)) * (1 - np.exp(-k * t)) / k - g * t / k
     
     return z, v
 
