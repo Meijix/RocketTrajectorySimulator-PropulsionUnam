@@ -6,11 +6,9 @@ import matplotlib.pyplot as plt
 from IntegradoresCasos import *
 
 
-
-#no depende de t porque nada es variable
 def der_gravedad_masa_cte(t, state):
     _, v = state
-    Drag = (D_mag/m)* (v**2) 
+    Drag = (D_mag/m)* (v**2) *np.sign(v)
     derivs = np.array((v, -g - Drag))
     #print(derivs)
     return derivs
@@ -21,6 +19,8 @@ def sol_analitica_gravedad_masa_cte(z0, v0, t):
     num= -g*t + np.arctan(root*v0)
     v = root2 * np.tan(num)
     z = z0 - (root2/ g) * np.log(np.cos(num) / np.cos(np.arctan(v0 *root)))
+    z=0
+    v=2
     return z, v
 
 def simular_dinamica(estado, t_max, dt):
