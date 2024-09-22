@@ -152,13 +152,14 @@ def simular_dinamica(estado, t_max, dt, integrador):
     # ...
     sim = [estado]
     tiempos = [0]
-    t=0
-    it=1
+    t = 0.0
+    it = 1
+
+    Integracion = integrador(der_gravedad_masa_cte)
 
     while t < t_max:
-        # ...
-        nuevo_estado = integrador.step(t, estado, dt)
-        # ...
+        nuevo_estado = Integracion.step(t, estado, dt)
+        
         # Avanzar estado
         it += 1
         t += dt
