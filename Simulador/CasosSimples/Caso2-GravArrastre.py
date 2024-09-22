@@ -12,15 +12,31 @@ def der_gravedad_masa_cte(t, state):
     derivs = np.array((v, -g - Drag))
     #print(derivs)
     return derivs
+import numpy as np
 
-def sol_analitica_gravedad_masa_cte(z0, v0, t):
+def sol_analitica_gravedad_arrastre(z0, v0, t, m, g, D_mag):
+    """
+    Calculates the analytical solution for vertical movement with drag and quadratic drag.
+    
+    Parameters:
+    z0 (float): Initial height
+    v0 (float): Initial velocity
+    t (float): Time
+    m (float): Mass
+    g (float): Gravitational acceleration
+    D_mag (float): Magnitude of drag coefficient
+    
+    Returns:
+    tuple: (z, v) where z is height and v is velocity at time t
+    """
     root = np.sqrt(D_mag / m * g)
-    root2 = np.sqrt(m*g / D_mag)
-    num= -g*t + np.arctan(root*v0)
+    root2 = np.sqrt(m * g / D_mag)
+    
+    num = -g * t + np.arctan(root * v0)
+    
     v = root2 * np.tan(num)
-    z = z0 - (root2/ g) * np.log(np.cos(num) / np.cos(np.arctan(v0 *root)))
-    z=0
-    v=2
+    z = z0 - (root2 / g) * np.log(np.cos(num) / np.cos(np.arctan(v0 * root)))
+    
     return z, v
 
 def simular_dinamica(estado, t_max, dt):
@@ -99,7 +115,7 @@ pos_analitica = []
 vel_analitica = []
 
 for t in tiempos:
-    pos, vel = sol_analitica_gravedad_masa_cte(z0, v0, t)
+    pos, vel = sol_analitica_gravedad_arrastre(z0, v0, t, m, g, D_mag)
     pos_analitica.append(pos)
     vel_analitica.append(vel)
 
