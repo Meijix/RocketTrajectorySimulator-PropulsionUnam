@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from IntegradoresCasos import *
 
-g=9.81 #Aceleracion de gravedad cte
+g = 9.81 #Aceleracion de gravedad cte
 
 #Caso 1: Gravedad y masa cte
 #no aplica parte angular
@@ -114,6 +114,7 @@ plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
 plt.legend()
 
+'''
 #Calcular y graficar el error numerico
 #error en metros
 error_pos = [pos_simul[i] - pos_analitica[i] for i in range(len(tiempos))]
@@ -140,7 +141,102 @@ plt.ylabel('Errores relativos')
 plt.legend()
 
 plt.show()
+'''
 
 
 ##############################################################################
-#Caso 2: Gravedad y masa variable
+#Comparacion integradores
+# ...
+
+def simular_dinamica(estado, t_max, dt, integrador):
+    # ...
+    sim = [estado]
+    tiempos = [0]
+    t=0
+    it=1
+
+    while t < t_max:
+        # ...
+        nuevo_estado = integrador.step(t, estado, dt)
+        # ...
+        # Avanzar estado
+        it += 1
+        t += dt
+        estado = nuevo_estado
+
+        sim.append(estado)
+        tiempos.append(t)
+
+        #Indicar el avance en la simulacion
+        if it%500==0:
+            print(f"Iteracion {it}, t={t:.1f} s, altitud={estado[0]:.1f} m, vel vert={estado[1]:.1f}")
+            
+        #if estado[0] < 0:
+            #break
+
+    return tiempos, sim
+
+# Listas para guardar los resultados
+tiempos_euler = []
+pos_euler = []
+vel_euler = []
+
+tiempos_rk4 = []
+pos_rk4 = []
+vel_rk4 = []
+
+tiempos_rkf45 = []
+pos_rkf45 = []
+vel_rkf45 = []
+
+# Estado inicial
+z0 = 0
+v0 = 80
+estado = np.array([z0, v0])
+
+# Parametros de la simulacion
+dt = 0.1
+t_max = 80
+
+# Simulaciones con diferentes integradores
+integradores = [Euler(der_gravedad_masa_cte), RungeKutta4(der_gravedad_masa_cte), RungeKutta2(der_gravedad_masa_cte), RKF45(der_gravedad_masa_cte)]
+labels = ['Euler', 'RK4', 'RK2', 'RKF45']
+
+for integrador, label in zip(integradores, labels):
+    tiempos, sim = simular_dinamica(estado, t_max, dt, integrador)
+    pos = [sim[i][0] for i in range(len(sim))]
+    vel = [sim[i][1] for i in range(len(sim))]
+    
+    if label == 'Euler':
+        tiempos_euler = tiempos
+        pos_euler = pos
+        vel_euler = vel
+    elif label == 'Runge-Kutta 4':
+        tiempos_rk4 = tiempos
+        pos_rk4 = pos
+        vel_rk4 = vel
+    elif label == 'RKF45':
+        tiempos_rkf45 = tiempos
+        pos_rkf45 = pos
+        vel_rkf45 = vel
+
+# Graficar resultados
+plt.figure(figsize=(8, 6))
+plt.plot(tiempos_euler, pos_euler, label='Euler')
+plt.plot(tiempos_rk4, pos_rk4, label='Runge-Kutta 4')
+plt.plot(tiempos_rkf45, pos_rkf45, label='RKF45')
+plt.title('Posición vertical [m]')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Posición [m]')
+plt.legend()
+
+plt.figure(figsize=(8, 6))
+plt.plot(tiempos_euler, vel_euler, label='Euler')
+plt.plot(tiempos_rk4, vel_rk4, label='Runge-Kutta 4')
+plt.plot(tiempos_rkf45, vel_rkf45, label='RKF45')
+plt.title('Velocidad vertical [m/s]')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Velocidad [m/s]')
+plt.legend()
+
+plt.show()
