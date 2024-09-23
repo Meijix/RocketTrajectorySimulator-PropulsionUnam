@@ -1,6 +1,5 @@
 
 def simular_dinamica(estado, t_max, dt, integrador, fun_derivada):
-    # ...
     sim = [estado]
     tiempos = [0]
     t = 0.0
@@ -22,7 +21,7 @@ def simular_dinamica(estado, t_max, dt, integrador, fun_derivada):
         #Indicar el avance en la simulacion
         if it%500==0:
             print(f"Iteracion {it}, t={t:.1f} s, altitud={estado[0]:.1f} m, vel vert={estado[1]:.1f}")
-            
+        #Terminar cuando llegue al suelo
         if estado[0] < 0:
             break
 
