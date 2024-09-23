@@ -98,46 +98,8 @@ plt.legend()
 plt.show()
 
 '''
-
-
 ##############################################################################
 #Comparacion integradores
-# ...
-'''
-def simular_dinamica(estado, t_max, dt, integrador):
-    # ...
-    sim = [estado]
-    tiempos = [0]
-    t = 0.0
-    it = 1
-
-    Integracion = integrador(der_gravedad_arrastre)
-
-    while t < t_max:
-        nuevo_estado = Integracion.step(t, estado, dt)
-        
-        # Avanzar estado
-        it += 1
-        t += dt
-        estado = nuevo_estado
-
-        sim.append(estado)
-        tiempos.append(t)
-
-        #Indicar el avance en la simulacion
-        if it%500==0:
-            print(f"Iteracion {it}, t={t:.1f} s, altitud={estado[0]:.1f} m, vel vert={estado[1]:.1f}")
-            
-        if estado[0] < 0:
-            break
-
-    return tiempos, sim
-'''
-
-
-
-
-
 # Listas para guardar los resultados
 tiempos_euler = []
 pos_euler = []

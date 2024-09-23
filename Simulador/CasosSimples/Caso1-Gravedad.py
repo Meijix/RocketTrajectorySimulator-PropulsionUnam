@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 #from scipy.integrate import odeint
 
 from IntegradoresCasos import *
+from FunSimularDinamica import * 
 
 g = 9.81 #Aceleracion de gravedad cte
 
@@ -19,100 +20,10 @@ def der_gravedad_masa_cte(t, state):
     return derivs
 
 def sol_analitica_gravedad_masa_cte(z0, v0, t):
-    z = z0 + v0*t -0.5*g*t**2
-    v = v0 - g*t
+    z = z0 + (v0*t) - (0.5 * g * (t**2))
+    v = v0 - (g*t)
     return z, v
 
-def simular_dinamica(estado, t_max, dt):
-    #print(estado)
-    t = 0.0
-    it = 0
-    #########################################
-    #CAMBIO DE METODO DE INTEGRACIÓN
-    # Integracion = Euler(der_gravedad_masa_cte) #ocupa dt=0.005
-    Integracion = RungeKutta4(der_gravedad_masa_cte) #ocupa dt=0.1
-    # Integracion = RKF45(der_gravedad_masa_cte)
-    #Integracion = RungeKutta2(self.fun_derivs)
-    ##########################################
-    
-    sim=[estado] #lista de estados de vuelo
-    tiempos=[0] #lista de tiempos
-    while t < t_max:
-        #print(t)
-        # Integracion numérica del estado actual
-        #el dt_new se usa para que el inetgrador actualize el paso de tiempo
-        nuevo_estado = Integracion.step(t, estado, dt)
-        # nuevo_estado, dt_new = Integracion.step(t, estado, dt, tol=1e-5)
-        # print(dt_new)
-        # dt = dt_new
-        #print(dt_new,dt)
-        #print("dt= ", dt)
-
-        # Avanzar estado
-        it += 1
-        t += dt
-        estado = nuevo_estado
-
-        sim.append(estado)
-        tiempos.append(t)
-
-        #Indicar el avance en la simulacion
-        if it%500==0:
-            print(f"Iteracion {it}, t={t:.1f} s, altitud={estado[0]:.1f} m, vel vert={estado[1]:.1f}")
-        
-        if estado[0] < 0:
-            break
-
-    return tiempos, sim
-
-
-
-#Solucion de ese caso
-# Estado inicial
-z0 = 0
-v0 = 100
-
-#no afecta la masa la dinamica
-#m = 1.0 #masa cte
-
-estado=np.array([z0, v0])
-#print(estado)
-
-#Parametros de la simulacion
-dt = 0.01 #0.1 #[s]
-t_max = 80 #[s]
-divisiones = t_max+1
-
-#Simulacion
-tiempos, simulacion = simular_dinamica(estado, t_max, dt)
-
-pos_simul = [sim[0] for sim in simulacion]
-vel_simul = [sim[1] for sim in simulacion]
-
-#Solucion analitica
-pos_analitica = []
-vel_analitica = []
-for t in tiempos:
-    pos, vel = sol_analitica_gravedad_masa_cte(z0, v0, t)
-    pos_analitica.append(pos)
-    vel_analitica.append(vel)
-
-#Graficar
-plt.figure(figsize=(8, 6))
-plt.scatter(tiempos, pos_simul, label='Numérica', color="C1")
-plt.plot(tiempos, pos_analitica, label='Analitica', ls='-')
-plt.title('Posición vertical [m/s]')
-plt.xlabel('Tiempo [s]')
-plt.ylabel('Posicion [m]')
-plt.legend()
-
-plt.figure(figsize=(8, 6))
-plt.scatter(tiempos, vel_simul, label="Numérica", color="C1")
-plt.plot(tiempos, vel_analitica, label='Analitica', ls='-')
-plt.title('Velocidad vertical [m/s]')
-plt.xlabel('Tiempo [s]')
-plt.ylabel('Velocidad [m/s]')
-plt.legend()
 
 '''
 #Calcular y graficar el error numerico
@@ -146,37 +57,6 @@ plt.show()
 
 ##############################################################################
 #Comparacion integradores
-# ...
-
-def simular_dinamica(estado, t_max, dt, integrador):
-    # ...
-    sim = [estado]
-    tiempos = [0]
-    t = 0.0
-    it = 1
-
-    Integracion = integrador(der_gravedad_masa_cte)
-
-    while t < t_max:
-        nuevo_estado = Integracion.step(t, estado, dt)
-        
-        # Avanzar estado
-        it += 1
-        t += dt
-        estado = nuevo_estado
-
-        sim.append(estado)
-        tiempos.append(t)
-
-        #Indicar el avance en la simulacion
-        if it%500==0:
-            print(f"Iteracion {it}, t={t:.1f} s, altitud={estado[0]:.1f} m, vel vert={estado[1]:.1f}")
-            
-        if estado[0] < 0:
-            break
-
-    return tiempos, sim
-
 # Listas para guardar los resultados
 tiempos_euler = []
 pos_euler = []
@@ -195,16 +75,20 @@ z0 = 0
 v0 = 100
 estado = np.array([z0, v0])
 
+#no afecta la masa la dinamica
+#m = 1.0 #masa cte
+
 # Parametros de la simulacion
 dt = 0.1
 t_max = 80
+divisiones = t_max+1
 
 # Simulaciones con diferentes integradores
 integradores = [Euler, RungeKutta4, RungeKutta2]#, RKF45]
 labels = ['Euler', 'RK4', 'RK2'] #, 'RKF45']
 
 for integrador, label in zip(integradores, labels):
-    tiempos, sim = simular_dinamica(estado, t_max, dt, integrador)
+    tiempos, sim = simular_dinamica(estado, t_max, dt, integrador, der_gravedad_masa_cte)
     pos = [sim[i][0] for i in range(len(sim))]
     vel = [sim[i][1] for i in range(len(sim))]
     
@@ -225,11 +109,21 @@ for integrador, label in zip(integradores, labels):
         pos_rkf45 = pos
         vel_rkf45 = vel
 
+#Solucion analitica
+pos_analitica = []
+vel_analitica = []
+
+#la solucion analitica se calcula para los tiempos de Euler
+for t in tiempos_euler:
+    pos, vel = sol_analitica_gravedad_masa_cte(estado, t, g)
+    pos_analitica.append(pos)
+    vel_analitica.append(vel)
+
 opacidad=1
 # Graficar resultados
 plt.figure(figsize=(8, 6))
 #Checar el tamano de la solcion analitica?
-#plt.plot(tiempos, pos_analitica, label='Analitica', ls='-')
+plt.plot(tiempos_euler, pos_analitica, label='Analitica', ls='-')
 plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
 plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
 plt.plot(tiempos_rk2, pos_rk2, label='RK2', linestyle='dashed', alpha=opacidad) #marker ='v', alpha= opacidad)
@@ -239,8 +133,9 @@ plt.xlabel('Tiempo [s]')
 plt.ylabel('Posición [m]')
 plt.legend()
 
+
 plt.figure(figsize=(8, 6))
-#plt.plot(tiempos, vel_analitica, label='Analitica', ls='-')
+plt.plot(tiempos_euler, vel_analitica, label='Analitica', ls='-')
 plt.plot(tiempos_euler, vel_euler, label='Euler', marker='o')
 plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*')
 plt.plot(tiempos_rk2, vel_rk2, label='RK2', linestyle='dashed', alpha=opacidad) 
