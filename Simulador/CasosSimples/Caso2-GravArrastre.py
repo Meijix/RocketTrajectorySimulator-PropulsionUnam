@@ -112,6 +112,8 @@ for t in tiempos1:
 #print(vel_analitica, vel_simul)
 #print(tiempos)
 
+
+'''
 #Graficar
 plt.figure(figsize=(8, 6))
 plt.scatter(tiempos1, pos_simul, label='Numérica', color="C1")
@@ -131,7 +133,6 @@ plt.legend()
 
 plt.show()
 
-'''
 #Calcular y graficar el error numerico
 #error en metros
 error_pos = [pos_simul[i] - pos_analitica[i] for i in range(len(tiempos))]
@@ -287,7 +288,7 @@ opacidad=1
 # Graficar resultados
 plt.figure(figsize=(8, 6))
 #Checar el tamano de la solcion analitica?
-plt.plot(tiempos1, pos_analitica, label='Analitica', ls='-')
+plt.plot(tiempos1, pos_analitica, label='Analitica', ls='-', alpha=opacidad)
 plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
 plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
 plt.plot(tiempos_rk2, pos_rk2, label='RK2', linestyle='dashed', alpha=opacidad) #marker ='v', alpha= opacidad)
@@ -298,11 +299,11 @@ plt.ylabel('Posición [m]')
 plt.legend()
 
 plt.figure(figsize=(8, 6))
-#plt.plot(tiempos, vel_analitica, label='Analitica', ls='-')
-plt.plot(tiempos_euler, vel_euler, label='Euler', marker='o')
-plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*')
+plt.plot(tiempos1, vel_analitica, label='Analitica', ls='-', alpha = opacidad)
+plt.plot(tiempos_euler, vel_euler, label='Euler', marker='o', alpha= opacidad)
+plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*', alpha=opacidad)
 plt.plot(tiempos_rk2, vel_rk2, label='RK2', linestyle='dashed', alpha=opacidad) 
-plt.plot(tiempos_rkf45, vel_rkf45, label='RKF45',marker='X')
+plt.plot(tiempos_rkf45, vel_rkf45, label='RKF45',marker='X', alpha=opacidad)
 plt.title('Velocidad vertical [m/s]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
