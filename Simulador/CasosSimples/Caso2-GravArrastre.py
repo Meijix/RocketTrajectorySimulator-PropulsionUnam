@@ -94,7 +94,7 @@ t_max = 80 #[s]
 divisiones = t_max+1
 
 #Simulacion
-tiempos, simulacion = simular_dinamica(estado, t_max, dt)
+tiempos1, simulacion = simular_dinamica(estado, t_max, dt)
 
 pos_simul = [sim[0] for sim in simulacion]
 vel_simul = [sim[1] for sim in simulacion]
@@ -103,7 +103,7 @@ vel_simul = [sim[1] for sim in simulacion]
 pos_analitica = []
 vel_analitica = []
 
-for t in tiempos:
+for t in tiempos1:
     pos, vel = sol_analitica_gravedad_arrastre(estado, t, m, g, D_mag)
     pos_analitica.append(pos)
     vel_analitica.append(vel)
@@ -114,16 +114,16 @@ for t in tiempos:
 
 #Graficar
 plt.figure(figsize=(8, 6))
-plt.scatter(tiempos, pos_simul, label='Numérica', color="C1")
-plt.plot(tiempos, pos_analitica, label='Analitica', ls='-')
+plt.scatter(tiempos1, pos_simul, label='Numérica', color="C1")
+plt.plot(tiempos1, pos_analitica, label='Analitica', ls='-')
 plt.title('Posición vertical [m/s]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Posicion [m]')
 plt.legend()
 
 plt.figure(figsize=(8, 6))
-plt.scatter(tiempos, vel_simul, label="Numérica", color="C1")
-plt.plot(tiempos, vel_analitica, label='Analitica', ls='-')
+plt.scatter(tiempos1, vel_simul, label="Numérica", color="C1")
+plt.plot(tiempos1, vel_analitica, label='Analitica', ls='-')
 plt.title('Velocidad vertical [m/s]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
@@ -287,7 +287,7 @@ opacidad=1
 # Graficar resultados
 plt.figure(figsize=(8, 6))
 #Checar el tamano de la solcion analitica?
-#plt.plot(tiempos, pos_analitica, label='Analitica', ls='-')
+plt.plot(tiempos1, pos_analitica, label='Analitica', ls='-')
 plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
 plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
 plt.plot(tiempos_rk2, pos_rk2, label='RK2', linestyle='dashed', alpha=opacidad) #marker ='v', alpha= opacidad)
