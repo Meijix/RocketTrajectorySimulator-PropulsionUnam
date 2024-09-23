@@ -2,7 +2,10 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+
+from Cond_Init import *
 from IntegradoresCasos import *
+from FunSimularDinamica import *
 
 # Función para la masa variable
 def masa_variable(t, m0, beta):
@@ -25,97 +28,68 @@ def sol_analitica_gravedad_empuje_masa_var(z0, v0, t, m0, beta, F0):
     return z, v
 
 
+##############################################################
+# Simulaciones numericas con diferentes integradores
+integradores = [Euler, RungeKutta4, RungeKutta2]#, RKF45]
+labels = ['Euler', 'RK4', 'RK2'] #, 'RKF45']
 
-def simular_dinamica(estado, t_max, dt):
-    #print(estado)
-    t = 0.0
-    it = 0
-    #########################################
-    #CAMBIO DE METODO DE INTEGRACIÓN
-    # Integracion = Euler(der_gravedad_masa_cte) #ocupa dt=0.005
-    Integracion = RungeKutta4(der_gravedad_empuje_masa_var) #ocupa dt=0.1
-    # Integracion = RKF45(der_gravedad_masa_cte)
-    #Integracion = RungeKutta2(self.fun_derivs)
-    ##########################################
+for integrador, label in zip(integradores, labels):
+    tiempos, sim = simular_dinamica(estado, t_max, dt, integrador, der_gravedad_empuje_masa_var)
+    pos = [sim[i][0] for i in range(len(sim))]
+    vel = [sim[i][1] for i in range(len(sim))]
     
-    sim=[estado] #lista de estados de vuelo
-    tiempos=[0] #lista de tiempos
-    while t < t_max:
-        #print(t)
-        # Integracion numérica del estado actual
-        #el dt_new se usa para que el inetgrador actualize el paso de tiempo
-        nuevo_estado = Integracion.step(t, estado, dt)
-        # nuevo_estado, dt_new = Integracion.step(t, estado, dt, tol=1e-5)
-        # print(dt_new)
-        # dt = dt_new
-        #print(dt_new,dt)
-        #print("dt= ", dt)
-
-        # Avanzar estado
-        it += 1
-        t += dt
-        estado = nuevo_estado
-
-        sim.append(estado)
-        tiempos.append(t)
-
-        #Indicar el avance en la simulacion
-        if it%500==0:
-            print(f"Iteracion {it}, t={t:.1f} s, altitud={estado[0]:.1f} m, vel vert={estado[1]:.1f}")
-        
-        if estado[0] < 0:
-            break
-
-    return tiempos, sim
-
-
-# Parámetros del sistema
-m0 = 5.0  # masa inicial
-beta = 0.1  # tasa de cambio de masa
-F0 = 10.0  # empuje constante
-g = 9.81  # aceleración de gravedad
-rho = 1.225
-A = 1
-cd = 0.45
-D_mag = 0.5 * cd * A * rho
-
-# Estado inicial
-z0 = 0
-v0 = 80
-
-# Parámetros de la simulación
-dt = 0.01  # paso de tiempo
-t_max = 80  # tiempo máximo
-divisiones = t_max + 1
-
-# Simulación
-estado = np.array([z0, v0])
-tiempos, simulacion = simular_dinamica(estado, t_max, dt)
-
-pos_simul = [sim[0] for sim in simulacion]
-vel_simul = [sim[1] for sim in simulacion]
+    if label == 'Euler':
+        tiempos_euler = tiempos
+        pos_euler = pos
+        vel_euler = vel
+    elif label == 'RK4':
+        tiempos_rk4 = tiempos
+        pos_rk4 = pos
+        vel_rk4 = vel
+    elif label =='RK2':
+        tiempos_rk2 = tiempos
+        pos_rk2 = pos
+        vel_rk2 = vel
+    elif label == 'RKF45':
+        tiempos_rkf45 = tiempos
+        pos_rkf45 = pos
+        vel_rkf45 = vel
 
 # Solución analítica
 pos_analitica = []
 vel_analitica = []
 
-for t in tiempos:
+for t in tiempos_euler:
     pos, vel = sol_analitica_gravedad_empuje_masa_var(z0, v0, t, m0, beta, F0)
     pos_analitica.append(pos)
     vel_analitica.append(vel)
 
-# Graficar
+########################################################
+####GRAFICAS
+########################################################
+opacidad=1
+# Graficar resultados
 plt.figure(figsize=(8, 6))
-plt.scatter(tiempos, pos_simul, label='Numérica', color="C1")
-plt.plot(tiempos, pos_analitica, label='Analitica', ls='-')
-plt.title('Posición vertical [m/s]')
+#Analitica
+plt.plot(tiempos_euler, pos_analitica, label='Analitica', ls='-', alpha=opacidad)
+#Simulacion numerica
+plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
+plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
+plt.plot(tiempos_rk2, pos_rk2, label='RK2', linestyle='dashed', alpha=opacidad) #marker ='v', alpha= opacidad)
+#plt.plot(tiempos_rkf45, pos_rkf45, label='RKF45', marker='X',alpha=opacidad)
+plt.title('Posición vertical [m]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Posición [m]')
 plt.legend()
 
 plt.figure(figsize=(8, 6))
-plt.scatter(tiempos, vel_simul, label="Numérica", color="C1")
-plt.plot(tiempos, vel_analitica, label='Analitica', ls='-')
+#Analitica
+plt.plot(tiempos_euler, vel_analitica, label='Analitica', ls='-', alpha = opacidad)
+#Simulacion numerica
+plt.plot(tiempos_euler, vel_euler, label='Euler', marker='o', alpha= opacidad)
+plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*', alpha=opacidad)
+plt.plot(tiempos_rk2, vel_rk2, label='RK2', linestyle='dashed', alpha=opacidad) 
+#plt.plot(tiempos_rkf45, vel_rkf45, label='RKF45',marker='X', alpha=opacidad)
 plt.title('Velocidad vertical [m/s]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
