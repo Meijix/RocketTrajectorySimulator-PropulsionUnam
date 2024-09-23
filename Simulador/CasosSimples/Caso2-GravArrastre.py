@@ -3,6 +3,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 #from scipy.integrate import odeint
+
+from Cond_Init import *
 from IntegradoresCasos import *
 from FunSimularDinamica import *
 
@@ -113,22 +115,6 @@ tiempos_rkf45 = []
 pos_rkf45 = []
 vel_rkf45 = []
 
-# Estado inicial
-z0 = 0
-v0 = 100
-estado = np.array([z0, v0])
-
-#no afecta la masa la dinamica
-m = 5.0 #masa cte
-g = 9.81 #Aceleracion de gravedad cte
-rho = 1.225
-A = 1
-cd = 0.45
-D_mag = 0.5 * cd * A * rho
-
-# Parametros de la simulacion
-dt = 0.1
-t_max = 80
 
 # Simulaciones numericas con diferentes integradores
 integradores = [Euler, RungeKutta4, RungeKutta2]#, RKF45]

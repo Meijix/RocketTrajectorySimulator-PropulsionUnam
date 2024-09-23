@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 #from scipy.integrate import odeint
 
+from Cond_Init import *
 from IntegradoresCasos import *
 from FunSimularDinamica import * 
 
@@ -69,19 +70,6 @@ vel_rk4 = []
 tiempos_rkf45 = []
 pos_rkf45 = []
 vel_rkf45 = []
-
-# Estado inicial
-z0 = 0
-v0 = 100
-estado = np.array([z0, v0])
-
-#no afecta la masa la dinamica
-#m = 1.0 #masa cte
-
-# Parametros de la simulacion
-dt = 0.1
-t_max = 80
-divisiones = t_max+1
 
 # Simulaciones con diferentes integradores
 integradores = [Euler, RungeKutta4, RungeKutta2]#, RKF45]

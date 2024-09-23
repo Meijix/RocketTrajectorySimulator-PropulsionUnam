@@ -2,6 +2,7 @@ import numpy as np
 
 # Parámetros del sistema
 m0 = 5.0  # masa inicial
+m=m0
 beta = 0.1  # tasa de cambio de masa
 F0 = 10.0  # empuje constante
 g = 9.81  # aceleración de gravedad
