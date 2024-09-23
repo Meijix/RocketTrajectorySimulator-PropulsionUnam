@@ -156,9 +156,6 @@ for integrador, label in zip(integradores, labels):
         pos_rkf45 = pos
         vel_rkf45 = vel
 
-divisiones = t_max+1
-
-
 #Solucion analitica
 pos_analitica = []
 vel_analitica = []
@@ -175,12 +172,15 @@ for t in tiempos_euler:
 
 
 
-
+########################################################
+####GRAFICAS
+########################################################
 opacidad=1
 # Graficar resultados
 plt.figure(figsize=(8, 6))
-#Checar el tamano de la solcion analitica?
+#Analitica
 plt.plot(tiempos_euler, pos_analitica, label='Analitica', ls='-', alpha=opacidad)
+#Simulacion numerica
 plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
 plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
 plt.plot(tiempos_rk2, pos_rk2, label='RK2', linestyle='dashed', alpha=opacidad) #marker ='v', alpha= opacidad)
@@ -191,7 +191,9 @@ plt.ylabel('Posición [m]')
 plt.legend()
 
 plt.figure(figsize=(8, 6))
+#Analitica
 plt.plot(tiempos_euler, vel_analitica, label='Analitica', ls='-', alpha = opacidad)
+#Simulacion numerica
 plt.plot(tiempos_euler, vel_euler, label='Euler', marker='o', alpha= opacidad)
 plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*', alpha=opacidad)
 plt.plot(tiempos_rk2, vel_rk2, label='RK2', linestyle='dashed', alpha=opacidad) 
