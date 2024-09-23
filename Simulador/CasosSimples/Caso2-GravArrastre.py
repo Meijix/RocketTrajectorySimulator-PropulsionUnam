@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 #from scipy.integrate import odeint
 from IntegradoresCasos import *
-
+from FunSimularDinamica import *
 
 def der_gravedad_arrastre(t, state):
     v = state[1]
@@ -27,72 +27,6 @@ def sol_analitica_gravedad_arrastre(state, t, m, g, D_mag):
     z = z0 + (v0 + (g / k)) * (1 - np.exp(-k * t)) / k - g * t / k
     
     return z, v
-
-'''
-def simular_dinamica(estado, t_max, dt):
-    #print(estado)
-    t = 0.0
-    it = 0
-    #########################################
-    #CAMBIO DE METODO DE INTEGRACIÓN
-    Integracion = Euler(der_gravedad_arrastre) #ocupa dt=0.005
-    #Integracion = RungeKutta4(der_gravedad_arrastre) #ocupa dt=0.1
-    # Integracion = RKF45(der_gravedad_arrastre)
-    #Integracion = RungeKutta2(der_gravedad_arrastre)
-    ##########################################
-    
-    sim=[estado] #lista de estados de vuelo
-    tiempos=[0] #lista de tiempos
-    while t < t_max:
-        #print(t)
-        # Integracion numérica del estado actual
-        #el dt_new se usa para que el inetgrador actualize el paso de tiempo
-        nuevo_estado = Integracion.step(t, estado, dt)
-        # nuevo_estado, dt_new = Integracion.step(t, estado, dt, tol=1e-5)
-        # print(dt_new)
-        # dt = dt_new
-        #print(dt_new,dt)
-        #print("dt= ", dt)
-
-        # Avanzar estado
-        it += 1
-        t += dt
-        estado = nuevo_estado
-
-        sim.append(estado)
-        tiempos.append(t)
-
-        #Indicar el avance en la simulacion
-        if it%500==0:
-            print(f"Iteracion {it}, t={t:.1f} s, altitud={estado[0]:.1f} m, vel vert={estado[1]:.1f}")
-        
-        if estado[0] < 0:
-            break
-
-    return tiempos, sim
-
-
-
-#Solucion de ese caso
-# Estado inicial
-z0 = 0
-v0 = 80
-
-#no afecta la masa la dinamica
-m = 5.0 #masa cte
-g = 9.81 #Aceleracion de gravedad cte
-rho = 1.225
-A = 1
-cd = 0.45
-D_mag = 0.5 * cd * A * rho
-
-estado=np.array([z0, v0])
-#print(estado)
-
-#Parametros de la simulacion
-dt = 0.01 #0.1 #[s]
-t_max = 80 #[s]
-'''
 
 '''
 
@@ -169,7 +103,7 @@ plt.show()
 ##############################################################################
 #Comparacion integradores
 # ...
-
+'''
 def simular_dinamica(estado, t_max, dt, integrador):
     # ...
     sim = [estado]
@@ -198,6 +132,7 @@ def simular_dinamica(estado, t_max, dt, integrador):
             break
 
     return tiempos, sim
+'''
 
 
 
@@ -238,7 +173,7 @@ integradores = [Euler, RungeKutta4, RungeKutta2]#, RKF45]
 labels = ['Euler', 'RK4', 'RK2'] #, 'RKF45']
 
 for integrador, label in zip(integradores, labels):
-    tiempos, sim = simular_dinamica(estado, t_max, dt, integrador)
+    tiempos, sim = simular_dinamica(estado, t_max, dt, integrador, der_gravedad_arrastre)
     pos = [sim[i][0] for i in range(len(sim))]
     vel = [sim[i][1] for i in range(len(sim))]
     
