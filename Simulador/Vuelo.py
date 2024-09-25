@@ -312,8 +312,8 @@ class Vuelo:
 
           #Guardar magnitudes y direcciones del viento
           viento_vuelo_vecs.append(v_viento)
-          viento_vuelo_mags.append(self.viento.magnitud)
-          viento_vuelo_dirs.append(self.viento.direccion)
+          viento_vuelo_mags.append(self.viento.magnitud_total)
+          viento_vuelo_dirs.append(self.viento.direccion_total)
         
           #Agregar nueva masa a la lista
           masavuelo.append(self.vehiculo.masa)    

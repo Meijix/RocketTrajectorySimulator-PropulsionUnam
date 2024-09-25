@@ -25,6 +25,9 @@ class Viento:
 
         self.vector_base = None
         self.vector_rafagoso = None
+
+        self.magnitud_total = None
+        self.direccion_total = None
         self.vector = None
         ###################
     def random_values(self):
@@ -42,6 +45,9 @@ class Viento:
         self.random_values()
         self.vector_base = self.vel_base * np.array([np.cos(np.deg2rad(self.dir_base)),0, np.sin(np.deg2rad(self.dir_base))])
         self.vector_rafagoso = self.magnitud * np.array([np.cos(np.deg2rad(self.direccion)),0, np.sin(np.deg2rad(self.direccion))])
+
+        self.magnitud_total = self.vel_base + self.magnitud #np.linalg(self.vector)
+        self.direccion_total = self.dir_base + self.direccion
         self.vector = self.vector_base + self.vector_rafagoso
 
     def actualizar_viento3D(self):
@@ -51,8 +57,10 @@ class Viento:
         #Vector rafagoso
         self.vector_rafagoso = self.magnitud * np.array([np.cos(self.giro)*np.cos(self.direccion), np.sin(self.giro)*np.cos(self.direccion) , np.sin(self.direccion)])
 
-        ###DEBUG: No agregar viento rafagoso
-        self.vector = self.vector_base #+ self.vector_rafagoso
+        
+        self.magnitud_total = self.vel_base + self.magnitud #np.linalg(self.vector)
+        self.direccion_total = self.dir_base + self.direccion
+        self.vector = self.vector_base + self.vector_rafagoso
 
     def __repr__(self):
         return f"Viento(magnitud={self.vel_base+self.magnitud}, direccion={self.dir_base+self.direccion})"
