@@ -4,8 +4,8 @@
     "tiempo_salida_riel": 0.49000000000000027,
     "tiempo_apogeo": 41.16000000000038,
     "tiempo_impacto": 88.93000000000859,
-    "max_altitude": 8989.08545798813,
-    "max_speed": 535.9499123514695,
-    "max_acceleration_linear": 99.09624646665546,
-    "max_acceleration_angular": 1.6516270728491242
+    "max_altitude": 8989.133824856792,
+    "max_speed": 535.9227429109676,
+    "max_acceleration_linear": 99.18186097596688,
+    "max_acceleration_angular": 2.555040169264589
 }
