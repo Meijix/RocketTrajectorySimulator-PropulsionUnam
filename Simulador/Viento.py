@@ -11,7 +11,7 @@ class Viento:
         
         #Parametros viento base
         self.vel_base = vel_base
-        self.dir_base = 180 #0--de izquierda a der, 180-- der hacia izquierda
+        self.dir_base = 0 #0--de izquierda a der, 180-- der hacia izquierda
         self.giro_base = 0 #El vector base esta en el plano XY
         
         #Parametros viento variable
