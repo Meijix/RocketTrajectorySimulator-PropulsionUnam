@@ -22,6 +22,8 @@ class Viento2D:
         self.direccion = None
         self.giro = None
 
+        self.vector_base = None
+        self.vector_rafagoso = None
         self.vector = None
         ###################
     def random_values(self):
@@ -34,20 +36,26 @@ class Viento2D:
         #if (random.random() >= 0.5):
         #  self.direccion *= -1
 
-    def vector_base(self):
-        self.vector = self.vel_base * np.array([np.cos(self.giro)*np.cos(self.dir_base), np.sin(self.giro)*np.cos(self.dir_base) , np.sin(self.dir_base)])
 
     def actualizar_viento2D(self):
         self.random_values()
-        self.vector = self.magnitud * np.array([np.cos(np.deg2rad(self.direccion)),0, np.sin(np.deg2rad(self.direccion))])
+        self.vector_base() = self.vel_base * np.array([np.cos(np.deg2rad(self.dir_base)),0, np.sin(np.deg2rad(self.dir_base))])
+        self.vector_rafagoso = self.magnitud * np.array([np.cos(np.deg2rad(self.direccion)),0, np.sin(np.deg2rad(self.direccion))])
+        self.vector = self.vector_base + self.vector_rafagoso
 
     def actualizar_viento3D(self):
         self.random_values()
-        self.vector = self.magnitud * np.array([np.cos(self.giro)*np.cos(self.direccion), np.sin(self.giro)*np.cos(self.direccion) , np.sin(self.direccion)])
+        self.vector_base = self.vel_base * np.array([np.cos(self.giro)*np.cos(self.dir_base), np.sin(self.giro)*np.cos(self.dir_base) , np.sin(self.dir_base)])
+        self.vector_rafagoso = self.magnitud * np.array([np.cos(self.giro)*np.cos(self.direccion), np.sin(self.giro)*np.cos(self.direccion) , np.sin(self.direccion)])
+        self.vector = self.vector_base + self.vector_rafagoso
 
     def __repr__(self):
-        return f"Viento(magnitud={self.magnitud}, direccion={self.direccion})"
+        return f"Viento(magnitud={self.vel_base+self.magnitud}, direccion={self.dir_base+self.direccion})"
 
+
+
+
+##################################################################################
 
 class Rafaga:
   def __init__(self, t_inicio, duracion, magnitud):
