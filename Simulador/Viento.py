@@ -7,7 +7,7 @@ import matplotlib.animation as animation
 
 class Viento:
 
-    def __init__(self, vel_base= 10, vel_mean=3, vel_var=0.02):
+    def __init__(self, vel_base= 10, vel_mean=3, vel_var=0.02, var_ang=15):
         
         #Parametros viento base
         self.vel_base = vel_base
@@ -17,6 +17,7 @@ class Viento:
         #Parametros viento variable
         self.vel_mean = vel_mean
         self.vel_var = vel_var
+        self.var_ang = var_ang
 
         #Valores aleatorios generados
         self.magnitud = None
@@ -34,6 +35,7 @@ class Viento:
         self.magnitud = random.normal(self.vel_mean, self.vel_var)
         self.direccion = random.uniform(-45, 45) #kappa
         #self.direccion = random.rand(0,180)
+        self.direccion = random.normal(self.dir_base,self.var_ang)
         self.giro = random.uniform(0,180) #phi
         #self.angulo = random.uniform(0,180)
         #Elegir hacia que lado sopla con 0.5 de probabilidad
@@ -152,6 +154,9 @@ if __name__ == "__main__":
     # Show the plot
     plt.show()
 
+
+
+
     '''
 
     ############################
@@ -238,4 +243,29 @@ if __name__ == "__main__":
     #agregar boolean de rafaga_activa
     '''
 
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
+# Crear una figura y un axes 3D
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+# Obtener los componentes del vector 3D
+vx, vy, vz = viento.vector
+
+# Graficar el vector 3D como una flecha
+ax.quiver(0, 0, 0, vx, vy, vz, color='r', length=1, normalize=True)
+
+# Establecer los límites del gráfico
+ax.set_xlim([-15, 15])
+ax.set_ylim([-15, 15])
+ax.set_zlim([-15, 15])
+
+# Agregar etiquetas y título
+ax.set_xlabel('X (m)')
+ax.set_ylabel('Y (m)')
+ax.set_zlabel('Z (m)')
+ax.set_title('Vector de viento 3D')
+
+# Mostrar el gráfico
+plt.show()
