@@ -5,7 +5,7 @@ from Integradores import *
 from funciones import *
 #from condiciones_init import *
 #from Xitle import *
-from Viento import Viento2D
+from Viento import Viento
 
 class Vuelo:
 

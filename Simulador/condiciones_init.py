@@ -13,6 +13,6 @@ altitud_cord = 20
 #fecha
 fecha = "2021-05-01"
 #viento
-viento_actual = Viento2D(10,0)
+viento_actual = Viento(10,2,0)
 #atmosfera
 atmosfera_actual = atmosfera()
