@@ -3,7 +3,9 @@ import random
 import numpy as np
 from numpy import *
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+#import matplotlib.animation as animation
+from mpl_toolkits.mplot3d import Axes3D
+
 
 class Viento:
 
@@ -65,7 +67,7 @@ class Viento:
         self.vector = self.vector_base + self.vector_rafagoso
 
     def __repr__(self):
-        return f"Viento(magnitud={self.vel_base+self.magnitud}, direccion={self.dir_base+self.direccion})"
+        return f"Viento(magnitud={self.magnitud_total}, direccion={self.direccion_total})"
 
 
 
@@ -153,6 +155,32 @@ if __name__ == "__main__":
 
     # Show the plot
     plt.show()
+
+  
+    # Crear una figura y un axes 3D
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Obtener los componentes del vector 3D
+    vx, vy, vz = viento.vector
+
+    # Graficar el vector 3D como una flecha
+    ax.quiver(0, 0, 0, vx, vy, vz, color='r', length=1, normalize=True)
+
+    # Establecer los límites del gráfico
+    ax.set_xlim([-15, 15])
+    ax.set_ylim([-15, 15])
+    ax.set_zlim([-15, 15])
+
+    # Agregar etiquetas y título
+    ax.set_xlabel('X (m)')
+    ax.set_ylabel('Y (m)')
+    ax.set_zlabel('Z (m)')
+    ax.set_title('Vector de viento 3D')
+
+    # Mostrar el gráfico
+    plt.show()
+
 
 
 
@@ -242,30 +270,3 @@ if __name__ == "__main__":
     #se debe apagar la rafaga cuando no este activada y regresar al viento normal
     #agregar boolean de rafaga_activa
     '''
-
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-
-# Crear una figura y un axes 3D
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-
-# Obtener los componentes del vector 3D
-vx, vy, vz = viento.vector
-
-# Graficar el vector 3D como una flecha
-ax.quiver(0, 0, 0, vx, vy, vz, color='r', length=1, normalize=True)
-
-# Establecer los límites del gráfico
-ax.set_xlim([-15, 15])
-ax.set_ylim([-15, 15])
-ax.set_zlim([-15, 15])
-
-# Agregar etiquetas y título
-ax.set_xlabel('X (m)')
-ax.set_ylabel('Y (m)')
-ax.set_zlabel('Z (m)')
-ax.set_title('Vector de viento 3D')
-
-# Mostrar el gráfico
-plt.show()
