@@ -38,7 +38,7 @@ import time
 inicio = time.time()
 print("Simulando...")
 
-viento_actual = Viento2D(vel_mean=50, vel_var=100)
+viento_actual = Viento(vel_base=30, vel_mean=8, vel_var=0.02)
 #viento_actual.actualizar_viento2D()
 viento_actual.actualizar_viento3D()
 #viento_actual = Viento2D(vel_mean=100, vel_var=0)
