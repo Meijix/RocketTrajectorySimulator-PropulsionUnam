@@ -7,11 +7,12 @@ import matplotlib.animation as animation
 
 class Viento:
 
-    def __init__(self, vel_base= 10, vel_mean=5, vel_var=0.2):
+    def __init__(self, vel_base= 10, vel_mean=3, vel_var=0.02):
         
         #Parametros viento base
         self.vel_base = vel_base
-        self.dir_base = 10 #0-izq hacia derecha, 180- der hacia izquierda
+        self.dir_base = 180 #0--de izquierda a der, 180-- der hacia izquierda
+        self.giro_base = 0 #El vector base esta en el plano XY
         
         #Parametros viento variable
         self.vel_mean = vel_mean
@@ -28,7 +29,7 @@ class Viento:
         ###################
     def random_values(self):
         self.magnitud = random.normal(self.vel_mean, self.vel_var)
-        self.direccion = random.uniform(-15, 15) #kappa
+        self.direccion = random.uniform(-45, 45) #kappa
         #self.direccion = random.rand(0,180)
         self.giro = random.uniform(0,180) #phi
         #self.angulo = random.uniform(0,180)
@@ -45,8 +46,10 @@ class Viento:
 
     def actualizar_viento3D(self):
         self.random_values()
-        self.vector_base = self.vel_base * np.array([np.cos(self.giro)*np.cos(self.dir_base), np.sin(self.giro)*np.cos(self.dir_base) , np.sin(self.dir_base)])
+        self.vector_base = self.vel_base * np.array([np.cos(self.giro_base)*np.cos(self.dir_base), np.sin(self.giro_base)*np.cos(self.dir_base) , np.sin(self.dir_base)])
         self.vector_rafagoso = self.magnitud * np.array([np.cos(self.giro)*np.cos(self.direccion), np.sin(self.giro)*np.cos(self.direccion) , np.sin(self.direccion)])
+
+        ###DEBUG: No agregar viento rafagoso
         self.vector = self.vector_base #+ self.vector_rafagoso
 
     def __repr__(self):
