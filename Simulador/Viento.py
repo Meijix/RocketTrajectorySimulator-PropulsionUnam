@@ -5,13 +5,13 @@ from numpy import *
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-class Viento2D:
+class Viento:
 
     def __init__(self, vel_base= 10, vel_mean=5, vel_var=0.2):
         
         #Parametros viento base
         self.vel_base = vel_base
-        self.dir_base = 90
+        self.dir_base = 10 #0-izq hacia derecha, 180- der hacia izquierda
         
         #Parametros viento variable
         self.vel_mean = vel_mean
@@ -28,7 +28,7 @@ class Viento2D:
         ###################
     def random_values(self):
         self.magnitud = random.normal(self.vel_mean, self.vel_var)
-        self.direccion = random.uniform(-45, 45) #kappa
+        self.direccion = random.uniform(-15, 15) #kappa
         #self.direccion = random.rand(0,180)
         self.giro = random.uniform(0,180) #phi
         #self.angulo = random.uniform(0,180)
@@ -39,7 +39,7 @@ class Viento2D:
 
     def actualizar_viento2D(self):
         self.random_values()
-        self.vector_base() = self.vel_base * np.array([np.cos(np.deg2rad(self.dir_base)),0, np.sin(np.deg2rad(self.dir_base))])
+        self.vector_base = self.vel_base * np.array([np.cos(np.deg2rad(self.dir_base)),0, np.sin(np.deg2rad(self.dir_base))])
         self.vector_rafagoso = self.magnitud * np.array([np.cos(np.deg2rad(self.direccion)),0, np.sin(np.deg2rad(self.direccion))])
         self.vector = self.vector_base + self.vector_rafagoso
 
@@ -47,7 +47,7 @@ class Viento2D:
         self.random_values()
         self.vector_base = self.vel_base * np.array([np.cos(self.giro)*np.cos(self.dir_base), np.sin(self.giro)*np.cos(self.dir_base) , np.sin(self.dir_base)])
         self.vector_rafagoso = self.magnitud * np.array([np.cos(self.giro)*np.cos(self.direccion), np.sin(self.giro)*np.cos(self.direccion) , np.sin(self.direccion)])
-        self.vector = self.vector_base + self.vector_rafagoso
+        self.vector = self.vector_base #+ self.vector_rafagoso
 
     def __repr__(self):
         return f"Viento(magnitud={self.vel_base+self.magnitud}, direccion={self.dir_base+self.direccion})"
@@ -103,12 +103,16 @@ class Rafaga1Coseno(Rafaga):
 
 if __name__ == "__main__":
     #Creacion del viento actual de prueba
-    viento = Viento2D(vel_mean=10, vel_var=0.05)
+    viento = Viento(vel_base= 10, vel_mean=3, vel_var=0.2)
     #viento.actualizar_viento2D()
+
     viento.actualizar_viento3D()
+    print("Vector 1 de viento:")
     print(viento)
-    print(viento.vector)  
+    print(viento.vector) 
+
     viento.actualizar_viento3D()
+    print("Vector 2 de viento:")
     print(viento)
     print(viento.vector)  
         
