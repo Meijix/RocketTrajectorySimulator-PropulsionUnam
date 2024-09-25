@@ -7,12 +7,21 @@ import matplotlib.animation as animation
 
 class Viento2D:
 
-    def __init__(self, vel_mean=10, vel_var=2):
+    def __init__(self, vel_base= 10, vel_mean=5, vel_var=0.2):
+        
+        #Parametros viento base
+        self.vel_base = vel_base
+        self.dir_base = 90
+        
+        #Parametros viento variable
         self.vel_mean = vel_mean
         self.vel_var = vel_var
+
+        #Valores aleatorios generados
         self.magnitud = None
         self.direccion = None
         self.giro = None
+
         self.vector = None
         ###################
     def random_values(self):
@@ -22,8 +31,11 @@ class Viento2D:
         self.giro = random.uniform(0,180) #phi
         #self.angulo = random.uniform(0,180)
         #Elegir hacia que lado sopla con 0.5 de probabilidad
-        if (random.random() >= 0.5):
-          self.direccion *= -1
+        #if (random.random() >= 0.5):
+        #  self.direccion *= -1
+
+    def vector_base(self):
+        self.vector = self.vel_base * np.array([np.cos(self.giro)*np.cos(self.dir_base), np.sin(self.giro)*np.cos(self.dir_base) , np.sin(self.dir_base)])
 
     def actualizar_viento2D(self):
         self.random_values()
