@@ -46,7 +46,9 @@ class Viento:
 
     def actualizar_viento3D(self):
         self.random_values()
+        #Vector base
         self.vector_base = self.vel_base * np.array([np.cos(self.giro_base)*np.cos(self.dir_base), np.sin(self.giro_base)*np.cos(self.dir_base) , np.sin(self.dir_base)])
+        #Vector rafagoso
         self.vector_rafagoso = self.magnitud * np.array([np.cos(self.giro)*np.cos(self.direccion), np.sin(self.giro)*np.cos(self.direccion) , np.sin(self.direccion)])
 
         ###DEBUG: No agregar viento rafagoso
