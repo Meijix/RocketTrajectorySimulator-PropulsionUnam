@@ -141,6 +141,59 @@ plt.legend()
 
 plt.show()
 
+#################################################
+#Comparacion de errores
+#Calcular y graficar el error numerico
+#error en metros
+error_pos_euler = [pos_euler[i] - pos_analitica[i] for i in range(len(tiempos_euler))]
+error_vel_euler = [vel_euler[i] - vel_analitica[i] for i in range(len(tiempos_euler))]
+error_pos_rk4 = [pos_rk4[i] - pos_analitica[i] for i in range(len(tiempos_euler))]
+error_vel_rk4 = [vel_rk4[i] - vel_analitica[i] for i in range(len(tiempos_euler))]
+error_pos_rk2 = [pos_rk2[i] - pos_analitica[i] for i in range(len(tiempos_euler))]
+error_vel_rk2 = [vel_rk2[i] - vel_analitica[i] for i in range(len(tiempos_euler))]
+error_pos_rkf45 = [pos_rkf45[i] - pos_analitica[i] for i in range(len(tiempos_euler))]
+error_vel_rkf45 = [vel_rkf45[i] - vel_analitica[i] for i in range(len(tiempos_euler))]
+#error relativo
+error_pos_rel_euler = [abs(error_pos_euler[i]/pos_analitica[i]) for i in range(len(tiempos_euler))]
+error_vel_rel_euler = [abs(error_vel_euler[i]/vel_analitica[i]) for i in range(len(tiempos_euler))]
+error_pos_rel_rk4 = [abs(error_pos_rk4[i]/pos_analitica[i]) for i in range(len(tiempos_euler))]
+error_vel_rel_rk4 = [abs(error_vel_rk4[i]/vel_analitica[i]) for i in range(len(tiempos_euler))]
+error_pos_rel_rk2 = [abs(error_pos_rk2[i]/pos_analitica[i]) for i in range(len(tiempos_euler))]
+error_vel_rel_rk2 = [abs(error_vel_rk2[i]/vel_analitica[i]) for i in range(len(tiempos_euler))]
+error_pos_rel_rkf45 = [abs(error_pos_rkf45[i]/pos_analitica[i]) for i in range(len(tiempos_euler))]
+error_vel_rel_rkf45 = [abs(error_vel_rkf45[i]/vel_analitica[i]) for i in range(len(tiempos_euler))]
+plt.figure(figsize=(8, 6))
+plt.plot(tiempos_euler, error_pos_euler, label='Error Euler z(t)', marker='o')
+plt.plot(tiempos_euler, error_vel_euler, label='Error Euler v(t)', marker='o')
+plt.plot(tiempos_euler, error_pos_rk4, label='Error RK4 z(t)', marker='*')
+plt.plot(tiempos_euler, error_vel_rk4, label='Error RK4 v(t)', marker='*')
+plt.plot(tiempos_euler, error_pos_rk2, label='Error RK2 z(t)', linestyle='dashed')
+plt.plot(tiempos_euler, error_vel_rk2, label='Error RK2 v(t)', linestyle='dashed')
+plt.plot(tiempos_euler, error_pos_rkf45, label='Error RKF45 z(t)', marker='X')
+plt.plot(tiempos_euler, error_vel_rkf45, label='Error RKF45 v(t)', marker='X')
+plt.title("Error absoluto")
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Errorres absolutos [m],[m/s]')
+plt.legend()
+#plt.show()
+#################################################
+plt.figure(figsize=(8, 6))
+plt.plot(tiempos_euler, error_pos_rel_euler, label='Error Euler z(t)', marker='o')
+plt.plot(tiempos_euler, error_vel_rel_euler, label='Error Euler v(t)', marker='o')
+plt.plot(tiempos_euler, error_pos_rel_rk4, label='Error RK4 z(t)', marker='*')
+plt.plot(tiempos_euler, error_vel_rel_rk4, label='Error RK4 v(t)', marker='*')
+plt.plot(tiempos_euler, error_pos_rel_rk2, label='Error RK2 z(t)', linestyle='dashed')
+plt.plot(tiempos_euler, error_vel_rel_rk2, label='Error RK2 v(t)', linestyle='dashed')
+plt.plot(tiempos_euler, error_pos_rel_rkf45, label='Error RKF45 z(t)', marker='X')
+plt.plot(tiempos_euler, error_vel_rel_rkf45, label='Error RKF45 v(t)', marker='X')
+plt.title("Error relativo")
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Errores relativos')
+plt.legend()
+plt.show()
+
+
+
 #####################################################
 #####################################################
 ###Diferentes pasos de tiempo y un mismo integrador
