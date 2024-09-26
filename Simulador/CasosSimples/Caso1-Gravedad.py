@@ -111,7 +111,7 @@ opacidad=1
 # Graficar resultados
 plt.figure(figsize=(8, 6))
 #Analitica
-plt.plot(tiempos_euler, pos_analitica, label='Analitica', ls='-')
+#plt.plot(tiempos_euler, pos_analitica, label='Analitica', ls='-')
 #Simulacion numerica
 plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
 plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
@@ -126,12 +126,94 @@ plt.legend()
 
 plt.figure(figsize=(8, 6))
 #Analitica
-plt.plot(tiempos_euler, vel_analitica, label='Analitica', ls='-')
+#plt.plot(tiempos_euler, vel_analitica, label='Analitica', ls='-')
 #Simulacion numerica
 plt.plot(tiempos_euler, vel_euler, label='Euler', marker='o')
 plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*')
 plt.plot(tiempos_rk2, vel_rk2, label='RK2', linestyle='dashed', alpha=opacidad) 
 plt.plot(tiempos_rkf45, vel_rkf45, label='RKF45',marker='X')
+
+plt.title('Velocidad vertical [m/s]')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Velocidad [m/s]')
+plt.legend()
+
+plt.show()
+
+
+#####################################################
+###Diferentes pasos de tiempo
+# Listas para guardar los resultados
+# Listas para guardar los resultados
+tiempos_euler_dt1 = []
+pos_euler_dt1 = []
+vel_euler_dt1 = []
+
+tiempos_euler_dt2 = []
+pos_euler_dt2 = []
+vel_euler_dt2 = []
+
+tiempos_euler_dt3 = []
+pos_euler_dt3 = []
+vel_euler_dt3 = []
+
+tiempos_euler_dt4 = []
+pos_euler_dt4 = []
+vel_euler_dt4 = []
+
+tiempos_euler_dt5 = []
+pos_euler_dt5 = []
+vel_euler_dt5 = []
+
+# Simulaciones con diferentes pasos de tiempo
+dt_values = [0.005, 0.01, 0.05, 0.1, 0.25]
+labels = ['dt=0.005', 'dt=0.01', 'dt=0.05', 'dt=0.1', 'dt=0.25']
+
+for dt, label in zip(dt_values, labels):
+    tiempos, sim = simular_dinamica(estado, t_max, dt, Euler, der_gravedad_masa_cte)
+    pos = [sim[i][0] for i in range(len(sim))]
+    vel = [sim[i][1] for i in range(len(sim))]
+    
+    if label == 'dt=0.005':
+        tiempos_euler_dt1 = tiempos
+        pos_euler_dt1 = pos
+        vel_euler_dt1 = vel
+    elif label == 'dt=0.01':
+        tiempos_euler_dt2 = tiempos
+        pos_euler_dt2 = pos
+        vel_euler_dt2 = vel
+    elif label == 'dt=0.05':
+        tiempos_euler_dt3 = tiempos
+        pos_euler_dt3 = pos
+        vel_euler_dt3 = vel
+    elif label == 'dt=0.1':
+        tiempos_euler_dt4 = tiempos
+        pos_euler_dt4 = pos
+        vel_euler_dt4 = vel
+    elif label == 'dt=0.25':
+        tiempos_euler_dt5 = tiempos
+        pos_euler_dt5 = pos
+        vel_euler_dt5 = vel
+
+# Graficar resultados
+plt.figure(figsize=(8, 6))
+plt.plot(tiempos_euler_dt1, pos_euler_dt1, label='dt=0.005')
+plt.plot(tiempos_euler_dt2, pos_euler_dt2, label='dt=0.01')
+plt.plot(tiempos_euler_dt3, pos_euler_dt3, label='dt=0.05')
+plt.plot(tiempos_euler_dt4, pos_euler_dt4, label='dt=0.1')
+plt.plot(tiempos_euler_dt5, pos_euler_dt5, label='dt=0.25')
+
+plt.title('Posición vertical [m]')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Posición [m]')
+plt.legend()
+
+plt.figure(figsize=(8, 6))
+plt.plot(tiempos_euler_dt1, vel_euler_dt1, label='dt=0.005')
+plt.plot(tiempos_euler_dt2, vel_euler_dt2, label='dt=0.01')
+plt.plot(tiempos_euler_dt3, vel_euler_dt3, label='dt=0.05')
+plt.plot(tiempos_euler_dt4, vel_euler_dt4, label='dt=0.1')
+plt.plot(tiempos_euler_dt5, vel_euler_dt5, label='dt=0.25')
 
 plt.title('Velocidad vertical [m/s]')
 plt.xlabel('Tiempo [s]')
