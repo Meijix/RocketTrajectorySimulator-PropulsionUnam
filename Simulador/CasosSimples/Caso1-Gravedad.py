@@ -20,7 +20,8 @@ def der_gravedad_masa_cte(t, state):
     #print(derivs)
     return derivs
 
-def sol_analitica_gravedad_masa_cte(z0, v0, t):
+def sol_analitica_gravedad_masa_cte(state, t):
+    z0, v0 = state
     z = z0 + (v0*t) - (0.5 * g * (t**2))
     v = v0 - (g*t)
     return z, v
@@ -103,15 +104,15 @@ vel_analitica = []
 
 #la solucion analitica se calcula para los tiempos de Euler
 for t in tiempos_euler:
-    pos, vel = sol_analitica_gravedad_masa_cte(estado, t, g)
+    pos, vel = sol_analitica_gravedad_masa_cte(estado, t)
     pos_analitica.append(pos)
     vel_analitica.append(vel)
 
-opacidad=1
+opacidad=0.5
 # Graficar resultados
 plt.figure(figsize=(8, 6))
 #Analitica
-#plt.plot(tiempos_euler, pos_analitica, label='Analitica', ls='-')
+plt.plot(tiempos_euler, pos_analitica, label='Analitica', ls='-')
 #Simulacion numerica
 plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
 plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
@@ -126,7 +127,7 @@ plt.legend()
 
 plt.figure(figsize=(8, 6))
 #Analitica
-#plt.plot(tiempos_euler, vel_analitica, label='Analitica', ls='-')
+plt.plot(tiempos_euler, vel_analitica, label='Analitica', ls='-')
 #Simulacion numerica
 plt.plot(tiempos_euler, vel_euler, label='Euler', marker='o')
 plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*')
@@ -142,8 +143,9 @@ plt.show()
 
 #####################################################
 #####################################################
-###Diferentes pasos de tiempo
+###Diferentes pasos de tiempo y un mismo integrador
 #####################################################
+Integrador_oficial= Euler
 tiempos_euler_dt1 = []
 pos_euler_dt1 = []
 vel_euler_dt1 = []
@@ -169,7 +171,7 @@ dt_values = [0.005, 0.01, 0.05, 0.1, 0.25]
 labels = ['dt=0.005', 'dt=0.01', 'dt=0.05', 'dt=0.1', 'dt=0.25']
 
 for dt, label in zip(dt_values, labels):
-    tiempos, sim = simular_dinamica(estado, t_max, dt, Euler, der_gravedad_masa_cte)
+    tiempos, sim = simular_dinamica(estado, t_max, dt, Integrador_oficial, der_gravedad_masa_cte)
     pos = [sim[i][0] for i in range(len(sim))]
     vel = [sim[i][1] for i in range(len(sim))]
     
@@ -203,12 +205,13 @@ plt.plot(tiempos_euler_dt4, pos_euler_dt4, label='dt=0.1', marker='*')
 plt.plot(tiempos_euler_dt5, pos_euler_dt5, label='dt=0.25', marker='*')
 
 
-#Para la velocidad la solucion va a ser igual pues e sun metodo de segundo orden? (Preguntar dr Claudio)
-plt.title('Posición vertical [m]')
+plt.title('Posición vertical[m] con distintos dt ')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Posición [m]')
 plt.legend()
 
+#Para la velocidad la solucion va a ser igual pues e sun metodo de segundo orden? (Preguntar dr Claudio)
+'''
 plt.figure(figsize=(8, 6))
 plt.plot(tiempos_euler_dt1, vel_euler_dt1, label='dt=0.005')
 plt.plot(tiempos_euler_dt2, vel_euler_dt2, label='dt=0.01')
@@ -220,5 +223,5 @@ plt.title('Velocidad vertical [m/s]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
 plt.legend()
-
+'''
 plt.show()
