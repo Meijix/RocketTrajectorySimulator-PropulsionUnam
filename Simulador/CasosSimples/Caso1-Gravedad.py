@@ -140,11 +140,10 @@ plt.legend()
 
 plt.show()
 
-
+#####################################################
 #####################################################
 ###Diferentes pasos de tiempo
-# Listas para guardar los resultados
-# Listas para guardar los resultados
+#####################################################
 tiempos_euler_dt1 = []
 pos_euler_dt1 = []
 vel_euler_dt1 = []
@@ -197,12 +196,14 @@ for dt, label in zip(dt_values, labels):
 
 # Graficar resultados
 plt.figure(figsize=(8, 6))
-plt.plot(tiempos_euler_dt1, pos_euler_dt1, label='dt=0.005')
-plt.plot(tiempos_euler_dt2, pos_euler_dt2, label='dt=0.01')
-plt.plot(tiempos_euler_dt3, pos_euler_dt3, label='dt=0.05')
-plt.plot(tiempos_euler_dt4, pos_euler_dt4, label='dt=0.1')
-plt.plot(tiempos_euler_dt5, pos_euler_dt5, label='dt=0.25')
+plt.plot(tiempos_euler_dt1, pos_euler_dt1, label='dt=0.005', marker='*')
+plt.plot(tiempos_euler_dt2, pos_euler_dt2, label='dt=0.01', marker='*')
+plt.plot(tiempos_euler_dt3, pos_euler_dt3, label='dt=0.05', marker='*')
+plt.plot(tiempos_euler_dt4, pos_euler_dt4, label='dt=0.1', marker='*')
+plt.plot(tiempos_euler_dt5, pos_euler_dt5, label='dt=0.25', marker='*')
 
+
+#Para la velocidad la solucion va a ser igual pues e sun metodo de segundo orden? (Preguntar dr Claudio)
 plt.title('Posición vertical [m]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Posición [m]')
