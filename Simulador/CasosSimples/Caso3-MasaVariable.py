@@ -23,8 +23,8 @@ def der_gravedad_empuje_masa_var(t, state):
 # Función para la solución analítica
 def sol_analitica_gravedad_empuje_masa_var(z0, v0, t, m0, beta, F0):
     m = masa_variable(t, m0, beta)
-    v = v0 + (F0/m0) * (1 - np.exp(-beta * t)) - g * t
-    z = z0 + v0 * t + (F0/(2*m0*beta)) * (1 - np.exp(-2*beta * t)) - (g/2) * t**2
+    v = v0 + np.log(m0/(m0-beta*t))
+    z = z0 + v0 * t + 0
     return z, v
 
 
