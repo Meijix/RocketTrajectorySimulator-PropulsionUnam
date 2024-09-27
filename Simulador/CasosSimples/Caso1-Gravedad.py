@@ -116,9 +116,8 @@ plt.plot(tiempos_euler, pos_analitica, label='Analitica', ls='-')
 #Simulacion numerica
 plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
 plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
-plt.plot(tiempos_rk2, pos_rk2, label='RK2', linestyle='dashed', alpha=opacidad) #marker ='v', alpha= opacidad)
+plt.plot(tiempos_rk2, pos_rk2, label='RK2', marker='^', alpha=opacidad) #marker ='v', alpha= opacidad)
 plt.plot(tiempos_rkf45, pos_rkf45, label='RKF45', marker='X',alpha=opacidad)
-
 plt.title('Posición vertical [m]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Posición [m]')
@@ -131,15 +130,14 @@ plt.plot(tiempos_euler, vel_analitica, label='Analitica', ls='-')
 #Simulacion numerica
 plt.plot(tiempos_euler, vel_euler, label='Euler', marker='o')
 plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*')
-plt.plot(tiempos_rk2, vel_rk2, label='RK2', linestyle='dashed', alpha=opacidad) 
+plt.plot(tiempos_rk2, vel_rk2, label='RK2', marker='^', alpha=opacidad) 
 plt.plot(tiempos_rkf45, vel_rkf45, label='RKF45',marker='X')
-
 plt.title('Velocidad vertical [m/s]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
 plt.legend()
 
-plt.show()
+#plt.show()
 
 #################################################
 #Comparacion de errores
@@ -167,36 +165,56 @@ error_pos_rel_rkf45 = [abs(error_pos_rkf45[i]/pos_analitica[i]) for i in range(l
 error_vel_rel_rkf45 = [abs(error_vel_rkf45[i]/vel_analitica[i]) for i in range(len(tiempos_rkf45))]
 
 
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 1)
 plt.plot(tiempos_euler, error_pos_euler, label='Error Euler z(t)', marker='o')
-plt.plot(tiempos_euler, error_vel_euler, label='Error Euler v(t)', marker='o')
 plt.plot(tiempos_rk4, error_pos_rk4, label='Error RK4 z(t)', marker='*') 
-plt.plot(tiempos_rk4, error_vel_rk4, label='Error RK4 v(t)', marker='*')
-plt.plot(tiempos_rk2, error_pos_rk2, label='Error RK2 z(t)', linestyle='dashed')
-plt.plot(tiempos_rk2, error_vel_rk2, label='Error RK2 v(t)', linestyle='dashed')
+plt.plot(tiempos_rk2, error_pos_rk2, label='Error RK2 z(t)', marker='^')
 plt.plot(tiempos_rkf45, error_pos_rkf45, label='Error RKF45 z(t)', marker='X')
-plt.plot(tiempos_rkf45, error_vel_rkf45, label='Error RKF45 v(t)', marker='X')
-plt.title("Error absoluto")
+plt.title("Error absoluto en la posicion")
 plt.xlabel('Tiempo [s]')
-plt.ylabel('Errorres absolutos [m],[m/s]')
+plt.ylabel('Errorres absolutos [m]')
 plt.legend()
+
+
+plt.subplot(1, 2, 2)
+plt.plot(tiempos_euler, error_vel_euler, label='Error Euler v(t)', marker='o')
+plt.plot(tiempos_rk4, error_vel_rk4, label='Error RK4 v(t)', marker='*')
+plt.plot(tiempos_rk2, error_vel_rk2, label='Error RK2 v(t)', marker='^')
+plt.plot(tiempos_rkf45, error_vel_rkf45, label='Error RKF45 v(t)', marker='X')
+plt.title("Error absoluto en la velocidad")
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Errorres absolutos [m/s]')
+plt.legend()
+
 plt.show()
 
 
 #################################################
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(12, 6))
+
+plt.subplot(1, 2, 1)
 plt.plot(tiempos_euler, error_pos_rel_euler, label='Error Euler z(t)', marker='o')
-plt.plot(tiempos_euler, error_vel_rel_euler, label='Error Euler v(t)', marker='o')
 plt.plot(tiempos_rk4, error_pos_rel_rk4, label='Error RK4 z(t)', marker='*')
-plt.plot(tiempos_rk4, error_vel_rel_rk4, label='Error RK4 v(t)', marker='*')
-plt.plot(tiempos_rk2, error_pos_rel_rk2, label='Error RK2 z(t)', linestyle='dashed')
-plt.plot(tiempos_rk2, error_vel_rel_rk2, label='Error RK2 v(t)', linestyle='dashed')
+plt.plot(tiempos_rk2, error_pos_rel_rk2, label='Error RK2 z(t)', marker='^')
 plt.plot(tiempos_rkf45, error_pos_rel_rkf45, label='Error RKF45 z(t)', marker='X')
-plt.plot(tiempos_rkf45, error_vel_rel_rkf45, label='Error RKF45 v(t)', marker='X')
-plt.title("Error relativo")
+
+plt.title("Error relativo de posicion")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Errores relativos')
 plt.legend()
+
+plt.subplot(1, 2, 2)
+plt.plot(tiempos_euler, error_vel_rel_euler, label='Error Euler v(t)', marker='o')
+plt.plot(tiempos_rk4, error_vel_rel_rk4, label='Error RK4 v(t)', marker='*')
+plt.plot(tiempos_rk2, error_vel_rel_rk2, label='Error RK2 v(t)', marker='^')
+plt.plot(tiempos_rkf45, error_vel_rel_rkf45, label='Error RKF45 v(t)', marker='X')
+
+plt.title("Error relativo de velocidad")
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Errores relativos')
+plt.legend()
+
 plt.show()
 
 
