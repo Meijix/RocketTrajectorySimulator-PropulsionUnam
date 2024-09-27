@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from Cond_Init import *
 from IntegradoresCasos import *
 from FunSimularDinamica import *
+from Errores import *
 
 def der_gravedad_arrastre(t, state):
     v = state[1]
@@ -31,16 +32,6 @@ def sol_analitica_gravedad_arrastre(state, t, m, g, D_mag):
     return z, v
 
 '''
-
-#Calcular y graficar el error numerico
-#error en metros
-error_pos = [pos_simul[i] - pos_analitica[i] for i in range(len(tiempos))]
-error_vel = [vel_simul[i] - vel_analitica[i] for i in range(len(tiempos))]
-
-#error relativo
-error_pos_rel = [abs(error_pos[i]/pos_analitica[i]) for i in range(len(tiempos))]
-error_vel_rel = [abs(error_vel[i]/vel_analitica[i]) for i in range(len(tiempos))]
-
 plt.figure(figsize=(8, 6))
 plt.plot(tiempos, error_pos, label='Error z(t)')
 plt.plot(tiempos, error_vel, label='Error v(t)')
@@ -58,7 +49,6 @@ plt.ylabel('Errores relativos')
 plt.legend()
 
 plt.show()
-
 
 ##############################
 # Simulación con scipy
@@ -169,7 +159,7 @@ plt.plot(tiempos_euler, pos_analitica, label='Analitica', ls='-', alpha=opacidad
 #Simulacion numerica
 plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
 plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
-plt.plot(tiempos_rk2, pos_rk2, label='RK2', linestyle='dashed', alpha=opacidad) #marker ='v', alpha= opacidad)
+plt.plot(tiempos_rk2, pos_rk2, label='RK2', marker='^', alpha=opacidad) 
 plt.plot(tiempos_rkf45, pos_rkf45, label='RKF45', marker='X',alpha=opacidad)
 plt.title('Posición vertical [m]')
 plt.xlabel('Tiempo [s]')
@@ -182,7 +172,7 @@ plt.plot(tiempos_euler, vel_analitica, label='Analitica', ls='-', alpha = opacid
 #Simulacion numerica
 plt.plot(tiempos_euler, vel_euler, label='Euler', marker='o', alpha= opacidad)
 plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*', alpha=opacidad)
-plt.plot(tiempos_rk2, vel_rk2, label='RK2', linestyle='dashed', alpha=opacidad) 
+plt.plot(tiempos_rk2, vel_rk2, label='RK2', marker= '^', alpha=opacidad) 
 plt.plot(tiempos_rkf45, vel_rkf45, label='RKF45',marker='X', alpha=opacidad)
 plt.title('Velocidad vertical [m/s]')
 plt.xlabel('Tiempo [s]')
