@@ -25,14 +25,9 @@ def sol_analitica_gravedad_arrastre(state, t, m, g, D_mag):
     z0= state[0]
     v0= state[1]
 
-    #k = np.sqrt(g * D_mag / m)
-    #v = (v0 + (g / k)) * np.exp(-k * t) - (g / k)
-    #z = z0 + (v0 + (g / k)) * (1 - np.exp(-k * t)) / k - g * t / k
-
-    raiz=np.sqrt(g*D_mag/m)
-    v=np.sqrt(m*g/D_mag)* np.tan(raiz*(t+v0))
-    z = (-m*np.sqrt(m*g)/g*D_mag)*np.log(np.abs(np.cos(raiz*(t+v0))))
-    
+    k = np.sqrt(g * D_mag / m)
+    v = (v0 + (g / k)) * np.exp(-k * t) - (g / k)
+    z = z0 + (v0 + (g / k)) * (1 - np.exp(-k * t)) / k - g * t / k
     return z, v
 
 '''
