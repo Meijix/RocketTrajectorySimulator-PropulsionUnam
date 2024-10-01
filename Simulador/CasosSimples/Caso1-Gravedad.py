@@ -149,15 +149,53 @@ plt.legend()
 #errores absolutos y relativos
 error_pos_euler, error_pos_rel_euler = errores(pos_euler, pos_analitica_euler, tiempos_euler)
 error_vel_euler, error_vel_rel_euler = errores(vel_euler, vel_analitica_euler, tiempos_euler)
-
+error_pos_euler_L2, error_pos_euler_medioabs = calcular_errores_globales(error_pos_euler, tiempos_euler)
+error_vel_euler_L2, error_vel_euler_medioabs = calcular_errores_globales(error_vel_euler,tiempos_euler)
+'''
+print("Errores globales Euler")
+print("Error posicion global L2:", error_pos_euler_L2)
+print("Error posicion global medio absoluto:", error_pos_euler_medioabs)
+print("Error velocidad global L2:", error_vel_euler_L2)
+print("Error velocidad global medio absoluto:", error_vel_euler_medioabs)
+'''
+##############
 error_pos_rk4, error_pos_rel_rk4 = errores(pos_rk4, pos_analitica_rk4, tiempos_rk4)
 error_vel_rk4, error_vel_rel_rk4 = errores(vel_rk4, vel_analitica_rk4, tiempos_rk4)
-
+error_pos_rk4_L2, error_pos_rk4_medioabs = calcular_errores_globales(error_pos_rk4, tiempos_rk4)
+error_vel_rk4_L2, error_vel_rk4_medioabs = calcular_errores_globales(error_vel_rk4, tiempos_rk4)
+'''
+print("Errores globales RK4")
+print("Error posicion global L2:", error_pos_rk4_L2)
+print("Error posicion global medio absoluto:", error_pos_rk4_medioabs)
+print("Error velocidad global L2:", error_vel_rk4_L2)
+print("Error velocidad global medio absoluto:", error_vel_rk4_medioabs)
+'''
+##############
 error_pos_rk2, error_pos_rel_rk2 = errores(pos_rk2, pos_analitica_rk2, tiempos_rk2)
 error_vel_rk2, error_vel_rel_rk2 = errores(vel_rk2, vel_analitica_rk2, tiempos_rk2)
+error_pos_rk2_L2, error_pos_rk2_medioabs = calcular_errores_globales(error_pos_rk2, tiempos_rk2)
+error_vel_rk2_L2, error_vel_rk2_medioabs = calcular_errores_globales(error_vel_rk2, tiempos_rk2)
+'''
+print("Errores globales RK2")
+print("Error posicion global L2:", error_pos_rk2_L2)
+print("Error posicion global medio absoluto:", error_pos_rk2_medioabs)
+print("Error velocidad global L2:", error_vel_rk2_L2)
+print("Error velocidad global medio absoluto:", error_vel_rk2_medioabs)
+'''
+################
 
 error_pos_rkf45, error_pos_rel_rkf45 = errores(pos_rkf45, pos_analitica_rkf45, tiempos_rkf45)
 error_vel_rkf45, error_vel_rel_rkf45 = errores(vel_rkf45, vel_analitica_rkf45, tiempos_rkf45)
+
+'''
+error_pos_rkf45_L2, error_pos_rkf45_medioabs = calcular_errores_globales(error_pos_rkf45, tiempos_rkf45)
+error_vel_rkf45_L2, error_vel_rkf45_medioabs = calcular_errores_globales(error_vel_rkf45, tiempos_rkf45)
+print("Errores globales RKF45")
+print("Error posicion global L2:", error_pos_rkf45_L2)
+print("Error posicion global medio absoluto:", error_pos_rkf45_medioabs)
+print("Error velocidad global L2:", error_vel_rkf45_L2)
+print("Error velocidad global medio absoluto:", error_vel_rkf45_medioabs)
+'''
 
 # Graficar errores absolutos y relativos
 
@@ -208,9 +246,13 @@ plt.ylabel('Errorres absolutos [m]')
 plt.legend()
 
 #plt.show()
+
+#####################################################
 #####################################################
 #####################################################
 ###Diferentes pasos de tiempo y un mismo integrador
+#####################################################
+#####################################################
 #####################################################
 Integrador_oficial= Euler
 tiempos_euler_dt1 = []

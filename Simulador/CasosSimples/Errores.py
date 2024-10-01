@@ -8,6 +8,14 @@ def errores(numerico,analitico,tiempos):
         #print(i, numerico[i], analitico[i])
     return error_abs, error_rel
 
+def calcular_errores_globales(error_abs, tiempos):
+    # Calcular error global L2
+    error_L2 = np.sqrt(sum([e**2 for e in error_abs])) / len(tiempos)
+    
+    # Calcular error global medio absoluto
+    error_medio_abs = sum([abs(e) for e in error_abs]) / len(tiempos)
+    
+    return error_L2, error_medio_abs
 '''
 def graficar_errores(tiempos1, tiempos2, tiempos3, tiempos4, tiempos5, errorpos1, errorpos2, errorpos3,errorpos4, errorpos5, errorpos_rel1, errorpos_rel2, errorpos_rel3, errorpos_rel4, errorpos_rel5, errorvel1, errorvel2, errorvel3,errorvel4, errorvel5, errorvel_rel1, errorvel_rel2, errorvel_rel3, errorvel_rel4, errorvel_rel5):
     # Grafica errores absolutos y relativos
