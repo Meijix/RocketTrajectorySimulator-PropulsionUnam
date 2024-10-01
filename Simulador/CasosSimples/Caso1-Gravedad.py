@@ -474,4 +474,26 @@ plt.plot(tiempos_euler_dt5, error_vel_rel_dt5, label='dt=0.2', marker='*')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Error relativo')
 plt.legend()
+#plt.show()
+
+
+########################################
+###ERRORES GLOBALES VS DT
+# Grafica errores L2 vs dt
+plt.figure(figsize=(8, 6))
+plt.plot([0.005, 0.01, 0.05, 0.1, 0.2], [error_pos_dt1_L2, error_pos_dt2_L2, error_pos_dt3_L2, error_pos_dt4_L2, error_pos_dt5_L2], label='Error L2 posición', marker='*')
+plt.plot([0.005, 0.01, 0.05, 0.1, 0.2], [error_vel_dt1_L2, error_vel_dt2_L2, error_vel_dt3_L2, error_vel_dt4_L2, error_vel_dt5_L2], label='Error L2 velocidad', marker='*')
+plt.title('Errores L2 vs dt')
+plt.xlabel('dt [s]')
+plt.ylabel('Error L2')
+plt.legend()
+
+# Grafica errores medios absolutos vs dt
+plt.figure(figsize=(8, 6))
+plt.plot([0.005, 0.01, 0.05, 0.1, 0.2], [error_pos_dt1_medioabs, error_pos_dt2_medioabs, error_pos_dt3_medioabs, error_pos_dt4_medioabs, error_pos_dt5_medioabs], label='Error medio absoluto posición', marker='*')
+plt.plot([0.005, 0.01, 0.05, 0.1, 0.2], [error_vel_dt1_medioabs, error_vel_dt2_medioabs, error_vel_dt3_medioabs, error_vel_dt4_medioabs, error_vel_dt5_medioabs], label='Error medio absoluto velocidad', marker='*')
+plt.title('Errores medios absolutos vs dt')
+plt.xlabel('dt [s]')
+plt.ylabel('Error medio absoluto')
+plt.legend()
 plt.show()
