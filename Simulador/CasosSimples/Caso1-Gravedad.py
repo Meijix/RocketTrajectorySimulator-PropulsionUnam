@@ -115,7 +115,7 @@ opacidad=0.5
 # Graficar resultados
 plt.figure(figsize=(8, 6))
 #Analitica
-plt.plot(tiempos_euler, pos_analitica_euler, label='Analitica', ls='-')
+plt.plot(tiempos_euler, pos_analitica_euler, label='Analitica', marker ='*')
 #Simulacion numerica
 plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
 plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
