@@ -126,7 +126,7 @@ error_vel_rk2, error_vel_rel_rk2 = errores(vel_rk2, vel_analitica, tiempos_rk2)
 error_pos_rkf45, error_pos_rel_rkf45 = errores(pos_rkf45, pos_analitica, tiempos_rkf45)
 error_vel_rkf45, error_vel_rel_rkf45 = errores(vel_rkf45, vel_analitica, tiempos_rkf45)
 
-
+# Graficar errores absolutos y relativos
 plt.figure(figsize=(12, 6))
 plt.subplot(1, 2, 1)
 plt.plot(tiempos_euler, error_pos_euler, label='Error Euler', marker='o')
@@ -277,6 +277,7 @@ error_pos_dt4, error_pos_rel_dt4 = errores(pos_euler_dt4, pos_analitica, tiempos
 error_vel_dt4, error_vel_rel_dt4 = errores(vel_euler_dt4, vel_analitica, tiempos_euler_dt4)
 error_pos_dt5, error_pos_rel_dt5 = errores(pos_euler_dt5, pos_analitica, tiempos_euler_dt5)
 error_vel_dt5, error_vel_rel_dt5 = errores(vel_euler_dt5, vel_analitica, tiempos_euler_dt5)
+
 
 # Grafica errores absolutos y relativos
 plt.figure(figsize=(12, 6))
