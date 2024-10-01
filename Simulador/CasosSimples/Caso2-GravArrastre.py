@@ -31,7 +31,6 @@ def sol_analitica_gravedad_arrastre(state, t, m, g, D_mag):
     print("Tiempo de apogeo: ",t_apogeo)
 
     A = np.arctan(v0/v_terminal)
-    B = np.arctanh(v0/v_terminal)
 
     apogeo = (v_terminal**2/g) *np.log(1/np.cos(A))
 
@@ -140,7 +139,14 @@ for t in tiempos_euler:
 #print(pos_analitica, pos_simul)
 #print(vel_analitica, vel_simul)
 #print(tiempos)
+v_terminal = np.sqrt(m*g/D_mag)
+t_apogeo = (v_terminal/g) * np.arctan(v0/v_terminal)
+A = np.arctan(v0/v_terminal)
+apogeo = (v_terminal**2/g) *np.log(1/np.cos(A))
 
+print("Tiempo de apogeo: ",t_apogeo, "[s]")
+print("Velocidad terminal: ", v_terminal, "[m/s]")
+print("Apogeo: ", apogeo, "[m]")
 
 
 ########################################################
@@ -153,9 +159,11 @@ plt.figure(figsize=(8, 6))
 plt.plot(tiempos_euler, pos_analitica, label='Analitica', ls='-', alpha=opacidad)
 #Simulacion numerica
 plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
-#plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
-#plt.plot(tiempos_rk2, pos_rk2, label='RK2', marker='^', alpha=opacidad) 
+plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
+plt.plot(tiempos_rk2, pos_rk2, label='RK2', marker='^', alpha=opacidad) 
 #plt.plot(tiempos_rkf45, pos_rkf45, label='RKF45', marker='X',alpha=opacidad)
+
+
 plt.title('Posición vertical [m]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Posición [m]')
@@ -166,8 +174,8 @@ plt.figure(figsize=(8, 6))
 plt.plot(tiempos_euler, vel_analitica, label='Analitica', ls='-', alpha = opacidad)
 #Simulacion numerica
 plt.plot(tiempos_euler, vel_euler, label='Euler', marker='o', alpha= opacidad)
-#plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*', alpha=opacidad)
-#plt.plot(tiempos_rk2, vel_rk2, label='RK2', marker= '^', alpha=opacidad) 
+plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*', alpha=opacidad)
+plt.plot(tiempos_rk2, vel_rk2, label='RK2', marker= '^', alpha=opacidad) 
 #plt.plot(tiempos_rkf45, vel_rkf45, label='RKF45',marker='X', alpha=opacidad)
 plt.title('Velocidad vertical [m/s]')
 plt.xlabel('Tiempo [s]')
