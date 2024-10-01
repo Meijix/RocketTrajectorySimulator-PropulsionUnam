@@ -293,6 +293,7 @@ for dt, label in zip(dt_values, labels):
 
 # Graficar resultados
 plt.figure(figsize=(8, 6))
+plt.plot(tiempos_rk4, pos_analitica, label='analitica', marker='^')
 plt.plot(tiempos_euler_dt1, pos_euler_dt1, label='dt=0.005', marker='*')
 plt.plot(tiempos_euler_dt2, pos_euler_dt2, label='dt=0.01', marker='*')
 plt.plot(tiempos_euler_dt3, pos_euler_dt3, label='dt=0.05', marker='*')
@@ -308,6 +309,7 @@ plt.legend()
 #Para la velocidad la solucion va a ser igual pues e sun metodo de segundo orden? (Preguntar dr Claudio)
 
 plt.figure(figsize=(8, 6))
+plt.plot(tiempos_rk4, vel_analitica, label='analitica', marker='^')
 plt.plot(tiempos_euler_dt1, vel_euler_dt1, label='dt=0.005')
 plt.plot(tiempos_euler_dt2, vel_euler_dt2, label='dt=0.01')
 plt.plot(tiempos_euler_dt3, vel_euler_dt3, label='dt=0.05')
@@ -320,23 +322,60 @@ plt.ylabel('Velocidad [m/s]')
 plt.legend()
 plt.show()
 
+####################################################
+# Calcula la solución analítica para cada dt
+pos_analitica_dt1 = []
+vel_analitica_dt1 = []
+for t in tiempos_euler_dt1:
+    pos, vel = sol_analitica_gravedad_arrastre(estado, t, m, g, D_mag)
+    pos_analitica_dt1.append(pos)
+    vel_analitica_dt1.append(vel)
+
+pos_analitica_dt2 = []
+vel_analitica_dt2 = []
+for t in tiempos_euler_dt2:
+    pos, vel = sol_analitica_gravedad_arrastre(estado, t, m, g, D_mag)
+    pos_analitica_dt2.append(pos)
+    vel_analitica_dt2.append(vel)
+
+pos_analitica_dt3 = []
+vel_analitica_dt3 = []
+for t in tiempos_euler_dt3:
+    pos, vel = sol_analitica_gravedad_arrastre(estado, t, m, g, D_mag)
+    pos_analitica_dt3.append(pos)
+    vel_analitica_dt3.append(vel)
+
+pos_analitica_dt4 = []
+vel_analitica_dt4 = []
+for t in tiempos_euler_dt4:
+    pos, vel = sol_analitica_gravedad_arrastre(estado, t, m, g, D_mag)
+    pos_analitica_dt4.append(pos)
+    vel_analitica_dt4.append(vel)
+
+pos_analitica_dt5 = []
+vel_analitica_dt5 = []
+for t in tiempos_euler_dt5:
+    pos, vel = sol_analitica_gravedad_arrastre(estado, t, m, g, D_mag)
+    pos_analitica_dt5.append(pos)
+    vel_analitica_dt5.append(vel)
 
 ################################################
 # Calcula errores absolutos y relativos para cada dt
-error_pos_dt1, error_pos_rel_dt1 = errores(pos_euler_dt1, pos_analitica, tiempos_euler_dt1)
-error_vel_dt1, error_vel_rel_dt1 = errores(vel_euler_dt1, vel_analitica, tiempos_euler_dt1)
-error_pos_dt2, error_pos_rel_dt2 = errores(pos_euler_dt2, pos_analitica, tiempos_euler_dt2)
-error_vel_dt2, error_vel_rel_dt2 = errores(vel_euler_dt2, vel_analitica, tiempos_euler_dt2)
-error_pos_dt3, error_pos_rel_dt3 = errores(pos_euler_dt3, pos_analitica, tiempos_euler_dt3)
-error_vel_dt3, error_vel_rel_dt3 = errores(vel_euler_dt3, vel_analitica, tiempos_euler_dt3)
-error_pos_dt4, error_pos_rel_dt4 = errores(pos_euler_dt4, pos_analitica, tiempos_euler_dt4)
-error_vel_dt4, error_vel_rel_dt4 = errores(vel_euler_dt4, vel_analitica, tiempos_euler_dt4)
-error_pos_dt5, error_pos_rel_dt5 = errores(pos_euler_dt5, pos_analitica, tiempos_euler_dt5)
-error_vel_dt5, error_vel_rel_dt5 = errores(vel_euler_dt5, vel_analitica, tiempos_euler_dt5)
+error_pos_dt1, error_pos_rel_dt1 = errores(pos_euler_dt1, pos_analitica_dt1, tiempos_euler_dt1)
+error_vel_dt1, error_vel_rel_dt1 = errores(vel_euler_dt1, vel_analitica_dt1, tiempos_euler_dt1)
+error_pos_dt2, error_pos_rel_dt2 = errores(pos_euler_dt2, pos_analitica_dt2, tiempos_euler_dt2)
+error_vel_dt2, error_vel_rel_dt2 = errores(vel_euler_dt2, vel_analitica_dt2, tiempos_euler_dt2)
+error_pos_dt3, error_pos_rel_dt3 = errores(pos_euler_dt3, pos_analitica_dt3, tiempos_euler_dt3)
+error_vel_dt3, error_vel_rel_dt3 = errores(vel_euler_dt3, vel_analitica_dt3, tiempos_euler_dt3)
+error_pos_dt4, error_pos_rel_dt4 = errores(pos_euler_dt4, pos_analitica_dt4, tiempos_euler_dt4)
+error_vel_dt4, error_vel_rel_dt4 = errores(vel_euler_dt4, vel_analitica_dt4, tiempos_euler_dt4)
+error_pos_dt5, error_pos_rel_dt5 = errores(pos_euler_dt5, pos_analitica_dt5, tiempos_euler_dt5)
+error_vel_dt5, error_vel_rel_dt5 = errores(vel_euler_dt5, vel_analitica_dt5, tiempos_euler_dt5)
 
 
 # Grafica errores absolutos y relativos
 plt.figure(figsize=(12, 6))
+plt.title("Errores en posición para distintos dt")
 
 plt.subplot(1, 2, 1)
 plt.plot(tiempos_euler_dt1, error_pos_dt1, label='dt=0.005', marker='*')
@@ -344,7 +383,7 @@ plt.plot(tiempos_euler_dt2, error_pos_dt2, label='dt=0.01', marker='*')
 plt.plot(tiempos_euler_dt3, error_pos_dt3, label='dt=0.05', marker='*')
 plt.plot(tiempos_euler_dt4, error_pos_dt4, label='dt=0.1', marker='*')
 plt.plot(tiempos_euler_dt5, error_pos_dt5, label='dt=0.2', marker='*')
-plt.title("Error absoluto en la posición")
+plt.title("Errores absolutos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Error absoluto [m]')
 plt.legend()
@@ -355,7 +394,7 @@ plt.plot(tiempos_euler_dt2, error_pos_rel_dt2, label='dt=0.01', marker='*')
 plt.plot(tiempos_euler_dt3, error_pos_rel_dt3, label='dt=0.05', marker='*')
 plt.plot(tiempos_euler_dt4, error_pos_dt4, label='dt=0.1', marker='*')
 plt.plot(tiempos_euler_dt5, error_pos_rel_dt5, label='dt=0.2', marker='*')
-plt.title("Error relativo en la posición")
+plt.title("Errores relativos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Error relativo')
 plt.legend()
@@ -363,13 +402,15 @@ plt.show()
 
 #Ahora para la velocidad
 plt.figure(figsize=(12, 6))
+plt.title("Errores en velocidad para distintos dt")
+
 plt.subplot(1, 2, 1)
 plt.plot(tiempos_euler_dt1, error_vel_dt1, label='dt=0.005', marker='*')
 plt.plot(tiempos_euler_dt2, error_vel_dt2, label='dt=0.01', marker='*')
 plt.plot(tiempos_euler_dt3, error_vel_dt3, label='dt=0.05', marker='*')
 plt.plot(tiempos_euler_dt4, error_vel_dt4, label='dt=0.1', marker='*')
 plt.plot(tiempos_euler_dt5, error_vel_dt5, label='dt=0.2', marker='*')
-plt.title("Error absoluto en la velocidad")
+plt.title("Errores absolutos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Error absoluto [m/s]')
 plt.legend()
@@ -381,7 +422,7 @@ plt.plot(tiempos_euler_dt2, error_vel_rel_dt2, label='dt=0.01', marker='*')
 plt.plot(tiempos_euler_dt3, error_vel_rel_dt3, label='dt=0.05', marker='*')
 plt.plot(tiempos_euler_dt4, error_vel_rel_dt4, label='dt=0.1', marker='*')
 plt.plot(tiempos_euler_dt5, error_vel_rel_dt5, label='dt=0.2', marker='*')
-plt.title("Error relativo en la velocidad")
+plt.title("Errores relativos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Error relativo')
 plt.legend()
