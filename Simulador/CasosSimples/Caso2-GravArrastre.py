@@ -25,30 +25,23 @@ def sol_analitica_gravedad_arrastre(state, t, m, g, D_mag):
     z0= state[0]
     v0= state[1]
 
-    k = np.sqrt(g * D_mag / m)
-    v = (v0 + (g / k)) * np.exp(-k * t) - (g / k)
-    z = z0 + (v0 + (g / k)) * (1 - np.exp(-k * t)) / k - g * t / k
+    v_terminal = np.sqrt(m*g/D_mag)
+    t_apogeo = (v_terminal/g) * np.arctan(v0/v_terminal)
+    print("Tiempo de apogeo: ",t_apogeo)
+
+    A = np.arctan(v0/v_terminal)
+    B = np.arctanh(v0/v_terminal)
+
+    if t<=t_apogeo:
+        v = v_terminal * np.tan((-g*t / v_terminal)+ A)
+        z = (v_terminal**2/g)* np.log(np.cos((-g*t/v_terminal)+A)/np.cos(A))
+    else:
+        v = v_terminal * np.tanh((-g*t / v_terminal)+ B)
+        z = (v_terminal**2/g)* np.log(np.cosh((-g*t/v_terminal)+B)/np.cosh(B))
+
     return z, v
 
 '''
-plt.figure(figsize=(8, 6))
-plt.plot(tiempos, error_pos, label='Error z(t)')
-plt.plot(tiempos, error_vel, label='Error v(t)')
-plt.title("Error absoluto")
-plt.xlabel('Tiempo [s]')
-plt.ylabel('Errorres absolutos [m],[m/s]')
-plt.legend()
-
-plt.figure(figsize=(8, 6))
-plt.plot(tiempos, error_pos_rel, label='Error z(t)')
-plt.plot(tiempos, error_vel_rel, label='Error v(t)')
-plt.title("Error relativo")
-plt.xlabel('Tiempo [s]')
-plt.ylabel('Errores relativos')
-plt.legend()
-
-plt.show()
-
 ##############################
 # Simulación con scipy
 ##############################
@@ -150,16 +143,16 @@ for t in tiempos_euler:
 ########################################################
 ####GRAFICAS
 ########################################################
-opacidad=1
+opacidad=0.5
 # Graficar resultados
 plt.figure(figsize=(8, 6))
 #Analitica
 plt.plot(tiempos_euler, pos_analitica, label='Analitica', ls='-', alpha=opacidad)
 #Simulacion numerica
 plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
-plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
-plt.plot(tiempos_rk2, pos_rk2, label='RK2', marker='^', alpha=opacidad) 
-plt.plot(tiempos_rkf45, pos_rkf45, label='RKF45', marker='X',alpha=opacidad)
+#plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
+#plt.plot(tiempos_rk2, pos_rk2, label='RK2', marker='^', alpha=opacidad) 
+#plt.plot(tiempos_rkf45, pos_rkf45, label='RKF45', marker='X',alpha=opacidad)
 plt.title('Posición vertical [m]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Posición [m]')
@@ -170,9 +163,9 @@ plt.figure(figsize=(8, 6))
 plt.plot(tiempos_euler, vel_analitica, label='Analitica', ls='-', alpha = opacidad)
 #Simulacion numerica
 plt.plot(tiempos_euler, vel_euler, label='Euler', marker='o', alpha= opacidad)
-plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*', alpha=opacidad)
-plt.plot(tiempos_rk2, vel_rk2, label='RK2', marker= '^', alpha=opacidad) 
-plt.plot(tiempos_rkf45, vel_rkf45, label='RKF45',marker='X', alpha=opacidad)
+#plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*', alpha=opacidad)
+#plt.plot(tiempos_rk2, vel_rk2, label='RK2', marker= '^', alpha=opacidad) 
+#plt.plot(tiempos_rkf45, vel_rkf45, label='RKF45',marker='X', alpha=opacidad)
 plt.title('Velocidad vertical [m/s]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
