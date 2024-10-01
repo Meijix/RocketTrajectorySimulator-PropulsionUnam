@@ -207,7 +207,7 @@ plt.xlabel('Tiempo [s]')
 plt.ylabel('Errorres absolutos [m]')
 plt.legend()
 
-plt.show()
+#plt.show()
 #####################################################
 #####################################################
 ###Diferentes pasos de tiempo y un mismo integrador
@@ -216,22 +216,32 @@ Integrador_oficial= Euler
 tiempos_euler_dt1 = []
 pos_euler_dt1 = []
 vel_euler_dt1 = []
+pos_analitica_dt1 = []
+vel_analitica_dt1 = []
 
 tiempos_euler_dt2 = []
 pos_euler_dt2 = []
 vel_euler_dt2 = []
+pos_analitica_dt2 = []
+vel_analitica_dt2 = []
 
 tiempos_euler_dt3 = []
 pos_euler_dt3 = []
 vel_euler_dt3 = []
+pos_analitica_dt3 = []
+vel_analitica_dt3 = []
 
 tiempos_euler_dt4 = []
 pos_euler_dt4 = []
 vel_euler_dt4 = []
+pos_analitica_dt4 = []
+vel_analitica_dt4 = []
 
 tiempos_euler_dt5 = []
 pos_euler_dt5 = []
 vel_euler_dt5 = []
+pos_analitica_dt5 = []
+vel_analitica_dt5 = []
 
 # Simulaciones con diferentes pasos de tiempo
 dt_values = [0.005, 0.01, 0.05, 0.1, 0.2]
@@ -241,27 +251,48 @@ for dt, label in zip(dt_values, labels):
     tiempos, sim = simular_dinamica(estado, t_max, dt, Integrador_oficial, der_gravedad_masa_cte)
     pos = [sim[i][0] for i in range(len(sim))]
     vel = [sim[i][1] for i in range(len(sim))]
+
+    pos_analitica_lista=[]
+    vel_analitica_lista=[]
+    for t in tiempos:
+        pos_analitica, vel_analitica = sol_analitica_gravedad_masa_cte(estado, t)
+        pos_analitica_lista.append(pos_analitica)
+        vel_analitica_lista.append(vel_analitica)
     
     if label == 'dt=0.005':
         tiempos_euler_dt1 = tiempos
         pos_euler_dt1 = pos
         vel_euler_dt1 = vel
+        pos_analitica_dt1 = pos_analitica_lista
+        vel_analitica_dt1 = vel_analitica_lista
+
     elif label == 'dt=0.01':
         tiempos_euler_dt2 = tiempos
         pos_euler_dt2 = pos
         vel_euler_dt2 = vel
+        pos_analitica_dt2 = pos_analitica_lista
+        vel_analitica_dt2 = vel_analitica_lista
+
     elif label == 'dt=0.05':
         tiempos_euler_dt3 = tiempos
         pos_euler_dt3 = pos
         vel_euler_dt3 = vel
+        pos_analitica_dt3 = pos_analitica_lista
+        vel_analitica_dt3 = vel_analitica_lista
+
     elif label == 'dt=0.1':
         tiempos_euler_dt4 = tiempos
         pos_euler_dt4 = pos
         vel_euler_dt4 = vel
+        pos_analitica_dt4 = pos_analitica_lista
+        vel_analitica_dt4 = vel_analitica_lista
+
     elif label == 'dt=0.2':
         tiempos_euler_dt5 = tiempos
         pos_euler_dt5 = pos
         vel_euler_dt5 = vel
+        pos_analitica_dt5 = pos_analitica_lista
+        vel_analitica_dt5 = vel_analitica_lista
 
 # Graficar resultados
 plt.figure(figsize=(8, 6))
@@ -290,21 +321,51 @@ plt.title('Velocidad vertical [m/s]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
 plt.legend()
-plt.show()
+#plt.show()
 
+'''
+print("Longitud tiempos dt1", len(tiempos_euler_dt1))
+print("Longitud tiempos dt2", len(tiempos_euler_dt2))
+print("Longitud tiempos dt3", len(tiempos_euler_dt3))
+print("Longitud tiempos dt4", len(tiempos_euler_dt4))
+print("Longitud tiempos dt5", len(tiempos_euler_dt5))
 
+print("Longitud posiciones dt1", len(pos_euler_dt1))
+print("Longitud posiciones dt2", len(pos_euler_dt2))
+print("Longitud posiciones dt3", len(pos_euler_dt3))
+print("Longitud posiciones dt4", len(pos_euler_dt4))
+print("Longitud posiciones dt5", len(pos_euler_dt5))
+
+print("Longitud velocidades dt1", len(vel_euler_dt1))
+print("Longitud velocidades dt2", len(vel_euler_dt2))
+print("Longitud velocidades dt3", len(vel_euler_dt3))
+print("Longitud velocidades dt4", len(vel_euler_dt4))
+print("Longitud velocidades dt5", len(vel_euler_dt5))
+
+print("Longitud posiciones analiticas dt1", len(pos_analitica_dt1))
+print("Longitud posiciones analiticas dt2", len(pos_analitica_dt2))
+print("Longitud posiciones analiticas dt3", len(pos_analitica_dt3))
+print("Longitud posiciones analiticas dt4", len(pos_analitica_dt4))
+print("Longitud posiciones analiticas dt5", len(pos_analitica_dt5))
+
+print("Longitud velocidades analiticas dt1", len(vel_analitica_dt1))
+print("Longitud velocidades analiticas dt2", len(vel_analitica_dt2))
+print("Longitud velocidades analiticas dt3", len(vel_analitica_dt3))
+print("Longitud velocidades analiticas dt4", len(vel_analitica_dt4))
+print("Longitud velocidades analiticas dt5", len(vel_analitica_dt5))
+'''
 ################################################
 # Calcula errores absolutos y relativos para cada dt
-error_pos_dt1, error_pos_rel_dt1 = errores(pos_euler_dt1, pos_analitica, tiempos_euler_dt1)
-error_vel_dt1, error_vel_rel_dt1 = errores(vel_euler_dt1, vel_analitica, tiempos_euler_dt1)
-error_pos_dt2, error_pos_rel_dt2 = errores(pos_euler_dt2, pos_analitica, tiempos_euler_dt2)
-error_vel_dt2, error_vel_rel_dt2 = errores(vel_euler_dt2, vel_analitica, tiempos_euler_dt2)
-error_pos_dt3, error_pos_rel_dt3 = errores(pos_euler_dt3, pos_analitica, tiempos_euler_dt3)
-error_vel_dt3, error_vel_rel_dt3 = errores(vel_euler_dt3, vel_analitica, tiempos_euler_dt3)
-error_pos_dt4, error_pos_rel_dt4 = errores(pos_euler_dt4, pos_analitica, tiempos_euler_dt4)
-error_vel_dt4, error_vel_rel_dt4 = errores(vel_euler_dt4, vel_analitica, tiempos_euler_dt4)
-error_pos_dt5, error_pos_rel_dt5 = errores(pos_euler_dt5, pos_analitica, tiempos_euler_dt5)
-error_vel_dt5, error_vel_rel_dt5 = errores(vel_euler_dt5, vel_analitica, tiempos_euler_dt5)
+error_pos_dt1, error_pos_rel_dt1 = errores(pos_euler_dt1, pos_analitica_dt1, tiempos_euler_dt1)
+error_vel_dt1, error_vel_rel_dt1 = errores(vel_euler_dt1, vel_analitica_dt1, tiempos_euler_dt1)
+error_pos_dt2, error_pos_rel_dt2 = errores(pos_euler_dt2, pos_analitica_dt2, tiempos_euler_dt2)
+error_vel_dt2, error_vel_rel_dt2 = errores(vel_euler_dt2, vel_analitica_dt2, tiempos_euler_dt2)
+error_pos_dt3, error_pos_rel_dt3 = errores(pos_euler_dt3, pos_analitica_dt3, tiempos_euler_dt3)
+error_vel_dt3, error_vel_rel_dt3 = errores(vel_euler_dt3, vel_analitica_dt3, tiempos_euler_dt3)
+error_pos_dt4, error_pos_rel_dt4 = errores(pos_euler_dt4, pos_analitica_dt4, tiempos_euler_dt4)
+error_vel_dt4, error_vel_rel_dt4 = errores(vel_euler_dt4, vel_analitica_dt4, tiempos_euler_dt4)
+error_pos_dt5, error_pos_rel_dt5 = errores(pos_euler_dt5, pos_analitica_dt5, tiempos_euler_dt5)
+error_vel_dt5, error_vel_rel_dt5 = errores(vel_euler_dt5, vel_analitica_dt5, tiempos_euler_dt5)
 
 
 # Grafica errores absolutos y relativos
