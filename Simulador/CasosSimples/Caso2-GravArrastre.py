@@ -162,7 +162,7 @@ plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
 plt.legend()
 
-plt.show()
+#plt.show()
 
 
 ###########################################
@@ -185,14 +185,15 @@ error_vel_rkf45, error_vel_rel_rkf45 = errores(vel_rkf45[:-1], vel_analitica, ti
 
 
 plt.figure(figsize=(12, 6))
+plt.title('Errores de la velocidad con distintos integradores')
 plt.subplot(1, 2, 1)
-plt.plot(tiempos_euler, error_pos_euler, label='Error Euler', marker='o')
-plt.plot(tiempos_rk4, error_pos_rk4, label='Error RK4', marker='*') 
-plt.plot(tiempos_rk2, error_pos_rk2, label='Error RK2', marker='^')
-plt.plot(tiempos_rkf45, error_pos_rkf45, label='Error RKF45', marker='X')
-plt.title("Error absoluto en la posicion")
+plt.plot(tiempos_euler, error_vel_rel_euler, label='Error Euler', marker='o')
+plt.plot(tiempos_rk4, error_vel_rel_rk4, label='Error RK4', marker='*')
+plt.plot(tiempos_rk2, error_vel_rel_rk2, label='Error RK2', marker='^')
+plt.plot(tiempos_rkf45, error_vel_rel_rkf45, label='Error RKF45', marker='X')
+#plt.title("Errores relativos")
 plt.xlabel('Tiempo [s]')
-plt.ylabel('Errorres absolutos [m]')
+plt.ylabel('Errores relativos')
 plt.legend()
 
 
@@ -201,37 +202,34 @@ plt.plot(tiempos_euler, error_vel_euler, label='Error Euler', marker='o')
 plt.plot(tiempos_rk4, error_vel_rk4, label='Error RK4', marker='*')
 plt.plot(tiempos_rk2, error_vel_rk2, label='Error RK2', marker='^')
 plt.plot(tiempos_rkf45, error_vel_rkf45, label='Error RKF45', marker='X')
-plt.title("Error absoluto en la velocidad")
+#plt.title("Errores absolutos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Errorres absolutos [m/s]')
 plt.legend()
 
-plt.show()
-
-
+#plt.show()
 #################################################
 plt.figure(figsize=(12, 6))
+plt.title('Errores de la posicion con distintos integradores')
 
 plt.subplot(1, 2, 1)
 plt.plot(tiempos_euler, error_pos_rel_euler, label='Error Euler', marker='o')
 plt.plot(tiempos_rk4, error_pos_rel_rk4, label='Error RK4', marker='*')
 plt.plot(tiempos_rk2, error_pos_rel_rk2, label='Error RK2', marker='^')
 plt.plot(tiempos_rkf45, error_pos_rel_rkf45, label='Error RKF45', marker='X')
-
-plt.title("Error relativo de posicion")
+#plt.title("Errores relativos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Errores relativos [1]')
 plt.legend()
 
 plt.subplot(1, 2, 2)
-plt.plot(tiempos_euler, error_vel_rel_euler, label='Error Euler', marker='o')
-plt.plot(tiempos_rk4, error_vel_rel_rk4, label='Error RK4', marker='*')
-plt.plot(tiempos_rk2, error_vel_rel_rk2, label='Error RK2', marker='^')
-plt.plot(tiempos_rkf45, error_vel_rel_rkf45, label='Error RKF45', marker='X')
-
-plt.title("Error relativo de velocidad")
+plt.plot(tiempos_euler, error_pos_euler, label='Error Euler', marker='o')
+plt.plot(tiempos_rk4, error_pos_rk4, label='Error RK4', marker='*') 
+plt.plot(tiempos_rk2, error_pos_rk2, label='Error RK2', marker='^')
+plt.plot(tiempos_rkf45, error_pos_rkf45, label='Error RKF45', marker='X')
+#plt.title("Errores absolutos")
 plt.xlabel('Tiempo [s]')
-plt.ylabel('Errores relativos')
+plt.ylabel('Errorres absolutos [m]')
 plt.legend()
 
 plt.show()
@@ -301,7 +299,7 @@ plt.plot(tiempos_euler_dt4, pos_euler_dt4, label='dt=0.1', marker='*')
 plt.plot(tiempos_euler_dt5, pos_euler_dt5, label='dt=0.2', marker='*')
 
 
-plt.title('Posición vertical[m] con distintos dt ')
+plt.title('Posición vertical con distintos dt ')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Posición [m]')
 plt.legend()
@@ -316,11 +314,11 @@ plt.plot(tiempos_euler_dt3, vel_euler_dt3, label='dt=0.05')
 plt.plot(tiempos_euler_dt4, vel_euler_dt4, label='dt=0.1')
 plt.plot(tiempos_euler_dt5, vel_euler_dt5, label='dt=0.2')
 
-plt.title('Velocidad vertical [m/s]')
+plt.title('Velocidad vertical con distintos dt')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
 plt.legend()
-plt.show()
+#plt.show()
 
 ####################################################
 # Calcula la solución analítica para cada dt
@@ -374,6 +372,7 @@ error_vel_dt5, error_vel_rel_dt5 = errores(vel_euler_dt5, vel_analitica_dt5, tie
 
 
 # Grafica errores absolutos y relativos
+#Para la posicion
 plt.figure(figsize=(12, 6))
 plt.title("Errores en posición para distintos dt")
 
@@ -383,7 +382,7 @@ plt.plot(tiempos_euler_dt2, error_pos_dt2, label='dt=0.01', marker='*')
 plt.plot(tiempos_euler_dt3, error_pos_dt3, label='dt=0.05', marker='*')
 plt.plot(tiempos_euler_dt4, error_pos_dt4, label='dt=0.1', marker='*')
 plt.plot(tiempos_euler_dt5, error_pos_dt5, label='dt=0.2', marker='*')
-plt.title("Errores absolutos")
+#plt.title("Errores absolutos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Error absoluto [m]')
 plt.legend()
@@ -394,13 +393,13 @@ plt.plot(tiempos_euler_dt2, error_pos_rel_dt2, label='dt=0.01', marker='*')
 plt.plot(tiempos_euler_dt3, error_pos_rel_dt3, label='dt=0.05', marker='*')
 plt.plot(tiempos_euler_dt4, error_pos_dt4, label='dt=0.1', marker='*')
 plt.plot(tiempos_euler_dt5, error_pos_rel_dt5, label='dt=0.2', marker='*')
-plt.title("Errores relativos")
+#plt.title("Errores relativos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Error relativo')
 plt.legend()
-plt.show()
+#plt.show()
 
-#Ahora para la velocidad
+#Para la velocidad
 plt.figure(figsize=(12, 6))
 plt.title("Errores en velocidad para distintos dt")
 
@@ -410,7 +409,7 @@ plt.plot(tiempos_euler_dt2, error_vel_dt2, label='dt=0.01', marker='*')
 plt.plot(tiempos_euler_dt3, error_vel_dt3, label='dt=0.05', marker='*')
 plt.plot(tiempos_euler_dt4, error_vel_dt4, label='dt=0.1', marker='*')
 plt.plot(tiempos_euler_dt5, error_vel_dt5, label='dt=0.2', marker='*')
-plt.title("Errores absolutos")
+#plt.title("Errores absolutos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Error absoluto [m/s]')
 plt.legend()
@@ -422,7 +421,7 @@ plt.plot(tiempos_euler_dt2, error_vel_rel_dt2, label='dt=0.01', marker='*')
 plt.plot(tiempos_euler_dt3, error_vel_rel_dt3, label='dt=0.05', marker='*')
 plt.plot(tiempos_euler_dt4, error_vel_rel_dt4, label='dt=0.1', marker='*')
 plt.plot(tiempos_euler_dt5, error_vel_rel_dt5, label='dt=0.2', marker='*')
-plt.title("Errores relativos")
+#plt.title("Errores relativos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Error relativo')
 plt.legend()
