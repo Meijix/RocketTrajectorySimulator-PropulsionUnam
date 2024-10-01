@@ -370,7 +370,11 @@ error_vel_dt4, error_vel_rel_dt4 = errores(vel_euler_dt4, vel_analitica_dt4, tie
 error_pos_dt5, error_pos_rel_dt5 = errores(pos_euler_dt5, pos_analitica_dt5, tiempos_euler_dt5)
 error_vel_dt5, error_vel_rel_dt5 = errores(vel_euler_dt5, vel_analitica_dt5, tiempos_euler_dt5)
 
-
+################################################
+'''
+# Graficar errores absolutos y relativos
+graficar_errores(tiempos_euler_dt1,tiempos_euler_dt2, tiempos_euler_dt3, tiempos_euler_dt4, tiempos_euler_dt5, error_pos_dt1, error_pos_dt1, error_pos_dt2, error_pos_dt3, error_pos_dt4, error_pos_dt5, error_vel_dt1, error_vel_dt2, error_vel_dt3, error_vel_dt4, error_vel_dt5, error_pos_rel_dt1, error_pos_rel_dt2, error_pos_rel_dt3, error_pos_rel_dt4, error_pos_rel_dt5, error_vel_rel_dt1, error_vel_rel_dt2, error_vel_rel_dt3, error_vel_rel_dt4, error_vel_rel_dt5)
+'''
 # Grafica errores absolutos y relativos
 #Para la posicion
 plt.figure(figsize=(12, 6))
