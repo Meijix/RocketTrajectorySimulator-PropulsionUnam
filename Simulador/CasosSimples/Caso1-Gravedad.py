@@ -33,14 +33,26 @@ def sol_analitica_gravedad_masa_cte(state, t):
 tiempos_euler = []
 pos_euler = []
 vel_euler = []
+pos_analitica_euler = []
+vel_analitica_euler =[]
 
 tiempos_rk4 = []
 pos_rk4 = []
 vel_rk4 = []
+pos_analitica_rk4 = []
+vel_analitica_rk4 =[]
+
+tiempos_rk2 = []
+pos_rk2 = []
+vel_rk2 = []
+pos_analitica_rk2 = []
+vel_analitica_rk2 =[]
 
 tiempos_rkf45 = []
 pos_rkf45 = []
 vel_rkf45 = []
+pos_analitica_rkf45 = []
+vel_analitica_rkf45 =[]
 
 # Simulaciones con diferentes integradores
 integradores = [Euler, RungeKutta4, RungeKutta2]#, RKF45]
@@ -50,24 +62,44 @@ for integrador, label in zip(integradores, labels):
     tiempos, sim = simular_dinamica(estado, t_max, dt, integrador, der_gravedad_masa_cte)
     pos = [sim[i][0] for i in range(len(sim))]
     vel = [sim[i][1] for i in range(len(sim))]
+
+    # Solucion analitica
+    posicion_analitica = []
+    velocidad_analitica = []
+    for t in tiempos:
+        pos_analitica, vel_analitica = sol_analitica_gravedad_masa_cte(estado, t)
+        posicion_analitica.append(pos_analitica)
+        velocidad_analitica.append(vel_analitica)
     
     if label == 'Euler':
         tiempos_euler = tiempos
         pos_euler = pos
         vel_euler = vel
+        pos_analitica_euler = posicion_analitica
+        vel_analitica_euler = velocidad_analitica
+
     elif label == 'RK4':
         tiempos_rk4 = tiempos
         pos_rk4 = pos
         vel_rk4 = vel
+        pos_analitica_rk4 = posicion_analitica
+        vel_analitica_rk4 = velocidad_analitica
+
     elif label =='RK2':
         tiempos_rk2 = tiempos
         pos_rk2 = pos
         vel_rk2 = vel
+        pos_analitica_rk2 = posicion_analitica
+        vel_analitica_rk2 = velocidad_analitica
+
     elif label == 'RKF45':
         tiempos_rkf45 = tiempos
         pos_rkf45 = pos
         vel_rkf45 = vel
+        pos_analitica_rkf45 = posicion_analitica
+        vel_analitica_rkf45 = velocidad_analitica
 
+'''
 #Solucion analitica
 pos_analitica = []
 vel_analitica = []
@@ -77,12 +109,13 @@ for t in tiempos_euler:
     pos, vel = sol_analitica_gravedad_masa_cte(estado, t)
     pos_analitica.append(pos)
     vel_analitica.append(vel)
+'''
 
 opacidad=0.5
 # Graficar resultados
 plt.figure(figsize=(8, 6))
 #Analitica
-plt.plot(tiempos_euler, pos_analitica, label='Analitica', ls='-')
+plt.plot(tiempos_euler, pos_analitica_euler, label='Analitica', ls='-')
 #Simulacion numerica
 plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
 plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
@@ -96,7 +129,7 @@ plt.legend()
 
 plt.figure(figsize=(8, 6))
 #Analitica
-plt.plot(tiempos_euler, vel_analitica, label='Analitica', ls='-')
+plt.plot(tiempos_euler, vel_analitica_euler, label='Analitica', ls='-')
 #Simulacion numerica
 plt.plot(tiempos_euler, vel_euler, label='Euler', marker='o')
 plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*')
@@ -114,17 +147,17 @@ plt.legend()
 #Comparacion de errores
 #Calcular y graficar el error numerico
 #errores absolutos y relativos
-error_pos_euler, error_pos_rel_euler = errores(pos_euler, pos_analitica, tiempos_euler)
-error_vel_euler, error_vel_rel_euler = errores(vel_euler, vel_analitica, tiempos_euler)
+error_pos_euler, error_pos_rel_euler = errores(pos_euler, pos_analitica_euler, tiempos_euler)
+error_vel_euler, error_vel_rel_euler = errores(vel_euler, vel_analitica_euler, tiempos_euler)
 
-error_pos_rk4, error_pos_rel_rk4 = errores(pos_rk4, pos_analitica, tiempos_rk4)
-error_vel_rk4, error_vel_rel_rk4 = errores(vel_rk4, vel_analitica, tiempos_rk4)
+error_pos_rk4, error_pos_rel_rk4 = errores(pos_rk4, pos_analitica_rk4, tiempos_rk4)
+error_vel_rk4, error_vel_rel_rk4 = errores(vel_rk4, vel_analitica_rk4, tiempos_rk4)
 
-error_pos_rk2, error_pos_rel_rk2 = errores(pos_rk2, pos_analitica, tiempos_rk2)
-error_vel_rk2, error_vel_rel_rk2 = errores(vel_rk2, vel_analitica, tiempos_rk2)
+error_pos_rk2, error_pos_rel_rk2 = errores(pos_rk2, pos_analitica_rk2, tiempos_rk2)
+error_vel_rk2, error_vel_rel_rk2 = errores(vel_rk2, vel_analitica_rk2, tiempos_rk2)
 
-error_pos_rkf45, error_pos_rel_rkf45 = errores(pos_rkf45, pos_analitica, tiempos_rkf45)
-error_vel_rkf45, error_vel_rel_rkf45 = errores(vel_rkf45, vel_analitica, tiempos_rkf45)
+error_pos_rkf45, error_pos_rel_rkf45 = errores(pos_rkf45, pos_analitica_rkf45, tiempos_rkf45)
+error_vel_rkf45, error_vel_rel_rkf45 = errores(vel_rkf45, vel_analitica_rkf45, tiempos_rkf45)
 
 # Graficar errores absolutos y relativos
 
