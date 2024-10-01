@@ -27,17 +27,20 @@ def sol_analitica_gravedad_arrastre(state, t, m, g, D_mag):
 
     v_terminal = np.sqrt(m*g/D_mag)
     t_apogeo = (v_terminal/g) * np.arctan(v0/v_terminal)
+    
     print("Tiempo de apogeo: ",t_apogeo)
 
     A = np.arctan(v0/v_terminal)
     B = np.arctanh(v0/v_terminal)
 
+    apogeo = (v_terminal**2/g) *np.log(1/np.cos(A))
+
     if t<=t_apogeo:
         v = v_terminal * np.tan((-g*t / v_terminal)+ A)
         z = (v_terminal**2/g)* np.log(np.cos((-g*t/v_terminal)+A)/np.cos(A))
     else:
-        v = v_terminal * np.tanh((-g*t / v_terminal)+ B)
-        z = (v_terminal**2/g)* np.log(np.cosh((-g*t/v_terminal)+B)/np.cosh(B))
+        v = v_terminal * np.tanh((-g / v_terminal)*(t-t_apogeo))
+        z = apogeo + (v_terminal**2/-g)* np.log(np.cosh((-g/v_terminal)*(t-t_apogeo)))
 
     return z, v
 
