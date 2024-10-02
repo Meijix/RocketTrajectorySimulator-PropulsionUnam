@@ -1,3 +1,5 @@
+#Caso 2: Gravedad + Arrastre cuadratico y masa cte
+
 import numpy as np
 import matplotlib.pyplot as plt
 
