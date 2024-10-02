@@ -80,18 +80,18 @@ graficar_resultados(dt_values, resultados, tipo='velocidad')
 # Cálculo de errores
 for dt in dt_values:
     tiempos = resultados[dt]["tiempos"]
-    pos_euler = resultados[dt]["pos_sim"]
+    pos_sim = resultados[dt]["pos_sim"]
     pos_analitica = resultados[dt]["pos_analitica"]
-    vel_euler = resultados[dt]["vel_sim"]
+    vel_sim = resultados[dt]["vel_sim"]
     vel_analitica = resultados[dt]["vel_analitica"]
 
-    error_pos = errores(pos_euler, pos_analitica, tiempos)
-    error_vel = errores(vel_euler, vel_analitica, tiempos)
+    error_pos = errores(pos_sim, pos_analitica, tiempos)
+    error_vel = errores(vel_sim, vel_analitica, tiempos)
 
-    resultados[dt]["error_pos"] = error_pos[0]
-    resultados[dt]["error_pos_rel"] = error_pos[1]
-    resultados[dt]["error_vel"] = error_vel[0]
-    resultados[dt]["error_vel_rel"] = error_vel[1]
+    resultados[dt]["error_posicion"] = error_pos[0]
+    resultados[dt]["error_posicion_rel"] = error_pos[1]
+    resultados[dt]["error_velocidad"] = error_vel[0]
+    resultados[dt]["error_velocidad_rel"] = error_vel[1]
 
 # Graficar errores
 def graficar_errores(dt_values, resultados, tipo='posición'):
@@ -120,7 +120,7 @@ def graficar_errores(dt_values, resultados, tipo='posición'):
     plt.show()
 
 # Graficar errores de posición y velocidad
-graficar_errores(dt_values, resultados, tipo='posición')
+graficar_errores(dt_values, resultados, tipo='posicion')
 graficar_errores(dt_values, resultados, tipo='velocidad')
 
 # Calcular y graficar errores globales (L2 y medio absoluto)
@@ -130,8 +130,8 @@ errores_pos_medabs = []
 errores_vel_medabs = []
 
 for dt in dt_values:
-    error_pos = resultados[dt]["error_pos"]
-    error_vel = resultados[dt]["error_vel"]
+    error_pos = resultados[dt]["error_posicion"]
+    error_vel = resultados[dt]["error_velocidad"]
     
     error_pos_L2, error_pos_medabs = calcular_errores_globales(error_pos, resultados[dt]["tiempos"])
     error_vel_L2, error_vel_medabs = calcular_errores_globales(error_vel, resultados[dt]["tiempos"])
