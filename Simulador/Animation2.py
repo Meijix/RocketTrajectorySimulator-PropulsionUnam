@@ -31,18 +31,16 @@ tamaño = 10
 
 # Crear figura y ejes
 fig = plt.figure(figsize=(12, 6))
-ax = fig.add_subplot(121)
+axcohete = fig.add_subplot(121)
 ax2d = fig.add_subplot(122)
 
 # Configurar el gráfico del cohete
-ax.set_xlim(-10, 10)
-ax.set_ylim(-10, 10)
-ax.set_aspect("equal")
-ax.set_title('Dibujo del Cohete')
+axcohete.set_aspect("equal")
+axcohete.set_title('Dibujo del Cohete')
 
 # Eje 2D para la visualización
-ax2d.set_xlim([0, t_fin + 10])
-ax2d.set_ylim([-15, 15])
+ax2d.set_xlim([0, t_fin + 1])
+ax2d.set_ylim([-1.8, 1.8])
 ax2d.set_title('Ángulos del Cohete')
 ax2d.set_xlabel("Tiempo (s)")
 ax2d.set_ylabel("Grados")
@@ -53,12 +51,12 @@ every = 100
 
 # Función de actualización para la animación
 def update(frame):
-    
+    axcohete.clear()
     dibujar_cohete(0, 0, thetas[frame], tamaño)  # Dibujar el cohete inclinado
     #ax.set_xlim(-10, 10)
     #ax.set_ylim(-10, 10)
-    ax.set_aspect("equal")
-    ax.set_title('Dibujo del Cohete')
+    axcohete.set_aspect("equal")
+    axcohete.set_title('Dibujo del Cohete')
 
     
     ax2d.set_xlim([0, t_fin + 1])
@@ -66,7 +64,7 @@ def update(frame):
     ax2d.plot(t[:frame + 1], thetas[:frame + 1], 'b-')  # Graficar hasta el frame actual
     ax2d.scatter(t[frame], thetas[frame], color='red')  # Puntos en el gráfico
 
-    return ax, ax2d
+    return ax2d, axcohete
 
 # Crear la animación
 frames = np.arange(0, len(t), every)
