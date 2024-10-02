@@ -39,7 +39,7 @@ print("Apogeo: ", apogeo, "[m]")
 ###Diferentes pasos de tiempo y un mismo integrador
 #####################################################
 # Inicialización de parámetros
-#Integrador_oficial = RungeKutta4 #RungeKutta2
+#Integrador_oficial = RungeKutta2 
 Integrador_oficial = Euler
 #dt_values = [0.005, 0.01, 0.02, 0.05, 0.1, 0.15, 0.2]
 dt_values = [0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.125, 0.15, 0.175, 0.2]
