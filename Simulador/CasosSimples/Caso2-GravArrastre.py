@@ -39,82 +39,6 @@ def sol_analitica_gravedad_arrastre(state, t, m, g, D_mag):
 
     return z, v
 
-
-# Función auxiliar para graficar resultados
-def graficar_resultados(dt_values, resultados, tipo='posición'):
-    plt.figure(figsize=(12, 6))
-    for dt in dt_values:
-        tiempos = resultados[dt]["tiempos"]
-        if tipo == 'posición':
-            datos_sim = resultados[dt]["pos_sim"]
-            datos_analitica = resultados[dt]["pos_analitica"]
-            plt.plot(tiempos, datos_sim, label=f'Posicion dt={dt}', marker='o')
-            #plt.plot(tiempos, datos_analitica, label=f'Pos. Analítica dt={dt}')
-            plt.title('Comparación de Posiciones')
-            plt.ylabel('Posición [m]')
-        elif tipo == 'velocidad':
-            datos_sim = resultados[dt]["vel_sim"]
-            datos_analitica = resultados[dt]["vel_analitica"]
-            plt.plot(tiempos, datos_sim, label=f'Velocidad dt={dt}', marker='o')
-            #plt.plot(tiempos, datos_analitica, label=f'Velocidad Analítica dt={dt}')
-            plt.title('Comparación de Velocidades')
-            plt.ylabel('Velocidad [m/s]')
-        
-        plt.xlabel('Tiempo [s]')
-        plt.legend()
-        plt.grid()
-    plt.show()
-
-# Graficar errores
-def graficar_errores(dt_values, resultados, tipo='posicion'):
-    plt.figure(figsize=(12, 6))
-    plt.suptitle(f"Errores en {'posición' if tipo == 'posición' else 'velocidad'} para distintos dt")
-    
-    plt.subplot(1, 2, 1)
-    for dt in dt_values:
-        tiempos = resultados[dt]["tiempos"]
-        error = resultados[dt][f"error_{tipo}"]
-        plt.plot(tiempos, error, label=f"Error Absoluto dt={dt}", marker='*')
-
-    plt.xlabel('Tiempo [s]')
-    plt.ylabel('Error Absoluto')
-    plt.legend()
-    
-    plt.subplot(1, 2, 2)
-    for dt in dt_values:
-        tiempos = resultados[dt]["tiempos"]
-        error_rel = resultados[dt][f"error_{tipo}_rel"]
-        plt.plot(tiempos, error_rel, label=f"Error Relativo dt={dt}", marker='*')
-
-    plt.xlabel('Tiempo [s]')
-    plt.ylabel('Error Relativo')
-    plt.legend()
-    plt.show()
-
-def graficar_errores2(lista, resultados, tipo='posicion'):
-    plt.figure(figsize=(12, 6))
-    plt.suptitle(f"Errores en {'posición' if tipo == 'posicion' else 'velocidad'} para distintos integradores")
-    
-    plt.subplot(1, 2, 1)
-    for integ in lista:
-        tiempos = resultados[integ]["tiempos"]
-        error = resultados[integ][f"error_{tipo}"]
-        plt.plot(tiempos, error, label=f"{integ}", marker='^')
-
-    plt.xlabel('Tiempo [s]')
-    plt.ylabel('Error Absoluto')
-    plt.legend()
-    
-    plt.subplot(1, 2, 2)
-    for integ in lista:
-        tiempos = resultados[integ]["tiempos"]
-        error_rel = resultados[integ][f"error_{tipo}_rel"]
-        plt.plot(tiempos, error_rel, label=f"{integ}", marker='^')
-
-    plt.xlabel('Tiempo [s]')
-    plt.ylabel('Error Relativo')
-    plt.legend()
-    plt.show()
 ####################################################################
 v_terminal = np.sqrt(m*g/D_mag)
 t_apogeo = (v_terminal/g) * np.arctan(v0/v_terminal)
@@ -314,10 +238,10 @@ for integ in integradores.keys():
     errores_vel_medabs.append(error_vel_medabs)
 
 # Resultados de errores globales
-print('Error L2 de la posición:', errores_pos_L2)
-print('Error L2 de la velocidad:', errores_vel_L2)
-print('Error medio absoluto de la posición:', errores_pos_medabs)
-print('Error medio absoluto de la velocidad:', errores_vel_medabs)
+#print('Error L2 de la posición:', errores_pos_L2)
+#print('Error L2 de la velocidad:', errores_vel_L2)
+#print('Error medio absoluto de la posición:', errores_pos_medabs)
+#print('Error medio absoluto de la velocidad:', errores_vel_medabs)
 
 # Graficar errores globales
 plt.figure(figsize=(12, 6))
@@ -328,11 +252,20 @@ plt.plot(lista_values, errores_pos_L2, marker='o')
 plt.title('Errores L2 ')
 plt.xlabel('Integrador')
 plt.ylabel('Error L2')
+# Agregar valores L2 sobre los puntos
+for i, value in enumerate(errores_pos_L2):
+    plt.text(i, value, f"{value:.2e}", ha='center', va='bottom')
+
+
 plt.subplot(1, 2, 2)
 plt.plot(lista_values, errores_pos_medabs, marker = 'o')
 plt.title('Errores medio absoluto')
 plt.xlabel('Integrador')
 plt.ylabel('Error medio absoluto')
+# Agregar valores de error medio absoluto sobre los puntos
+for i, value in enumerate(errores_pos_medabs):
+    plt.text(i, value, f"{value:.2e}", ha='center', va='bottom')
+
 
 plt.figure(figsize=(12, 6))
 plt.suptitle('Errores de la velocidad')
@@ -341,10 +274,19 @@ plt.plot(lista_values, errores_vel_L2, marker ='o')
 plt.title('Errores L2')
 plt.xlabel('Integrador')
 plt.ylabel('Error L2')
+# Agregar valores L2 sobre los puntos
+for i, value in enumerate(errores_vel_L2):
+    plt.text(i, value, f"{value:.2e}", ha='center', va='bottom')
+
+
 plt.subplot(1, 2, 2)
 plt.plot(lista_values, errores_vel_medabs, marker ='o')
 plt.title('Errores medio absoluto')
 plt.xlabel('Integrador')
 plt.ylabel('Error medio absoluto')
+# Agregar valores de error medio absoluto sobre los puntos
+for i, value in enumerate(errores_vel_medabs):
+    plt.text(i, value, f"{value:.2e}", ha='center', va='bottom')
+
 plt.show()
 
