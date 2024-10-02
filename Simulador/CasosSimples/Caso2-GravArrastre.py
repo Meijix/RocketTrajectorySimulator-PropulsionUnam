@@ -288,3 +288,63 @@ lista_values = list(integradores.keys())
 graficar_errores2(lista_values, resultados, tipo='posicion')
 # Graficar errores de velocidad
 graficar_errores2(lista_values, resultados, tipo='velocidad')
+
+
+##########################################
+#print(lista_values)
+# Cálculo de errores globales
+errores_pos_L2 = []
+errores_vel_L2 = []
+errores_pos_medabs = []
+errores_vel_medabs = []
+
+for integ in integradores.keys():
+    error_pos = resultados[integ]["error_posicion"]
+    error_vel = resultados[integ]["error_velocidad"]
+    tiempos = resultados[integ]["tiempos"]
+    
+    # Calcular errores globales para posición y velocidad
+    error_pos_L2, error_pos_medabs = calcular_errores_globales(error_pos, tiempos)
+    error_vel_L2, error_vel_medabs = calcular_errores_globales(error_vel, tiempos)
+    
+    # Guardar los errores
+    errores_pos_L2.append(error_pos_L2)
+    errores_vel_L2.append(error_vel_L2)
+    errores_pos_medabs.append(error_pos_medabs)
+    errores_vel_medabs.append(error_vel_medabs)
+
+# Resultados de errores globales
+print('Error L2 de la posición:', errores_pos_L2)
+print('Error L2 de la velocidad:', errores_vel_L2)
+print('Error medio absoluto de la posición:', errores_pos_medabs)
+print('Error medio absoluto de la velocidad:', errores_vel_medabs)
+
+# Graficar errores globales
+plt.figure(figsize=(12, 6))
+plt.suptitle('Errores de la posición')
+
+plt.subplot(1, 2, 1)
+plt.plot(lista_values, errores_pos_L2, marker='o')
+plt.title('Errores L2 ')
+plt.xlabel('Integrador')
+plt.ylabel('Error L2')
+plt.subplot(1, 2, 2)
+plt.plot(lista_values, errores_pos_medabs, marker = 'o')
+plt.title('Errores medio absoluto')
+plt.xlabel('Integrador')
+plt.ylabel('Error medio absoluto')
+
+plt.figure(figsize=(12, 6))
+plt.suptitle('Errores de la velocidad')
+plt.subplot(1, 2, 1)
+plt.plot(lista_values, errores_vel_L2, marker ='o')
+plt.title('Errores L2')
+plt.xlabel('Integrador')
+plt.ylabel('Error L2')
+plt.subplot(1, 2, 2)
+plt.plot(lista_values, errores_vel_medabs, marker ='o')
+plt.title('Errores medio absoluto')
+plt.xlabel('Integrador')
+plt.ylabel('Error medio absoluto')
+plt.show()
+
