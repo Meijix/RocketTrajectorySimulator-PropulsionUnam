@@ -29,14 +29,14 @@ def graficar_resultados(dt_values, resultados, tipo='posición'):
         if tipo == 'posición':
             datos_sim = resultados[dt]["pos_sim"]
             datos_analitica = resultados[dt]["pos_analitica"]
-            plt.plot(tiempos, datos_sim, label=f'Posicion dt={dt}', marker='o')
+            plt.plot(tiempos, datos_sim, label=f'dt={dt}', marker='o')
             #plt.plot(tiempos, datos_analitica, label=f'Pos. Analítica dt={dt}')
             plt.title('Comparación de Posiciones')
             plt.ylabel('Posición [m]')
         elif tipo == 'velocidad':
             datos_sim = resultados[dt]["vel_sim"]
             datos_analitica = resultados[dt]["vel_analitica"]
-            plt.plot(tiempos, datos_sim, label=f'Velocidad dt={dt}', marker='o')
+            plt.plot(tiempos, datos_sim, label=f'dt={dt}', marker='o')
             #plt.plot(tiempos, datos_analitica, label=f'Velocidad Analítica dt={dt}')
             plt.title('Comparación de Velocidades')
             plt.ylabel('Velocidad [m/s]')
@@ -56,24 +56,27 @@ def graficar_errores(dt_values, resultados, tipo='posicion'):
     for dt in dt_values:
         tiempos = resultados[dt]["tiempos"]
         error = resultados[dt][f"error_{tipo}"]
-        plt.plot(tiempos, error, label=f"Error Absoluto dt={dt}", marker='*', alpha = opacidad)
+        plt.plot(tiempos, error, label=f"dt={dt}", marker='*', alpha = opacidad)
 
     plt.xlabel('Tiempo [s]')
     plt.ylabel('Error Absoluto')
+    plt.title('Errores absolutos')
     plt.legend()
     
     plt.subplot(1, 2, 2)
     for dt in dt_values:
         tiempos = resultados[dt]["tiempos"]
         error_rel = resultados[dt][f"error_{tipo}_rel"]
-        plt.plot(tiempos, error_rel, label=f"Error Relativo dt={dt}", marker='*', alpha = opacidad)
+        plt.plot(tiempos, error_rel, label=f"dt={dt}", marker='*', alpha = opacidad)
 
     plt.xlabel('Tiempo [s]')
     plt.ylabel('Error Relativo')
+    plt.title('Errores relativos')
     plt.legend()
     plt.show()
 
 def graficar_errores2(lista, resultados, tipo='posicion'):
+    opacidad=0.5
     plt.figure(figsize=(12, 6))
     plt.suptitle(f"Errores en {'posición' if tipo == 'posicion' else 'velocidad'} para distintos integradores")
     
@@ -81,7 +84,7 @@ def graficar_errores2(lista, resultados, tipo='posicion'):
     for integ in lista:
         tiempos = resultados[integ]["tiempos"]
         error = resultados[integ][f"error_{tipo}"]
-        plt.plot(tiempos, error, label=f"{integ}", marker='^')
+        plt.plot(tiempos, error, label=f"{integ}", marker='p', alpha = opacidad)
 
     plt.xlabel('Tiempo [s]')
     plt.ylabel('Error Absoluto')
@@ -91,7 +94,7 @@ def graficar_errores2(lista, resultados, tipo='posicion'):
     for integ in lista:
         tiempos = resultados[integ]["tiempos"]
         error_rel = resultados[integ][f"error_{tipo}_rel"]
-        plt.plot(tiempos, error_rel, label=f"{integ}", marker='^')
+        plt.plot(tiempos, error_rel, label=f"{integ}", marker='^', alpha = opacidad)
 
     plt.xlabel('Tiempo [s]')
     plt.ylabel('Error Relativo')
@@ -109,7 +112,7 @@ print("Tiempo de apogeo: ",t_apogeo, "[s]")
 print("Velocidad terminal: ", v_terminal, "[m/s]")
 print("Apogeo: ", apogeo, "[m]")
 
-'''
+
 #####################################################
 #####################################################
 ###Diferentes pasos de tiempo y un mismo integrador
@@ -198,7 +201,7 @@ plt.ylabel('Error')
 plt.legend()
 
 plt.show()
-'''
+
 #####################################################
 #################################################### 
 ### Un mismo paso de tiempo y diferentes integradores

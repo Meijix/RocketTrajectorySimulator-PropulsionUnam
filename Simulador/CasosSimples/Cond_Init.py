@@ -16,7 +16,7 @@ z0 = 0
 v0 = 80
 
 # Parámetros de la simulación
-dt = 0.01  # paso de tiempo
+dt = 0.2  # paso de tiempo
 t_max = 80  # tiempo máximo
 
 
