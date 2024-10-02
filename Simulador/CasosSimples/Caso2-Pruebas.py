@@ -38,15 +38,15 @@ def graficar_resultados(dt_values, resultados, tipo='posición'):
         if tipo == 'posición':
             datos_sim = resultados[dt]["pos_sim"]
             datos_analitica = resultados[dt]["pos_analitica"]
-            plt.plot(tiempos, datos_sim, label=f'Pos. Simulada dt={dt}', linestyle='--')
-            plt.plot(tiempos, datos_analitica, label=f'Pos. Analítica dt={dt}')
+            plt.plot(tiempos, datos_sim, label=f'Posicion dt={dt}', marker='o')
+            #plt.plot(tiempos, datos_analitica, label=f'Pos. Analítica dt={dt}')
             plt.title('Comparación de Posiciones')
             plt.ylabel('Posición [m]')
         elif tipo == 'velocidad':
             datos_sim = resultados[dt]["vel_sim"]
             datos_analitica = resultados[dt]["vel_analitica"]
-            plt.plot(tiempos, datos_sim, label=f'Velocidad Simulada dt={dt}', linestyle='--')
-            plt.plot(tiempos, datos_analitica, label=f'Velocidad Analítica dt={dt}')
+            plt.plot(tiempos, datos_sim, label=f'Velocidad dt={dt}', marker='o')
+            #plt.plot(tiempos, datos_analitica, label=f'Velocidad Analítica dt={dt}')
             plt.title('Comparación de Velocidades')
             plt.ylabel('Velocidad [m/s]')
         
@@ -55,9 +55,36 @@ def graficar_resultados(dt_values, resultados, tipo='posición'):
         plt.grid()
     plt.show()
 
+# Graficar errores
+def graficar_errores(dt_values, resultados, tipo='posicion'):
+    plt.figure(figsize=(12, 6))
+    plt.suptitle(f"Errores en {'posición' if tipo == 'posición' else 'velocidad'} para distintos dt")
+    
+    plt.subplot(1, 2, 1)
+    for dt in dt_values:
+        tiempos = resultados[dt]["tiempos"]
+        error = resultados[dt][f"error_{tipo}"]
+        plt.plot(tiempos, error, label=f"Error Absoluto dt={dt}", marker='*')
+
+    plt.xlabel('Tiempo [s]')
+    plt.ylabel('Error Absoluto')
+    plt.legend()
+    
+    plt.subplot(1, 2, 2)
+    for dt in dt_values:
+        tiempos = resultados[dt]["tiempos"]
+        error_rel = resultados[dt][f"error_{tipo}_rel"]
+        plt.plot(tiempos, error_rel, label=f"Error Relativo dt={dt}", marker='*')
+
+    plt.xlabel('Tiempo [s]')
+    plt.ylabel('Error Relativo')
+    plt.legend()
+    plt.show()
+
+
 # Inicialización de parámetros
-Integrador_oficial = RungeKutta2
-dt_values = [0.005, 0.01, 0.02, 0.05, 0.1, 0.15, 0.2]
+Integrador_oficial = Euler #RungeKutta2
+#dt_values = [0.005, 0.01, 0.02, 0.05, 0.1, 0.15, 0.2]
 dt_values = [0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.125, 0.2]
 resultados = {}
 
@@ -96,31 +123,6 @@ for dt in dt_values:
     resultados[dt]["error_velocidad"] = error_vel[0]
     resultados[dt]["error_velocidad_rel"] = error_vel[1]
 
-# Graficar errores
-def graficar_errores(dt_values, resultados, tipo='posición'):
-    plt.figure(figsize=(12, 6))
-    plt.suptitle(f"Errores en {'posición' if tipo == 'posición' else 'velocidad'} para distintos dt")
-    
-    plt.subplot(1, 2, 1)
-    for dt in dt_values:
-        tiempos = resultados[dt]["tiempos"]
-        error = resultados[dt][f"error_{tipo}"]
-        plt.plot(tiempos, error, label=f"Error Absoluto dt={dt}")
-
-    plt.xlabel('Tiempo [s]')
-    plt.ylabel('Error Absoluto')
-    plt.legend()
-    
-    plt.subplot(1, 2, 2)
-    for dt in dt_values:
-        tiempos = resultados[dt]["tiempos"]
-        error_rel = resultados[dt][f"error_{tipo}_rel"]
-        plt.plot(tiempos, error_rel, label=f"Error Relativo dt={dt}")
-
-    plt.xlabel('Tiempo [s]')
-    plt.ylabel('Error Relativo')
-    plt.legend()
-    plt.show()
 
 # Graficar errores de posición y velocidad
 graficar_errores(dt_values, resultados, tipo='posicion')
