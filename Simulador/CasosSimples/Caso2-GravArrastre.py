@@ -91,7 +91,30 @@ def graficar_errores(dt_values, resultados, tipo='posicion'):
     plt.legend()
     plt.show()
 
+def graficar_errores2(lista, resultados, tipo='posicion'):
+    plt.figure(figsize=(12, 6))
+    plt.suptitle(f"Errores en {'posición' if tipo == 'posicion' else 'velocidad'} para distintos integradores")
+    
+    plt.subplot(1, 2, 1)
+    for integ in lista:
+        tiempos = resultados[integ]["tiempos"]
+        error = resultados[integ][f"error_{tipo}"]
+        plt.plot(tiempos, error, label=f"{integ}", marker='^')
 
+    plt.xlabel('Tiempo [s]')
+    plt.ylabel('Error Absoluto')
+    plt.legend()
+    
+    plt.subplot(1, 2, 2)
+    for integ in lista:
+        tiempos = resultados[integ]["tiempos"]
+        error_rel = resultados[integ][f"error_{tipo}_rel"]
+        plt.plot(tiempos, error_rel, label=f"{integ}", marker='^')
+
+    plt.xlabel('Tiempo [s]')
+    plt.ylabel('Error Relativo')
+    plt.legend()
+    plt.show()
 ####################################################################
 v_terminal = np.sqrt(m*g/D_mag)
 t_apogeo = (v_terminal/g) * np.arctan(v0/v_terminal)
@@ -228,7 +251,7 @@ for t in resultados['RK4']['tiempos']:  # Usando RK4
 # Graficar resultados de posiciones
 plt.figure(figsize=(12, 6))
 for label, res in resultados.items():
-    plt.plot(res['tiempos'], res['posiciones'], label=f'Posición - {label}', marker='o', markersize=4)
+    plt.plot(res['tiempos'], res['posiciones'], label=f' {label}', marker='o', markersize=4)
 
 plt.plot(resultados['RK4']['tiempos'], pos_analitica, label='Posición Analítica', ls='--')
 plt.title('Comparación de posiciones con distintos integradores')
@@ -240,7 +263,7 @@ plt.grid()
 # Graficar resultados de velocidades
 plt.figure(figsize=(12, 6))
 for label, res in resultados.items():
-    plt.plot(res['tiempos'], res['velocidades'], label=f'Velocidad - {label}', marker='o', markersize=4)
+    plt.plot(res['tiempos'], res['velocidades'], label=f' {label}', marker='o', markersize=4)
 
 plt.plot(resultados['RK4']['tiempos'], vel_analitica, label='Velocidad Analítica', ls='--')
 plt.title('Comparación de velocidades con distintos integradores')
@@ -262,6 +285,6 @@ for label, res in resultados.items():
 
 # Graficar errores de posición
 lista_values = list(integradores.keys())
-graficar_errores(lista_values, resultados, tipo='posicion')
+graficar_errores2(lista_values, resultados, tipo='posicion')
 # Graficar errores de velocidad
-graficar_errores(lista_values, resultados, tipo='velocidad')
+graficar_errores2(lista_values, resultados, tipo='velocidad')
