@@ -39,6 +39,16 @@ def sol_analitica_gravedad_arrastre(state, t, m, g, D_mag):
 
     return z, v
 
+v_terminal = np.sqrt(m*g/D_mag)
+t_apogeo = (v_terminal/g) * np.arctan(v0/v_terminal)
+A = np.arctan(v0/v_terminal)
+apogeo = (v_terminal**2/g) *np.log(1/np.cos(A))
+
+print("Tiempo de apogeo: ",t_apogeo, "[s]")
+print("Velocidad terminal: ", v_terminal, "[m/s]")
+print("Apogeo: ", apogeo, "[m]")
+
+'''
 ##############################################################################
 #Comparacion integradores
 # Listas para guardar los resultados
@@ -100,34 +110,10 @@ for t in tiempos_rk4:
 #print(pos_analitica, pos_simul)
 #print(vel_analitica, vel_simul)
 #print(tiempos)
-v_terminal = np.sqrt(m*g/D_mag)
-t_apogeo = (v_terminal/g) * np.arctan(v0/v_terminal)
-A = np.arctan(v0/v_terminal)
-apogeo = (v_terminal**2/g) *np.log(1/np.cos(A))
 
-print("Tiempo de apogeo: ",t_apogeo, "[s]")
-print("Velocidad terminal: ", v_terminal, "[m/s]")
-print("Apogeo: ", apogeo, "[m]")
 
 #################################
-'''
-print("Longitud posicion Euler", len(pos_euler))
-print("Longitud posicion RK4", len(pos_rk4))
-print("Longitud posicion RK2", len(pos_rk2))
-print("Longitud posicion RKF45", len(pos_rkf45))
-print("Longitud posicion analitica", len(pos_analitica))
 
-print("Longitud velocidad Euler", len(vel_euler))
-print("Longitud velocidad RK4", len(vel_rk4))
-print("Longitud velocidad RK2", len(vel_rk2))
-print("Longitud velocidad RKF45", len(vel_rkf45))
-print("Longitud velocidad analitica", len(vel_analitica))
-
-print("Longitud tiempos Euler", len(tiempos_euler))
-print("Longitud tiempos RK4", len(tiempos_rk4))
-print("Longitud tiempos RK2", len(tiempos_rk2))
-print("Longitud tiempos RKF45", len(tiempos_rkf45))
-'''
 
 ########################################################
 ####GRAFICAS
@@ -142,6 +128,9 @@ plt.plot(tiempos_euler, pos_euler, label='Euler',marker ='o', alpha=opacidad)
 plt.plot(tiempos_rk4, pos_rk4, label='RK4', marker='*', alpha= opacidad)
 plt.plot(tiempos_rk2, pos_rk2, label='RK2', marker='^', alpha=opacidad) 
 plt.plot(tiempos_rkf45, pos_rkf45, label='RKF45', marker='X',alpha=opacidad)
+plt.axvline(x=t_apogeo, color='k', linestyle='--', label='t_apogeo')  # <--- Agregue esta línea
+plt.axvline(x=tiempos_euler[-1], color='r', linestyle='--', label='t_rompe')  # <--- Agregue esta línea
+
 
 
 plt.title('Posición vertical [m]')
@@ -157,6 +146,9 @@ plt.plot(tiempos_euler, vel_euler, label='Euler', marker='o', alpha= opacidad)
 plt.plot(tiempos_rk4, vel_rk4, label='RK4', marker='*', alpha=opacidad)
 plt.plot(tiempos_rk2, vel_rk2, label='RK2', marker= '^', alpha=opacidad) 
 plt.plot(tiempos_rkf45, vel_rkf45, label='RKF45',marker='X', alpha=opacidad)
+plt.axvline(x=t_apogeo, color='k', linestyle='--', label='t_apogeo')  # <--- Agregue esta línea
+plt.axvline(x=tiempos_euler[-1], color='r', linestyle='--', label='t_rompe')  # <--- Agregue esta línea
+
 plt.title('Velocidad vertical [m/s]')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
@@ -182,15 +174,29 @@ error_vel_rk2, error_vel_rel_rk2 = errores(vel_rk2, vel_analitica, tiempos_rk2)
 error_pos_rkf45, error_pos_rel_rkf45 = errores(pos_rkf45[:-1], pos_analitica, tiempos_rkf45)
 error_vel_rkf45, error_vel_rel_rkf45 = errores(vel_rkf45[:-1], vel_analitica, tiempos_rkf45)
 
+# Graficar errores globales
+error_pos_euler_L2, error_pos_euler_medioabs=calcular_errores_globales(error_pos_euler, tiempos_euler)
+error_vel_euler_L2, error_vel_euler_medioabs=calcular_errores_globales(error_vel_euler, tiempos_euler)
 
+error_pos_rk4_L2, error_pos_rk4_medioabs=calcular_errores_globales(error_pos_rk4, tiempos_rk4)
+error_vel_rk4_L2, error_vel_rk4_medioabs=calcular_errores_globales(error_vel_rk4, tiempos_rk4)
+
+error_pos_rk2_L2, error_pos_rk2_medioabs=calcular_errores_globales(error_pos_rk2, tiempos_rk2)
+error_vel_rk2_L2, error_vel_rk2_medioabs=calcular_errores_globales(error_vel_rk2, tiempos_rk2)
+
+#error_pos_rkf45_L2, error_pos_rkf45_medioabs=calcular_errores_globales(error_pos_rkf45, tiempos_rkf45)
+#error_vel_rkf45_L2, error_vel_rkf45_medioabs=calcular_errores_globales(error_vel_rkf45, tiempos_rkf45)
 
 plt.figure(figsize=(12, 6))
-plt.title('Errores de la velocidad con distintos integradores')
+plt.suptitle('Errores de la velocidad con distintos integradores')
 plt.subplot(1, 2, 1)
 plt.plot(tiempos_euler, error_vel_rel_euler, label='Error Euler', marker='o')
 plt.plot(tiempos_rk4, error_vel_rel_rk4, label='Error RK4', marker='*')
 plt.plot(tiempos_rk2, error_vel_rel_rk2, label='Error RK2', marker='^')
 plt.plot(tiempos_rkf45, error_vel_rel_rkf45, label='Error RKF45', marker='X')
+plt.axvline(x=t_apogeo, color='k', linestyle='--', label='t_apogeo')  # <--- Agregue esta línea
+plt.axvline(x=tiempos_euler[-1], color='r', linestyle='--', label='t_rompe')  # <--- Agregue esta línea
+
 #plt.title("Errores relativos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Errores relativos')
@@ -202,6 +208,9 @@ plt.plot(tiempos_euler, error_vel_euler, label='Error Euler', marker='o')
 plt.plot(tiempos_rk4, error_vel_rk4, label='Error RK4', marker='*')
 plt.plot(tiempos_rk2, error_vel_rk2, label='Error RK2', marker='^')
 plt.plot(tiempos_rkf45, error_vel_rkf45, label='Error RKF45', marker='X')
+plt.axvline(x=t_apogeo, color='k', linestyle='--', label='t_apogeo')  # <--- Agregue esta línea
+plt.axvline(x=tiempos_euler[-1], color='r', linestyle='--', label='t_rompe')  # <--- Agregue esta línea
+
 #plt.title("Errores absolutos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Errorres absolutos [m/s]')
@@ -210,13 +219,16 @@ plt.legend()
 #plt.show()
 #################################################
 plt.figure(figsize=(12, 6))
-plt.title('Errores de la posicion con distintos integradores')
+plt.suptitle('Errores de la posicion con distintos integradores')
 
 plt.subplot(1, 2, 1)
 plt.plot(tiempos_euler, error_pos_rel_euler, label='Error Euler', marker='o')
 plt.plot(tiempos_rk4, error_pos_rel_rk4, label='Error RK4', marker='*')
 plt.plot(tiempos_rk2, error_pos_rel_rk2, label='Error RK2', marker='^')
 plt.plot(tiempos_rkf45, error_pos_rel_rkf45, label='Error RKF45', marker='X')
+plt.axvline(x=t_apogeo, color='k', linestyle='--', label='t_apogeo')  # <--- Agregue esta línea
+plt.axvline(x=tiempos_euler[-1], color='r', linestyle='--', label='t_rompe')  # <--- Agregue esta línea
+
 #plt.title("Errores relativos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Errores relativos [1]')
@@ -227,76 +239,111 @@ plt.plot(tiempos_euler, error_pos_euler, label='Error Euler', marker='o')
 plt.plot(tiempos_rk4, error_pos_rk4, label='Error RK4', marker='*') 
 plt.plot(tiempos_rk2, error_pos_rk2, label='Error RK2', marker='^')
 plt.plot(tiempos_rkf45, error_pos_rkf45, label='Error RKF45', marker='X')
+plt.axvline(x=t_apogeo, color='k', linestyle='--', label='t_apogeo')  # <--- Agregue esta línea
+plt.axvline(x=tiempos_euler[-1], color='r', linestyle='--', label='t_rompe')  # <--- Agregue esta línea
+
 #plt.title("Errores absolutos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Errorres absolutos [m]')
 plt.legend()
 
-plt.show()
+'''
 
 #####################################################
 #####################################################
 ###Diferentes pasos de tiempo y un mismo integrador
 #####################################################
-Integrador_oficial= Euler
-tiempos_euler_dt1 = []
-pos_euler_dt1 = []
-vel_euler_dt1 = []
-
-tiempos_euler_dt2 = []
-pos_euler_dt2 = []
-vel_euler_dt2 = []
-
-tiempos_euler_dt3 = []
-pos_euler_dt3 = []
-vel_euler_dt3 = []
-
-tiempos_euler_dt4 = []
-pos_euler_dt4 = []
-vel_euler_dt4 = []
-
-tiempos_euler_dt5 = []
-pos_euler_dt5 = []
-vel_euler_dt5 = []
+Integrador_oficial= RungeKutta2
+#Integrador_oficial= Euler
 
 # Simulaciones con diferentes pasos de tiempo
 dt_values = [0.005, 0.01, 0.05, 0.1, 0.2]
 labels = ['dt=0.005', 'dt=0.01', 'dt=0.05', 'dt=0.1', 'dt=0.2']
 
+tiempos_euler_dt1=[]
+pos_euler_dt1=[]
+vel_euler_dt1=[]
+pos_analitica_dt1=[]
+vel_analitica_dt1=[]
+
+tiempos_euler_dt2=[]
+pos_euler_dt2=[]
+vel_euler_dt2=[]
+pos_analitica_dt2=[]
+vel_analitica_dt2=[]
+
+tiempos_euler_dt3=[]
+pos_euler_dt3=[]
+vel_euler_dt3=[]
+pos_analitica_dt3=[]
+vel_analitica_dt3=[]
+
+tiempos_euler_dt4=[]
+pos_euler_dt4=[]
+vel_euler_dt4=[]
+pos_analitica_dt4=[]
+vel_analitica_dt4=[]
+
+tiempos_euler_dt5=[]
+pos_euler_dt5=[]
+vel_euler_dt5=[]
+pos_analitica_dt5=[]
+vel_analitica_dt5=[]
+
 for dt, label in zip(dt_values, labels):
     tiempos, sim = simular_dinamica(estado, t_max, dt, Integrador_oficial, der_gravedad_arrastre)
     pos = [sim[i][0] for i in range(len(sim))]
     vel = [sim[i][1] for i in range(len(sim))]
+
+    pos_analitica = []
+    vel_analitica = []
+    for t in tiempos:
+        pos, vel = sol_analitica_gravedad_arrastre(estado, t, m, g, D_mag)
+        pos_analitica.append(pos)
+        vel_analitica.append(vel)
     
     if label == 'dt=0.005':
         tiempos_euler_dt1 = tiempos
         pos_euler_dt1 = pos
         vel_euler_dt1 = vel
+        pos_analitica_dt1 = pos_analitica
+        vel_analitica_dt1 = vel_analitica
     elif label == 'dt=0.01':
         tiempos_euler_dt2 = tiempos
         pos_euler_dt2 = pos
         vel_euler_dt2 = vel
+        pos_analitica_dt2 = pos_analitica
+        vel_analitica_dt2 = vel_analitica
     elif label == 'dt=0.05':
         tiempos_euler_dt3 = tiempos
         pos_euler_dt3 = pos
         vel_euler_dt3 = vel
+        pos_analitica_dt3 = pos_analitica
+        vel_analitica_dt3 = vel_analitica
     elif label == 'dt=0.1':
         tiempos_euler_dt4 = tiempos
         pos_euler_dt4 = pos
         vel_euler_dt4 = vel
+        pos_analitica_dt4 = pos_analitica
+        vel_analitica_dt4 = vel
+
     elif label == 'dt=0.2':
         tiempos_euler_dt5 = tiempos
         pos_euler_dt5 = pos
         vel_euler_dt5 = vel
+        pos_analitica_dt5 = pos_analitica
+        vel_analitica_dt5 = vel
 
 # Graficar resultados
 plt.figure(figsize=(8, 6))
-plt.plot(tiempos_rk4, pos_analitica, label='analitica', marker='^')
+plt.plot(tiempos_euler_dt1, pos_analitica_dt1, label='analitica', marker='^')
 plt.plot(tiempos_euler_dt1, pos_euler_dt1, label='dt=0.005', marker='*')
 plt.plot(tiempos_euler_dt2, pos_euler_dt2, label='dt=0.01', marker='*')
 plt.plot(tiempos_euler_dt3, pos_euler_dt3, label='dt=0.05', marker='*')
 plt.plot(tiempos_euler_dt4, pos_euler_dt4, label='dt=0.1', marker='*')
 plt.plot(tiempos_euler_dt5, pos_euler_dt5, label='dt=0.2', marker='*')
+plt.axvline(x=t_apogeo, color='k', linestyle='--', label='t_apogeo')  # <--- Agregue esta línea
+plt.axvline(x=tiempos_euler_dt5[-1], color='r', linestyle='--', label='t_rompe')  # <--- Agregue esta línea
 
 
 plt.title('Posición vertical con distintos dt ')
@@ -307,55 +354,21 @@ plt.legend()
 #Para la velocidad la solucion va a ser igual pues e sun metodo de segundo orden? (Preguntar dr Claudio)
 
 plt.figure(figsize=(8, 6))
-plt.plot(tiempos_rk4, vel_analitica, label='analitica', marker='^')
+plt.plot(tiempos_euler_dt1, vel_analitica_dt1, label='analitica', marker='^')
 plt.plot(tiempos_euler_dt1, vel_euler_dt1, label='dt=0.005')
 plt.plot(tiempos_euler_dt2, vel_euler_dt2, label='dt=0.01')
 plt.plot(tiempos_euler_dt3, vel_euler_dt3, label='dt=0.05')
 plt.plot(tiempos_euler_dt4, vel_euler_dt4, label='dt=0.1')
 plt.plot(tiempos_euler_dt5, vel_euler_dt5, label='dt=0.2')
+plt.axvline(x=t_apogeo, color='k', linestyle='--', label='t_apogeo')  # <--- Agregue esta línea
+plt.axvline(x=tiempos_euler_dt5[-1], color='r', linestyle='--', label='t_rompe')  # <--- Agregue esta línea
 
 plt.title('Velocidad vertical con distintos dt')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
 plt.legend()
 #plt.show()
-
-####################################################
-# Calcula la solución analítica para cada dt
-pos_analitica_dt1 = []
-vel_analitica_dt1 = []
-for t in tiempos_euler_dt1:
-    pos, vel = sol_analitica_gravedad_arrastre(estado, t, m, g, D_mag)
-    pos_analitica_dt1.append(pos)
-    vel_analitica_dt1.append(vel)
-
-pos_analitica_dt2 = []
-vel_analitica_dt2 = []
-for t in tiempos_euler_dt2:
-    pos, vel = sol_analitica_gravedad_arrastre(estado, t, m, g, D_mag)
-    pos_analitica_dt2.append(pos)
-    vel_analitica_dt2.append(vel)
-
-pos_analitica_dt3 = []
-vel_analitica_dt3 = []
-for t in tiempos_euler_dt3:
-    pos, vel = sol_analitica_gravedad_arrastre(estado, t, m, g, D_mag)
-    pos_analitica_dt3.append(pos)
-    vel_analitica_dt3.append(vel)
-
-pos_analitica_dt4 = []
-vel_analitica_dt4 = []
-for t in tiempos_euler_dt4:
-    pos, vel = sol_analitica_gravedad_arrastre(estado, t, m, g, D_mag)
-    pos_analitica_dt4.append(pos)
-    vel_analitica_dt4.append(vel)
-
-pos_analitica_dt5 = []
-vel_analitica_dt5 = []
-for t in tiempos_euler_dt5:
-    pos, vel = sol_analitica_gravedad_arrastre(estado, t, m, g, D_mag)
-    pos_analitica_dt5.append(pos)
-    vel_analitica_dt5.append(vel)
+#plt.savefig('pos_vel_dt.png')
 
 ################################################
 # Calcula errores absolutos y relativos para cada dt
@@ -370,15 +383,22 @@ error_vel_dt4, error_vel_rel_dt4 = errores(vel_euler_dt4, vel_analitica_dt4, tie
 error_pos_dt5, error_pos_rel_dt5 = errores(pos_euler_dt5, pos_analitica_dt5, tiempos_euler_dt5)
 error_vel_dt5, error_vel_rel_dt5 = errores(vel_euler_dt5, vel_analitica_dt5, tiempos_euler_dt5)
 
+error_pos_dt1_L2, error_pos_dt1_medabs=calcular_errores_globales(pos_euler_dt1, tiempos_euler_dt1)
+error_vel_dt1_L2, error_vel_dt1_medabs=calcular_errores_globales(vel_euler_dt1, tiempos_euler_dt1)
+error_pos_dt2_L2, error_pos_dt2_medabs=calcular_errores_globales(pos_euler_dt2, tiempos_euler_dt2)
+error_vel_dt2_L2, error_vel_dt2_medabs=calcular_errores_globales(vel_euler_dt2, tiempos_euler_dt2)
+error_pos_dt3_L2, error_pos_dt3_medabs=calcular_errores_globales(pos_euler_dt3, tiempos_euler_dt3)
+error_vel_dt3_L2, error_vel_dt3_medabs=calcular_errores_globales(vel_euler_dt3, tiempos_euler_dt3)
+error_pos_dt4_L2, error_pos_dt4_medabs=calcular_errores_globales(pos_euler_dt4, tiempos_euler_dt4)
+error_vel_dt4_L2, error_vel_dt4_medabs=calcular_errores_globales(vel_euler_dt4, tiempos_euler_dt4)
+error_pos_dt5_L2, error_pos_dt5_medabs=calcular_errores_globales(pos_euler_dt5, tiempos_euler_dt5)
+error_vel_dt5_L2, error_vel_dt5_medabs=calcular_errores_globales(vel_euler_dt5, tiempos_euler_dt5)
+
 ################################################
-'''
-# Graficar errores absolutos y relativos
-graficar_errores(tiempos_euler_dt1,tiempos_euler_dt2, tiempos_euler_dt3, tiempos_euler_dt4, tiempos_euler_dt5, error_pos_dt1, error_pos_dt1, error_pos_dt2, error_pos_dt3, error_pos_dt4, error_pos_dt5, error_vel_dt1, error_vel_dt2, error_vel_dt3, error_vel_dt4, error_vel_dt5, error_pos_rel_dt1, error_pos_rel_dt2, error_pos_rel_dt3, error_pos_rel_dt4, error_pos_rel_dt5, error_vel_rel_dt1, error_vel_rel_dt2, error_vel_rel_dt3, error_vel_rel_dt4, error_vel_rel_dt5)
-'''
 # Grafica errores absolutos y relativos
 #Para la posicion
 plt.figure(figsize=(12, 6))
-plt.title("Errores en posición para distintos dt")
+plt.suptitle("Errores en posición para distintos dt")
 
 plt.subplot(1, 2, 1)
 plt.plot(tiempos_euler_dt1, error_pos_dt1, label='dt=0.005', marker='*')
@@ -386,6 +406,9 @@ plt.plot(tiempos_euler_dt2, error_pos_dt2, label='dt=0.01', marker='*')
 plt.plot(tiempos_euler_dt3, error_pos_dt3, label='dt=0.05', marker='*')
 plt.plot(tiempos_euler_dt4, error_pos_dt4, label='dt=0.1', marker='*')
 plt.plot(tiempos_euler_dt5, error_pos_dt5, label='dt=0.2', marker='*')
+plt.axvline(x=t_apogeo, color='k', linestyle='--', label='t_apogeo')  # <--- Agregue esta línea
+plt.axvline(x=tiempos_euler_dt5[-1], color='r', linestyle='--', label='t_rompe')  # <--- Agregue esta línea
+
 #plt.title("Errores absolutos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Error absoluto [m]')
@@ -397,6 +420,9 @@ plt.plot(tiempos_euler_dt2, error_pos_rel_dt2, label='dt=0.01', marker='*')
 plt.plot(tiempos_euler_dt3, error_pos_rel_dt3, label='dt=0.05', marker='*')
 plt.plot(tiempos_euler_dt4, error_pos_dt4, label='dt=0.1', marker='*')
 plt.plot(tiempos_euler_dt5, error_pos_rel_dt5, label='dt=0.2', marker='*')
+plt.axvline(x=t_apogeo, color='k', linestyle='--', label='t_apogeo')  # <--- Agregue esta línea
+plt.axvline(x=tiempos_euler_dt5[-1], color='r', linestyle='--', label='t_rompe')  # <--- Agregue esta línea
+
 #plt.title("Errores relativos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Error relativo')
@@ -405,7 +431,7 @@ plt.legend()
 
 #Para la velocidad
 plt.figure(figsize=(12, 6))
-plt.title("Errores en velocidad para distintos dt")
+plt.suptitle("Errores en velocidad para distintos dt")
 
 plt.subplot(1, 2, 1)
 plt.plot(tiempos_euler_dt1, error_vel_dt1, label='dt=0.005', marker='*')
@@ -413,6 +439,9 @@ plt.plot(tiempos_euler_dt2, error_vel_dt2, label='dt=0.01', marker='*')
 plt.plot(tiempos_euler_dt3, error_vel_dt3, label='dt=0.05', marker='*')
 plt.plot(tiempos_euler_dt4, error_vel_dt4, label='dt=0.1', marker='*')
 plt.plot(tiempos_euler_dt5, error_vel_dt5, label='dt=0.2', marker='*')
+plt.axvline(x=t_apogeo, color='k', linestyle='--', label='t_apogeo')  # <--- Agregue esta línea
+plt.axvline(x=tiempos_euler_dt5[-1], color='r', linestyle='--', label='t_rompe')  # <--- Agregue esta línea
+
 #plt.title("Errores absolutos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Error absoluto [m/s]')
@@ -425,8 +454,41 @@ plt.plot(tiempos_euler_dt2, error_vel_rel_dt2, label='dt=0.01', marker='*')
 plt.plot(tiempos_euler_dt3, error_vel_rel_dt3, label='dt=0.05', marker='*')
 plt.plot(tiempos_euler_dt4, error_vel_rel_dt4, label='dt=0.1', marker='*')
 plt.plot(tiempos_euler_dt5, error_vel_rel_dt5, label='dt=0.2', marker='*')
+plt.axvline(x=t_apogeo, color='k', linestyle='--', label='t_apogeo')  # <--- Agregue esta línea
+plt.axvline(x=tiempos_euler_dt5[-1], color='r', linestyle='--', label='t_rompe')  # <--- Agregue esta línea
+
 #plt.title("Errores relativos")
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Error relativo')
 plt.legend()
+plt.show()
+##################################################
+# Grafica el error L2 y el error medio absoluto
+lista_errores_pos_L2 = [error_pos_dt1_L2, error_pos_dt2_L2, error_pos_dt3_L2, error_pos_dt4_L2, error_pos_dt5_L2]
+lista_errores_vel_L2 = [error_vel_dt1_L2, error_vel_dt2_L2, error_vel_dt3_L2, error_vel_dt4_L2, error_vel_dt5_L2]
+lista_errores_pos_medabs = [error_pos_dt1_medabs, error_pos_dt2_medabs, error_pos_dt3_medabs, error_pos_dt4_medabs, error_pos_dt5_medabs]
+lista_errores_vel_medabs = [error_vel_dt1_medabs, error_vel_dt2_medabs, error_vel_dt3_medabs, error_vel_dt4_medabs, error_vel_dt5_medabs]
+
+plt.figure(figsize=(8, 6))
+
+plt.subplot(1,2,1)
+plt.title("Error L2")
+plt.plot(dt_values, lista_errores_pos_L2, label='Error posicion', marker='*')
+plt.plot(dt_values, lista_errores_vel_L2, label='Error velocidad', marker='o')
+plt.xlabel('Paso de tiempo dt')
+plt.ylabel('Error')
+plt.legend()
+
+plt.subplot(1,2,2)
+plt.title("Error medio absoluto")
+#plt.scatter([error_pos_dt1_medabs, error_pos_dt2_medabs, error_pos_dt3_medabs, error_pos_dt4_medabs, error_pos_dt5_medabs])
+plt.plot(dt_values, lista_errores_pos_medabs , label='Error posicion', marker='*')
+#plt.scatter([error_vel_dt1_medabs, error_vel_dt2_medabs, error_vel_dt3_medabs, error_vel_dt4_medabs, error_vel_dt5_medabs])
+plt.plot(dt_values, lista_errores_vel_medabs, label='Error velocidad', marker='o')
+
+plt.xlabel('Paso de tiempo dt')
+plt.ylabel('Error')
+plt.legend()
+
+
 plt.show()
