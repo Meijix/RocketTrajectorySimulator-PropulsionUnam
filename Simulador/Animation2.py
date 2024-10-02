@@ -40,7 +40,7 @@ axcohete.set_title('Dibujo del Cohete')
 
 # Eje 2D para la visualización
 ax2d.set_xlim([0, t_fin + 1])
-ax2d.set_ylim([-1.8, 1.8])
+ax2d.set_ylim([-95, 95])
 ax2d.set_title('Ángulos del Cohete')
 ax2d.set_xlabel("Tiempo (s)")
 ax2d.set_ylabel("Grados")
@@ -49,29 +49,32 @@ ax2d.grid()
 # Cada cuántos frames graficar
 every = 100
 
+print(thetas)
+
 # Función de actualización para la animación
 def update(frame):
     axcohete.clear()
-    dibujar_cohete(0, 0, thetas[frame], tamaño)  # Dibujar el cohete inclinado
+    axcohete.set_xlim([-15, 15])
+    axcohete.set_ylim([-15, 15])
+    dibujar_cohete(0, 0, np.degrees(thetas[frame]), tamaño, ax=axcohete)  # Dibujar el cohete inclinado
     #ax.set_xlim(-10, 10)
     #ax.set_ylim(-10, 10)
     axcohete.set_aspect("equal")
     axcohete.set_title('Dibujo del Cohete')
 
-    
-    ax2d.set_xlim([0, t_fin + 1])
-    ax2d.set_ylim([-1.8,1.8])
-    ax2d.plot(t[:frame + 1], thetas[:frame + 1], 'b-')  # Graficar hasta el frame actual
-    ax2d.scatter(t[frame], thetas[frame], color='red')  # Puntos en el gráfico
+    ax2d.plot(t[:frame + 1], np.degrees(thetas[:frame + 1]), 'b-')  # Graficar hasta el frame actual
+    ax2d.scatter(t[frame], np.degrees(thetas[frame]), color='red')  # Puntos en el gráfico
 
     return ax2d, axcohete
 
 # Crear la animación
+fps = 30
 frames = np.arange(0, len(t), every)
-animation = FuncAnimation(fig, update, frames=frames, interval=50, repeat=False)
+animation = FuncAnimation(fig, update, frames=frames, interval=1000/fps, repeat=False)
 
-plt.show()
+# plt.show()
+animation.save("AngulosAnimados.mp4")
 
 # Guardar la animación como GIF
-animation.save("AngulosAnimados.gif")
+
 print("GIF Guardado")

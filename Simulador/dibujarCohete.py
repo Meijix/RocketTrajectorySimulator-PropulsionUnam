@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from Xitle import *
 
-def dibujar_cohete(x, y, theta, tamaño):
+def dibujar_cohete(x, y, theta, tamaño, ax):
   theta = theta-90
 
   #Falta arreglar las proporciones
@@ -28,16 +28,16 @@ def dibujar_cohete(x, y, theta, tamaño):
   esquina4_rotada = matriz_rotacion @ esquina4 + np.array([x, y])
 
   #Mostrar esquinas
-  #plt.scatter(esquina1[0],esquina1[1])
-  #plt.scatter(esquina2[0],esquina2[1])
-  #plt.scatter(esquina3[0],esquina3[1])
-  #plt.scatter(esquina4[0],esquina4[1])
+  #ax.scatter(esquina1[0],esquina1[1])
+  #ax.scatter(esquina2[0],esquina2[1])
+  #ax.scatter(esquina3[0],esquina3[1])
+  #ax.scatter(esquina4[0],esquina4[1])
 
   # Dibujar el rectángulo (cuerpo del cohete)
-  plt.plot([esquina1_rotada[0], esquina2_rotada[0]], [esquina1_rotada[1], esquina2_rotada[1]], 'k-')
-  plt.plot([esquina2_rotada[0], esquina3_rotada[0]], [esquina2_rotada[1], esquina3_rotada[1]], 'k-')
-  plt.plot([esquina3_rotada[0], esquina4_rotada[0]], [esquina3_rotada[1], esquina4_rotada[1]], 'k-')
-  plt.plot([esquina4_rotada[0], esquina1_rotada[0]], [esquina4_rotada[1], esquina1_rotada[1]], 'k-')
+  ln, = ax.plot([esquina1_rotada[0], esquina2_rotada[0]], [esquina1_rotada[1], esquina2_rotada[1]], 'k-')
+  ax.plot([esquina2_rotada[0], esquina3_rotada[0]], [esquina2_rotada[1], esquina3_rotada[1]], 'k-')
+  ax.plot([esquina3_rotada[0], esquina4_rotada[0]], [esquina3_rotada[1], esquina4_rotada[1]], 'k-')
+  ax.plot([esquina4_rotada[0], esquina1_rotada[0]], [esquina4_rotada[1], esquina1_rotada[1]], 'k-')
 
   # Dibujar el triángulo (punta del cohete)
   punta1 = np.array([0, altura + long_nose])
@@ -47,9 +47,9 @@ def dibujar_cohete(x, y, theta, tamaño):
   punta1 = matriz_rotacion @ punta1 + np.array([x, y])
   punta2 = esquina3_rotada
   punta3 = esquina4_rotada
-  plt.plot([punta1[0], punta2[0]], [punta1[1], punta2[1]], 'k-')
-  plt.plot([punta2[0], punta3[0]], [punta2[1], punta3[1]], 'k-')
-  plt.plot([punta3[0], punta1[0]], [punta3[1], punta1[1]], 'k-')
+  ax.plot([punta1[0], punta2[0]], [punta1[1], punta2[1]], 'k-')
+  ax.plot([punta2[0], punta3[0]], [punta2[1], punta3[1]], 'k-')
+  ax.plot([punta3[0], punta1[0]], [punta3[1], punta1[1]], 'k-')
 
   # Dibujar los trapecios (aletas)
   aleta_base = altura / 4
@@ -68,10 +68,10 @@ def dibujar_cohete(x, y, theta, tamaño):
   aleta1_3_rotada = matriz_rotacion @ aleta1_3 + np.array([x, y])
   aleta1_4_rotada = matriz_rotacion @ aleta1_4 + np.array([x, y])
 
-  plt.plot([aleta1_1_rotada[0], aleta1_2_rotada[0]], [aleta1_1_rotada[1], aleta1_2_rotada[1]], 'k-')
-  plt.plot([aleta1_2_rotada[0], aleta1_3_rotada[0]], [aleta1_2_rotada[1], aleta1_3_rotada[1]], 'k-')
-  plt.plot([aleta1_3_rotada[0], aleta1_4_rotada[0]], [aleta1_3_rotada[1], aleta1_4_rotada[1]], 'k-')
-  plt.plot([aleta1_4_rotada[0], aleta1_1_rotada[0]], [aleta1_4_rotada[1], aleta1_1_rotada[1]], 'k-')
+  ax.plot([aleta1_1_rotada[0], aleta1_2_rotada[0]], [aleta1_1_rotada[1], aleta1_2_rotada[1]], 'k-')
+  ax.plot([aleta1_2_rotada[0], aleta1_3_rotada[0]], [aleta1_2_rotada[1], aleta1_3_rotada[1]], 'k-')
+  ax.plot([aleta1_3_rotada[0], aleta1_4_rotada[0]], [aleta1_3_rotada[1], aleta1_4_rotada[1]], 'k-')
+  ax.plot([aleta1_4_rotada[0], aleta1_1_rotada[0]], [aleta1_4_rotada[1], aleta1_1_rotada[1]], 'k-')
 
   # Aleta derecha (espejo de la izquierda)
   aleta2_1 = esquina2
@@ -85,10 +85,10 @@ def dibujar_cohete(x, y, theta, tamaño):
   aleta2_3_rotada = matriz_rotacion @ aleta2_3 + np.array([x, y])
   aleta2_4_rotada = matriz_rotacion @ aleta2_4 + np.array([x, y])
 
-  plt.plot([aleta2_1_rotada[0], aleta2_2_rotada[0]], [aleta2_1_rotada[1], aleta2_2_rotada[1]], 'k-')
-  plt.plot([aleta2_2_rotada[0], aleta2_3_rotada[0]], [aleta2_2_rotada[1], aleta2_3_rotada[1]], 'k-')
-  plt.plot([aleta2_3_rotada[0], aleta2_4_rotada[0]], [aleta2_3_rotada[1], aleta2_4_rotada[1]], 'k-')
-  plt.plot([aleta2_4_rotada[0], aleta2_1_rotada[0]], [aleta2_4_rotada[1], aleta2_1_rotada[1]], 'k-')
+  ax.plot([aleta2_1_rotada[0], aleta2_2_rotada[0]], [aleta2_1_rotada[1], aleta2_2_rotada[1]], 'k-')
+  ax.plot([aleta2_2_rotada[0], aleta2_3_rotada[0]], [aleta2_2_rotada[1], aleta2_3_rotada[1]], 'k-')
+  ax.plot([aleta2_3_rotada[0], aleta2_4_rotada[0]], [aleta2_3_rotada[1], aleta2_4_rotada[1]], 'k-')
+  ax.plot([aleta2_4_rotada[0], aleta2_1_rotada[0]], [aleta2_4_rotada[1], aleta2_1_rotada[1]], 'k-')
 
   #Falta agregar dibujo del boattail
   # Boattail
@@ -108,15 +108,15 @@ def dibujar_cohete(x, y, theta, tamaño):
   aleta4_3_rotada = matriz_rotacion @ aleta4_4 + np.array([x, y])
 
   # Mostrar las esquinas del boattail
-  #plt.scatter(aleta4_1_rotada[0],aleta4_1_rotada[1])
-  #plt.scatter(aleta4_2_rotada[0],aleta4_2_rotada[1])
-  #plt.scatter(aleta4_3_rotada[0],aleta4_3_rotada[1])
-  #plt.scatter(aleta4_4_rotada[0],aleta4_4_rotada[1])
+  #ax.scatter(aleta4_1_rotada[0],aleta4_1_rotada[1])
+  #ax.scatter(aleta4_2_rotada[0],aleta4_2_rotada[1])
+  #ax.scatter(aleta4_3_rotada[0],aleta4_3_rotada[1])
+  #ax.scatter(aleta4_4_rotada[0],aleta4_4_rotada[1])
 
-  plt.plot([aleta4_1_rotada[0], aleta4_2_rotada[0]], [aleta4_1_rotada[1], aleta4_2_rotada[1]], 'k-')
-  plt.plot([aleta4_2_rotada[0], aleta4_3_rotada[0]], [aleta4_2_rotada[1], aleta4_3_rotada[1]], 'k-')
-  plt.plot([aleta4_3_rotada[0], aleta4_4_rotada[0]], [aleta4_3_rotada[1], aleta4_4_rotada[1]], 'k-')
-  plt.plot([aleta4_4_rotada[0], aleta4_1_rotada[0]], [aleta4_4_rotada[1], aleta4_1_rotada[1]], 'k-')
+  ax.plot([aleta4_1_rotada[0], aleta4_2_rotada[0]], [aleta4_1_rotada[1], aleta4_2_rotada[1]], 'k-')
+  ax.plot([aleta4_2_rotada[0], aleta4_3_rotada[0]], [aleta4_2_rotada[1], aleta4_3_rotada[1]], 'k-')
+  ax.plot([aleta4_3_rotada[0], aleta4_4_rotada[0]], [aleta4_3_rotada[1], aleta4_4_rotada[1]], 'k-')
+  ax.plot([aleta4_4_rotada[0], aleta4_1_rotada[0]], [aleta4_4_rotada[1], aleta4_1_rotada[1]], 'k-')
 
 if __name__ == "__main__":
     # Dibujar un cohete
