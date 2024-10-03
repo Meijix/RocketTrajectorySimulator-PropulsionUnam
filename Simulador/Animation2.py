@@ -72,8 +72,9 @@ fps = 30
 frames = np.arange(0, len(t), every)
 animation = FuncAnimation(fig, update, frames=frames, interval=1000/fps, repeat=False)
 
-plt.show()
-animation.save("AngulosAnimados.gif")
+#plt.show()
+
+animation.save("AngulosAnimados.mp4")
 
 # Guardar la animación como GIF
 print("Guardado")
