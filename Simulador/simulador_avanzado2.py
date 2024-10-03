@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, filedialog
+from tkinter import ttk, filedialog, messagebox
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from mpl_toolkits.mplot3d import Axes3D
@@ -8,12 +8,16 @@ import pandas as pd
 import json
 from math import pi
 import time
+from datetime import datetime
 
-# Importar las clases y funciones necesarias del archivo de simulación
+# Import necessary modules
 from condiciones_init import *
 from Xitle import *
 from Vuelo import *
 from Viento import Viento
+from riel import Torrelanzamiento
+from Atmosfera1 import atmosfera
+from Componentes import Componente, Cono, Cilindro, Aletas, Boattail
 
 class SimuladorCohetesAvanzado:
     def __init__(self, master):
@@ -24,6 +28,7 @@ class SimuladorCohetesAvanzado:
         self.notebook = ttk.Notebook(self.master)
         self.notebook.pack(expand=True, fill="both")
 
+        self.create_rocket_tab()
         self.create_input_tab()
         self.create_trajectory_tab()
         self.create_position_tab()
@@ -34,43 +39,161 @@ class SimuladorCohetesAvanzado:
         self.create_summary_tab()
         self.create_csv_import_tab()
 
+        self.rocket = None
+
+    def create_rocket_tab(self):
+        rocket_frame = ttk.Frame(self.notebook)
+        self.notebook.add(rocket_frame, text="Cohete")
+
+        # Nose Cone
+        ttk.Label(rocket_frame, text="Nariz (Cono):").grid(row=0, column=0, sticky="w", padx=5, pady=5)
+        self.nose_length = self.create_entry(rocket_frame, 1, "Longitud (m):")
+        self.nose_diameter = self.create_entry(rocket_frame, 2, "Diámetro (m):")
+        self.nose_geometry = ttk.Combobox(rocket_frame, values=["conica", "ogiva", "parabolica", "eliptica"])
+        self.nose_geometry.grid(row=3, column=1, padx=5, pady=5)
+        ttk.Label(rocket_frame, text="Geometría:").grid(row=3, column=0, sticky="w", padx=5, pady=5)
+
+        # Body Tube
+        ttk.Label(rocket_frame, text="Tubo del cuerpo:").grid(row=4, column=0, sticky="w", padx=5, pady=5)
+        self.body_length = self.create_entry(rocket_frame, 5, "Longitud (m):")
+        self.body_diameter = self.create_entry(rocket_frame, 6, "Diámetro exterior (m):")
+        self.body_thickness = self.create_entry(rocket_frame, 7, "Espesor (m):")
+
+        # Fins
+        ttk.Label(rocket_frame, text="Aletas:").grid(row=8, column=0, sticky="w", padx=5, pady=5)
+        self.fin_count = self.create_entry(rocket_frame, 9, "Número de aletas:")
+        self.fin_span = self.create_entry(rocket_frame, 10, "Envergadura (m):")
+        self.fin_root_chord = self.create_entry(rocket_frame, 11, "Cuerda raíz (m):")
+        self.fin_tip_chord = self.create_entry(rocket_frame, 12, "Cuerda punta (m):")
+        self.fin_sweep = self.create_entry(rocket_frame, 13, "Ángulo de barrido (grados):")
+
+        # Boattail
+        ttk.Label(rocket_frame, text="Boattail:").grid(row=14, column=0, sticky="w", padx=5, pady=5)
+        self.boattail_length = self.create_entry(rocket_frame, 15, "Longitud (m):")
+        self.boattail_front_diameter = self.create_entry(rocket_frame, 16, "Diámetro frontal (m):")
+        self.boattail_rear_diameter = self.create_entry(rocket_frame, 17, "Diámetro trasero (m):")
+
+        # Create Rocket button
+        self.btn_create_rocket = ttk.Button(rocket_frame, text="Crear Cohete", command=self.create_rocket)
+        self.btn_create_rocket.grid(row=18, column=0, columnspan=2, pady=20)
+
+    def create_entry(self, parent, row, label):
+        ttk.Label(parent, text=label).grid(row=row, column=0, sticky="w", padx=5, pady=5)
+        entry = ttk.Entry(parent)
+        entry.grid(row=row, column=1, padx=5, pady=5)
+        return entry
+
+    def create_rocket(self):
+        try:
+            # Create components
+            nose = Cono("Nariz", 1.0, 0.0, float(self.nose_length.get()), float(self.nose_diameter.get()), self.nose_geometry.get())
+            body = Cilindro("Tubo", 5.0, float(self.nose_length.get()), float(self.body_length.get()), float(self.body_diameter.get()), float(self.body_diameter.get()) - 2*float(self.body_thickness.get()))
+            fins = Aletas("Aletas", 2.0, float(self.nose_length.get()) + float(self.body_length.get()) - float(self.fin_root_chord.get()),
+                          float(self.body_diameter.get()), int(self.fin_count.get()), float(self.fin_span.get()),
+                          float(self.fin_root_chord.get()), float(self.fin_tip_chord.get()), 0.0, np.deg2rad(float(self.fin_sweep.get())))
+            boattail = Boattail("Boattail", 1.0, float(self.nose_length.get()) + float(self.body_length.get()),
+                                float(self.boattail_length.get()), float(self.boattail_front_diameter.get()),
+                                float(self.boattail_rear_diameter.get()), float(self.body_thickness.get()))
+
+            # Create rocket
+            self.rocket = Cohete()
+            self.rocket.componentes = {
+                "Nariz": nose,
+                "Tubo": body,
+                "Aletas": fins,
+                "Boattail": boattail
+            }
+            self.rocket.calcular_propiedades()
+
+            messagebox.showinfo("Éxito", "Cohete creado exitosamente")
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al crear el cohete: {str(e)}")
+
     def create_input_tab(self):
         input_frame = ttk.Frame(self.notebook)
-        self.notebook.add(input_frame, text="Entrada")
+        self.notebook.add(input_frame, text="Parámetros de Simulación")
 
-        # Parámetros de entrada
-        ttk.Label(input_frame, text="Ángulo del riel (grados):").grid(row=0, column=0, sticky="w", padx=5, pady=5)
+        # Launch site parameters
+        ttk.Label(input_frame, text="Parámetros del sitio de lanzamiento").grid(row=0, column=0, columnspan=2, pady=10)
+        
+        ttk.Label(input_frame, text="Latitud:").grid(row=1, column=0, sticky="w", padx=5, pady=5)
+        self.latitud = ttk.Entry(input_frame)
+        self.latitud.grid(row=1, column=1, padx=5, pady=5)
+        self.latitud.insert(0, str(latitud_cord))
+
+        ttk.Label(input_frame, text="Longitud:").grid(row=2, column=0, sticky="w", padx=5, pady=5)
+        self.longitud = ttk.Entry(input_frame)
+        self.longitud.grid(row=2, column=1, padx=5, pady=5)
+        self.longitud.insert(0, str(longitud_cord))
+
+        ttk.Label(input_frame, text="Altitud (m):").grid(row=3, column=0, sticky="w", padx=5, pady=5)
+        self.altitud = ttk.Entry(input_frame)
+        self.altitud.grid(row=3, column=1, padx=5, pady=5)
+        self.altitud.insert(0, str(altitud_cord))
+
+        ttk.Label(input_frame, text="Fecha (YYYY-MM-DD):").grid(row=4, column=0, sticky="w", padx=5, pady=5)
+        self.fecha = ttk.Entry(input_frame)
+        self.fecha.grid(row=4, column=1, padx=5, pady=5)
+        self.fecha.insert(0, fecha)
+
+        # Launch rail parameters
+        ttk.Label(input_frame, text="Parámetros del riel de lanzamiento").grid(row=5, column=0, columnspan=2, pady=10)
+
+        ttk.Label(input_frame, text="Longitud del riel (m):").grid(row=6, column=0, sticky="w", padx=5, pady=5)
+        self.longitud_riel = ttk.Entry(input_frame)
+        self.longitud_riel.grid(row=6, column=1, padx=5, pady=5)
+        self.longitud_riel.insert(0, str(riel.longitud))
+
+        ttk.Label(input_frame, text="Ángulo del riel (grados):").grid(row=7, column=0, sticky="w", padx=5, pady=5)
         self.angulo_riel = ttk.Entry(input_frame)
-        self.angulo_riel.grid(row=0, column=1, padx=5, pady=5)
+        self.angulo_riel.grid(row=7, column=1, padx=5, pady=5)
         self.angulo_riel.insert(0, str(np.rad2deg(riel.angulo)))
 
-        ttk.Label(input_frame, text="Tiempo máximo de simulación (s):").grid(row=1, column=0, sticky="w", padx=5, pady=5)
+        # Wind parameters
+        ttk.Label(input_frame, text="Parámetros del viento").grid(row=8, column=0, columnspan=2, pady=10)
+
+        ttk.Label(input_frame, text="Velocidad base (m/s):").grid(row=9, column=0, sticky="w", padx=5, pady=5)
+        self.vel_base_viento = ttk.Entry(input_frame)
+        self.vel_base_viento.grid(row=9, column=1, padx=5, pady=5)
+        self.vel_base_viento.insert(0, str(viento_actual.vel_base))
+
+        ttk.Label(input_frame, text="Velocidad media (m/s):").grid(row=10, column=0, sticky="w", padx=5, pady=5)
+        self.vel_mean_viento = ttk.Entry(input_frame)
+        self.vel_mean_viento.grid(row=10, column=1, padx=5, pady=5)
+        self.vel_mean_viento.insert(0, str(viento_actual.vel_mean))
+
+        ttk.Label(input_frame, text="Variación de velocidad:").grid(row=11, column=0, sticky="w", padx=5, pady=5)
+        self.vel_var_viento = ttk.Entry(input_frame)
+        self.vel_var_viento.grid(row=11, column=1, padx=5, pady=5)
+        self.vel_var_viento.insert(0, str(viento_actual.vel_var))
+
+        ttk.Label(input_frame, text="Variación de ángulo (grados):").grid(row=12, column=0, sticky="w", padx=5, pady=5)
+        self.var_ang_viento = ttk.Entry(input_frame)
+        self.var_ang_viento.grid(row=12, column=1, padx=5, pady=5)
+        self.var_ang_viento.insert(0, str(viento_actual.var_ang))
+
+        # Simulation parameters
+        ttk.Label(input_frame, text="Parámetros de simulación").grid(row=13, column=0, columnspan=2, pady=10)
+
+        ttk.Label(input_frame, text="Tiempo máximo (s):").grid(row=14, column=0, sticky="w", padx=5, pady=5)
         self.t_max = ttk.Entry(input_frame)
-        self.t_max.grid(row=1, column=1, padx=5, pady=5)
+        self.t_max.grid(row=14, column=1, padx=5, pady=5)
         self.t_max.insert(0, "800")
 
-        ttk.Label(input_frame, text="Paso de tiempo (s):").grid(row=2, column=0, sticky="w", padx=5, pady=5)
+        ttk.Label(input_frame, text="Paso de tiempo (s):").grid(row=15, column=0, sticky="w", padx=5, pady=5)
         self.dt = ttk.Entry(input_frame)
-        self.dt.grid(row=2, column=1, padx=5, pady=5)
+        self.dt.grid(row=15, column=1, padx=5, pady=5)
         self.dt.insert(0, "0.01")
 
-        ttk.Label(input_frame, text="Velocidad base del viento (m/s):").grid(row=3, column=0, sticky="w", padx=5, pady=5)
-        self.vel_base_viento = ttk.Entry(input_frame)
-        self.vel_base_viento.grid(row=3, column=1, padx=5, pady=5)
-        self.vel_base_viento.insert(0, "10")
-
-        ttk.Label(input_frame, text="Diámetro externo (m):").grid(row=4, column=0, sticky="w", padx=5, pady=5)
-        self.diam_ext = ttk.Entry(input_frame)
-        self.diam_ext.grid(row=4, column=1, padx=5, pady=5)
-        self.diam_ext.insert(0, str(Xitle.d_ext))
-
-        ttk.Label(input_frame, text="Espesor (m):").grid(row=5, column=0, sticky="w", padx=5, pady=5)
-        self.espesor = ttk.Entry(input_frame)
-        self.espesor.grid(row=5, column=1, padx=5, pady=5)
-        self.espesor.insert(0, "0.003")
-
         self.btn_simular = ttk.Button(input_frame, text="Simular", command=self.simular)
-        self.btn_simular.grid(row=6, column=0, columnspan=2, pady=20)
+        self.btn_simular.grid(row=16, column=0, columnspan=2, pady=20)
+
+        # Progress bar
+        self.progress = ttk.Progressbar(input_frame, orient="horizontal", length=200, mode="indeterminate")
+        self.progress.grid(row=17, column=0, columnspan=2, pady=10)
+
+        self.progress_label = ttk.Label(input_frame, text="")
+        self.progress_label.grid(row=18, column=0, columnspan=2)
 
     def create_trajectory_tab(self):
         self.trajectory_frame = ttk.Frame(self.notebook)
@@ -97,7 +220,9 @@ class SimuladorCohetesAvanzado:
         self.notebook.add(self.wind_frame, text="Viento")
 
     def create_summary_tab(self):
-        self.summary_frame = ttk.Frame(self.notebook)
+        self.summary_frame = tt
+
+k.Frame(self.notebook)
         self.notebook.add(self.summary_frame, text="Resumen")
 
     def create_csv_import_tab(self):
@@ -141,97 +266,95 @@ class SimuladorCohetesAvanzado:
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
     def simular(self):
-        # Obtener valores de entrada
-        riel.angulo = np.deg2rad(float(self.angulo_riel.get()))
-        t_max = float(self.t_max.get())
-        dt = float(self.dt.get())
-        vel_base_viento = float(self.vel_base_viento.get())
-        Xitle.d_ext = float(self.diam_ext.get())
-        espesor = float(self.espesor.get())
+        if self.rocket is None:
+            messagebox.showerror("Error", "Por favor, cree un cohete antes de simular.")
+            return
 
-        # Actualizar componentes del cohete con los nuevos valores
-        self.update_rocket_components(Xitle.d_ext, espesor)
+        try:
+            # Start progress bar
+            self.progress.start()
+            self.progress_label.config(text="Simulando...")
+            self.master.update()
 
-        # Configuración inicial
-        Xitle.parachute_added = False
-        Xitle.parachute_active1 = False
+            # Update launch site parameters
+            latitud_cord = float(self.latitud.get())
+            longitud_cord = float(self.longitud.get())
+            altitud_cord = float(self.altitud.get())
+            fecha = self.fecha.get()
 
-        x0, y0, z0 = 0, 0, 0
-        vx0, vy0, vz0 = 0, 0, 0
-        theta0, omega0 = riel.angulo, 0
-        estado = np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
+            # Update launch rail parameters
+            riel.longitud = float(self.longitud_riel.get())
+            riel.angulo = np.deg2rad(float(self.angulo_riel.get()))
 
-        # Simulación
-        inicio = time.time()
-        print("Simulando...")
+            # Update wind parameters
+            viento_actual.vel_base = float(self.vel_base_viento.get())
+            viento_actual.vel_mean = float(self.vel_mean_viento.get())
+            viento_actual.vel_var = float(self.vel_var_viento.get())
+            viento_actual.var_ang = float(self.var_ang_viento.get())
 
-        viento_actual = Viento(vel_base=vel_base_viento, vel_mean=2, vel_var=0.01, var_ang=20)
-        viento_actual.actualizar_viento3D()
-        print("Viento actual", viento_actual.vector)
+            # Update simulation parameters
+            t_max = float(self.t_max.get())
+            dt = float(self.dt.get())
 
-        vuelo1 = Vuelo(Xitle, atmosfera_actual, viento_actual)
-        tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo1.simular_vuelo(estado, t_max, dt, dt)
+            # Simulation
+            inicio = time.time()
+            print("Simulando...")
 
-        fin = time.time()
-        print(f"Tiempo de ejecución: {fin-inicio:.1f}s")
+            viento_actual.actualizar_viento3D()
+            print("Viento actual", viento_actual.vector)
 
-        # Procesar datos
-        posiciones = np.array([state[0:3] for state in sim])
-        velocidades = np.array([state[3:6] for state in sim])
-        thetas = np.array([state[6] for state in sim])
-        omegas = np.array([state[7] for state in sim])
+            vuelo1 = Vuelo(self.rocket, atmosfera_actual, viento_actual)
+            tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo1.simular_vuelo(np.array([0, 0, 0, 0, 0, 0, riel.angulo, 0]), t_max, dt, dt)
 
-        Tmags = np.array([np.linalg.norm(Tvec) for Tvec in Tvecs])
-        Dmags = np.array([np.linalg.norm(Dvec) for Dvec in Dvecs])
-        Nmags = np.array([np.linalg.norm(Nvec) for Nvec in Nvecs])
+            fin = time.time()
+            print(f"Tiempo de ejecución: {fin-inicio:.1f}s")
 
-        Txs, Tys, Tzs = zip(*Tvecs)
-        Dxs, Dys, Dzs = zip(*Dvecs)
-        Nxs, Nys, Nzs = zip(*Nvecs)
+            # Process data
+            posiciones = np.array([state[0:3] for state in sim])
+            velocidades = np.array([state[3:6] for state in sim])
+            thetas = np.array([state[6] for state in sim])
+            omegas = np.array([state[7] for state in sim])
 
-        wind_xs = [vec[0] for vec in viento_vuelo_vecs]
-        wind_ys = [vec[1] for vec in viento_vuelo_vecs]
-        wind_zs = [vec[2] for vec in viento_vuelo_vecs]
+            Tmags = np.array([np.linalg.norm(Tvec) for Tvec in Tvecs])
+            Dmags = np.array([np.linalg.norm(Dvec) for Dvec in Dvecs])
+            Nmags = np.array([np.linalg.norm(Nvec) for Nvec in Nvecs])
 
-        stability = [(CP - CG) / Xitle.d_ext for CP, CG in zip(CPs, CGs)]
+            Txs, Tys, Tzs = zip(*Tvecs)
+            Dxs, Dys, Dzs = zip(*Dvecs)
+            Nxs, Nys, Nzs = zip(*Nvecs)
 
-        max_altitude = max(posiciones[:, 2])
-        max_speed = max(np.linalg.norm(velocidades, axis=1))
+            wind_xs = [vec[0] for vec in viento_vuelo_vecs]
+            wind_ys = [vec[1] for vec in viento_vuelo_vecs]
+            wind_zs = [vec[2] for vec in viento_vuelo_vecs]
 
-        # Actualizar gráficos
-        self.plot_trajectory(tiempos, posiciones)
-        self.plot_position_velocity(tiempos, posiciones, velocidades)
-        self.plot_forces(tiempos, Tmags, Dmags, Nmags)
-        self.plot_angles(tiempos, thetas, Gammas, Alphas)
-        self.plot_stability(tiempos, CPs, CGs, stability)
-        self.plot_wind(tiempos, viento_vuelo_mags, viento_vuelo_dirs)
-        self.update_summary(vuelo1, max_altitude, max_speed, np.max(accels), np.max(accangs))
+            stability = [(CP - CG) / self.rocket.d_ext for CP, CG in zip(CPs, CGs)]
 
-        # Guardar datos
-        self.save_data(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo,
-                       viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tmags, Dmags, Nmags,
-                       Txs, Tys, Tzs, Dxs, Dys, Dzs, Nxs, Nys, Nzs, accels, palancas, accangs,
-                       Gammas, Alphas, torcas, Cds, Machs, stability)
+            max_altitude = max(posiciones[:, 2])
+            max_speed = max(np.linalg.norm(velocidades, axis=1))
 
-    def update_rocket_components(self, diam_ext, espesor):
-        # Actualizar dimensiones de los componentes del cohete
-        Xitle.componentes['Nariz'].diametro = diam_ext
-        Xitle.componentes['coples'].diametro_ext = diam_ext
-        Xitle.componentes['coples'].diametro_int = diam_ext - espesor
-        Xitle.componentes['Tubo recuperación'].diametro_ext = diam_ext
-        Xitle.componentes['Tubo recuperación'].diametro_int = diam_ext - espesor
-        Xitle.componentes['Transferidor de carga'].diametro_ext = diam_ext
-        Xitle.componentes['Transferidor de carga'].diametro_int = diam_ext - espesor
-        Xitle.componentes['tanquevacio'].diametro_ext = diam_ext
-        Xitle.componentes['tanquevacio'].diametro_int = diam_ext - espesor
-        Xitle.componentes['valvulas'].diametro_ext = diam_ext
-        Xitle.componentes['valvulas'].diametro_int = diam_ext - espesor
-        Xitle.componentes['Cámara Combustión'].diametro_ext = diam_ext
-        Xitle.componentes['Boattail'].diametro_mayor = diam_ext
-        Xitle.componentes['Aletas'].diametro_cohete = diam_ext
+            # Update graphs
+            self.plot_trajectory(tiempos, posiciones)
+            self.plot_position_velocity(tiempos, posiciones, velocidades)
+            self.plot_forces(tiempos, Tmags, Dmags, Nmags)
+            self.plot_angles(tiempos, thetas, Gammas, Alphas)
+            self.plot_stability(tiempos, CPs, CGs, stability)
+            self.plot_wind(tiempos, viento_vuelo_mags, viento_vuelo_dirs)
+            self.update_summary(vuelo1, max_altitude, max_speed, np.max(accels), np.max(accangs))
 
-        # Recalcular propiedades del cohete
-        Xitle.calcular_propiedades()
+            # Save data
+            self.save_data(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo,
+                           viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tmags, Dmags, Nmags,
+                           Txs, Tys, Tzs, Dxs, Dys, Dzs, Nxs, Nys, Nzs, accels, palancas, accangs,
+                           Gammas, Alphas, torcas, Cds, Machs, stability)
+
+            # Stop progress bar
+            self.progress.stop()
+            self.progress_label.config(text="Simulación completada")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred during simulation: {str(e)}")
+            self.progress.stop()
+            self.progress_label.config(text="Error en la simulación")
 
     def plot_trajectory(self, tiempos, posiciones):
         for widget in self.trajectory_frame.winfo_children():
@@ -353,8 +476,8 @@ class SimuladorCohetesAvanzado:
         summary_text = f"""
         Resumen de la simulación:
 
-        Diámetro externo del cohete: {Xitle.d_ext:.2f} m
-        Tiempo de MECO: {Xitle.t_MECO:.2f} s
+        Diámetro externo del cohete: {self.rocket.d_ext:.2f} m
+        Tiempo de MECO: {self.rocket.t_MECO:.2f} s
         Tiempo de salida del riel: {vuelo.tiempo_salida_riel:.2f} s
         Tiempo de apogeo: {vuelo.tiempo_apogeo:.2f} s
         Tiempo de impacto: {vuelo.tiempo_impacto:.2f} s
@@ -372,11 +495,13 @@ class SimuladorCohetesAvanzado:
                   Txs, Tys, Tzs, Dxs, Dys, Dzs, Nxs, Nys, Nzs, accels, palancas, accangs,
                   Gammas, Alphas, torcas, Cds, Machs, stability):
         
-        # Guardar datos en CSV
+        # Save data to CSV
         datos_simulados = pd.DataFrame({
             'tiempos': tiempos,
             'posiciones_x': posiciones[:, 0],
-            'posiciones_y': posiciones[:, 1],
+            '
+
+posiciones_y': posiciones[:, 1],
             'posiciones_z': posiciones[:, 2],
             'velocidades_x': velocidades[:, 0],
             'velocidades_y': velocidades[:, 1],
@@ -416,10 +541,10 @@ class SimuladorCohetesAvanzado:
 
         datos_simulados.to_csv('datos_simulacion.csv', index=False)
 
-        # Guardar datos importantes en JSON
+        # Save important data to JSON
         datos_a_guardar = {
-            'd_ext': Xitle.d_ext,
-            't_MECO': Xitle.t_MECO,
+            'd_ext': self.rocket.d_ext,
+            't_MECO': self.rocket.t_MECO,
             'tiempo_salida_riel': vuelo1.tiempo_salida_riel,
             'tiempo_apogeo': vuelo1.tiempo_apogeo,
             'tiempo_impacto': vuelo1.tiempo_impacto,

@@ -57,6 +57,14 @@ class Cohete:
         self.parachute_active1 = None
         self.parachute1 = None
 
+    def calcular_propiedades(self):
+        # Recalculate the properties of the rocket
+        self.calc_masa()
+        self.calc_CG()
+        self.calc_CP()
+        self.calc_CN()
+        self.calc_A()
+
     def agregar_paracaidas(self, parachute_n):
       self.parachute_added = True
       self.parachute_active1 = False
