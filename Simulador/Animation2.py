@@ -47,7 +47,7 @@ ax2d.set_ylabel("Grados")
 ax2d.grid()
 
 # Cada cuántos frames graficar
-every = 100
+every = 40
 
 print(thetas)
 
@@ -72,9 +72,8 @@ fps = 30
 frames = np.arange(0, len(t), every)
 animation = FuncAnimation(fig, update, frames=frames, interval=1000/fps, repeat=False)
 
-# plt.show()
-animation.save("AngulosAnimados.mp4")
+plt.show()
+animation.save("AngulosAnimados.gif")
 
 # Guardar la animación como GIF
-
-print("GIF Guardado")
+print("Guardado")
