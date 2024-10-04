@@ -174,9 +174,7 @@ class SimuladorCohetesAvanzado:
         self.var_ang_viento = self.create_entry(input_frame, 9, 0, "Variación de ángulo (grados):", viento_actual.var_ang)
 
         # Simulation parameters
-        ttk.Label(input_frame, text="Parámetros de simulación", font=('Arial', 12, 'bold')).grid(row=5, column=1, column
-
-span=2, pady=10)
+        ttk.Label(input_frame, text="Parámetros de simulación", font=('Arial', 12, 'bold')).grid(row=5, column=1, columnspan=2, pady=10)
 
         self.t_max = self.create_entry(input_frame, 6, 1, "Tiempo máximo (s):", 800)
         self.dt = self.create_entry(input_frame, 7, 1, "Paso de tiempo (s):", 0.01)
