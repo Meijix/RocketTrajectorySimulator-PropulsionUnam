@@ -39,6 +39,7 @@ class SimuladorCohetesAvanzado:
 
         self.create_rocket_tab()
         self.create_input_tab()
+        self.create_csv_import_tab()
         self.create_trajectory_tab()
         self.create_position_tab()
         self.create_forces_tab()
@@ -46,66 +47,72 @@ class SimuladorCohetesAvanzado:
         self.create_stability_tab()
         self.create_wind_tab()
         self.create_summary_tab()
-        self.create_csv_import_tab()
 
-        self.rocket = None
+        self.rocket = Xitle
         self.thrust_curve = None
         self.cd_vs_mach = None
+        self.simulation_done = False
 
     def create_rocket_tab(self):
         rocket_frame = ttk.Frame(self.notebook)
         self.notebook.add(rocket_frame, text="Cohete")
 
+        rocket_frame.columnconfigure(0, weight=1)
+        rocket_frame.columnconfigure(1, weight=1)
+        rocket_frame.columnconfigure(2, weight=1)
+
         # Nose Cone
         ttk.Label(rocket_frame, text="Nariz (Cono):", font=('Arial', 12, 'bold')).grid(row=0, column=0, sticky="w", padx=5, pady=10)
-        self.nose_length = self.create_entry(rocket_frame, 1, "Longitud (m):")
-        self.nose_diameter = self.create_entry(rocket_frame, 2, "Diámetro (m):")
-        self.nose_mass = self.create_entry(rocket_frame, 3, "Masa (kg):")
+        self.nose_length = self.create_entry(rocket_frame, 1, 0, "Longitud (m):", Xitle.componentes['Nariz'].longitud)
+        self.nose_diameter = self.create_entry(rocket_frame, 2, 0, "Diámetro (m):", Xitle.componentes['Nariz'].diametro)
+        self.nose_mass = self.create_entry(rocket_frame, 3, 0, "Masa (kg):", Xitle.componentes['Nariz'].masa)
         self.nose_geometry = ttk.Combobox(rocket_frame, values=["conica", "ogiva", "parabolica", "eliptica"])
         self.nose_geometry.grid(row=4, column=1, padx=5, pady=5)
+        self.nose_geometry.set(Xitle.componentes['Nariz'].geometria)
         ttk.Label(rocket_frame, text="Geometría:").grid(row=4, column=0, sticky="w", padx=5, pady=5)
 
         # Body Tube
-        ttk.Label(rocket_frame, text="Tubo del cuerpo:", font=('Arial', 12, 'bold')).grid(row=5, column=0, sticky="w", padx=5, pady=10)
-        self.body_length = self.create_entry(rocket_frame, 6, "Longitud (m):")
-        self.body_diameter = self.create_entry(rocket_frame, 7, "Diámetro exterior (m):")
-        self.body_thickness = self.create_entry(rocket_frame, 8, "Espesor (m):")
-        self.body_mass = self.create_entry(rocket_frame, 9, "Masa (kg):")
+        ttk.Label(rocket_frame, text="Tubo del cuerpo:", font=('Arial', 12, 'bold')).grid(row=0, column=1, sticky="w", padx=5, pady=10)
+        self.body_length = self.create_entry(rocket_frame, 1, 1, "Longitud (m):", Xitle.componentes['Tubo'].longitud)
+        self.body_diameter = self.create_entry(rocket_frame, 2, 1, "Diámetro exterior (m):", Xitle.componentes['Tubo'].diametro_ext)
+        self.body_thickness = self.create_entry(rocket_frame, 3, 1, "Espesor (m):", (Xitle.componentes['Tubo'].diametro_ext - Xitle.componentes['Tubo'].diametro_int) / 2)
+        self.body_mass = self.create_entry(rocket_frame, 4, 1, "Masa (kg):", Xitle.componentes['Tubo'].masa)
 
         # Fins
-        ttk.Label(rocket_frame, text="Aletas:", font=('Arial', 12, 'bold')).grid(row=10, column=0, sticky="w", padx=5, pady=10)
-        self.fin_count = self.create_entry(rocket_frame, 11, "Número de aletas:")
-        self.fin_span = self.create_entry(rocket_frame, 12, "Envergadura (m):")
-        self.fin_root_chord = self.create_entry(rocket_frame, 13, "Cuerda raíz (m):")
-        self.fin_tip_chord = self.create_entry(rocket_frame, 14, "Cuerda punta (m):")
-        self.fin_sweep = self.create_entry(rocket_frame, 15, "Ángulo de barrido (grados):")
-        self.fin_mass = self.create_entry(rocket_frame, 16, "Masa total de aletas (kg):")
+        ttk.Label(rocket_frame, text="Aletas:", font=('Arial', 12, 'bold')).grid(row=0, column=2, sticky="w", padx=5, pady=10)
+        self.fin_count = self.create_entry(rocket_frame, 1, 2, "Número de aletas:", Xitle.componentes['Aletas'].numf)
+        self.fin_span = self.create_entry(rocket_frame, 2, 2, "Envergadura (m):", Xitle.componentes['Aletas'].semispan)
+        self.fin_root_chord = self.create_entry(rocket_frame, 3, 2, "Cuerda raíz (m):", Xitle.componentes['Aletas'].C_r)
+        self.fin_tip_chord = self.create_entry(rocket_frame, 4, 2, "Cuerda punta (m):", Xitle.componentes['Aletas'].C_t)
+        self.fin_sweep = self.create_entry(rocket_frame, 5, 2, "Ángulo de barrido (grados):", np.degrees(Xitle.componentes['Aletas'].mid_sweep))
+        self.fin_mass = self.create_entry(rocket_frame, 6, 2, "Masa total de aletas (kg):", Xitle.componentes['Aletas'].masa)
 
         # Boattail
-        ttk.Label(rocket_frame, text="Boattail:", font=('Arial', 12, 'bold')).grid(row=17, column=0, sticky="w", padx=5, pady=10)
-        self.boattail_length = self.create_entry(rocket_frame, 18, "Longitud (m):")
-        self.boattail_front_diameter = self.create_entry(rocket_frame, 19, "Diámetro frontal (m):")
-        self.boattail_rear_diameter = self.create_entry(rocket_frame, 20, "Diámetro trasero (m):")
-        self.boattail_mass = self.create_entry(rocket_frame, 21, "Masa (kg):")
+        ttk.Label(rocket_frame, text="Boattail:", font=('Arial', 12, 'bold')).grid(row=7, column=0, sticky="w", padx=5, pady=10)
+        self.boattail_length = self.create_entry(rocket_frame, 8, 0, "Longitud (m):", Xitle.componentes['Boattail'].longitud)
+        self.boattail_front_diameter = self.create_entry(rocket_frame, 9, 0, "Diámetro frontal (m):", Xitle.componentes['Boattail'].diamF_boat)
+        self.boattail_rear_diameter = self.create_entry(rocket_frame, 10, 0, "Diámetro trasero (m):", Xitle.componentes['Boattail'].diamR_boat)
+        self.boattail_mass = self.create_entry(rocket_frame, 11, 0, "Masa (kg):", Xitle.componentes['Boattail'].masa)
 
         # Motor
-        ttk.Label(rocket_frame, text="Motor:", font=('Arial', 12, 'bold')).grid(row=22, column=0, sticky="w", padx=5, pady=10)
-        self.motor_mass = self.create_entry(rocket_frame, 23, "Masa total (kg):")
-        self.motor_length = self.create_entry(rocket_frame, 24, "Longitud (m):")
-        self.motor_diameter = self.create_entry(rocket_frame, 25, "Diámetro (m):")
+        ttk.Label(rocket_frame, text="Motor:", font=('Arial', 12, 'bold')).grid(row=7, column=1, sticky="w", padx=5, pady=10)
+        self.motor_mass = self.create_entry(rocket_frame, 8, 1, "Masa total (kg):", Xitle.componentes['Motor'].masa)
+        self.motor_length = self.create_entry(rocket_frame, 9, 1, "Longitud (m):", Xitle.componentes['Motor'].longitud)
+        self.motor_diameter = self.create_entry(rocket_frame, 10, 1, "Diámetro (m):", Xitle.componentes['Motor'].diametro_ext)
 
         # Create Rocket button
         self.btn_create_rocket = ttk.Button(rocket_frame, text="Crear Cohete", command=self.create_rocket)
-        self.btn_create_rocket.grid(row=26, column=0, columnspan=2, pady=20)
+        self.btn_create_rocket.grid(row=12, column=0, columnspan=3, pady=20)
 
         # Save Data button
         self.btn_save_rocket = ttk.Button(rocket_frame, text="Guardar Datos", command=lambda: self.save_tab_data("rocket"))
-        self.btn_save_rocket.grid(row=26, column=2, pady=20)
+        self.btn_save_rocket.grid(row=12, column=2, pady=20)
 
-    def create_entry(self, parent, row, label):
-        ttk.Label(parent, text=label).grid(row=row, column=0, sticky="w", padx=5, pady=5)
+    def create_entry(self, parent, row, column, label, default_value):
+        ttk.Label(parent, text=label).grid(row=row, column=column, sticky="w", padx=5, pady=5)
         entry = ttk.Entry(parent)
-        entry.grid(row=row, column=1, padx=5, pady=5)
+        entry.grid(row=row, column=column+1, padx=5, pady=5, sticky="ew")
+        entry.insert(0, str(default_value))
         return entry
 
     def create_rocket(self):
@@ -122,8 +129,7 @@ class SimuladorCohetesAvanzado:
             motor = Cilindro("Motor", float(self.motor_mass.get()), float(self.nose_length.get()) + float(self.body_length.get()) - float(self.motor_length.get()),
                              float(self.motor_length.get()), float(self.motor_diameter.get()), 0)
 
-            # Create rocket
-            self.rocket = Cohete()
+            # Update rocket
             self.rocket.componentes = {
                 "Nariz": nose,
                 "Tubo": body,
@@ -133,127 +139,61 @@ class SimuladorCohetesAvanzado:
             }
             self.rocket.calcular_propiedades()
 
-            messagebox.showinfo("Éxito", "Cohete creado exitosamente")
+            messagebox.showinfo("Éxito", "Cohete actualizado exitosamente")
         except Exception as e:
-            messagebox.showerror("Error", f"Error al crear el cohete: {str(e)}")
+            messagebox.showerror("Error", f"Error al actualizar el cohete: {str(e)}")
 
     def create_input_tab(self):
         input_frame = ttk.Frame(self.notebook)
         self.notebook.add(input_frame, text="Parámetros de Simulación")
 
+        input_frame.columnconfigure(0, weight=1)
+        input_frame.columnconfigure(1, weight=1)
+        input_frame.columnconfigure(2, weight=1)
+
         # Launch site parameters
-        ttk.Label(input_frame, text="Parámetros del sitio de lanzamiento", font=('Arial', 12, 'bold')).grid(row=0, column=0, columnspan=2, pady=10)
+        ttk.Label(input_frame, text="Parámetros del sitio de lanzamiento", font=('Arial', 12, 'bold')).grid(row=0, column=0, columnspan=3, pady=10)
         
-        ttk.Label(input_frame, text="Latitud:").grid(row=1, column=0, sticky="w", padx=5, pady=5)
-        self.latitud = ttk.Entry(input_frame)
-        self.latitud.grid(row=1, column=1, padx=5, pady=5)
-        self.latitud.insert(0, str(latitud_cord))
-
-        ttk.Label(input_frame, text="Longitud:").grid(row=2, column=0, sticky="w", padx=5, pady=5)
-        self.longitud = ttk.Entry(input_frame)
-        self.longitud.grid(row=2, column=1, padx=5, pady=5)
-        self.longitud.insert(0, str(longitud_cord))
-
-        ttk.Label(input_frame, text="Altitud (m):").grid(row=3, column=0, sticky="w", padx=5, pady=5)
-        self.altitud = ttk.Entry(input_frame)
-        self.altitud.grid(row=3, column=1, padx=5, pady=5)
-        self.altitud.insert(0, str(altitud_cord))
-
-        ttk.Label(input_frame, text="Fecha (YYYY-MM-DD):").grid(row=4, column=0, sticky="w", padx=5, pady=5)
-        self.fecha = ttk.Entry(input_frame)
-        self.fecha.grid(row=4, column=1, padx=5, pady=5)
-        self.fecha.insert(0, fecha)
+        self.latitud = self.create_entry(input_frame, 1, 0, "Latitud:", latitud_cord)
+        self.longitud = self.create_entry(input_frame, 2, 0, "Longitud:", longitud_cord)
+        self.altitud = self.create_entry(input_frame, 3, 0, "Altitud (m):", altitud_cord)
+        self.fecha = self.create_entry(input_frame, 4, 0, "Fecha (YYYY-MM-DD):", fecha)
 
         # Launch rail parameters
-        ttk.Label(input_frame, text="Parámetros del riel de lanzamiento", font=('Arial', 12, 'bold')).grid(row=5, column=0, columnspan=2, pady=10)
+        ttk.Label(input_frame, text="Parámetros del riel de lanzamiento", font=('Arial', 12, 'bold')).grid(row=0, column=1, columnspan=2, pady=10)
 
-        ttk.Label(input_frame, text="Longitud del riel (m):").grid(row=6, column=0, sticky="w", padx=5, pady=5)
-        self.longitud_riel = ttk.Entry(input_frame)
-        self.longitud_riel.grid(row=6, column=1, padx=5, pady=5)
-        self.longitud_riel.insert(0, str(riel.longitud))
-
-        ttk.Label(input_frame, text="Ángulo del riel (grados):").grid(row=7, column=0, sticky="w", padx=5, pady=5)
-        self.angulo_riel = ttk.Entry(input_frame)
-        self.angulo_riel.grid(row=7, column=1, padx=5, pady=5)
-        self.angulo_riel.insert(0, str(np.rad2deg(riel.angulo)))
+        self.longitud_riel = self.create_entry(input_frame, 1, 1, "Longitud del riel (m):", riel.longitud)
+        self.angulo_riel = self.create_entry(input_frame, 2, 1, "Ángulo del riel (grados):", np.rad2deg(riel.angulo))
 
         # Wind parameters
-        ttk.Label(input_frame, text="Parámetros del viento", font=('Arial', 12, 'bold')).grid(row=8, column=0, columnspan=2, pady=10)
+        ttk.Label(input_frame, text="Parámetros del viento", font=('Arial', 12, 'bold')).grid(row=5, column=0, columnspan=3, pady=10)
 
-        ttk.Label(input_frame, text="Velocidad base (m/s):").grid(row=9, column=0, sticky="w", padx=5, pady=5)
-        self.vel_base_viento = ttk.Entry(input_frame)
-        self.vel_base_viento.grid(row=9, column=1, padx=5, pady=5)
-        self.vel_base_viento.insert(0, str(viento_actual.vel_base))
-
-        ttk.Label(input_frame, text="Velocidad media (m/s):").grid(row=10, column=0, sticky="w", padx=5, pady=5)
-        self.vel_mean_viento = ttk.Entry(input_frame)
-        self.vel_mean_viento.grid(row=10, column=1, padx=5, pady=5)
-        self.vel_mean_viento.insert(0, str(viento_actual.vel_mean))
-
-        ttk.Label(input_frame, text="Variación de velocidad:").grid(row=11, column=0, sticky="w", padx=5, pady=5)
-        self.vel_var_viento = ttk.Entry(input_frame)
-        self.vel_var_viento.grid(row=11, column=1, padx=5, pady=5)
-        self.vel_var_viento.insert(0, str(viento_actual.vel_var))
-
-        ttk.Label(input_frame, text="Variación de ángulo (grados):").grid(row=12, column=0, sticky="w", padx=5, pady=5)
-        self.var_ang_viento = ttk.Entry(input_frame)
-        self.var_ang_viento.grid(row=12, column=1, padx=5, pady=5)
-        self.var_ang_viento.insert(0, str(viento_actual.var_ang))
+        self.vel_base_viento = self.create_entry(input_frame, 6, 0, "Velocidad base (m/s):", viento_actual.vel_base)
+        self.vel_mean_viento = self.create_entry(input_frame, 7, 0, "Velocidad media (m/s):", viento_actual.vel_mean)
+        self.vel_var_viento = self.create_entry(input_frame, 8, 0, "Variación de velocidad:", viento_actual.vel_var)
+        self.var_ang_viento = self.create_entry(input_frame, 9, 0, "Variación de ángulo (grados):", viento_actual.var_ang)
 
         # Simulation parameters
-        ttk.Label(input_frame, text="Parámetros de simulación", font=('Arial', 12, 'bold')).grid(row=13, column=0, columnspan=2, pady=10)
+        ttk.Label(input_frame, text="Parámetros de simulación", font=('Arial', 12, 'bold')).grid(row=5, column=1, column
 
-        ttk.Label(input_frame, text="Tiempo máximo (s):").grid(row=14, column=0, sticky="w", padx=5, pady=5)
-        self.t_max = ttk.Entry(input_frame)
-        self.t_max.grid(row=14, column=1, padx=5, pady=5)
-        self.t_max.insert(0, "800")
+span=2, pady=10)
 
-        ttk.Label(input_frame, text="Paso de tiempo (s):").grid(row=15, column=0, sticky="w", padx=5, pady=5)
-        self.dt = ttk.Entry(input_frame)
-        self.dt.grid(row=15, column=1, padx=5, pady=5)
-        self.dt.insert(0, "0.01")
+        self.t_max = self.create_entry(input_frame, 6, 1, "Tiempo máximo (s):", 800)
+        self.dt = self.create_entry(input_frame, 7, 1, "Paso de tiempo (s):", 0.01)
 
         self.btn_simular = ttk.Button(input_frame, text="Simular", command=self.simular)
-        self.btn_simular.grid(row=16, column=0, columnspan=2, pady=20)
+        self.btn_simular.grid(row=10, column=0, columnspan=3, pady=20)
 
         # Save Data button
         self.btn_save_input = ttk.Button(input_frame, text="Guardar Datos", command=lambda: self.save_tab_data("input"))
-        self.btn_save_input.grid(row=16, column=2, pady=20)
+        self.btn_save_input.grid(row=10, column=2, pady=20)
 
         # Progress bar
         self.progress = ttk.Progressbar(input_frame, orient="horizontal", length=200, mode="indeterminate")
-        self.progress.grid(row=17, column=0, columnspan=2, pady=10)
+        self.progress.grid(row=11, column=0, columnspan=3, pady=10)
 
         self.progress_label = ttk.Label(input_frame, text="")
-        self.progress_label.grid(row=18, column=0, columnspan=2)
-
-    def create_trajectory_tab(self):
-        self.trajectory_frame = ttk.Frame(self.notebook)
-        self.notebook.add(self.trajectory_frame, text="Trayectoria 3D")
-
-    def create_position_tab(self):
-        self.position_frame = ttk.Frame(self.notebook)
-        self.notebook.add(self.position_frame, text="Posición y Velocidad")
-
-    def create_forces_tab(self):
-        self.forces_frame = ttk.Frame(self.notebook)
-        self.notebook.add(self.forces_frame, text="Fuerzas")
-
-    def create_angles_tab(self):
-        self.angles_frame = ttk.Frame(self.notebook)
-        self.notebook.add(self.angles_frame, text="Ángulos")
-
-    def create_stability_tab(self):
-        self.stability_frame = ttk.Frame(self.notebook)
-        self.notebook.add(self.stability_frame, text="Estabilidad")
-
-    def create_wind_tab(self):
-        self.wind_frame = ttk.Frame(self.notebook)
-        self.notebook.add(self.wind_frame, text="Viento")
-
-    def create_summary_tab(self):
-        self.summary_frame = ttk.Frame(self.notebook)
-        self.notebook.add(self.summary_frame, text="Resumen")
+        self.progress_label.grid(row=12, column=0, columnspan=3)
 
     def create_csv_import_tab(self):
         self.csv_frame = ttk.Frame(self.notebook)
@@ -269,7 +209,7 @@ class SimuladorCohetesAvanzado:
         self.cd_plot_frame.pack(fill=tk.BOTH, expand=True)
 
         # Save Data button
-        self.btn_save_csv = ttk.Button(self.csv_frame, text="Guardar Datos", command=lambda: self.save_tab_data("csv"))
+        self.btn_save_csv = ttk.Button(self.csv_frame, text="Guardar Datos", command=self.save_csv_data)
         self.btn_save_csv.pack(pady=20)
 
     def import_thrust_curve(self):
@@ -299,16 +239,58 @@ class SimuladorCohetesAvanzado:
         canvas.draw()
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
-    def simular(self):
-        if self.rocket is None:
-            messagebox.showerror("Error", "Por favor, cree un cohete antes de simular.")
-            return
+    def save_csv_data(self):
+        if self.thrust_curve is not None:
+            self.rocket.curva_empuje = self.thrust_curve
+        if self.cd_vs_mach is not None:
+            self.rocket.cd_vs_mach = self.cd_vs_mach
+        messagebox.showinfo("Éxito", "Datos CSV guardados en el objeto Xitle")
 
-        if self.thrust_curve is None:
+    def create_trajectory_tab(self):
+        self.trajectory_frame = ttk.Frame(self.notebook)
+        self.notebook.add(self.trajectory_frame, text="Trayectoria 3D")
+        self.show_no_simulation_message(self.trajectory_frame)
+
+    def create_position_tab(self):
+        self.position_frame = ttk.Frame(self.notebook)
+        self.notebook.add(self.position_frame, text="Posición y Velocidad")
+        self.show_no_simulation_message(self.position_frame)
+
+    def create_forces_tab(self):
+        self.forces_frame = ttk.Frame(self.notebook)
+        self.notebook.add(self.forces_frame, text="Fuerzas")
+        self.show_no_simulation_message(self.forces_frame)
+
+    def create_angles_tab(self):
+        self.angles_frame = ttk.Frame(self.notebook)
+        self.notebook.add(self.angles_frame, text="Ángulos")
+        self.show_no_simulation_message(self.angles_frame)
+
+    def create_stability_tab(self):
+        self.stability_frame = ttk.Frame(self.notebook)
+        self.notebook.add(self.stability_frame, text="Estabilidad")
+        self.show_no_simulation_message(self.stability_frame)
+
+    def create_wind_tab(self):
+        self.wind_frame = ttk.Frame(self.notebook)
+        self.notebook.add(self.wind_frame, text="Viento")
+        self.show_no_simulation_message(self.wind_frame)
+
+    def create_summary_tab(self):
+        self.summary_frame = ttk.Frame(self.notebook)
+        self.notebook.add(self.summary_frame, text="Resumen")
+        self.show_no_simulation_message(self.summary_frame)
+
+    def show_no_simulation_message(self, frame):
+        label = ttk.Label(frame, text="Aún no se ha realizado simulación", font=('Arial', 14))
+        label.pack(expand=True)
+
+    def simular(self):
+        if self.rocket.curva_empuje is None:
             messagebox.showerror("Error", "Por favor, importe la curva de empuje antes de simular.")
             return
 
-        if self.cd_vs_mach is None:
+        if self.rocket.cd_vs_mach is None:
             messagebox.showerror("Error", "Por favor, importe la tabla de Cd vs Mach antes de simular.")
             return
 
@@ -337,10 +319,6 @@ class SimuladorCohetesAvanzado:
             # Update simulation parameters
             t_max = float(self.t_max.get())
             dt = float(self.dt.get())
-
-            # Update rocket with thrust curve and Cd vs Mach data
-            self.rocket.curva_empuje = self.thrust_curve
-            self.rocket.cd_vs_mach = self.cd_vs_mach
 
             # Simulation
             inicio = time.time()
@@ -396,6 +374,7 @@ class SimuladorCohetesAvanzado:
             # Stop progress bar
             self.progress.stop()
             self.progress_label.config(text="Simulación completada")
+            self.simulation_done = True
 
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred during simulation: {str(e)}")
@@ -640,11 +619,6 @@ class SimuladorCohetesAvanzado:
                 "var_ang_viento": self.var_ang_viento.get(),
                 "t_max": self.t_max.get(),
                 "dt": self.dt.get()
-            }
-        elif tab_name == "csv":
-            data = {
-                "thrust_curve": self.thrust_curve.to_dict() if self.thrust_curve is not None else None,
-                "cd_vs_mach": self.cd_vs_mach.to_dict() if self.cd_vs_mach is not None else None
             }
         else:
             messagebox.showerror("Error", "Tab name not recognized")
