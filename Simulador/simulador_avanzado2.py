@@ -601,6 +601,61 @@ class SimuladorCohetesAvanzado:
         with open('datos_simulacion.json', 'w') as f:
             json.dump(datos_a_guardar, f, indent=4)
 
+    def save_tab_data(self, tab_name):
+        if tab_name == "rocket":
+            data = {
+                "nose_length": self.nose_length.get(),
+                "nose_diameter": self.nose_diameter.get(),
+                "nose_mass": self.nose_mass.get(),
+                "nose_geometry": self.nose_geometry.get(),
+                "body_length": self.body_length.get(),
+                "body_diameter": self.body_diameter.get(),
+                "body_thickness": self.body_thickness.get(),
+                "body_mass": self.body_mass.get(),
+                "fin_count": self.fin_count.get(),
+                "fin_span": self.fin_span.get(),
+                "fin_root_chord": self.fin_root_chord.get(),
+                "fin_tip_chord": self.fin_tip_chord.get(),
+                "fin_sweep": self.fin_sweep.get(),
+                "fin_mass": self.fin_mass.get(),
+                "boattail_length": self.boattail_length.get(),
+                "boattail_front_diameter": self.boattail_front_diameter.get(),
+                "boattail_rear_diameter": self.boattail_rear_diameter.get(),
+                "boattail_mass": self.boattail_mass.get(),
+                "motor_mass": self.motor_mass.get(),
+                "motor_length": self.motor_length.get(),
+                "motor_diameter": self.motor_diameter.get()
+            }
+        elif tab_name == "input":
+            data = {
+                "latitud": self.latitud.get(),
+                "longitud": self.longitud.get(),
+                "altitud": self.altitud.get(),
+                "fecha": self.fecha.get(),
+                "longitud_riel": self.longitud_riel.get(),
+                "angulo_riel": self.angulo_riel.get(),
+                "vel_base_viento": self.vel_base_viento.get(),
+                "vel_mean_viento": self.vel_mean_viento.get(),
+                "vel_var_viento": self.vel_var_viento.get(),
+                "var_ang_viento": self.var_ang_viento.get(),
+                "t_max": self.t_max.get(),
+                "dt": self.dt.get()
+            }
+        elif tab_name == "csv":
+            data = {
+                "thrust_curve": self.thrust_curve.to_dict() if self.thrust_curve is not None else None,
+                "cd_vs_mach": self.cd_vs_mach.to_dict() if self.cd_vs_mach is not None else None
+            }
+        else:
+            messagebox.showerror("Error", "Tab name not recognized")
+            return
+
+        file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")])
+        if file_path:
+            with open(file_path, 'w') as f:
+                json.dump(data, f, indent=4)
+            messagebox.showinfo("Éxito", f"Datos de la pestaña {tab_name} guardados exitosamente")
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = SimuladorCohetesAvanzado(root)
