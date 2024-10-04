@@ -37,6 +37,14 @@ class SimuladorCohetesAvanzado:
         self.notebook = ttk.Notebook(self.master)
         self.notebook.pack(expand=True, fill="both", padx=10, pady=10)
 
+        # Initialize self.rocket with a Cohete instance
+        # Tablas de Cd, empuje y masa
+        self.thrust_curve = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\MegaPunisherBien.csv'
+        self.cd_vs_mach = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\cdmachXitle.csv'
+        self.mass_vs_time = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\MegaPunisherFatMasadot.csv'
+        
+        self.rocket = Cohete("Xitle", "hibrido", Xitle.componentes, Xitle.componentes, self.cd_vs_mach, self.thrust_curve, self.mass_vs_time, riel)
+        
         self.create_rocket_tab()
         self.create_input_tab()
         self.create_csv_import_tab()
@@ -48,9 +56,6 @@ class SimuladorCohetesAvanzado:
         self.create_wind_tab()
         self.create_summary_tab()
 
-        self.rocket = Xitle
-        self.thrust_curve = None
-        self.cd_vs_mach = None
         self.simulation_done = False
 
     def create_rocket_tab(self):
@@ -63,45 +68,45 @@ class SimuladorCohetesAvanzado:
 
         # Nose Cone
         ttk.Label(rocket_frame, text="Nariz (Cono):", font=('Arial', 12, 'bold')).grid(row=0, column=0, sticky="w", padx=5, pady=10)
-        self.nose_length = self.create_entry(rocket_frame, 1, 0, "Longitud (m):", Xitle.componentes['Nariz'].longitud)
-        self.nose_diameter = self.create_entry(rocket_frame, 2, 0, "Diámetro (m):", Xitle.componentes['Nariz'].diametro)
-        self.nose_mass = self.create_entry(rocket_frame, 3, 0, "Masa (kg):", Xitle.componentes['Nariz'].masa)
+        self.nose_length = self.create_entry(rocket_frame, 1, 0, "Longitud (m):", self.rocket.componentes['Nariz'].long)
+        self.nose_diameter = self.create_entry(rocket_frame, 2, 0, "Diámetro (m):", self.rocket.componentes['Nariz'].diam)
+        self.nose_mass = self.create_entry(rocket_frame, 3, 0, "Masa (kg):", self.rocket.componentes['Nariz'].masa)
         self.nose_geometry = ttk.Combobox(rocket_frame, values=["conica", "ogiva", "parabolica", "eliptica"])
         self.nose_geometry.grid(row=4, column=1, padx=5, pady=5)
-        self.nose_geometry.set(Xitle.componentes['Nariz'].geometria)
+        self.nose_geometry.set(self.rocket.componentes['Nariz'].geom)
         ttk.Label(rocket_frame, text="Geometría:").grid(row=4, column=0, sticky="w", padx=5, pady=5)
 
         # Body Tube
-        ttk.Label(rocket_frame, text="Tubo del cuerpo:", font=('Arial', 12, 'bold')).grid(row=0, column=1, sticky="w", padx=5, pady=10)
-        self.body_length = self.create_entry(rocket_frame, 1, 1, "Longitud (m):", Xitle.componentes['Tubo'].longitud)
-        self.body_diameter = self.create_entry(rocket_frame, 2, 1, "Diámetro exterior (m):", Xitle.componentes['Tubo'].diametro_ext)
-        self.body_thickness = self.create_entry(rocket_frame, 3, 1, "Espesor (m):", (Xitle.componentes['Tubo'].diametro_ext - Xitle.componentes['Tubo'].diametro_int) / 2)
-        self.body_mass = self.create_entry(rocket_frame, 4, 1, "Masa (kg):", Xitle.componentes['Tubo'].masa)
+        ttk.Label(rocket_frame, text="Tubo:", font=('Arial', 12, 'bold')).grid(row=0, column=1, sticky="w", padx=5, pady=10)
+        self.body_length = self.create_entry(rocket_frame, 1, 1, "Longitud (m):", self.rocket.componentes['Tubo'].long)
+        self.body_diameter = self.create_entry(rocket_frame, 2, 1, "Diámetro exterior (m):", self.rocket.componentes['Tubo'].diam_ext)
+        self.body_thickness = self.create_entry(rocket_frame, 3, 1, "Espesor (m):", (self.rocket.componentes['Tubo'].diametro_ext - self.rocket.componentes['Tubo'].diam_int) / 2)
+        self.body_mass = self.create_entry(rocket_frame, 4, 1, "Masa (kg):", self.rocket.componentes['Tubo'].masa)
 
         # Fins
         ttk.Label(rocket_frame, text="Aletas:", font=('Arial', 12, 'bold')).grid(row=0, column=2, sticky="w", padx=5, pady=10)
-        self.fin_count = self.create_entry(rocket_frame, 1, 2, "Número de aletas:", Xitle.componentes['Aletas'].numf)
-        self.fin_span = self.create_entry(rocket_frame, 2, 2, "Envergadura (m):", Xitle.componentes['Aletas'].semispan)
-        self.fin_root_chord = self.create_entry(rocket_frame, 3, 2, "Cuerda raíz (m):", Xitle.componentes['Aletas'].C_r)
-        self.fin_tip_chord = self.create_entry(rocket_frame, 4, 2, "Cuerda punta (m):", Xitle.componentes['Aletas'].C_t)
-        self.fin_sweep = self.create_entry(rocket_frame, 5, 2, "Ángulo de barrido (grados):", np.degrees(Xitle.componentes['Aletas'].mid_sweep))
-        self.fin_mass = self.create_entry(rocket_frame, 6, 2, "Masa total de aletas (kg):", Xitle.componentes['Aletas'].masa)
+        self.fin_count = self.create_entry(rocket_frame, 1, 2, "Número de aletas:", self.rocket.componentes['Aletas'].numf)
+        self.fin_span = self.create_entry(rocket_frame, 2, 2, "Envergadura (m):", self.rocket.componentes['Aletas'].semispan)
+        self.fin_root_chord = self.create_entry(rocket_frame, 3, 2, "Cuerda raíz (m):", self.rocket.componentes['Aletas'].C_r)
+        self.fin_tip_chord = self.create_entry(rocket_frame, 4, 2, "Cuerda punta (m):", self.rocket.componentes['Aletas'].C_t)
+        self.fin_sweep = self.create_entry(rocket_frame, 5, 2, "Ángulo de barrido (grados):", np.degrees(self.rocket.componentes['Aletas'].mid_sweep))
+        self.fin_mass = self.create_entry(rocket_frame, 6, 2, "Masa total de aletas (kg):", self.rocket.componentes['Aletas'].masa)
 
         # Boattail
         ttk.Label(rocket_frame, text="Boattail:", font=('Arial', 12, 'bold')).grid(row=7, column=0, sticky="w", padx=5, pady=10)
-        self.boattail_length = self.create_entry(rocket_frame, 8, 0, "Longitud (m):", Xitle.componentes['Boattail'].longitud)
-        self.boattail_front_diameter = self.create_entry(rocket_frame, 9, 0, "Diámetro frontal (m):", Xitle.componentes['Boattail'].diamF_boat)
-        self.boattail_rear_diameter = self.create_entry(rocket_frame, 10, 0, "Diámetro trasero (m):", Xitle.componentes['Boattail'].diamR_boat)
-        self.boattail_mass = self.create_entry(rocket_frame, 11, 0, "Masa (kg):", Xitle.componentes['Boattail'].masa)
+        self.boattail_length = self.create_entry(rocket_frame, 8, 0, "Longitud (m):", self.rocket.componentes['Boattail'].longitud)
+        self.boattail_front_diameter = self.create_entry(rocket_frame, 9, 0, "Diámetro frontal (m):", self.rocket.componentes['Boattail'].diamF_boat)
+        self.boattail_rear_diameter = self.create_entry(rocket_frame, 10, 0, "Diámetro trasero (m):", self.rocket.componentes['Boattail'].diamR_boat)
+        self.boattail_mass = self.create_entry(rocket_frame, 11, 0, "Masa (kg):", self.rocket.componentes['Boattail'].masa)
 
         # Motor
         ttk.Label(rocket_frame, text="Motor:", font=('Arial', 12, 'bold')).grid(row=7, column=1, sticky="w", padx=5, pady=10)
-        self.motor_mass = self.create_entry(rocket_frame, 8, 1, "Masa total (kg):", Xitle.componentes['Motor'].masa)
-        self.motor_length = self.create_entry(rocket_frame, 9, 1, "Longitud (m):", Xitle.componentes['Motor'].longitud)
-        self.motor_diameter = self.create_entry(rocket_frame, 10, 1, "Diámetro (m):", Xitle.componentes['Motor'].diametro_ext)
+        self.motor_mass = self.create_entry(rocket_frame, 8, 1, "Masa total (kg):", self.rocket.componentes['Motor'].masa)
+        self.motor_length = self.create_entry(rocket_frame, 9, 1, "Longitud (m):", self.rocket.componentes['Motor'].longitud)
+        self.motor_diameter = self.create_entry(rocket_frame, 10, 1, "Diámetro (m):", self.rocket.componentes['Motor'].diametro_ext)
 
         # Create Rocket button
-        self.btn_create_rocket = ttk.Button(rocket_frame, text="Crear Cohete", command=self.create_rocket)
+        self.btn_create_rocket = ttk.Button(rocket_frame, text="Actualizar Cohete", command=self.create_rocket)
         self.btn_create_rocket.grid(row=12, column=0, columnspan=3, pady=20)
 
         # Save Data button
@@ -117,31 +122,70 @@ class SimuladorCohetesAvanzado:
 
     def create_rocket(self):
         try:
-            # Create components
-            nose = Cono("Nariz", float(self.nose_mass.get()), 0.0, float(self.nose_length.get()), float(self.nose_diameter.get()), self.nose_geometry.get())
-            body = Cilindro("Tubo", float(self.body_mass.get()), float(self.nose_length.get()), float(self.body_length.get()), float(self.body_diameter.get()), float(self.body_diameter.get()) - 2*float(self.body_thickness.get()))
-            fins = Aletas("Aletas", float(self.fin_mass.get()), float(self.nose_length.get()) + float(self.body_length.get()) - float(self.fin_root_chord.get()),
-                          float(self.body_diameter.get()), int(self.fin_count.get()), float(self.fin_span.get()),
-                          float(self.fin_root_chord.get()), float(self.fin_tip_chord.get()), 0.0, np.deg2rad(float(self.fin_sweep.get())))
-            boattail = Boattail("Boattail", float(self.boattail_mass.get()), float(self.nose_length.get()) + float(self.body_length.get()),
-                                float(self.boattail_length.get()), float(self.boattail_front_diameter.get()),
-                                float(self.boattail_rear_diameter.get()), float(self.body_thickness.get()))
-            motor = Cilindro("Motor", float(self.motor_mass.get()), float(self.nose_length.get()) + float(self.body_length.get()) - float(self.motor_length.get()),
-                             float(self.motor_length.get()), float(self.motor_diameter.get()), 0)
-
-            # Update rocket
-            self.rocket.componentes = {
-                "Nariz": nose,
-                "Tubo": body,
-                "Aletas": fins,
-                "Boattail": boattail,
-                "Motor": motor
+            # Create a dictionary to store the rocket's component data
+            component_data = {
+                "Nariz": {
+                    "masa": float(self.nose_mass.get()),
+                    "long": float(self.nose_length.get()),
+                    "diam": float(self.nose_diameter.get()),
+                    "geom": self.nose_geometry.get()
+                },
+                "Tubo": {
+                    "masa": float(self.body_mass.get()),
+                    "long": float(self.body_length.get()),
+                    "diam_ext": float(self.body_diameter.get()),
+                    "diam_int": float(self.body_diameter.get()) - 2 * float(self.body_thickness.get())
+                },
+                "Aletas": {
+                    "masa": float(self.fin_mass.get()),
+                    "numf": int(self.fin_count.get()),
+                    "semispan": float(self.fin_span.get()),
+                    "C_r": float(self.fin_root_chord.get()),
+                    "C_t": float(self.fin_tip_chord.get()),
+                    "mid_sweep": np.deg2rad(float(self.fin_sweep.get()))
+                },
+                "Boattail": {
+                    "masa": float(self.boattail_mass.get()),
+                    "longitud": float(self.boattail_length.get()),
+                    "diamF_boat": float(self.boattail_front_diameter.get()),
+                    "diamR_boat": float(self.boattail_rear_diameter.get())
+                },
+                "Motor": {
+                    "masa": float(self.motor_mass.get()),
+                    "longitud": float(self.motor_length.get()),
+                    "diametro_ext": float(self.motor_diameter.get())
+                }
             }
+
+            # Update the rocket's components
+            self.rocket.componentes = {
+                name: self.create_component(component_data[name], name)
+                for name in component_data
+            }
+
+            # Update the rocket's properties
+            self.rocket.d_ext = float(self.body_diameter.get())
             self.rocket.calcular_propiedades()
 
             messagebox.showinfo("Éxito", "Cohete actualizado exitosamente")
         except Exception as e:
             messagebox.showerror("Error", f"Error al actualizar el cohete: {str(e)}")
+
+def create_component(self, data, name):
+    # Create a component based on its type
+    if name == "Nariz":
+        return Cono(name, data["masa"], 0.0, data["long"], data["diam"], data["geom"])
+    elif name == "Tubo":
+        return Cilindro(name, data["masa"], 0.0, data["long"], data["diam_ext"], data["diam_int"])
+    elif name == "Aletas":
+        return Aletas(name, data["masa"], 0.0, data["diam_ext"], data["numf"], data["semispan"],
+                      data["C_r"], data["C_t"], 0.0, data["mid_sweep"])
+    elif name == "Boattail":
+        return Boattail(name, data["masa"], 0.0, data["longitud"], data["diamF_boat"], data["diamR_boat"])
+    elif name == "Motor":
+        return Cilindro(name, data["masa"], 0.0, data["longitud"], data["diametro_ext"], 0)
+    else:
+        raise ValueError("Invalid component name")
 
     def create_input_tab(self):
         input_frame = ttk.Frame(self.notebook)
@@ -192,13 +236,14 @@ class SimuladorCohetesAvanzado:
 
         self.progress_label = ttk.Label(input_frame, text="")
         self.progress_label.grid(row=12, column=0, columnspan=3)
-
+################################################
     def create_csv_import_tab(self):
         self.csv_frame = ttk.Frame(self.notebook)
         self.notebook.add(self.csv_frame, text="Importar CSV")
 
-        ttk.Button(self.csv_frame, text="Importar Curva de Empuje", command=self.import_thrust_curve).pack(pady=10)
-        ttk.Button(self.csv_frame, text="Importar Cd vs Mach", command=self.import_cd_vs_mach).pack(pady=10)
+        ttk.Button(self.csv_frame, text="Importar Curva de Empuje", command=lambda: self.import_csv_data("thrust")).pack(pady=10)
+        ttk.Button(self.csv_frame, text="Importar Cd vs Mach", command=lambda: self.import_csv_data("cd_vs_mach")).pack(pady=10)
+        ttk.Button(self.csv_frame, text="Importar Masa vs Tiempo", command=lambda: self.import_csv_data("mass_vs_time")).pack(pady=10)
 
         self.thrust_plot_frame = ttk.Frame(self.csv_frame)
         self.thrust_plot_frame.pack(fill=tk.BOTH, expand=True)
@@ -206,21 +251,27 @@ class SimuladorCohetesAvanzado:
         self.cd_plot_frame = ttk.Frame(self.csv_frame)
         self.cd_plot_frame.pack(fill=tk.BOTH, expand=True)
 
+        self.mass_plot_frame = ttk.Frame(self.csv_frame)
+        self.mass_plot_frame.pack(fill=tk.BOTH, expand=True)
+
         # Save Data button
         self.btn_save_csv = ttk.Button(self.csv_frame, text="Guardar Datos", command=self.save_csv_data)
         self.btn_save_csv.pack(pady=20)
 
-    def import_thrust_curve(self):
+    def import_csv_data(self, data_type):
         file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
         if file_path:
-            self.thrust_curve = pd.read_csv(file_path)
-            self.plot_csv_data(self.thrust_curve, self.thrust_plot_frame, "Curva de Empuje", "Tiempo (s)", "Empuje (N)")
-
-    def import_cd_vs_mach(self):
-        file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
-        if file_path:
-            self.cd_vs_mach = pd.read_csv(file_path)
-            self.plot_csv_data(self.cd_vs_mach, self.cd_plot_frame, "Cd vs Mach", "Mach", "Cd")
+            df = pd.read_csv(file_path)
+            if data_type == "thrust":
+                self.rocket.curva_empuje = df
+                self.plot_csv_data(df, self.thrust_plot_frame, "Curva de Empuje", "Tiempo (s)", "Empuje (N)")
+            elif data_type == "cd_vs_mach":
+                self.rocket.cd_vs_mach = df
+                self.plot_csv_data(df, self.cd_plot_frame, "Cd vs Mach", "Mach", "Cd")
+            elif data_type == "mass_vs_time":
+                self.rocket.masa_vs_tiempo = df
+                self.plot_csv_data(df, self.mass_plot_frame, "Masa vs Tiempo", "Tiempo (s)", "Masa (kg)")
+            messagebox.showinfo("Éxito", f"Datos de {data_type} importados correctamente")
 
     def plot_csv_data(self, df, frame, title, xlabel, ylabel):
         for widget in frame.winfo_children():
@@ -238,11 +289,13 @@ class SimuladorCohetesAvanzado:
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
     def save_csv_data(self):
-        if self.thrust_curve is not None:
-            self.rocket.curva_empuje = self.thrust_curve
-        if self.cd_vs_mach is not None:
-            self.rocket.cd_vs_mach = self.cd_vs_mach
-        messagebox.showinfo("Éxito", "Datos CSV guardados en el objeto Xitle")
+        if self.rocket.curva_empuje is not None:
+            self.rocket.curva_empuje.to_csv('curva_empuje.csv', index=False)
+        if self.rocket.cd_vs_mach is not None:
+            self.rocket.cd_vs_mach.to_csv('cd_vs_mach.csv', index=False)
+        if self.rocket.masa_vs_tiempo is not None:
+            self.rocket.masa_vs_tiempo.to_csv('masa_vs_tiempo.csv', index=False)
+        messagebox.showinfo("Éxito", "Datos CSV guardados exitosamente")
 
     def create_trajectory_tab(self):
         self.trajectory_frame = ttk.Frame(self.notebook)
