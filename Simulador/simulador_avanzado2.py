@@ -68,6 +68,7 @@ class SimuladorCohetesAvanzado:
 
         # Nose Cone
         ttk.Label(rocket_frame, text="Nariz (Cono):", font=('Arial', 12, 'bold')).grid(row=0, column=0, sticky="w", padx=5, pady=10)
+        # Update entries for each component
         self.nose_length = self.create_entry(rocket_frame, 1, 0, "Longitud (m):", self.rocket.componentes['Nariz'].long)
         self.nose_diameter = self.create_entry(rocket_frame, 2, 0, "Diámetro (m):", self.rocket.componentes['Nariz'].diam)
         self.nose_mass = self.create_entry(rocket_frame, 3, 0, "Masa (kg):", self.rocket.componentes['Nariz'].masa)
@@ -76,12 +77,11 @@ class SimuladorCohetesAvanzado:
         self.nose_geometry.set(self.rocket.componentes['Nariz'].geom)
         ttk.Label(rocket_frame, text="Geometría:").grid(row=4, column=0, sticky="w", padx=5, pady=5)
 
-        # Body Tube
-        ttk.Label(rocket_frame, text="Tubo:", font=('Arial', 12, 'bold')).grid(row=0, column=1, sticky="w", padx=5, pady=10)
-        self.body_length = self.create_entry(rocket_frame, 1, 1, "Longitud (m):", self.rocket.componentes['Tubo'].long)
-        self.body_diameter = self.create_entry(rocket_frame, 2, 1, "Diámetro exterior (m):", self.rocket.componentes['Tubo'].diam_ext)
-        self.body_thickness = self.create_entry(rocket_frame, 3, 1, "Espesor (m):", (self.rocket.componentes['Tubo'].diametro_ext - self.rocket.componentes['Tubo'].diam_int) / 2)
-        self.body_mass = self.create_entry(rocket_frame, 4, 1, "Masa (kg):", self.rocket.componentes['Tubo'].masa)
+        ttk.Label(rocket_frame, text="Fuselaje:", font=('Arial', 12, 'bold')).grid(row=0, column=1, sticky="w", padx=5, pady=10)
+        self.body_length = self.create_entry(rocket_frame, 1, 1, "Longitud (m):", self.rocket.componentes['Fuselaje'].long)
+        self.body_diameter = self.create_entry(rocket_frame, 2, 1, "Diámetro exterior (m):", self.rocket.componentes['Fuselaje'].diam_ext)
+        self.body_thickness = self.create_entry(rocket_frame, 3, 1, "Espesor (m):", (self.rocket.componentes['Fuselaje'].diam_ext - self.rocket.componentes['Fuselaje'].diametro_int) / 2)
+        self.body_mass = self.create_entry(rocket_frame, 4, 1, "Masa (kg):", self.rocket.componentes['Fuselaje'].masa)
 
         # Fins
         ttk.Label(rocket_frame, text="Aletas:", font=('Arial', 12, 'bold')).grid(row=0, column=2, sticky="w", padx=5, pady=10)
@@ -122,48 +122,19 @@ class SimuladorCohetesAvanzado:
 
     def create_rocket(self):
         try:
-            # Create a dictionary to store the rocket's component data
-            component_data = {
-                "Nariz": {
-                    "masa": float(self.nose_mass.get()),
-                    "long": float(self.nose_length.get()),
-                    "diam": float(self.nose_diameter.get()),
-                    "geom": self.nose_geometry.get()
-                },
-                "Tubo": {
-                    "masa": float(self.body_mass.get()),
-                    "long": float(self.body_length.get()),
-                    "diam_ext": float(self.body_diameter.get()),
-                    "diam_int": float(self.body_diameter.get()) - 2 * float(self.body_thickness.get())
-                },
-                "Aletas": {
-                    "masa": float(self.fin_mass.get()),
-                    "numf": int(self.fin_count.get()),
-                    "semispan": float(self.fin_span.get()),
-                    "C_r": float(self.fin_root_chord.get()),
-                    "C_t": float(self.fin_tip_chord.get()),
-                    "mid_sweep": np.deg2rad(float(self.fin_sweep.get()))
-                },
-                "Boattail": {
-                    "masa": float(self.boattail_mass.get()),
-                    "longitud": float(self.boattail_length.get()),
-                    "diamF_boat": float(self.boattail_front_diameter.get()),
-                    "diamR_boat": float(self.boattail_rear_diameter.get())
-                },
-                "Motor": {
-                    "masa": float(self.motor_mass.get()),
-                    "longitud": float(self.motor_length.get()),
-                    "diametro_ext": float(self.motor_diameter.get())
-                }
-            }
+            # Update components
+            self.rocket.componentes['Nariz'] = Cono("Nariz", float(self.nose_mass.get()), 0.0, float(self.nose_length.get()), float(self.nose_diameter.get()), self.nose_geometry.get())
+            self.rocket.componentes['Fuselaje'] = Cilindro("Fuselaje", float(self.body_mass.get()), float(self.nose_length.get()), float(self.body_length.get()), float(self.body_diameter.get()), float(self.body_diameter.get()) - 2*float(self.body_thickness.get()))
+            self.rocket.componentes['Aletas'] = Aletas("Aletas", float(self.fin_mass.get()), float(self.nose_length.get()) + float(self.body_length.get()) - float(self.fin_root_chord.get()),
+                          float(self.body_diameter.get()), int(self.fin_count.get()), float(self.fin_span.get()),
+                          float(self.fin_root_chord.get()), float(self.fin_tip_chord.get()), 0.0, np.deg2rad(float(self.fin_sweep.get())))
+            self.rocket.componentes['Boattail'] = Boattail("Boattail", float(self.boattail_mass.get()), float(self.nose_length.get()) + float(self.body_length.get()),
+                                float(self.boattail_length.get()), float(self.boattail_front_diameter.get()),
+                                float(self.boattail_rear_diameter.get()), float(self.body_thickness.get()))
+            self.rocket.componentes['Motor'] = Cilindro("Motor", float(self.motor_mass.get()), float(self.nose_length.get()) + float(self.body_length.get()) - float(self.motor_length.get()),
+                             float(self.motor_length.get()), float(self.motor_diameter.get()), 0)
 
-            # Update the rocket's components
-            self.rocket.componentes = {
-                name: self.create_component(component_data[name], name)
-                for name in component_data
-            }
-
-            # Update the rocket's properties
+            # Update rocket properties
             self.rocket.d_ext = float(self.body_diameter.get())
             self.rocket.calcular_propiedades()
 
