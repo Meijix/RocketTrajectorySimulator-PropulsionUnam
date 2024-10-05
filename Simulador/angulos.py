@@ -9,4 +9,4 @@ def normalize_angle(angle_deg):
     return angle_deg
 
 def nice_angle(angle_rad):
-  return np.array([normalize_angle(x) for x in np.rad2deg(angle_rad)])
+    return np.array([normalize_angle(x) for x in np.rad2deg(angle_rad)])
