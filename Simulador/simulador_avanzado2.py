@@ -12,12 +12,13 @@ from datetime import datetime
 
 # Import necessary modules
 from condiciones_init import *
-from Xitle import *
+from Xitle import Xitle
 from Vuelo import *
 from Viento import Viento
 from riel import Torrelanzamiento
 from Atmosfera1 import atmosfera
 from Componentes import Componente, Cono, Cilindro, Aletas, Boattail
+from cohete import Cohete
 
 class SimuladorCohetesAvanzado:
     def __init__(self, master):
@@ -36,14 +37,8 @@ class SimuladorCohetesAvanzado:
 
         self.notebook = ttk.Notebook(self.master)
         self.notebook.pack(expand=True, fill="both", padx=10, pady=10)
-
-        # Initialize self.rocket with a Cohete instance
-        # Tablas de Cd, empuje y masa
-        self.thrust_curve = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\MegaPunisherBien.csv'
-        self.cd_vs_mach = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\cdmachXitle.csv'
-        self.mass_vs_time = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\MegaPunisherFatMasadot.csv'
         
-        self.rocket = Cohete("Xitle", "hibrido", Xitle.componentes, Xitle.componentes, self.cd_vs_mach, self.thrust_curve, self.mass_vs_time, riel)
+        self.rocket = Xitle
         
         self.create_rocket_tab()
         self.create_input_tab()
@@ -77,10 +72,11 @@ class SimuladorCohetesAvanzado:
         self.nose_geometry.set(self.rocket.componentes['Nariz'].geom)
         ttk.Label(rocket_frame, text="Geometría:").grid(row=4, column=0, sticky="w", padx=5, pady=5)
 
+        # Body
         ttk.Label(rocket_frame, text="Fuselaje:", font=('Arial', 12, 'bold')).grid(row=0, column=1, sticky="w", padx=5, pady=10)
         self.body_length = self.create_entry(rocket_frame, 1, 1, "Longitud (m):", self.rocket.componentes['Fuselaje'].long)
         self.body_diameter = self.create_entry(rocket_frame, 2, 1, "Diámetro exterior (m):", self.rocket.componentes['Fuselaje'].diam_ext)
-        self.body_thickness = self.create_entry(rocket_frame, 3, 1, "Espesor (m):", (self.rocket.componentes['Fuselaje'].diam_ext - self.rocket.componentes['Fuselaje'].diametro_int) / 2)
+        self.body_thickness = self.create_entry(rocket_frame, 3, 1, "Espesor (m):", (self.rocket.componentes['Fuselaje'].diam_ext - self.rocket.componentes['Fuselaje'].diam_int) / 2)
         self.body_mass = self.create_entry(rocket_frame, 4, 1, "Masa (kg):", self.rocket.componentes['Fuselaje'].masa)
 
         # Fins
@@ -122,18 +118,27 @@ class SimuladorCohetesAvanzado:
 
     def create_rocket(self):
         try:
-            # Update components
-            self.rocket.componentes['Nariz'] = Cono("Nariz", float(self.nose_mass.get()), 0.0, float(self.nose_length.get()), float(self.nose_diameter.get()), self.nose_geometry.get())
-            self.rocket.componentes['Fuselaje'] = Cilindro("Fuselaje", float(self.body_mass.get()), float(self.nose_length.get()), float(self.body_length.get()), float(self.body_diameter.get()), float(self.body_diameter.get()) - 2*float(self.body_thickness.get()))
-            self.rocket.componentes['Aletas'] = Aletas("Aletas", float(self.fin_mass.get()), float(self.nose_length.get()) + float(self.body_length.get()) - float(self.fin_root_chord.get()),
-                          float(self.body_diameter.get()), int(self.fin_count.get()), float(self.fin_span.get()),
-                          float(self.fin_root_chord.get()), float(self.fin_tip_chord.get()), 0.0, np.deg2rad(float(self.fin_sweep.get())))
-            self.rocket.componentes['Boattail'] = Boattail("Boattail", float(self.boattail_mass.get()), float(self.nose_length.get()) + float(self.body_length.get()),
+        # Tablas de Cd, empuje y masa
+            self.thrust_curve = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Archivos\MegaPunisherBien.csv'
+            self.cd_vs_mach = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Archivos\cdmachXitle.csv'
+            self.mass_vs_time = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Archivos\MegaPunisherFatMasadot.csv'
+        
+
+            nariz = Cono("Nariz", float(self.nose_mass.get()), 0.0, float(self.nose_length.get()), float(self.nose_diameter.get()), self.nose_geometry.get())
+            
+            fuselaje = Cilindro("Fuselaje", float(self.body_mass.get()), float(self.nose_length.get()), float(self.body_length.get()), float(self.body_diameter.get()), float(self.body_diameter.get()) - 2*float(self.body_thickness.get()))
+            
+            aletas = Aletas("Aletas", float(self.fin_mass.get()), float(self.nose_length.get()) + float(self.body_length.get()) - float(self.fin_root_chord.get()),float(self.body_diameter.get()), int(self.fin_count.get()), float(self.fin_span.get()),float(self.fin_root_chord.get()), float(self.fin_tip_chord.get()), 0.0, np.deg2rad(float(self.fin_sweep.get())))
+            
+            boattail = Boattail("Boattail", float(self.boattail_mass.get()), float(self.nose_length.get()) + float(self.body_length.get()),
                                 float(self.boattail_length.get()), float(self.boattail_front_diameter.get()),
                                 float(self.boattail_rear_diameter.get()), float(self.body_thickness.get()))
-            self.rocket.componentes['Motor'] = Cilindro("Motor", float(self.motor_mass.get()), float(self.nose_length.get()) + float(self.body_length.get()) - float(self.motor_length.get()),
-                             float(self.motor_length.get()), float(self.motor_diameter.get()), 0)
-
+            # Create rocket components
+            self.componentes_de_cohete = {'Nariz': nariz ,'Fuselaje': fuselaje, 'Aletas': aletas, 'Boattail': boattail}
+            self.rocket = Cohete("Xitle", "hibrido", self.componentes_de_cohete, self.componentes_de_cohete, self.cd_vs_mach, self.thrust_curve, self.mass_vs_time, riel)
+        
+    
+        ####################################################
             # Update rocket properties
             self.rocket.d_ext = float(self.body_diameter.get())
             self.rocket.calcular_propiedades()
@@ -141,22 +146,6 @@ class SimuladorCohetesAvanzado:
             messagebox.showinfo("Éxito", "Cohete actualizado exitosamente")
         except Exception as e:
             messagebox.showerror("Error", f"Error al actualizar el cohete: {str(e)}")
-
-def create_component(self, data, name):
-    # Create a component based on its type
-    if name == "Nariz":
-        return Cono(name, data["masa"], 0.0, data["long"], data["diam"], data["geom"])
-    elif name == "Tubo":
-        return Cilindro(name, data["masa"], 0.0, data["long"], data["diam_ext"], data["diam_int"])
-    elif name == "Aletas":
-        return Aletas(name, data["masa"], 0.0, data["diam_ext"], data["numf"], data["semispan"],
-                      data["C_r"], data["C_t"], 0.0, data["mid_sweep"])
-    elif name == "Boattail":
-        return Boattail(name, data["masa"], 0.0, data["longitud"], data["diamF_boat"], data["diamR_boat"])
-    elif name == "Motor":
-        return Cilindro(name, data["masa"], 0.0, data["longitud"], data["diametro_ext"], 0)
-    else:
-        raise ValueError("Invalid component name")
 
     def create_input_tab(self):
         input_frame = ttk.Frame(self.notebook)
@@ -388,10 +377,7 @@ def create_component(self, data, name):
             self.update_summary(vuelo1, max_altitude, max_speed, np.max(accels), np.max(accangs))
 
             # Save data
-            self.save_data(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo,
-                           viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tmags, Dmags, Nmags,
-                           Txs, Tys, Tzs, Dxs, Dys, Dzs, Nxs, Nys, Nzs, accels, palancas, accangs,
-                           Gammas, Alphas, torcas, Cds, Machs, stability)
+            self.save_data(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo,viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tmags, Dmags, Nmags,Txs, Tys, Tzs, Dxs, Dys, Dzs, Nxs, Nys, Nzs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs, stability)
 
             # Stop progress bar
             self.progress.stop()
@@ -538,9 +524,9 @@ def create_component(self, data, name):
         summary_label.pack(padx=10, pady=10)
 
     def save_data(self, tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo,
-                  viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tmags, Dmags, Nmags,
-                  Txs, Tys, Tzs, Dxs, Dys, Dzs, Nxs, Nys, Nzs, accels, palancas, accangs,
-                  Gammas, Alphas, torcas, Cds, Machs, stability):
+                viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tmags, Dmags, Nmags,
+                Txs, Tys, Tzs, Dxs, Dys, Dzs, Nxs, Nys, Nzs, accels, palancas, accangs,
+                Gammas, Alphas, torcas, Cds, Machs, stability):
         
         # Save data to CSV
         datos_simulados = pd.DataFrame({
