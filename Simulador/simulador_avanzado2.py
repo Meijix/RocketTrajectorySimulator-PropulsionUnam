@@ -22,9 +22,12 @@ from cohete import Cohete
 class SimuladorCohetesAvanzado:
     def __init__(self, master):
         azul = '#052c53'
-        azul = '#000040'
+        azul = '#022D36'#peacock
+        azul = '#151E3D'#denim
+        #azul = '#112B4B'#denim
         rojo = '#90091d'
-        font_selection = ('Fontana', 10)
+        #teal = '#48AAAD'
+        font_selection = ('Lucida Sans Unicode', 10)
         self.master = master
         self.master.title("Simulador de Cohetes Suborbitales Avanzado")
         self.master.geometry("1200x800")
