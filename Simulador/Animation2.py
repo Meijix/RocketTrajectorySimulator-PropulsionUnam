@@ -6,6 +6,7 @@ from matplotlib.animation import FuncAnimation
 
 from funciones import *
 from dibujarCohete import dibujar_cohete
+from angulos import nice_angle
 
 # Leer los datos de la simulación desde el archivo CSV
 datos_simulacion = pd.read_csv('datos_simulacion.csv')
@@ -49,7 +50,7 @@ ax2d.grid()
 # Cada cuántos frames graficar
 every = 40
 
-print(thetas)
+print(nice_angle(thetas))
 
 # Función de actualización para la animación
 def update(frame):
@@ -74,7 +75,6 @@ animation = FuncAnimation(fig, update, frames=frames, interval=1000/fps, repeat=
 
 #plt.show()
 
-animation.save("AngulosAnimados.mp4")
-
-# Guardar la animación como GIF
-print("Guardado")
+# Guardar la animación como mp4
+animation.save(r"..\AngulosAnimados.mp4")
+print("mp4 Guardado")
