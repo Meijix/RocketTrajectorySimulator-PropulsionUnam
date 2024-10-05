@@ -12,7 +12,6 @@ from datetime import datetime
 
 # Import necessary modules
 from condiciones_init import *
-from Xitle import Xitle
 from Vuelo import *
 from Viento import Viento
 from riel import Torrelanzamiento
@@ -38,7 +37,14 @@ class SimuladorCohetesAvanzado:
         self.notebook = ttk.Notebook(self.master)
         self.notebook.pack(expand=True, fill="both", padx=10, pady=10)
         
-        self.rocket = Xitle
+        self.rocket = None
+        diam_ext=0.152
+        espesor=0.03
+        nariz = Cono("Nariz", 0.8 , np.array([0.0, 0.0, 0.0]), 0.81, diam_ext, "ogiva")
+        fuselaje = Cilindro("Coples",1.5, np.array([0.0,0.0, nariz.bottom[2]]),0.176, diam_ext, diam_ext-espesor)
+        aletas= Aletas("Aletas", 1.1, np.array([0.0, 0.0, fuselaje.bottom[2]]), diam_ext, 4, 0.11, 0.3, 0.1, 0.2, 25)
+        boattail = Boattail("Boattail", 0.251, np.array([0.0, 0.0, fuselaje.bottom[2]]), 0.12, diam_ext, 0.132, espesor)
+        self.lista_componentes = {'Nariz': nariz ,'Fuselaje': fuselaje, 'Aletas': aletas, 'Boattail': boattail}
         
         self.create_rocket_tab()
         self.create_input_tab()
@@ -64,42 +70,37 @@ class SimuladorCohetesAvanzado:
         # Nose Cone
         ttk.Label(rocket_frame, text="Nariz (Cono):", font=('Arial', 12, 'bold')).grid(row=0, column=0, sticky="w", padx=5, pady=10)
         # Update entries for each component
-        self.nose_length = self.create_entry(rocket_frame, 1, 0, "Longitud (m):", self.rocket.componentes['Nariz'].long)
-        self.nose_diameter = self.create_entry(rocket_frame, 2, 0, "Diámetro (m):", self.rocket.componentes['Nariz'].diam)
-        self.nose_mass = self.create_entry(rocket_frame, 3, 0, "Masa (kg):", self.rocket.componentes['Nariz'].masa)
+        self.nose_length = self.create_entry(rocket_frame, 1, 0, "Longitud (m):", self.lista_componentes['Nariz'].long)
+        self.nose_diameter = self.create_entry(rocket_frame, 2, 0, "Diámetro (m):", self.lista_componentes['Nariz'].diam)
+        self.nose_mass = self.create_entry(rocket_frame, 3, 0, "Masa (kg):", self.lista_componentes['Nariz'].masa)
         self.nose_geometry = ttk.Combobox(rocket_frame, values=["conica", "ogiva", "parabolica", "eliptica"])
         self.nose_geometry.grid(row=4, column=1, padx=5, pady=5)
-        self.nose_geometry.set(self.rocket.componentes['Nariz'].geom)
+        self.nose_geometry.set(self.lista_componentes['Nariz'].geom)
         ttk.Label(rocket_frame, text="Geometría:").grid(row=4, column=0, sticky="w", padx=5, pady=5)
 
         # Body
         ttk.Label(rocket_frame, text="Fuselaje:", font=('Arial', 12, 'bold')).grid(row=0, column=1, sticky="w", padx=5, pady=10)
-        self.body_length = self.create_entry(rocket_frame, 1, 1, "Longitud (m):", self.rocket.componentes['Fuselaje'].long)
-        self.body_diameter = self.create_entry(rocket_frame, 2, 1, "Diámetro exterior (m):", self.rocket.componentes['Fuselaje'].diam_ext)
-        self.body_thickness = self.create_entry(rocket_frame, 3, 1, "Espesor (m):", (self.rocket.componentes['Fuselaje'].diam_ext - self.rocket.componentes['Fuselaje'].diam_int) / 2)
-        self.body_mass = self.create_entry(rocket_frame, 4, 1, "Masa (kg):", self.rocket.componentes['Fuselaje'].masa)
+        self.body_length = self.create_entry(rocket_frame, 1, 1, "Longitud (m):", self.lista_componentes['Fuselaje'].long)
+        self.body_diameter = self.create_entry(rocket_frame, 2, 1, "Diámetro exterior (m):", self.lista_componentes['Fuselaje'].diam_ext)
+        self.body_thickness = self.create_entry(rocket_frame, 3, 1, "Espesor (m):", (self.lista_componentes['Fuselaje'].diam_ext - self.lista_componentes['Fuselaje'].diam_int) / 2)
+        self.body_mass = self.create_entry(rocket_frame, 4, 1, "Masa (kg):", self.lista_componentes['Fuselaje'].masa)
 
         # Fins
         ttk.Label(rocket_frame, text="Aletas:", font=('Arial', 12, 'bold')).grid(row=0, column=2, sticky="w", padx=5, pady=10)
-        self.fin_count = self.create_entry(rocket_frame, 1, 2, "Número de aletas:", self.rocket.componentes['Aletas'].numf)
-        self.fin_span = self.create_entry(rocket_frame, 2, 2, "Envergadura (m):", self.rocket.componentes['Aletas'].semispan)
-        self.fin_root_chord = self.create_entry(rocket_frame, 3, 2, "Cuerda raíz (m):", self.rocket.componentes['Aletas'].C_r)
-        self.fin_tip_chord = self.create_entry(rocket_frame, 4, 2, "Cuerda punta (m):", self.rocket.componentes['Aletas'].C_t)
-        self.fin_sweep = self.create_entry(rocket_frame, 5, 2, "Ángulo de barrido (grados):", np.degrees(self.rocket.componentes['Aletas'].mid_sweep))
-        self.fin_mass = self.create_entry(rocket_frame, 6, 2, "Masa total de aletas (kg):", self.rocket.componentes['Aletas'].masa)
+        self.fin_count = self.create_entry(rocket_frame, 1, 2, "Número de aletas:", self.lista_componentes['Aletas'].numf)
+        self.fin_span = self.create_entry(rocket_frame, 2, 2, "Envergadura (m):", self.lista_componentes['Aletas'].semispan)
+        self.fin_root_chord = self.create_entry(rocket_frame, 3, 2, "Cuerda raíz (m):", self.lista_componentes['Aletas'].C_r)
+        self.fin_tip_chord = self.create_entry(rocket_frame, 4, 2, "Cuerda punta (m):", self.lista_componentes['Aletas'].C_t)
+        self.fin_sweep = self.create_entry(rocket_frame, 5, 2, "Ángulo de barrido (grados):", np.degrees(self.lista_componentes['Aletas'].mid_sweep))
+        self.fin_mass = self.create_entry(rocket_frame, 6, 2, "Masa total de aletas (kg):", self.lista_componentes['Aletas'].masa)
 
         # Boattail
         ttk.Label(rocket_frame, text="Boattail:", font=('Arial', 12, 'bold')).grid(row=7, column=0, sticky="w", padx=5, pady=10)
-        self.boattail_length = self.create_entry(rocket_frame, 8, 0, "Longitud (m):", self.rocket.componentes['Boattail'].longitud)
-        self.boattail_front_diameter = self.create_entry(rocket_frame, 9, 0, "Diámetro frontal (m):", self.rocket.componentes['Boattail'].diamF_boat)
-        self.boattail_rear_diameter = self.create_entry(rocket_frame, 10, 0, "Diámetro trasero (m):", self.rocket.componentes['Boattail'].diamR_boat)
-        self.boattail_mass = self.create_entry(rocket_frame, 11, 0, "Masa (kg):", self.rocket.componentes['Boattail'].masa)
+        self.boattail_length = self.create_entry(rocket_frame, 8, 0, "Longitud (m):", self.lista_componentes['Boattail'].long)
+        self.boattail_front_diameter = self.create_entry(rocket_frame, 9, 0, "Diámetro frontal (m):", self.lista_componentes['Boattail'].dF)
+        self.boattail_rear_diameter = self.create_entry(rocket_frame, 10, 0, "Diámetro trasero (m):", self.lista_componentes['Boattail'].dR)
+        self.boattail_mass = self.create_entry(rocket_frame, 11, 0, "Masa (kg):", self.lista_componentes['Boattail'].masa)
 
-        # Motor
-        ttk.Label(rocket_frame, text="Motor:", font=('Arial', 12, 'bold')).grid(row=7, column=1, sticky="w", padx=5, pady=10)
-        self.motor_mass = self.create_entry(rocket_frame, 8, 1, "Masa total (kg):", self.rocket.componentes['Motor'].masa)
-        self.motor_length = self.create_entry(rocket_frame, 9, 1, "Longitud (m):", self.rocket.componentes['Motor'].longitud)
-        self.motor_diameter = self.create_entry(rocket_frame, 10, 1, "Diámetro (m):", self.rocket.componentes['Motor'].diametro_ext)
 
         # Create Rocket button
         self.btn_create_rocket = ttk.Button(rocket_frame, text="Actualizar Cohete", command=self.create_rocket)
