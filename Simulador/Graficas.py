@@ -130,10 +130,10 @@ x = 10
 x = x * 100
 
 for i in range(0, len(tiempos), x):
-  dibujar_cohete(posiciones[i, 0], posiciones[i, 2], np.rad2deg(thetas[i]), 200)  # Ajusta longitud y altura según sea necesario
-  #dibujar_cohete(posiciones[i, 0], posiciones[i, 2], thetas[i], 500)
+    dibujar_cohete(posiciones[i, 0], posiciones[i, 2], np.rad2deg(thetas[i]), 200, plt)  # Ajusta longitud y altura según sea necesario
+    #dibujar_cohete(posiciones[i, 0], posiciones[i, 2], thetas[i], 500)
 
-# plt.show()
+plt.show()
 
 # GRAFICA 1. Posiciones
 plt.figure(figsize=(10, 6))

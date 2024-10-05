@@ -9,11 +9,11 @@ from mpl_toolkits.mplot3d import Axes3D
 
 class Viento:
 
-    def __init__(self, vel_base= 10, vel_mean=3, vel_var=0.02, var_ang=15):
+    def __init__(self, vel_base= 10, vel_mean=3, vel_var=0.02, ang_base=0 , var_ang=15):
         
         #Parametros viento base
         self.vel_base = vel_base
-        self.dir_base = 0 #0--de izquierda a der, 180-- der hacia izquierda
+        self.dir_base = ang_base #0--de izquierda a der, 180-- der hacia izquierda
         self.giro_base = 0 #El vector base esta en el plano XY
         
         #Parametros viento variable
@@ -35,14 +35,8 @@ class Viento:
         ###################
     def random_values(self):
         self.magnitud = random.normal(self.vel_mean, self.vel_var)
-        self.direccion = random.uniform(-45, 45) #kappa
-        #self.direccion = random.rand(0,180)
         self.direccion = random.normal(self.dir_base,self.var_ang)
         self.giro = random.uniform(0,180) #phi
-        #self.angulo = random.uniform(0,180)
-        #Elegir hacia que lado sopla con 0.5 de probabilidad
-        #if (random.random() >= 0.5):
-        #  self.direccion *= -1
 
 
     def actualizar_viento2D(self):
@@ -57,14 +51,16 @@ class Viento:
     def actualizar_viento3D(self):
         self.random_values()
         #Vector base
-        self.vector_base = self.vel_base * np.array([np.cos(self.giro_base)*np.cos(self.dir_base), np.sin(self.giro_base)*np.cos(self.dir_base) , np.sin(self.dir_base)])
+        self.vector_base = self.vel_base * np.array([np.cos(np.deg2rad(self.giro_base))*np.cos(np.deg2rad(self.dir_base)), np.sin(np.deg2rad(self.giro_base))*np.cos(np.deg2rad(self.dir_base)) , np.sin(np.deg2rad(self.dir_base))])
         #Vector rafagoso
-        self.vector_rafagoso = self.magnitud * np.array([np.cos(self.giro)*np.cos(self.direccion), np.sin(self.giro)*np.cos(self.direccion) , np.sin(self.direccion)])
+        self.vector_rafagoso = self.magnitud * np.array([np.cos(np.deg2rad(self.giro))*np.cos(np.deg2rad(self.direccion)), np.sin(np.deg2rad(self.giro))*np.cos(np.deg2rad(self.direccion)) , np.sin(np.deg2rad(self.direccion))])
 
-        
-        self.magnitud_total = self.vel_base + self.magnitud #np.linalg(self.vector)
-        self.direccion_total = self.dir_base + self.direccion
         self.vector = self.vector_base + self.vector_rafagoso
+        self.magnitud_total = np.linalg.norm(self.vector)
+        
+        z= self.vector[2]
+        x= self.vector[0]
+        self.direccion_total = np.rad2deg(np.arctan2(z,x))
 
     def __repr__(self):
         return f"Viento(magnitud={self.magnitud_total}, direccion={self.direccion_total})"
