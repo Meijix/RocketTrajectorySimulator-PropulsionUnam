@@ -1,5 +1,4 @@
 #Simulacion sin paracaidas del Xitle2
-
 import numpy as np
 from math import pi
 
@@ -137,10 +136,11 @@ datos_simulados = pd.DataFrame({
 })
 
 datos_simulados.to_csv('datos_simulacion.csv', index=False)
-
+print('csv guardado')
 ############################
 #Guardar datos importantes en un archivo json
 import json
+
 datos_a_guardar = {
     'd_ext': Xitle.d_ext,
     't_MECO': Xitle.t_MECO,
@@ -156,3 +156,5 @@ datos_a_guardar = {
 
 with open('datos_simulacion.json', 'w') as f:
     json.dump(datos_a_guardar, f, indent=4)
+    
+print('json guardado')
