@@ -11,6 +11,7 @@ from angulos import nice_angle
 # Leer los datos de la simulación desde el archivo CSV
 datos_simulacion = pd.read_csv('datos_simulacion.csv')
 
+print(datos_simulacion.columns)
 # Extraer los datos del CSV
 (tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo, estabilidad,
  viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, wind_xs, wind_ys, wind_zs,
@@ -73,8 +74,10 @@ fps = 30
 frames = np.arange(0, len(t), every)
 animation = FuncAnimation(fig, update, frames=frames, interval=1000/fps, repeat=False)
 
-#plt.show()
+plt.show()
 
+fps=fps/3
+print('Guardando animacion...')
 # Guardar la animación como mp4
-animation.save(r"..\AngulosAnimados.mp4")
+animation.save("AngulosAnimados.mp4", fps=fps)
 print("mp4 Guardado")

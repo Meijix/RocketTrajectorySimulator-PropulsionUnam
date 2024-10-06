@@ -104,9 +104,14 @@ def update(frame):
 frames = np.arange(0, len(t)+every, every)
 if frames[-1] > len(t): frames[-1] = len(t)-1
 #print(frames)
-animation = FuncAnimation(fig, update, frames=frames, interval=5, repeat=False)
+
+fps=30
+animation = FuncAnimation(fig, update, frames=frames, interval=1000/fps, repeat=False)
 
 plt.show()
 
-animation.save("TrayectoriaAnimada.gif")
-print("GIF Guardado")
+
+fps=fps/3
+#animation.save("TrayectoriaAnimada.gif")
+animation.save("Trayectoria-pelicula.mp4", fps=fps)
+print("Mp4 Guardado")
