@@ -88,6 +88,7 @@ max_speed = max(np.linalg.norm(velocidades, axis=1))
 #print("Máxima velocidad:", max_speed, "m/s")
 #print("Equivalente a:",max_speed/340, "Mach")
 #########################################
+'''
 import pandas as pd
 # Guardar los datos de la simulación en un archivo .csv
 datos_simulados = pd.DataFrame({
@@ -158,3 +159,42 @@ with open('datos_simulacion.json', 'w') as f:
     json.dump(datos_a_guardar, f, indent=4)
     
 print('json guardado')
+'''
+
+import json
+import numpy as np
+import csv
+
+# Asegúrate de que estas variables estén definidas y tengan valores asignados
+datos_a_guardar = {
+    'd_ext': Xitle.d_ext,
+    't_MECO': Xitle.t_MECO,
+    'tiempo_salida_riel': vuelo1.tiempo_salida_riel,
+    'tiempo_apogeo': vuelo1.tiempo_apogeo,
+    'tiempo_impacto': vuelo1.tiempo_impacto,
+    'max_altitude': max_altitude,
+    'max_speed': max_speed,
+    'max_acceleration_linear': np.max(accels),
+    'max_acceleration_angular': np.max(accangs)
+    #'velocidad de impacto': velocidades[-1]  # Asegúrate de que 'velocidades' esté definido si descomentas esta línea
+}
+
+# Guardar datos en un archivo JSON
+try:
+    with open('datos_simulacion.json', 'w') as f:
+        json.dump(datos_a_guardar, f, indent=4)
+    print('json guardado')
+except Exception as e:
+    print(f"Error al guardar el archivo JSON: {e}")
+
+# Guardar datos en un archivo CSV
+try:
+    with open('datos_simulacion.csv', 'w', newline='') as csvfile:
+        fieldnames = datos_a_guardar.keys()
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        
+        writer.writeheader()
+        writer.writerow(datos_a_guardar)
+    print('csv guardado')
+except Exception as e:
+    print(f"Error al guardar el archivo CSV: {e}")
