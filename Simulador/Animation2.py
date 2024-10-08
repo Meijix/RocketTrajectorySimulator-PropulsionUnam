@@ -79,5 +79,6 @@ plt.show()
 fps=fps/3
 print('Guardando animacion...')
 # Guardar la animación como mp4
-animation.save("AngulosAnimados.mp4", fps=fps)
+animation.save("AngulosAnimacionPrueba.gif")
+#animation.save("AngulosAnimados.mp4", fps=fps)
 print("mp4 Guardado")
