@@ -111,7 +111,7 @@ animation = FuncAnimation(fig, update, frames=frames, interval=1000/fps, repeat=
 plt.show()
 
 
-fps=fps/3
+fps=fps
 #animation.save("TrayectoriaAnimada.gif")
 animation.save("Trayectoria-pelicula.mp4", fps=fps)
 print("Mp4 Guardado")
