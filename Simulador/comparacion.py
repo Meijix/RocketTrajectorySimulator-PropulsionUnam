@@ -39,9 +39,57 @@ for i in range(n_simulaciones):
     (d_ext, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto,
     max_altitude, max_speed, max_acceleration_linear, max_acceleration_angular) = extraer_datosjson(datos_simulacion_json)
 
+#print("Simulación 1: (datos para ver como se han guardado)")
+#print(datos_simulacion_csv)
+#print(datos_simulacion_json)
+# Comparación de Altitud máxima
+altitudes_maximas = [datos_simulaciones_json[i][5] for i in range(n_simulaciones)]
 
+plt.figure(figsize=(10, 6))
+plt.scatter(range(1, n_simulaciones + 1), altitudes_maximas, color='skyblue')
+plt.title('Comparación de Altitud Máxima entre Simulaciones')
+plt.xlabel('Simulación')
+plt.ylabel('Altitud Máxima (m)')
+plt.xticks(range(1, n_simulaciones + 1))
+plt.show()
+
+# Comparación de Velocidad máxima
+velocidades_maximas = [datos_simulaciones_json[i][6] for i in range(n_simulaciones)]
+
+plt.figure(figsize=(10, 6))
+plt.scatter(range(1, n_simulaciones + 1), velocidades_maximas, color='lightgreen')
+plt.title('Comparación de Velocidad Máxima entre Simulaciones')
+plt.xlabel('Simulación')
+plt.ylabel('Velocidad Máxima (m/s)')
+plt.xticks(range(1, n_simulaciones + 1 ))
+plt.show()
+
+# Comparación de Aceleración lineal máxima
+aceleraciones_lineales_maximas = [datos_simulaciones_json[i][7] for i in range(n_simulaciones)]
+
+plt.figure(figsize=(10, 6))
+plt.scatter(range(1, n_simulaciones + 1), aceleraciones_lineales_maximas, color='pink')
+plt.title('Comparación de Aceleración Lineal Máxima entre Simulaciones')
+plt.xlabel('Simulación')
+plt.ylabel('Aceleración Lineal Máxima (m/s²)')
+plt.xticks(range(1, n_simulaciones + 1))
+plt.show()
+
+# Comparación de Aceleración angular máxima
+aceleraciones_angulares_maximas = [datos_simulaciones_json[i][8] for i in range(n_simulaciones)]
+
+plt.figure(figsize=(10, 6))
+plt.scatter(range(1, n_simulaciones + 1), aceleraciones_angulares_maximas, color='orange')
+plt.title('Comparación de Aceleración Angular Máxima entre Simulaciones')
+plt.xlabel('Simulación')
+plt.ylabel('Aceleración Angular Máxima (rad/s²)')
+plt.xticks(range(1, n_simulaciones + 1))
+plt.show()
+#############################################################################
 # Comparación de simulaciones (ejemplo básico de cómo podrías graficar o comparar)
 # Aquí podrías empezar a graficar o analizar las diferencias entre las simulaciones
+
+'''
 for i in range(n_simulaciones):
     print(f"Simulación {i+1}:")
     print(f" - Tiempo de apogeo: {datos_simulaciones_json[i]['tiempo_apogeo']} s")
@@ -87,4 +135,5 @@ plt.xlabel('Simulación')
 plt.ylabel('Aceleración Lineal Máxima (m/s²)')
 plt.xticks(range(1, n_simulaciones + 1))
 plt.show()
-
+'''
+###################################################################
