@@ -43,7 +43,7 @@ for i in range(n_simulaciones):
 #print(datos_simulacion_csv)
 #print(datos_simulacion_json)
 # Comparación de Altitud máxima
-altitudes_maximas = [datos_simulaciones_json['max_altitude'] for i in range(n_simulaciones)]
+altitudes_maximas = [datos_simulaciones_json[i]['max_altitude'] for i in range(n_simulaciones)]
 
 plt.figure(figsize=(10, 6))
 plt.scatter(range(1, n_simulaciones + 1), altitudes_maximas, color='skyblue')
@@ -54,7 +54,7 @@ plt.xticks(range(1, n_simulaciones + 1))
 plt.show()
 
 # Comparación de Velocidad máxima
-velocidades_maximas = [datos_simulaciones_json['max_speed'] for i in range(n_simulaciones)]
+velocidades_maximas = [datos_simulaciones_json[i]['max_speed'] for i in range(n_simulaciones)]
 
 plt.figure(figsize=(10, 6))
 plt.scatter(range(1, n_simulaciones + 1), velocidades_maximas, color='lightgreen')
@@ -65,7 +65,7 @@ plt.xticks(range(1, n_simulaciones + 1 ))
 plt.show()
 
 # Comparación de Aceleración lineal máxima
-aceleraciones_lineales_maximas = [datos_simulaciones_json['max_acceleration_linear'] for i in range(n_simulaciones)]
+aceleraciones_lineales_maximas = [datos_simulaciones_json[i]['max_acceleration_linear'] for i in range(n_simulaciones)]
 
 plt.figure(figsize=(10, 6))
 plt.scatter(range(1, n_simulaciones + 1), aceleraciones_lineales_maximas, color='pink')
@@ -76,7 +76,7 @@ plt.xticks(range(1, n_simulaciones + 1))
 plt.show()
 
 # Comparación de Aceleración angular máxima
-aceleraciones_angulares_maximas = [datos_simulaciones_json['max_acceleration_angular'] for i in range(n_simulaciones)]
+aceleraciones_angulares_maximas = [datos_simulaciones_json[i]['max_acceleration_angular'] for i in range(n_simulaciones)]
 
 plt.figure(figsize=(10, 6))
 plt.scatter(range(1, n_simulaciones + 1), aceleraciones_angulares_maximas, color='orange')
