@@ -23,7 +23,7 @@ for sim_num in range(1, n_simulaciones + 1):
     print(f"Simulación {sim_num} de {n_simulaciones}")
     
     # Variación de la masa inicial en cada simulación (por ejemplo, entre 90% y 110% de la masa original)
-    masa_inicial_variada = Xitle.masa * random.uniform(0.9, 1.1)
+    masa_inicial_variada = Xitle.masa * random.uniform(0.8, 1.2)
     Xitle.masa = masa_inicial_variada  # Actualizamos la masa inicial del cohete
     
     print(f"Masa inicial para la simulación {sim_num}: {masa_inicial_variada} kg")
