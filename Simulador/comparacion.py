@@ -30,48 +30,6 @@ for i in range(n_simulaciones):
     Dmags, Nmags, Tmags, Dxs, Dys, Dzs, Nxs, Nys, Nzs, Txs, Tys, Tzs, Tvecs, Dvecs, Nvecs,
     accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs) = extraer_datoscsv(datos_simulacion_csv)
 
-    # Guardar los datos extraídos del CSV en una lista
-    datos_simulaciones_csv.append({
-        'tiempos': tiempos,
-        'posiciones': posiciones,
-        'velocidades': velocidades,
-        'thetas': thetas,
-        'omegas': omegas,
-        'CPs': CPs,
-        'CGs': CGs,
-        'masavuelo': masavuelo,
-        'estabilidad': estabilidad,
-        'viento_vuelo_mags': viento_vuelo_mags,
-        'viento_vuelo_dirs': viento_vuelo_dirs,
-        'viento_vuelo_vecs': viento_vuelo_vecs,
-        'wind_xs': wind_xs,
-        'wind_ys': wind_ys,
-        'wind_zs': wind_zs,
-        'Dmags': Dmags,
-        'Nmags': Nmags,
-        'Tmags': Tmags,
-        'Dxs': Dxs,
-        'Dys': Dys,
-        'Dzs': Dzs,
-        'Nxs': Nxs,
-        'Nys': Nys,
-        'Nzs': Nzs,
-        'Txs': Txs,
-        'Tys': Tys,
-        'Tzs': Tzs,
-        'Tvecs': Tvecs,
-        'Dvecs': Dvecs,
-        'Nvecs': Nvecs,
-        'accels': accels,
-        'palancas': palancas,
-        'accangs': accangs,
-        'Gammas': Gammas,
-        'Alphas': Alphas,
-        'torcas': torcas,
-        'Cds': Cds,
-        'Machs': Machs
-    })
-
     # Leer el archivo JSON
     archivo_json = lista_archivos_json[i]
     with open(archivo_json, 'r') as f:
@@ -81,18 +39,6 @@ for i in range(n_simulaciones):
     (d_ext, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto,
     max_altitude, max_speed, max_acceleration_linear, max_acceleration_angular) = extraer_datosjson(datos_simulacion_json)
 
-    # Guardar los datos extraídos del JSON en una lista
-    datos_simulaciones_json.append({
-        'd_ext': d_ext,
-        't_MECO': t_MECO,
-        'tiempo_salida_riel': tiempo_salida_riel,
-        'tiempo_apogeo': tiempo_apogeo,
-        'tiempo_impacto': tiempo_impacto,
-        'max_altitude': max_altitude,
-        'max_speed': max_speed,
-        'max_acceleration_linear': max_acceleration_linear,
-        'max_acceleration_angular': max_acceleration_angular
-    })
 
 # Comparación de simulaciones (ejemplo básico de cómo podrías graficar o comparar)
 # Aquí podrías empezar a graficar o analizar las diferencias entre las simulaciones
