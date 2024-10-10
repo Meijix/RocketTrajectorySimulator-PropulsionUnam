@@ -364,39 +364,3 @@ plt.show()
 ##################
 fin = time.time()
 print(f"Tiempo graficando: {fin-inicio:.1f}s")
-
-'''
-#################\
-#ANIMACIONES
-#ANIMACION 1. Trayectoria
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import numpy as np
-
-def dib_cohete(x, y, ax):
-    ax.clear()
-    ax.set_xlim(-10, 110)
-    ax.set_ylim(-10, 110)
-    ax.set_title('Trayectoria del cohete')
-    ax.plot(x, y, 'bo-')
-def animar_cohete():
-    fig, ax = plt.subplots()
-    x = posiciones[:, 0]
-    y = posiciones[:, 2]
-
-    # Parámetros de la simulación
-    num_frames = len(tiempos)  # número de frames de la animación
-    velocidad_simulacion = 0.1  # velocidad de la simulación (segundos)
-
-    def update(frame):
-        ax.clear()
-        ax.set_xlim(-10, 110)
-        ax.set_ylim(-10, 110)
-        ax.set_title('Trayectoria del cohete')
-        ax.plot(x[:frame], y[:frame], 'bo-')
-        dibujar_cohete(x[frame], y[frame], ax)
-        return ax
-
-    ani = animation.FuncAnimation(fig, update, frames=num_frames, interval=50, blit=True)
-    plt.show()
-'''
