@@ -16,8 +16,8 @@ lista_archivos_csv = [f'datos_simulacion_{i+1}.csv' for i in range(n_simulacione
 lista_archivos_json = [f'datos_simulacion_{i+1}.json' for i in range(n_simulaciones)]
 
 # Leer y extraer los datos de todos los archivos CSV y JSON
-datos_simulaciones_csv = {}
-datos_simulaciones_json ={}
+datos_simulaciones_csv = []
+datos_simulaciones_json =[]
 
 
 for i in range(n_simulaciones):
@@ -31,7 +31,7 @@ for i in range(n_simulaciones):
     Dmags, Nmags, Tmags, Dxs, Dys, Dzs, Nxs, Nys, Nzs, Txs, Tys, Tzs, Tvecs, Dvecs, Nvecs,
     accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs) = extraer_datoscsv(datos_simulacion_csv)
 
-    datos_simulacion_csv[i]={
+    datos_simulacion_csv.append({
         'numero':i,
         "tiempos": tiempos,
         "posiciones": posiciones,
@@ -71,7 +71,7 @@ for i in range(n_simulaciones):
         "torcas": torcas,
         "Cds": Cds,
         "Machs": Machs
-    }
+    })
 
     # Leer el archivo JSON
     archivo_json = lista_archivos_json[i]
@@ -82,7 +82,7 @@ for i in range(n_simulaciones):
     (d_ext, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto,
     max_altitude, max_speed, max_acceleration_linear, max_acceleration_angular) = extraer_datosjson(datos_simulacion_json)
 
-    datos_simulacion_json[i]={
+    datos_simulacion_json.append({
         'numero':i,
         "d_ext": d_ext,
         "t_MECO": t_MECO,
@@ -93,7 +93,7 @@ for i in range(n_simulaciones):
         "max_speed": max_speed,
         "max_acceleration_linear": max_acceleration_linear,
         "max_acceleration_angular": max_acceleration_angular
-    }
+    })
 
 print("Simulación: (datos para ver como se han guardado)")
 print(datos_simulacion_csv)
@@ -107,7 +107,7 @@ for k in range(n_simulaciones):
     print(f" - Masa inicial: {datos_simulaciones_csv[k]['masavuelo'][0]} kg")  # Usamos la primera masa del CSV como la masa inicial
     print()
 
-    
+
 altitudes_maximas = [datos_simulaciones_json[i]['max_altitude'] for i in range(n_simulaciones)]
 # Comparación de Velocidad máxima
 
