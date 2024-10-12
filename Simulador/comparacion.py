@@ -16,8 +16,9 @@ lista_archivos_csv = [f'datos_simulacion_{i+1}.csv' for i in range(n_simulacione
 lista_archivos_json = [f'datos_simulacion_{i+1}.json' for i in range(n_simulaciones)]
 
 # Leer y extraer los datos de todos los archivos CSV y JSON
-datos_simulaciones_csv = []
-datos_simulaciones_json = []
+datos_simulaciones_csv = {}
+datos_simulaciones_json ={}
+
 
 for i in range(n_simulaciones):
     # Leer el archivo CSV
@@ -30,6 +31,48 @@ for i in range(n_simulaciones):
     Dmags, Nmags, Tmags, Dxs, Dys, Dzs, Nxs, Nys, Nzs, Txs, Tys, Tzs, Tvecs, Dvecs, Nvecs,
     accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs) = extraer_datoscsv(datos_simulacion_csv)
 
+    datos_simulacion_csv[i]={
+        'numero':i,
+        "tiempos": tiempos,
+        "posiciones": posiciones,
+        "velocidades": velocidades,
+        "thetas": thetas,
+        "omegas": omegas,
+        "CPs": CPs,
+        "CGs": CGs,
+        "masavuelo": masavuelo,
+        "estabilidad": estabilidad,
+        "viento_vuelo_mags": viento_vuelo_mags,
+        "viento_vuelo_dirs": viento_vuelo_dirs,
+        "viento_vuelo_vecs": viento_vuelo_vecs,
+        "wind_xs": wind_xs,
+        "wind_ys": wind_ys,
+        "wind_zs": wind_zs,
+        "Dmags": Dmags,
+        "Nmags": Nmags,
+        "Tmags": Tmags,
+        "Dxs": Dxs,
+        "Dys": Dys,
+        "Dzs": Dzs,
+        "Nxs": Nxs,
+        "Nys": Nys,
+        "Nzs": Nzs,
+        "Txs": Txs,
+        "Tys": Tys,
+        "Tzs": Tzs,
+        "Tvecs": Tvecs,
+        "Dvecs": Dvecs,
+        "Nvecs": Nvecs,
+        "accels": accels,
+        "palancas": palancas,
+        "accangs": accangs,
+        "Gammas": Gammas,
+        "Alphas": Alphas,
+        "torcas": torcas,
+        "Cds": Cds,
+        "Machs": Machs
+    }
+
     # Leer el archivo JSON
     archivo_json = lista_archivos_json[i]
     with open(archivo_json, 'r') as f:
@@ -39,11 +82,34 @@ for i in range(n_simulaciones):
     (d_ext, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto,
     max_altitude, max_speed, max_acceleration_linear, max_acceleration_angular) = extraer_datosjson(datos_simulacion_json)
 
-#print("Simulación 1: (datos para ver como se han guardado)")
-#print(datos_simulacion_csv)
-#print(datos_simulacion_json)
+    datos_simulacion_json[i]={
+        'numero':i,
+        "d_ext": d_ext,
+        "t_MECO": t_MECO,
+        "tiempo_salida_riel": tiempo_salida_riel,
+        "tiempo_apogeo": tiempo_apogeo,
+        "tiempo_impacto": tiempo_impacto,
+        "max_altitude": max_altitude,
+        "max_speed": max_speed,
+        "max_acceleration_linear": max_acceleration_linear,
+        "max_acceleration_angular": max_acceleration_angular
+    }
+
+print("Simulación: (datos para ver como se han guardado)")
+print(datos_simulacion_csv)
+print(datos_simulacion_json)
 # Comparación de Altitud máxima
-altitudes_maximas = [datos_simulaciones_json[i]['max_altitude'] for i in range(1,n_simulaciones+1)]
+for k in range(n_simulaciones):
+    print(f"Simulación {k+1}:")
+    print(f" - Tiempo de apogeo: {datos_simulaciones_json[k]['tiempo_apogeo']} s")
+    print(f" - Altitud máxima: {datos_simulaciones_json[k]['max_altitude']} m")
+    print(f" - Velocidad máxima: {datos_simulaciones_json[k]['max_speed']} m/s")
+    print(f" - Masa inicial: {datos_simulaciones_csv[k]['masavuelo'][0]} kg")  # Usamos la primera masa del CSV como la masa inicial
+    print()
+
+    
+altitudes_maximas = [datos_simulaciones_json[i]['max_altitude'] for i in range(n_simulaciones)]
+# Comparación de Velocidad máxima
 
 plt.figure(figsize=(10, 6))
 plt.scatter(range(1, n_simulaciones + 1), altitudes_maximas, color='skyblue')
@@ -89,7 +155,7 @@ plt.show()
 # Comparación de simulaciones (ejemplo básico de cómo podrías graficar o comparar)
 # Aquí podrías empezar a graficar o analizar las diferencias entre las simulaciones
 
-'''
+
 for i in range(n_simulaciones):
     print(f"Simulación {i+1}:")
     print(f" - Tiempo de apogeo: {datos_simulaciones_json[i]['tiempo_apogeo']} s")
@@ -135,5 +201,5 @@ plt.xlabel('Simulación')
 plt.ylabel('Aceleración Lineal Máxima (m/s²)')
 plt.xticks(range(1, n_simulaciones + 1))
 plt.show()
-'''
+
 ###################################################################
