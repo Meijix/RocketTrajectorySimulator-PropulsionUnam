@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from funciones import extraer_datoscsv, extraer_datosjson
+from angulos import nice_angle
 
 # Variable para el número de simulaciones
 n_simulaciones = 5  # Cambia este valor al número de simulaciones deseadas
@@ -101,54 +102,15 @@ for i in range(n_simulaciones):
 #print(f"Simulaciones: {simulaciones}")
 #print(f"Una sim: {simulaciones[0]}")
 
-'''
-# Graficar todas las trayectorias en una misma gráfica
-plt.figure(figsize=(10, 6))
+#Extraer altitudes, velocidades ya celeraciones maximas
+altitudes_maximas = [simulacion["max_altitude"] for simulacion in simulaciones]
+velocidades_maximas = [simulacion["max_speed"] for simulacion in simulaciones]
+aceleraciones_maximas = [simulacion["max_acceleration_linear"] for simulacion in simulaciones]
+aceleraciones_maximas_angular = [simulacion["max_acceleration_angular"] for simulacion in simulaciones]
 
-for i, simulacion in enumerate(simulaciones):
-    tiempos = simulacion["tiempos"]
-    posiciones = simulacion["posiciones"]
-    plt.plot(tiempos, posiciones, label=f'Sim {i+1}', ls='--', marker='*')
 
-plt.xlabel('Tiempo')
-plt.ylabel('Posición')
-plt.title('Trayectorias de las simulaciones')
-plt.legend()
-plt.grid(True)
-plt.show()
+print(altitudes_maximas)
 
-# Graficar todas las velocidades en una misma gráfica
-plt.figure(figsize=(10, 6))
-for i, simulacion in enumerate(simulaciones):
-    tiempos = simulacion["tiempos"]
-    velocidades = simulacion["velocidades"]
-    plt.plot(tiempos, velocidades, label=f'Sim {i+1}',  ls='--', marker='*')
-
-plt.xlabel('Tiempo')
-plt.ylabel('Velocidad')
-plt.title('Velocidades de las simulaciones')
-plt.legend()
-plt.grid(True)
-plt.show()
-
-# Graficar todas las aceleraciones en una misma gráfica
-plt.figure(figsize=(10, 6))
-for i, simulacion in enumerate(simulaciones):
-    tiempos = simulacion["tiempos"]
-    accels = simulacion["accels"]
-    plt.plot(tiempos, accels, label=f'Sim {i+1}',  ls='--', marker='*')
-
-plt.xlabel('Tiempo')
-plt.ylabel('Aceleración')
-plt.title('Aceleraciones de las simulaciones')
-plt.legend()
-plt.grid(True)
-plt.show()
-
-altitudes_maximas = [datos_simulaciones_json[i]['max_altitude'] for i in range(n_simulaciones)]
-velocidades_maximas = [datos_simulaciones_json[i]['max_speed'] for i in range(n_simulaciones)]
-masas_iniciales = [datos_simulaciones_csv[i]['masavuelo'][0] for i in range(n_simulaciones)]
-'''
 alpha=0.8
 # Graficar todas las trayectorias en una misma gráfica con subplots
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
@@ -161,9 +123,9 @@ for i, simulacion in enumerate(simulaciones):
     posy = [p[1] for p in posiciones]
     posz = [p[2] for p in posiciones]
 
-    axs[0].plot(tiempos, posx, label=f'Sim {i+1}', ls='--', marker='*', alpha = alpha)
-    axs[1].plot(tiempos, posy, label=f'Sim {i+1}', ls='--', marker='*', alpha= alpha)
-    axs[2].plot(tiempos, posz, label=f'Sim {i+1}', ls='--', marker='*', alpha= alpha)
+    axs[0].plot(tiempos, posx, label=f'Sim {i+1}', ls='--', alpha = alpha)
+    axs[1].plot(tiempos, posy, label=f'Sim {i+1}', ls='--', alpha= alpha)
+    axs[2].plot(tiempos, posz, label=f'Sim {i+1}', ls='--', alpha= alpha)
 
 
 axs[0].set_xlabel('Tiempo')
@@ -230,7 +192,7 @@ for i, simulacion in enumerate(simulaciones):
     posy = [p[1] for p in posiciones]
     posz = [p[2] for p in posiciones]
 
-    ax.plot(posx, posy, posz, label=f'Sim {i+1}', ls='--', alpha=0.5)
+    ax.plot(posx, posy, posz, label=f'Sim {i+1}', ls='--', alpha=alpha)
 
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
@@ -251,4 +213,41 @@ ax.set_xlabel('Tiempo')
 ax.set_ylabel('Masa')
 ax.legend()
 ax.grid(True)
+plt.show()
+
+##################################
+###Comparar los valores maximos
+fig, axs = plt.subplots(2, 2, figsize=(15, 10))
+plt.suptitle("Valores máximos de las simulaciones")
+
+# Alturas máximas
+axs[0, 0].plot(range(1, n_simulaciones+1), altitudes_maximas, marker='o')
+axs[0, 0].set_title('Alturas máximas')
+axs[0, 0].set_xlabel('Simulación')
+axs[0, 0].set_ylabel('Altura [m]')
+axs[0, 0].grid(True)
+
+
+# Velocidades máximas
+axs[0, 1].plot(range(1, n_simulaciones+1), velocidades_maximas, marker='o')
+axs[0, 1].set_title('Velocidades máximas')
+axs[0, 1].set_xlabel('Simulación')
+axs[0, 1].set_ylabel('Velocidad [m/s]')
+axs[0, 1].grid(True)
+
+# Aceleraciones lineales máximas
+axs[1, 0].plot(range(1, n_simulaciones+1), aceleraciones_maximas, marker='o')
+axs[1, 0].set_title('Aceleraciones lineales máximas')
+axs[1, 0].set_xlabel('Simulación')
+axs[1, 0].set_ylabel('Aceleración lineal [m/s^2]')
+axs[1, 0].grid(True)
+
+# Aceleraciones angulares máximas
+axs[1, 1].plot(range(1, n_simulaciones+1), nice_angle(aceleraciones_maximas_angular), marker='o')
+axs[1, 1].set_title('Aceleraciones angulares máximas')
+axs[1, 1].set_xlabel('Simulación')
+axs[1, 1].set_ylabel('Aceleración angular [deg/s^2]')
+axs[1, 1].grid(True)
+
+plt.tight_layout()
 plt.show()
