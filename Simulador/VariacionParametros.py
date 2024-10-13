@@ -18,15 +18,14 @@ dt = 0.01  # Intervalo de tiempo
 t_max = 800  # Tiempo máximo
 dt_out = 0.01  # Intervalo de salida
 
+masa_inicial_variada = [30,35,40,45,50]
 # Bucle para múltiples simulaciones
 for sim_num in range(1, n_simulaciones + 1):
     print(f"Simulación {sim_num} de {n_simulaciones}")
     
-    # Variación de la masa inicial en cada simulación (por ejemplo, entre 90% y 110% de la masa original)
-    masa_inicial_variada = Xitle.masa * random.uniform(0.8, 1.2)
-    Xitle.masa = masa_inicial_variada  # Actualizamos la masa inicial del cohete
-    
-    print(f"Masa inicial para la simulación {sim_num}: {masa_inicial_variada} kg")
+    # Asignar el valor de la lista a la masa inicial variada
+    Xitle.masa = masa_inicial_variada[sim_num - 1]
+    print(f"Masa inicial para la simulación {sim_num}: {Xitle.masa} kg")
 
     # Configuración inicial para cada simulación
     Xitle.parachute_added = False
