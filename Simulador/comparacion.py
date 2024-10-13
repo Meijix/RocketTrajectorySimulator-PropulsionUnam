@@ -101,6 +101,7 @@ for i in range(n_simulaciones):
 #print(f"Simulaciones: {simulaciones}")
 #print(f"Una sim: {simulaciones[0]}")
 
+'''
 # Graficar todas las trayectorias en una misma gráfica
 plt.figure(figsize=(10, 6))
 
@@ -144,50 +145,64 @@ plt.legend()
 plt.grid(True)
 plt.show()
 
-'''
 altitudes_maximas = [datos_simulaciones_json[i]['max_altitude'] for i in range(n_simulaciones)]
 velocidades_maximas = [datos_simulaciones_json[i]['max_speed'] for i in range(n_simulaciones)]
 masas_iniciales = [datos_simulaciones_csv[i]['masavuelo'][0] for i in range(n_simulaciones)]
 '''
-
+alpha=0.5
 # Graficar todas las trayectorias en una misma gráfica con subplots
-fig, axs = plt.subplots(3, 1, figsize=(10, 12))
+fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+plt.suptitle("Componentes de la trayectoria")
 
 for i, simulacion in enumerate(simulaciones):
     tiempos = simulacion["tiempos"]
     posiciones = simulacion["posiciones"]
-    velocidades = simulacion["velocidades"]
-    accels = simulacion["accels"]
+    posx = [p[0] for p in posiciones]
+    posy = [p[1] for p in posiciones]
+    posz = [p[2] for p in posiciones]
 
-    axs[0].plot(tiempos, posiciones[:, 0], label=f'Sim {i+1} X', ls='--', marker='*')
-    axs[0].plot(tiempos, posiciones[:, 1], label=f'Sim {i+1} Y', ls='--', marker='*')
-    axs[0].plot(tiempos, posiciones[:, 2], label=f'Sim {i+1} Z', ls='--', marker='*')
+    axs[0].plot(tiempos, posx, label=f'Sim {i+1}', ls='--', marker='*', alpha = alpha)
+    axs[1].plot(tiempos, posy, label=f'Sim {i+1}', ls='--', marker='*', alpha= alpha)
+    axs[2].plot(tiempos, posz, label=f'Sim {i+1}', ls='--', marker='*', alpha= alpha)
 
-    axs[1].plot(tiempos, velocidades[:, 0], label=f'Sim {i+1} VX', ls='--', marker='*')
-    axs[1].plot(tiempos, velocidades[:, 1], label=f'Sim {i+1} VY', ls='--', marker='*')
-    axs[1].plot(tiempos, velocidades[:, 2], label=f'Sim {i+1} VZ', ls='--', marker='*')
-
-    axs[2].plot(tiempos, accels[:, 0], label=f'Sim {i+1} AX', ls='--', marker='*')
-    axs[2].plot(tiempos, accels[:, 1], label=f'Sim {i+1} AY', ls='--', marker='*')
-    axs[2].plot(tiempos, accels[:, 2], label=f'Sim {i+1} AZ', ls='--', marker='*')
 
 axs[0].set_xlabel('Tiempo')
-axs[0].set_ylabel('Posición')
-axs[0].set_title('Trayectorias de las simulaciones')
+axs[0].set_ylabel('Posición X')
 axs[0].legend()
 axs[0].grid(True)
 
 axs[1].set_xlabel('Tiempo')
-axs[1].set_ylabel('Velocidad')
-axs[1].set_title('Velocidades de las simulaciones')
+axs[1].set_ylabel('Posición Y')
 axs[1].legend()
 axs[1].grid(True)
 
 axs[2].set_xlabel('Tiempo')
-axs[2].set_ylabel('Aceleración')
-axs[2].set_title('Aceleraciones de las simulaciones')
+axs[2].set_ylabel('Posición Z')
 axs[2].legend()
 axs[2].grid(True)
 
 plt.tight_layout()
+plt.show()
+
+##Graficar la trayectoria 3D de todas las simulaciones
+
+from mpl_toolkits.mplot3d import Axes3D
+
+fig = plt.figure(figsize=(10, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+for i, simulacion in enumerate(simulaciones):
+    tiempos = simulacion["tiempos"]
+    posiciones = simulacion["posiciones"]
+    posx = [p[0] for p in posiciones]
+    posy = [p[1] for p in posiciones]
+    posz = [p[2] for p in posiciones]
+
+    ax.plot(posx, posy, posz, label=f'Sim {i+1}', ls='--', marker='*', alpha=0.5)
+
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+ax.set_title('Trayectoria 3D de todas las simulaciones')
+ax.legend()
 plt.show()
