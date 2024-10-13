@@ -239,7 +239,7 @@ class Vuelo:
         # -------------------------
         # Integracion numérica del estado actual
         #el dt_new se usa para que el inetgrador actualize el paso de tiempo
-        nuevo_estado = Integracion.step(t, estado, dt)
+        nuevo_estado, dt = Integracion.step(t, estado, dt)
         #nuevo_estado, dt_new = Integracion.step(t, estado, dt, tol=1e-3)
         # print("dt_new={}".format(dt_new))
         #dt = dt_new
@@ -278,8 +278,8 @@ class Vuelo:
 
         ultima_altitud = altitud
 
-       #FASE3.RECUPERACIÓN
-       #FALTA IMPLEMENTAR RECUPERACION DE DOS ETAPAS JE
+      #FASE3.RECUPERACIÓN
+      #FALTA IMPLEMENTAR RECUPERACION DE DOS ETAPAS JE
         #activar el paracaidas en el apogeo
         if self.tiempo_apogeo is not None and self.vehiculo.parachute_added == True:
           #print(self.vehiculo.parachute_active1,"antes")

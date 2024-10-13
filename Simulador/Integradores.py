@@ -9,7 +9,7 @@ class Euler:
     def step(self, t, state, dt):
         #Aplicar método de Euler para obtener nuevo estado
         state_new = state + (dt * self.fun_derivadas(t, state))
-        return state_new
+        return state_new, dt
     
 #2. Runge-Kutta 4
 class RungeKutta4:
@@ -22,7 +22,7 @@ class RungeKutta4:
         k3 = self.fun_derivadas(t + dt/2, state + k2 * dt/2)
         k4 = self.fun_derivadas(t + dt, state + k3 * dt)
         new_state = state + dt * (k1 + 2*k2 + 2*k3 + k4) / 6
-        return new_state
+        return new_state, dt
 
 # 3. Runge-Kutta 2
 class RungeKutta2:
@@ -33,7 +33,7 @@ class RungeKutta2:
         k1 = self.fun_derivadas(t, state)
         k2 = self.fun_derivadas(t + dt, state + k1 * dt)
         new_state = state + dt * (k1 + k2) / 2
-        return new_state
+        return new_state, dt
         
 # 4. Método de Runge-Kutt-Fehlberg 45
 class RKF45:
