@@ -238,3 +238,17 @@ ax.set_zlabel('Z')
 ax.set_title('Trayectoria 3D de todas las simulaciones')
 ax.legend()
 plt.show()
+
+#Grafica variacion de masa en el tiempo
+fig, ax = plt.subplots(figsize=(10, 6))
+plt.suptitle("Variación de la masa en el tiempo")
+for i, simulacion in enumerate(simulaciones):
+    tiempos = simulacion["tiempos"]
+    masavuelo = simulacion["masavuelo"]
+    ax.plot(tiempos, masavuelo, label=f'Sim {i+1}', ls='--', marker='*', alpha= alpha)
+    
+ax.set_xlabel('Tiempo')
+ax.set_ylabel('Masa')
+ax.legend()
+ax.grid(True)
+plt.show()
