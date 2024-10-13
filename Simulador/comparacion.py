@@ -149,7 +149,7 @@ altitudes_maximas = [datos_simulaciones_json[i]['max_altitude'] for i in range(n
 velocidades_maximas = [datos_simulaciones_json[i]['max_speed'] for i in range(n_simulaciones)]
 masas_iniciales = [datos_simulaciones_csv[i]['masavuelo'][0] for i in range(n_simulaciones)]
 '''
-alpha=0.5
+alpha=0.8
 # Graficar todas las trayectorias en una misma gráfica con subplots
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 plt.suptitle("Componentes de la trayectoria")
@@ -195,9 +195,9 @@ for i, simulacion in enumerate(simulaciones):
     vely = [p[1] for p in velocidades]
     velz = [p[2] for p in velocidades]
 
-    axs[0].plot(tiempos, velx, label=f'Sim {i+1}', ls='--', marker='*', alpha = alpha)
-    axs[1].plot(tiempos, vely, label=f'Sim {i+1}', ls='--', marker='*', alpha= alpha)
-    axs[2].plot(tiempos, velz, label=f'Sim {i+1}', ls='--', marker='*', alpha= alpha)
+    axs[0].plot(tiempos, velx, label=f'Sim {i+1}', ls='--', alpha = alpha)
+    axs[1].plot(tiempos, vely, label=f'Sim {i+1}', ls='--', alpha= alpha)
+    axs[2].plot(tiempos, velz, label=f'Sim {i+1}', ls='--', alpha= alpha)
 
 
 axs[0].set_xlabel('Tiempo')
@@ -230,7 +230,7 @@ for i, simulacion in enumerate(simulaciones):
     posy = [p[1] for p in posiciones]
     posz = [p[2] for p in posiciones]
 
-    ax.plot(posx, posy, posz, label=f'Sim {i+1}', ls='--', marker='*', alpha=0.5)
+    ax.plot(posx, posy, posz, label=f'Sim {i+1}', ls='--', alpha=0.5)
 
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
@@ -245,8 +245,8 @@ plt.suptitle("Variación de la masa en el tiempo")
 for i, simulacion in enumerate(simulaciones):
     tiempos = simulacion["tiempos"]
     masavuelo = simulacion["masavuelo"]
-    ax.plot(tiempos, masavuelo, label=f'Sim {i+1}', ls='--', marker='*', alpha= alpha)
-    
+    ax.plot(tiempos, masavuelo, label=f'Sim {i+1}', ls='--', alpha= alpha)
+
 ax.set_xlabel('Tiempo')
 ax.set_ylabel('Masa')
 ax.legend()
