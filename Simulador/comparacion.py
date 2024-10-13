@@ -215,6 +215,58 @@ ax.legend()
 ax.grid(True)
 plt.show()
 
+##############################
+# Graficar las fuerzas en el tiempo
+fig, axs = plt.subplots(3, 1, figsize=(10, 15))
+plt.suptitle("Fuerzas en el tiempo")
+for i, simulacion in enumerate(simulaciones):
+    tiempos = simulacion["tiempos"]
+    Dmags = simulacion["Dmags"]
+    Nmags = simulacion["Nmags"]
+    Tmags = simulacion["Tmags"]
+
+    axs[0].plot(tiempos, Dmags, label=f'Sim {i+1}', ls='--', alpha= alpha)
+    axs[1].plot(tiempos, Nmags, label=f'Sim {i+1}', ls='--', alpha= alpha)
+    axs[2].plot(tiempos, Tmags, label=f'Sim {i+1}', ls='--', alpha= alpha)
+
+axs[0].set_ylabel('Fuerza de Arrastre')
+axs[1].set_ylabel('Fuerza Normal')
+axs[2].set_ylabel('Fuerza de Empuje')
+
+axs[0].set_xlabel('Tiempo')
+axs[1].set_xlabel('Tiempo')
+axs[2].set_xlabel('Tiempo')
+
+axs[0].legend()
+axs[1].legend()
+axs[2].legend()
+axs[0].grid(True)
+axs[1].grid(True)
+axs[2].grid(True)
+plt.show()
+
+##############################
+# Graficar los angulos en el tiempo
+# Graficar los ángulos en el tiempo
+fig, axs = plt.subplots(1, 1, figsize=(10, 6))
+plt.suptitle("Ángulos en el tiempo")
+
+for i, simulacion in enumerate(simulaciones):
+    tiempos = simulacion["tiempos"]
+    Gammas = simulacion["Gammas"]  # Ángulo de vuelo
+    Alphas = simulacion["Alphas"]  # Ángulo de Ataque
+    thetas = simulacion["thetas"] #Angulo de inclinacion
+
+    axs.plot(tiempos, Gammas, label=f'Inclinación Sim {i+1}', ls='--', alpha=alpha)
+    axs.plot(tiempos, Alphas, label=f'Ataque Sim {i+1}', ls='--', alpha=alpha)
+    axs.plot(tiempos, thetas, label=f'Vuelo Sim {i+1}', ls='--', alpha=alpha)
+
+axs.set_ylabel('Ángulo [grados]')
+axs.set_xlabel('Tiempo')
+axs.legend()
+axs.grid(True)
+plt.show()
+
 ##################################
 ###Comparar los valores maximos
 color= 'darkblue'
