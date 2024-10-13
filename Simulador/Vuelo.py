@@ -217,8 +217,6 @@ class Vuelo:
         Integracion = RungeKutta4(self.fun_derivs)
       elif integrador == 'RKF45':
         Integracion = RKF45(self.fun_derivs)
-      elif integrador == 'LSODA':
-        Integracion = LSODA(self.fun_derivs)
       elif integrador == 'AdaptiveEuler':
         Integracion = AdaptiveEuler(self.fun_derivs)
       else:
