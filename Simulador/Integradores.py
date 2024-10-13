@@ -61,15 +61,46 @@ class RKF45:
             #print("errmax={} {} tol={}".format(errmax, ">" if errmax>tol else "<", tol))
             # print("dt_nuevo=", dt_nuevo)
 
-        if errmax < tol:
-            # Errores aceptables, ya no iterar más, aumentar dt
-            # print("Error aceptable")
-            retry = False
-        else:
-            # Errores demasiado grandes, reducir dt y repetir paso
-            # print("Error no aceptable, repitiendo iteración")
-            retry = True
-            dt = dt_nuevo
+            if errmax < tol:
+                # Errores aceptables, ya no iterar más, aumentar dt
+                print("Error aceptable")
+                retry = False
+            else:
+                # Errores demasiado grandes, reducir dt y repetir paso
+                print("Error no aceptable, repitiendo iteración")
+                retry = True
+                dt = dt_nuevo
 
         return zkp, dt_nuevo
+    
+#Metodo de Euler adaptivo
+class AdaptiveEuler:
+    def __init__(self, fun_derivs):
+        self.fun_derivadas = fun_derivs
+
+    def step(self, t, state, dt, tol=1e-4, S=0.9):
+        retry = True
+        while retry:
+            # Estimar el paso de Euler con un paso completo
+            state_full = state + dt * self.fun_derivadas(t, state)
+
+            # Estimar el paso de Euler con dos pasos a la mitad
+            dt_half = dt / 2
+            state_half = state + dt_half * self.fun_derivadas(t, state)
+            state_half = state_half + dt_half * self.fun_derivadas(t + dt_half, state_half)
+
+            # Calcular el error
+            error = np.linalg.norm(state_half - state_full)
+
+            # Calcular nuevo tamaño de paso basado en el error
+            if error < tol:
+                # Si el error es aceptable, incrementar el tamaño del paso
+                dt_new = S * dt * (tol / error) ** 0.5
+                retry = False  # No necesitamos repetir el paso
+                return state_full, dt_new
+            else:
+                # Si el error es demasiado grande, reducir el tamaño del paso y repetir
+                dt_new = S * dt * (tol / error) ** 0.5
+                dt = dt_new  # Actualizar dt para el próximo intento
+
     

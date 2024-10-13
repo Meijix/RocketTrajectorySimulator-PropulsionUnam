@@ -23,6 +23,8 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 #Parametros de la simulacion
 dt=0.01 #[s]
 t_max = 1000 #[s]
+dt_out = dt
+integrador_actual = 'Euler'
 
 ######################################
 #####Agregar paracaidas
@@ -46,7 +48,7 @@ viento_actual.actualizar_viento3D()
 #print(viento_actual.vector)
 
 vuelo_paracaidas = Vuelo(Xitle, atmosfera_actual, viento_actual)
-tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo_paracaidas.simular_vuelo(estado,t_max, dt, dt_out=dt)
+tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo_paracaidas.simular_vuelo(estado,t_max, dt, dt_out, integrador_actual)
 
 # Guardar los datos de la simulación
 #datos_simulados = (tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs)

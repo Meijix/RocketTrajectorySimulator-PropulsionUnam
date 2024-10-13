@@ -179,7 +179,7 @@ class Vuelo:
 
       return derivs
 
-    def simular_vuelo(self, estado, t_max, dt, dt_out):
+    def simular_vuelo(self, estado, t_max, dt, dt_out, integrador):
 
       Tvecs = []
       Dvecs = []
@@ -210,9 +210,9 @@ class Vuelo:
       #########################################
       #CAMBIO DE METODO DE INTEGRACIÓN
       #Integracion = Euler(self.fun_derivs) ocupa dt=0.005
-      Integracion = RungeKutta4(self.fun_derivs) #ocupa dt=0.1
+      #Integracion = RungeKutta4(self.fun_derivs) #ocupa dt=0.1
       #Integracion = RKF45(self.fun_derivs)
-      #Integracion = RungeKutta2(self.fun_derivs)
+      Integracion = integrador(self.fun_derivs)
       ##########################################
       
       sim=[estado] #lista de estados de vuelo
@@ -239,8 +239,10 @@ class Vuelo:
         # -------------------------
         # Integracion numérica del estado actual
         #el dt_new se usa para que el inetgrador actualize el paso de tiempo
-        nuevo_estado, dt = Integracion.step(t, estado, dt)
-        #nuevo_estado, dt_new = Integracion.step(t, estado, dt, tol=1e-3)
+        if integrador in ['Euler', 'RungeKutta4', 'RungeKutta2']:
+          nuevo_estado, dt = Integracion.step(t, estado, dt)
+        else:
+          nuevo_estado, dt = Integracion.step(t, estado, dt, tol=1e-4, S=0.9)
         # print("dt_new={}".format(dt_new))
         #dt = dt_new
         #print("dt= ", dt)
