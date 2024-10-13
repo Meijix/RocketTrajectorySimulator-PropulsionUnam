@@ -102,5 +102,3 @@ class AdaptiveEuler:
                 # Si el error es demasiado grande, reducir el tamaño del paso y repetir
                 dt_new = S * dt * (tol / error) ** 0.5
                 dt = dt_new  # Actualizar dt para el próximo intento
-
-    

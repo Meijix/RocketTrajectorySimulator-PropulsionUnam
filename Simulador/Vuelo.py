@@ -209,10 +209,20 @@ class Vuelo:
       next_tout = dt_out
       #########################################
       #CAMBIO DE METODO DE INTEGRACIÓN
-      #Integracion = Euler(self.fun_derivs) ocupa dt=0.005
-      #Integracion = RungeKutta4(self.fun_derivs) #ocupa dt=0.1
-      #Integracion = RKF45(self.fun_derivs)
-      Integracion = integrador(self.fun_derivs)
+      if integrador == 'Euler':
+        Integracion = Euler(self.fun_derivs) #ocupa dt=0.005
+      elif integrador == 'RungeKutta2':
+        Integracion = RungeKutta2(self.fun_derivs)
+      elif integrador == 'RungeKutta4':
+        Integracion = RungeKutta4(self.fun_derivs)
+      elif integrador == 'RKF45':
+        Integracion = RKF45(self.fun_derivs)
+      elif integrador == 'LSODA':
+        Integracion = LSODA(self.fun_derivs)
+      elif integrador == 'AdaptiveEuler':
+        Integracion = AdaptiveEuler(self.fun_derivs)
+      else:
+        print('Error: Integrador no reconocido')
       ##########################################
       
       sim=[estado] #lista de estados de vuelo
