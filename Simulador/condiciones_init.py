@@ -5,7 +5,7 @@ from Atmosfera1 import *
 from Viento import *
 
 #riel inicial
-riel = Torrelanzamiento(10, 80)
+riel = Torrelanzamiento(10, 88)
 #lugar de lanzamiento
 latitud_cord = 19.5
 longitud_cord = -98.8
@@ -13,6 +13,8 @@ altitud_cord = 20
 #fecha
 fecha = "2021-05-01"
 #viento
-viento_actual = Viento( 10, 2, 0, 0)
+#viento_actual = Viento( 10, 2, 0, 0)
+#Sin viento
+viento_actual = Viento( 0, 2, 0, 0)
 #atmosfera
 atmosfera_actual = atmosfera()

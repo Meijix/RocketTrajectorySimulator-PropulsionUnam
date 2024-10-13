@@ -24,7 +24,7 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 #estado=list(estado)
 #print(estado)
 #Parametros de la simulacion
-dt = 0.01 #0.1 #[s]
+dt = 0.1 #0.1 #[s]
 t_max = 800 #[s]
 dt_out =  0.01
 integrador_actual = 'RungeKutta4'
@@ -39,6 +39,8 @@ inicio = time.time()
 print("Simulando...")
 
 viento_actual = Viento(vel_base=10, vel_mean=2, vel_var=0.01, var_ang=20)
+#Sin viento
+viento_actual = Viento(vel_base=0, vel_mean=0, vel_var=0, var_ang=0)
 #viento_actual.actualizar_viento()
 viento_actual.actualizar_viento3D()
 #viento_actual = Viento(vel_mean=100, vel_var=0)
