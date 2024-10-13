@@ -114,29 +114,28 @@ plt.ylabel('Posición')
 plt.title('Trayectorias de las simulaciones')
 plt.legend()
 plt.grid(True)
-
-#plt.show()
+plt.show()
 
 # Graficar todas las velocidades en una misma gráfica
 plt.figure(figsize=(10, 6))
 for i, simulacion in enumerate(simulaciones):
     tiempos = simulacion["tiempos"]
     velocidades = simulacion["velocidades"]
-    plt.plot(tiempos, velocidades, label=f'Sim {i+1}')
+    plt.plot(tiempos, velocidades, label=f'Sim {i+1}',  ls='--', marker='*')
 
 plt.xlabel('Tiempo')
 plt.ylabel('Velocidad')
 plt.title('Velocidades de las simulaciones')
 plt.legend()
 plt.grid(True)
-#plt.show()
+plt.show()
 
 # Graficar todas las aceleraciones en una misma gráfica
 plt.figure(figsize=(10, 6))
 for i, simulacion in enumerate(simulaciones):
     tiempos = simulacion["tiempos"]
     accels = simulacion["accels"]
-    plt.plot(tiempos, accels, label=f'Sim {i+1}')
+    plt.plot(tiempos, accels, label=f'Sim {i+1}',  ls='--', marker='*')
 
 plt.xlabel('Tiempo')
 plt.ylabel('Aceleración')
@@ -150,3 +149,45 @@ altitudes_maximas = [datos_simulaciones_json[i]['max_altitude'] for i in range(n
 velocidades_maximas = [datos_simulaciones_json[i]['max_speed'] for i in range(n_simulaciones)]
 masas_iniciales = [datos_simulaciones_csv[i]['masavuelo'][0] for i in range(n_simulaciones)]
 '''
+
+# Graficar todas las trayectorias en una misma gráfica con subplots
+fig, axs = plt.subplots(3, 1, figsize=(10, 12))
+
+for i, simulacion in enumerate(simulaciones):
+    tiempos = simulacion["tiempos"]
+    posiciones = simulacion["posiciones"]
+    velocidades = simulacion["velocidades"]
+    accels = simulacion["accels"]
+
+    axs[0].plot(tiempos, posiciones[:, 0], label=f'Sim {i+1} X', ls='--', marker='*')
+    axs[0].plot(tiempos, posiciones[:, 1], label=f'Sim {i+1} Y', ls='--', marker='*')
+    axs[0].plot(tiempos, posiciones[:, 2], label=f'Sim {i+1} Z', ls='--', marker='*')
+
+    axs[1].plot(tiempos, velocidades[:, 0], label=f'Sim {i+1} VX', ls='--', marker='*')
+    axs[1].plot(tiempos, velocidades[:, 1], label=f'Sim {i+1} VY', ls='--', marker='*')
+    axs[1].plot(tiempos, velocidades[:, 2], label=f'Sim {i+1} VZ', ls='--', marker='*')
+
+    axs[2].plot(tiempos, accels[:, 0], label=f'Sim {i+1} AX', ls='--', marker='*')
+    axs[2].plot(tiempos, accels[:, 1], label=f'Sim {i+1} AY', ls='--', marker='*')
+    axs[2].plot(tiempos, accels[:, 2], label=f'Sim {i+1} AZ', ls='--', marker='*')
+
+axs[0].set_xlabel('Tiempo')
+axs[0].set_ylabel('Posición')
+axs[0].set_title('Trayectorias de las simulaciones')
+axs[0].legend()
+axs[0].grid(True)
+
+axs[1].set_xlabel('Tiempo')
+axs[1].set_ylabel('Velocidad')
+axs[1].set_title('Velocidades de las simulaciones')
+axs[1].legend()
+axs[1].grid(True)
+
+axs[2].set_xlabel('Tiempo')
+axs[2].set_ylabel('Aceleración')
+axs[2].set_title('Aceleraciones de las simulaciones')
+axs[2].legend()
+axs[2].grid(True)
+
+plt.tight_layout()
+plt.show()
