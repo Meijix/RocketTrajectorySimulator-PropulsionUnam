@@ -217,11 +217,12 @@ plt.show()
 
 ##################################
 ###Comparar los valores maximos
+color= 'darkblue'
 fig, axs = plt.subplots(2, 2, figsize=(15, 10))
 plt.suptitle("Valores máximos de las simulaciones")
 
 # Alturas máximas
-axs[0, 0].plot(range(1, n_simulaciones+1), altitudes_maximas, marker='o')
+axs[0, 0].plot(range(1, n_simulaciones+1), altitudes_maximas, marker='o',color=color)
 axs[0, 0].set_title('Alturas máximas')
 axs[0, 0].set_xlabel('Simulación')
 axs[0, 0].set_ylabel('Altura [m]')
@@ -229,25 +230,25 @@ axs[0, 0].grid(True)
 
 
 # Velocidades máximas
-axs[0, 1].plot(range(1, n_simulaciones+1), velocidades_maximas, marker='o')
+axs[0, 1].plot(range(1, n_simulaciones+1), velocidades_maximas, marker='o', color=color)
 axs[0, 1].set_title('Velocidades máximas')
 axs[0, 1].set_xlabel('Simulación')
 axs[0, 1].set_ylabel('Velocidad [m/s]')
 axs[0, 1].grid(True)
 
 # Aceleraciones lineales máximas
-axs[1, 0].plot(range(1, n_simulaciones+1), aceleraciones_maximas, marker='o')
+axs[1, 0].plot(range(1, n_simulaciones+1), aceleraciones_maximas, marker='o',color=color)
 axs[1, 0].set_title('Aceleraciones lineales máximas')
 axs[1, 0].set_xlabel('Simulación')
 axs[1, 0].set_ylabel('Aceleración lineal [m/s^2]')
 axs[1, 0].grid(True)
 
 # Aceleraciones angulares máximas
-axs[1, 1].plot(range(1, n_simulaciones+1), nice_angle(aceleraciones_maximas_angular), marker='o')
+axs[1, 1].plot(range(1, n_simulaciones+1), nice_angle(aceleraciones_maximas_angular), marker='o',color=color)
 axs[1, 1].set_title('Aceleraciones angulares máximas')
 axs[1, 1].set_xlabel('Simulación')
 axs[1, 1].set_ylabel('Aceleración angular [deg/s^2]')
 axs[1, 1].grid(True)
 
-plt.tight_layout()
+#plt.tight_layout()
 plt.show()
