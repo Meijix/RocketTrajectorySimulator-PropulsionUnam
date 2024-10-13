@@ -107,13 +107,14 @@ plt.figure(figsize=(10, 6))
 for i, simulacion in enumerate(simulaciones):
     tiempos = simulacion["tiempos"]
     posiciones = simulacion["posiciones"]
-    plt.plot(tiempos, posiciones, label=f'Sim {i+1}')
+    plt.plot(tiempos, posiciones, label=f'Sim {i+1}', ls='--', marker='*')
 
 plt.xlabel('Tiempo')
 plt.ylabel('Posición')
 plt.title('Trayectorias de las simulaciones')
 plt.legend()
 plt.grid(True)
+
 #plt.show()
 
 # Graficar todas las velocidades en una misma gráfica
