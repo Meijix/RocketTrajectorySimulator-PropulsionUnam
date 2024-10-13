@@ -184,13 +184,45 @@ axs[2].grid(True)
 plt.tight_layout()
 plt.show()
 
-##Graficar la trayectoria 3D de todas las simulaciones
+##########
+fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+plt.suptitle("Componentes de la velocidad")
 
+for i, simulacion in enumerate(simulaciones):
+    tiempos = simulacion["tiempos"]
+    velocidades = simulacion["velocidades"]
+    velx = [p[0] for p in velocidades]
+    vely = [p[1] for p in velocidades]
+    velz = [p[2] for p in velocidades]
+
+    axs[0].plot(tiempos, velx, label=f'Sim {i+1}', ls='--', marker='*', alpha = alpha)
+    axs[1].plot(tiempos, vely, label=f'Sim {i+1}', ls='--', marker='*', alpha= alpha)
+    axs[2].plot(tiempos, velz, label=f'Sim {i+1}', ls='--', marker='*', alpha= alpha)
+
+
+axs[0].set_xlabel('Tiempo')
+axs[0].set_ylabel('Velocidad X')
+axs[0].legend()
+axs[0].grid(True)
+
+axs[1].set_xlabel('Tiempo')
+axs[1].set_ylabel('Velocidad Y')
+axs[1].legend()
+axs[1].grid(True)
+
+axs[2].set_xlabel('Tiempo')
+axs[2].set_ylabel('Velocidad Z')
+axs[2].legend()
+axs[2].grid(True)
+
+plt.tight_layout()
+plt.show()
+
+##Graficar la trayectoria 3D de todas las simulaciones
 from mpl_toolkits.mplot3d import Axes3D
 
 fig = plt.figure(figsize=(10, 8))
 ax = fig.add_subplot(111, projection='3d')
-
 for i, simulacion in enumerate(simulaciones):
     tiempos = simulacion["tiempos"]
     posiciones = simulacion["posiciones"]
