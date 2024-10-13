@@ -257,9 +257,9 @@ for i, simulacion in enumerate(simulaciones):
     Alphas = simulacion["Alphas"]  # Ángulo de Ataque
     thetas = simulacion["thetas"] #Angulo de inclinacion
 
-    axs.plot(tiempos, Gammas, label=f'Inclinación Sim {i+1}', ls='--', alpha=alpha)
+    axs.plot(tiempos, thetas, label=f'Inclinación Sim {i+1}', ls='--', alpha=alpha)
     axs.plot(tiempos, Alphas, label=f'Ataque Sim {i+1}', ls='--', alpha=alpha)
-    axs.plot(tiempos, thetas, label=f'Vuelo Sim {i+1}', ls='--', alpha=alpha)
+    axs.plot(tiempos, Gammas, label=f'Vuelo Sim {i+1}', ls='--', alpha=alpha)
 
 axs.set_ylabel('Ángulo [grados]')
 axs.set_xlabel('Tiempo')
