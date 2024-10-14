@@ -39,8 +39,12 @@ class RungeKutta2:
 class RKF45:
     def __init__(self, fun_derivs):
         self.fun_derivadas = fun_derivs
+        self.tol=1e-3
+        self.S= 0.8
 
-    def step(self, t, state, dt, tol=1e-4, S=0.9):
+    def step(self, t, state, dt):
+        tol=self.tol
+        #S=self.S #no se ocupa???
 
         retry = True
         while retry:
@@ -56,30 +60,34 @@ class RKF45:
 
             errs = np.abs(zkp - ykp)
             errmax = max(errs)
-
-            dt_nuevo = dt * (tol / (2*errmax))**0.2
             #print("errmax={} {} tol={}".format(errmax, ">" if errmax>tol else "<", tol))
             # print("dt_nuevo=", dt_nuevo)
 
             if errmax < tol:
                 # Errores aceptables, ya no iterar más, aumentar dt
-                print("Error aceptable")
+                #print("Error aceptable")
                 retry = False
             else:
                 # Errores demasiado grandes, reducir dt y repetir paso
-                print("Error no aceptable, repitiendo iteración")
+                #print("Error no aceptable, repitiendo iteración")
+                dt_nuevo = dt * (tol / (2*errmax))**0.25
                 retry = True
                 dt = dt_nuevo
 
-        return zkp, dt_nuevo
+        return zkp, dt
     
 #Metodo de Euler adaptivo
 class AdaptiveEuler:
     def __init__(self, fun_derivs):
         self.fun_derivadas = fun_derivs
+        self.tol = 1e-3
+        self.S = 0.8
 
-    def step(self, t, state, dt, tol=1e-4, S=0.9):
+    def step(self, t, state, dt):
         retry = True
+        tol = self.tol
+        S = self.S
+        
         while retry:
             # Estimar el paso de Euler con un paso completo
             state_full = state + dt * self.fun_derivadas(t, state)

@@ -27,7 +27,8 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 dt = 0.1 #0.1 #[s]
 t_max = 800 #[s]
 dt_out =  0.01
-integrador_actual = 'RungeKutta4'
+#integrador_actual = 'RungeKutta4'
+integrador_actual = 'RKF45'
 # t_max = 1200 #[s]
 # t_max = 5 #[s]
 

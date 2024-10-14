@@ -247,10 +247,10 @@ class Vuelo:
         # -------------------------
         # Integracion numérica del estado actual
         #el dt_new se usa para que el inetgrador actualize el paso de tiempo
-        if integrador in ['Euler', 'RungeKutta4', 'RungeKutta2']:
-          nuevo_estado, dt = Integracion.step(t, estado, dt)
-        else:
-          nuevo_estado, dt = Integracion.step(t, estado, dt, tol=1e-4, S=0.9)
+        #if integrador in ['Euler', 'RungeKutta4', 'RungeKutta2']:
+        nuevo_estado, dt = Integracion.step(t, estado, dt)
+        #else:
+        #nuevo_estado, dt = Integracion.step(t, estado, dt, tol=1e-4, S=0.9)
         # print("dt_new={}".format(dt_new))
         #dt = dt_new
         #print("dt= ", dt)
