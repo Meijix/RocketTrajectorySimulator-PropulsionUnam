@@ -39,8 +39,8 @@ class RungeKutta2:
 class RKF45:
     def __init__(self, fun_derivs):
         self.fun_derivadas = fun_derivs
-        self.tol=1e-3
-        self.S= 0.8
+        self.tol=1e-4
+        self.S= 0.9
 
     def step(self, t, state, dt):
         tol=self.tol
@@ -80,14 +80,14 @@ class RKF45:
 class AdaptiveEuler:
     def __init__(self, fun_derivs):
         self.fun_derivadas = fun_derivs
-        self.tol = 1e-3
-        self.S = 0.8
+        self.tol = 1e-4
+        self.S = 0.9
 
     def step(self, t, state, dt):
         retry = True
         tol = self.tol
         S = self.S
-        
+
         while retry:
             # Estimar el paso de Euler con un paso completo
             state_full = state + dt * self.fun_derivadas(t, state)
@@ -110,3 +110,31 @@ class AdaptiveEuler:
                 # Si el error es demasiado grande, reducir el tamaño del paso y repetir
                 dt_new = S * dt * (tol / error) ** 0.5
                 dt = dt_new  # Actualizar dt para el próximo intento
+
+#Ejemplo para los metodos adptivos
+def fun_derivadas(t, state):
+    x, y, z = state
+    dxdt = -y
+    dydt = x
+    dzdt = 0
+    return np.array([dxdt, dydt, dzdt])
+
+#Elegir el integrador adaptivo a probar
+integrador = AdaptiveEuler(fun_derivadas)
+#integrador = RKF45(fun_derivadas)
+
+state = np.array([1, 0, 0])
+t = 0
+dt = 0.01
+t_max = 80
+it = 1
+
+print('Estado inicial:', state)
+
+while t < t_max:
+    state, dt_new = integrador.step(t, state, dt)
+
+    print(f'Iteración {it}: t={t:.2f}, state={state}')
+    print('dt_new', dt_new)
+    it += 1
+    t += dt_new
