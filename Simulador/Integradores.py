@@ -138,3 +138,21 @@ while t < t_max:
     print('dt_new', dt_new)
     it += 1
     t += dt_new
+
+#Grafica la solucion de ejemplo
+# Crear un rango de valores de t
+t_values = np.linspace(0, t_max, 1000)
+# Calcular el estado en cada valor de t
+state_values = np.array([integrador.step(t, state, 0.01)[0] for t in t_values])
+# Extraer las coordenadas x, y, z
+x_values = state_values[:, 0]
+y_values = state_values[:, 1]
+z_values = state_values[:, 2]
+# Graficar la trayectoria en 3D
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.plot(x_values, y_values, z_values)
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_zlabel('z')
+plt.show()
