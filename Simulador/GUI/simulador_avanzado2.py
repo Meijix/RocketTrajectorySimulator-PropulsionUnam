@@ -11,13 +11,13 @@ import time
 from datetime import datetime
 
 # Import necessary modules
-from condiciones_init import *
-from Vuelo import *
-from Viento import Viento
-from riel import Torrelanzamiento
-from Atmosfera1 import atmosfera
-from Componentes import Componente, Cono, Cilindro, Aletas, Boattail
-from cohete import Cohete
+from Simulador.src.condiciones_init import *
+from Simulador.PaqueteFisica.Vuelo import *
+from Simulador.PaqueteFisica.Viento import Viento
+from Simulador.PaqueteFisica.riel import Torrelanzamiento
+from Simulador.PaqueteFisica.Atmosfera1 import atmosfera
+from Simulador.PaqueteFisica.Componentes import Componente, Cono, Cilindro, Aletas, Boattail
+from Simulador.PaqueteFisica.cohete import Cohete
 
 class SimuladorCohetesAvanzado:
     def __init__(self, master):

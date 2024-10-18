@@ -2,7 +2,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from simulacion1 import *
+from src.simulacion1 import *
 
 # Load the data from the CSV file
 #Corregir el path file

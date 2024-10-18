@@ -6,8 +6,8 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-from funciones import extraer_datoscsv, extraer_datosjson
-from angulos import nice_angle
+from Simulador.utils.funciones import extraer_datoscsv, extraer_datosjson
+from Simulador.utils.angulos import nice_angle
 
 # Variable para el número de simulaciones
 n_simulaciones = 5  # Cambia este valor al número de simulaciones deseadas

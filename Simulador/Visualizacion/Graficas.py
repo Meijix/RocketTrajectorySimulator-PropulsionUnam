@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import json
 
-from angulos import *
+from Simulador.utils.angulos import *
 #from condiciones_init import *
-from dibujarCohete import *
-from funciones import *
+from Simulador.utils.dibujarCohete import *
+from Simulador.utils.funciones import *
 
 #Para usar si se va a simular apenas
 #Cambiar el vuelo a graficar

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from angulos import *
+from Simulador.utils.angulos import *
 from simulacion1 import *
 #from simulacion2 import *
 

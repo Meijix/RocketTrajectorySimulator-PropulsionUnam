@@ -4,9 +4,9 @@ import json
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-from funciones import *
-from dibujarCohete import dibujar_cohete
-from angulos import nice_angle
+from Simulador.utils.funciones import *
+from Simulador.utils.dibujarCohete import dibujar_cohete
+from Simulador.utils.angulos import nice_angle
 
 # Leer los datos de la simulación desde el archivo CSV
 datos_simulacion = pd.read_csv('datos_simulacion.csv')

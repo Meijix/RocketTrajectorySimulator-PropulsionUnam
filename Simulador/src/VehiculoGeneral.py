@@ -1,7 +1,7 @@
 
-from condiciones_init import *
-from Componentes import *
-from cohete import *
+from Simulador.src.condiciones_init import *
+from Simulador.PaqueteFisica.Componentes import *
+from Simulador.PaqueteFisica.cohete import *
 from math import *
 
 #Dimensiones principales del cohete
@@ -143,11 +143,11 @@ tabla_masa_fpath = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\A
 #Lista de componentes y creación del vehículo completo
 #Debe ser un diccionario con un nombre corto para cada componente
 componentes = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup, 'Transferidor de carga': transfer, 'Aviónica': avionica, 'Carga Útil': CU, 'drogue': drogue,
-               'main': main, 'tanquevacio': tanquevacio,
-               'oxidante': oxidante, 'valvulas': valvulas, 'grano': grano, 'Cámara Combustión': CC, 'Aletas': aletas, 'Boattail': boattail}
+            'main': main, 'tanquevacio': tanquevacio,
+            'oxidante': oxidante, 'valvulas': valvulas, 'grano': grano, 'Cámara Combustión': CC, 'Aletas': aletas, 'Boattail': boattail}
 
 componentes_externos = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup, 'Transferidor de carga': transfer, 'tanquevacio': tanquevacio,
-               'oxidante': oxidante, 'valvulas': valvulas, 'grano': grano, 'Cámara Combustión': CC, 'Boattail': boattail}
+            'oxidante': oxidante, 'valvulas': valvulas, 'grano': grano, 'Cámara Combustión': CC, 'Boattail': boattail}
 
 Vehiculo = Cohete("Xitle", "hibrido", componentes, componentes_externos, tabla_Cd_fpath, tabla_empuje_fpath, tabla_masa_fpath, riel)
 Vehiculo.d_ext=diam_ext

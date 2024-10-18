@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from Xitle import *
+from Simulador.src.Xitle import *
 
 def dibujar_cohete(x, y, theta, tamaño, ax):
   theta = theta-90

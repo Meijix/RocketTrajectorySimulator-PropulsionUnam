@@ -5,10 +5,10 @@ import json
 import time
 import random  # Para variar las condiciones en cada simulación
 
-from condiciones_init import *
-from Xitle import *
-from Vuelo import *
-from Viento import Viento
+from Simulador.src.condiciones_init import *
+from Simulador.src.Xitle import *
+from Simulador.PaqueteFisica.Vuelo import *
+from Simulador.PaqueteFisica.Viento import Viento
 
 # Variable para el número de simulaciones
 n_simulaciones = 5  # Cambia este valor para el número de simulaciones deseadas

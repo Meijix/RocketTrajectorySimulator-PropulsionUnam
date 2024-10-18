@@ -1,7 +1,7 @@
 
-from condiciones_init import *
-from Componentes import *
-from cohete import *
+from Simulador.src.condiciones_init import *
+from Simulador.PaqueteFisica.Componentes import *
+from Simulador.PaqueteFisica.cohete import *
 from math import *
 
 #Dimensiones principales del cohete
