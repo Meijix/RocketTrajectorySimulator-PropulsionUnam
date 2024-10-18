@@ -3,8 +3,8 @@
 import matplotlib.pyplot as plt
 
 #from cohete import*
-from Xitle import *
-from dibujarCohete import *
+from Simulador.src.Xitle import *
+from Simulador.utils.dibujarCohete import *
 
 CG_list=[]
 CP_list=[]

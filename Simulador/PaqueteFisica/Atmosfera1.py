@@ -5,7 +5,7 @@ from numpy import *
 import matplotlib.pyplot as plt
 
 #Archivos importados
-from funciones import *
+from Simulador.utils.funciones import *
 
 class atmosfera:
 
