@@ -6,7 +6,7 @@ import json
 
 from Simulador.utils.angulos import *
 #from condiciones_init import *
-from Simulador.utils.dibujarCohete import *
+from Simulador.utils.dibujar_cohete import *
 from Simulador.utils.funciones import *
 
 #Para usar si se va a simular apenas

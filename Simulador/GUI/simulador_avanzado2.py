@@ -15,7 +15,7 @@ from Simulador.src.condiciones_init import *
 from Simulador.PaqueteFisica.Vuelo import *
 from Simulador.PaqueteFisica.Viento import Viento
 from Simulador.PaqueteFisica.riel import Torrelanzamiento
-from Simulador.PaqueteFisica.Atmosfera1 import atmosfera
+from Simulador.PaqueteFisica.atmosfera import atmosfera
 from Simulador.PaqueteFisica.Componentes import Componente, Cono, Cilindro, Aletas, Boattail
 from Simulador.PaqueteFisica.cohete import Cohete
 

@@ -4,9 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 #from scipy.integrate import odeint
 
-from Cond_Init import *
+from Simulador.CasosSimples.cond_iniciales import *
 from IntegradoresCasos import *
-from FunSimularDinamica import *
+from Simulador.CasosSimples.fun_simular_dinamica import *
 from Errores import *
 
 def der_gravedad_arrastre(t, state):

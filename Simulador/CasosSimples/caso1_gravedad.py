@@ -5,9 +5,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Importar tus módulos aquí
-from Cond_Init import *
+from Simulador.CasosSimples.cond_iniciales import *
 from IntegradoresCasos import *
-from FunSimularDinamica import *
+from Simulador.CasosSimples.fun_simular_dinamica import *
 from Errores import *
 
 def der_gravedad_masa_cte(t, state):

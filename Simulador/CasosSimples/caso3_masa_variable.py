@@ -3,9 +3,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Cond_Init import *
+from Simulador.CasosSimples.cond_iniciales import *
 from IntegradoresCasos import *
-from FunSimularDinamica import *
+from Simulador.CasosSimples.fun_simular_dinamica import *
 from Errores import *
 
 # Función para la masa variable

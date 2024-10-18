@@ -4,9 +4,9 @@
 import numpy as np
 from math import pi
 
-from condiciones_init import *
-from Xitle import *
-from Vuelo import *
+from Simulador.src.condiciones_init import *
+from Simulador.src.Xitle import *
+from Simulador.PaqueteFisica.Vuelo import *
 #####EMPEZAR SIN PARACAIDAS
 #quitar el paracaidas
 Xitle.parachute_added = False

@@ -1,7 +1,7 @@
 #Agregar condiciones iniciales
 
 from Simulador.PaqueteFisica.riel import *
-from Simulador.PaqueteFisica.Atmosfera1 import *
+from Simulador.PaqueteFisica.atmosfera import *
 from Simulador.PaqueteFisica.Viento import *
 
 #riel inicial

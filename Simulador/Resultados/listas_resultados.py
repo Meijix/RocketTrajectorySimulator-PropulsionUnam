@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 #from cohete import*
 from Simulador.src.Xitle import *
-from Simulador.utils.dibujarCohete import *
+from Simulador.utils.dibujar_cohete import *
 
 CG_list=[]
 CP_list=[]

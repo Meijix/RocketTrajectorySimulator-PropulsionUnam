@@ -2,10 +2,10 @@
 import numpy as np
 from math import pi
 
-from condiciones_init import *
-from Xitle import *
-from Vuelo import *
-from Viento import Viento
+from Simulador.src.condiciones_init import *
+from Simulador.src.Xitle import *
+from Simulador.PaqueteFisica.Vuelo import *
+from Simulador.PaqueteFisica.Viento import Viento
 
 #input()
 
