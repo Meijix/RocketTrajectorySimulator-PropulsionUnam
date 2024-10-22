@@ -67,5 +67,5 @@ def dibujar_cohete2(x_cm=3, y_cm=0.5, edge_color='b', alpha='0.8'):
     return fig, parts
 
 # Ejemplo de uso:
-fig, parts = dibujarCohete()
-plt.show()
+#fig, parts = dibujarCohete()
+#plt.show()
