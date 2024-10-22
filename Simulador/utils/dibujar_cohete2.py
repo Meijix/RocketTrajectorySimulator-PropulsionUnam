@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
 
-def dibujarCohete(x_cm=3, y_cm=0.5, edge_color='b', alpha='0.8'):
+def dibujar_cohete2(x_cm=3, y_cm=0.5, edge_color='b', alpha='0.8'):
     """
     Dibuja un cohete usando matplotlib
     
@@ -27,6 +27,7 @@ def dibujarCohete(x_cm=3, y_cm=0.5, edge_color='b', alpha='0.8'):
     fin_w1 = 1.5
     fin_w2 = 2
     fin_h = 0.5
+    boattail_lenght = 0.5
     
     parts = []
     
@@ -49,7 +50,7 @@ def dibujarCohete(x_cm=3, y_cm=0.5, edge_color='b', alpha='0.8'):
     fin2 = patches.Polygon(points2, facecolor=alpha, edgecolor=edge_color)
     
     # Boattail (parte trasera)
-    points = np.array([(0,0), (0,body_w), (-0.5, body_w-0.1), (-0.5, 0.1)])
+    points = np.array([(0,0), (0,body_w), (-boattail_lenght, body_w-0.1), (-boattail_lenght, 0.1)])
     boattail = patches.Polygon(points, facecolor=alpha, edgecolor=edge_color)
     
     # Añadir todas las partes
@@ -66,5 +67,5 @@ def dibujarCohete(x_cm=3, y_cm=0.5, edge_color='b', alpha='0.8'):
     return fig, parts
 
 # Ejemplo de uso:
-# fig, parts = dibujarCohete()
-# plt.show()
+fig, parts = dibujarCohete()
+plt.show()

@@ -6,6 +6,7 @@ from matplotlib.animation import FuncAnimation
 
 from Simulador.utils.funciones import *
 from Simulador.utils.dibujar_cohete import dibujar_cohete
+from Simulador.utils.dibujar_cohete2 import dibujar_cohete2
 from Simulador.utils.angulos import nice_angle
 
 # Leer los datos de la simulación desde el archivo CSV
