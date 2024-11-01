@@ -69,7 +69,7 @@ def dibujar_cohete2(x_cm=3, y_cm=0.5, edge_color='b', alpha='0.8'):
 x_cm, y_cm = 3, 0.5
 fig,parts = dibujar_cohete2()
 
-angles =[0,30,45,20,10,5,15,50,60,70,120]
+angles =[0,30,45,20,10,5,15,50,60,70,120,145,80,50,20,10,10,10,5,5]
 
 def update(frame):
     global angle, xpos, ypos
