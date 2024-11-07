@@ -10,8 +10,9 @@ riel = Torrelanzamiento(10, 88)
 latitud_cord = 19.5
 longitud_cord = -98.8
 altitud_cord = 20
-#fecha
-fecha = "2021-05-01"
+#Indicar fecha actual
+fecha = "2024-11-06"
+
 #viento
 #viento_actual = Viento( 10, 2, 0, 0)
 #Sin viento
