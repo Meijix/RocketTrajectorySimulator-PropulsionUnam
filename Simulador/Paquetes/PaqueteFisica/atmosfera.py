@@ -4,8 +4,15 @@ import numpy as np
 from numpy import *
 import matplotlib.pyplot as plt
 
-#Importar paquete utils
-from Paquetes.utils import funciones 
+
+# Constantes universales
+GravUn = 6.67430E-11  # m^3/kg/s^2 Constante de gravitación universal
+R_Tierra = 6371000 #[m] Radio de la Tierra
+M_tierra = 5.972168e24  #[kg] Masa de la Tierra
+
+
+#Calcular la gravedad en la superficie
+g0 = GravUn * M_tierra / ( R_Tierra)**2
 
 class atmosfera:
 

@@ -12,8 +12,8 @@ from math import pi
 #Importar otros scripts
 #from Atmosfera1 import atm_actual,calc_gravedad
 #from Componentes import *
-from Simulador.PaqueteFisica.Viento import *
-from Simulador.PaqueteFisica.riel import *
+from Paquetes.PaqueteFisica.viento import *
+from Paquetes.PaqueteFisica.riel import *
 
 class Cohete:
 
