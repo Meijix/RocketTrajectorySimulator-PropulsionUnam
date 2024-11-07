@@ -2,7 +2,7 @@
 
 from Simulador.PaqueteFisica.riel import *
 from Simulador.PaqueteFisica.atmosfera import *
-from Simulador.PaqueteFisica.Viento import *
+from Simulador.PaqueteFisica.viento import *
 
 #riel inicial
 riel = Torrelanzamiento(10, 88)
