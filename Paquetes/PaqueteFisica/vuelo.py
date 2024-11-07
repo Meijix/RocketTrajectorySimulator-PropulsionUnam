@@ -1,11 +1,14 @@
 #En este SCRIPT: Clase Vuelo
 #Se crea la clase Vuelo, con sus metodos para simular el vuelo 
 #y calcular cantidades relevantes
-from Simulador.PaqueteEDOs.Integradores import *
-from Simulador.utils.funciones import *
+import numpy as np
+import math
+
+from Paquetes.PaqueteEDOs.integradores import *
+from Paquetes.utils.funciones import normalized, calc_gravedad
 #from condiciones_init import *
 #from Xitle import *
-from Simulador.PaqueteFisica.Viento import Viento
+from Paquetes.PaqueteFisica.viento import Viento
 
 class Vuelo:
 
