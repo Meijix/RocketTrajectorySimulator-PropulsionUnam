@@ -1,8 +1,8 @@
 #Agregar condiciones iniciales
 
-from Simulador.PaqueteFisica.riel import *
-from Simulador.PaqueteFisica.atmosfera import *
-from Simulador.PaqueteFisica.viento import *
+from PaqueteFisica.riel import *
+from PaqueteFisica.atmosfera import *
+from PaqueteFisica.viento import *
 
 #riel inicial
 riel = Torrelanzamiento(10, 88)
