@@ -4,8 +4,8 @@ import numpy as np
 from numpy import *
 import matplotlib.pyplot as plt
 
-#Archivos importados
-from Simulador.utils.funciones import *
+#Importar paquete utils
+from Paquetes.utils import funciones 
 
 class atmosfera:
 
