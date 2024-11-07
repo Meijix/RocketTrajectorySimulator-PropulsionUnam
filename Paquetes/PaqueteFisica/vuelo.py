@@ -6,7 +6,7 @@ import math
 
 from Paquetes.PaqueteEDOs.integradores import *
 from Paquetes.utils.funciones import normalized, calc_gravedad
-from Paquetes.PaqueteFisica.viento import Viento
+#from Paquetes.PaqueteFisica.viento import Viento
 
 class Vuelo:
 
