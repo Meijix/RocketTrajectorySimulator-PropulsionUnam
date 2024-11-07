@@ -10,11 +10,8 @@ import math
 from math import pi
 
 #Importar otros scripts
-#from Atmosfera1 import atm_actual,calc_gravedad
-#from Componentes import *
-from Paquetes.PaqueteFisica.viento import *
-from Paquetes.PaqueteFisica.riel import *
 
+#from Componentes import *
 class Cohete:
 
     def __init__(self, nombre, tipo, componentes, componentes_externos, tabla_Cd_fpath, tabla_empuje_fpath, tabla_masa_fpath, riel):
