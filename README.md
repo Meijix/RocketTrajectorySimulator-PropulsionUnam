@@ -1,7 +1,7 @@
 # 3DOF-Rocket-PU
 Natalia Edith Mejia Bautista thesis work 
 
-3DOF Simulator of rocket trajectory 
+## 3DOF Numerical simulator of rocket trajectory 
 Propulsion UNAM rocketry team
 
 Implements different numerical integrators to solve ODEs
