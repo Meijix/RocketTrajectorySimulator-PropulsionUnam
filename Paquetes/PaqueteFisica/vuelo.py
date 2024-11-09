@@ -4,14 +4,20 @@ import numpy as np
 import math
 #Importar paquetes propios de carpeta superior Paquetes
 import sys
-sys.path.append(r"c:\Users\Natalia\OneDrive\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Paquetes")
+import os
+
+# Agregar la ruta del directorio que contiene los paquetes al sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+#sys.path.append(r"c:\Users\Natalia\OneDrive\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Paquetes")
 #print(sys.path)
+
 
 #Importar funciones
 from Paquetes.utils.funciones import normalized, calc_gravedad
 #Importar integradores
 from Paquetes.PaqueteEDOs.integradores import Euler, RungeKutta2, RungeKutta4, RKF45, AdaptiveEuler
 
+#Porque se corre la simulacion en este script?
 class Vuelo:
 
     def __init__(self, vehiculo_actual, atm_actual, viento_actual):
