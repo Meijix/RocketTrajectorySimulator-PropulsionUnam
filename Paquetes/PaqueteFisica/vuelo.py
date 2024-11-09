@@ -4,11 +4,11 @@ import numpy as np
 import math
 #Importar paquetes propios de carpeta superior Paquetes
 import sys
-sys.path.append('Paquetes')
-
+sys.path.append(r"c:\Users\Natalia\OneDrive\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Paquetes")
+#print(sys.path)
 
 #Importar funciones
-from Paquetes.utils import normalized, calc_gravedad
+from Paquetes.utils.funciones import normalized, calc_gravedad
 #Importar integradores
 from Paquetes.PaqueteEDOs.integradores import Euler, RungeKutta2, RungeKutta4, RKF45, AdaptiveEuler
 
