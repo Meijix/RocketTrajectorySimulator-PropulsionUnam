@@ -2,9 +2,13 @@
 #Se crea la clase Vuelo, con sus metodos para simular el vuelo y calcular cantidades relevantes
 import numpy as np
 import math
+#Importar paquetes propios de carpeta superior Paquetes
+import sys
+sys.path.append('Paquetes')
+
 
 #Importar funciones
-from Paquetes import utils
+from Paquetes.utils import normalized, calc_gravedad
 #Importar integradores
 from Paquetes.PaqueteEDOs.integradores import Euler, RungeKutta2, RungeKutta4, RKF45, AdaptiveEuler
 
@@ -75,7 +79,7 @@ class Vuelo:
       else:
         #si todavía esta en la atmosfera definida
         #print(self.calc_arrastre_normal(pos,vel,alpha))
-        v_rel_hat = utils.normalized(v_rel)
+        v_rel_hat = normalized(v_rel)
         alpha = self.calc_alpha(v_rel, theta)
         Dmag, Nmag, Cd, mach = self.calc_arrastre_normal(pos, v_rel, alpha)
         #print(Cd,mach)
