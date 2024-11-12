@@ -25,7 +25,7 @@ class Vuelo:
         self.vehiculo = vehiculo_actual #Vehiculo actual
         self.atmosfera = atm_actual #atmosfera actual
         self.viento = viento_actual
-        self.parachute1 = vehiculo_actual.parachute1 #paracaidas
+        self.parachute1 = None #vehiculo_actual.parachute1 #paracaidas
 
         #hacer una lista de etapas de vuelo
         #self. etapas = [enriel , motorON, apogeo, droguerec, mainrec]
