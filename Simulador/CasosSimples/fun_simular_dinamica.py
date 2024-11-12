@@ -1,6 +1,7 @@
 
 def simular_dinamica(estado, t_max, dt, integrador, fun_derivada):
     sim = [estado]
+    print("Estado:",estado)
     tiempos = [0]
     t = 0.0
     it = 1
@@ -9,13 +10,11 @@ def simular_dinamica(estado, t_max, dt, integrador, fun_derivada):
 
     while t < t_max:
         nuevo_estado = Integracion.step(t, estado, dt)
-        
+        print("Nuevo estado:",nuevo_estado)
         # Avanzar estado
         it += 1
         t += dt
         estado = nuevo_estado
-        #Debugging
-        print(estado)
 
         sim.append(estado)
         tiempos.append(t)
@@ -24,6 +23,7 @@ def simular_dinamica(estado, t_max, dt, integrador, fun_derivada):
         if it%500==0:
             print(f"Iteracion {it}, t={t:.1f} s, altitud={estado[0]:.1f} m, vel vert={estado[1]:.1f}")
         #Terminar cuando llegue al suelo
+        print("Estado[0]:",estado[0])
         if estado[0] < 0:
             break
 
