@@ -88,3 +88,9 @@ if __name__ == "__main__":
     print("El impulso total es:", Xitle.I_total, "N s")
     print("El área transversal del cohete es:", Xitle.A, "m^2")
     print("El diámetro exterior del cohete es:", Xitle.d_ext, "m")
+
+    #Informacion del paracaidas
+    print("Paracaidas", Xitle.parachute1)
+    print("Paracaidas activo", Xitle.parachute_active1)
+    print("Cd Paracaidas", Xitle.parachute1.cd)
+    print("area Paracaidas", Xitle.parachute1.Area_trans)
