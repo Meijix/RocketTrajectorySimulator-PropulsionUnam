@@ -2,10 +2,18 @@
 import numpy as np
 from math import pi
 
-from Simulador.src.condiciones_init import *
-from Simulador.src.Xitle import *
-from Simulador.PaqueteFisica.Vuelo import *
-from Simulador.PaqueteFisica.Viento import Viento
+import sys
+import os
+
+# Agregar la ruta del directorio que contiene los paquetes al sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+#Importar paquetes propios de carpeta superior Paquetes
+from Paquetes.PaqueteFisica.vuelo import Vuelo
+from Paquetes.PaqueteFisica.viento import Viento
+
+from condiciones_init import *
+from Xitle import *
 
 #input()
 
