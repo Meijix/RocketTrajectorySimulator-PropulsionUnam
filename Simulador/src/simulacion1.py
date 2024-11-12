@@ -12,8 +12,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from Paquetes.PaqueteFisica.vuelo import Vuelo
 from Paquetes.PaqueteFisica.viento import Viento
 
-from condiciones_init import *
-from Xitle import *
+import condiciones_init as c_init
+import Xitle 
 
 #input()
 
@@ -26,7 +26,7 @@ Xitle.parachute_active1 = False
 x0, y0, z0 = 0, 0, 0
 vx0, vy0, vz0 = 0, 0, 0
 
-theta0, omega0 = np.deg2rad(riel.angulo), 0
+theta0, omega0 = np.deg2rad(c_init.riel.angulo), 0
 estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 #print(estado)
 #estado=list(estado)
@@ -57,7 +57,7 @@ viento_actual.actualizar_viento3D()
 #print(viento_actual)
 print("Viento actual",viento_actual.vector)
 
-vuelo1 = Vuelo(Xitle, atmosfera_actual, viento_actual)
+vuelo1 = Vuelo(Xitle, c_init.atmosfera_actual, viento_actual)
 tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo1.simular_vuelo(estado,t_max, dt, dt_out, integrador_actual)
 #print(viento_vuelo_mags)
 #Medir tiempo que tarda en correr la simulacion
@@ -84,7 +84,7 @@ wind_zs = [vec[2] for vec in viento_vuelo_vecs]
 stability=[]
 
 for i in range(len(tiempos)-1):
-    stab= (CPs[i]-CGs[i])/diam_ext
+    stab= (CPs[i]-CGs[i])/Xitle.diam_ext
     stability.append(stab)
 
 max_altitude = max(posiciones[:, 2])
