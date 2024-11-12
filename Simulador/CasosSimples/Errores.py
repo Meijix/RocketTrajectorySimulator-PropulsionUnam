@@ -1,3 +1,4 @@
+#Funciones utiles para calcular errores y graficarlos
 import numpy as np
 import matplotlib.pyplot as plt
 
