@@ -1,6 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from Simulador.src.Xitle import *
+import sys
+import os
+
+# Agregar la ruta del directorio que contiene los paquetes al sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+from Simulador.src.Xitle import Xitle
 
 def dibujar_cohete(x, y, theta, tamaño, ax):
   theta = theta-90
@@ -121,6 +127,6 @@ def dibujar_cohete(x, y, theta, tamaño, ax):
 if __name__ == "__main__":
     # Dibujar un cohete
     #dibujar_cohete(0, 0, 0, 5)
-    dibujar_cohete(0, 0, 45, 5)
+    dibujar_cohete(plt,0, 0, 45, 5)
     plt.gca().set_aspect("equal")
     plt.show()

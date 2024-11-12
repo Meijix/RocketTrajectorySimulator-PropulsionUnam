@@ -11,7 +11,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from Paquetes.PaqueteFisica.componentes import *
 from Paquetes.PaqueteFisica.cohete import *
 
-import condiciones_init as c_init
+from Simulador.src import condiciones_init as c_init
+#import condiciones_init as c_init
 
 #Dimensiones principales del cohete
 diam_ext = 0.152
