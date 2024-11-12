@@ -1,8 +1,15 @@
+import sys
+import os
+import math
 
-from Simulador.src.condiciones_init import *
-from Simulador.PaqueteFisica.Componentes import *
-from Simulador.PaqueteFisica.cohete import *
-from math import *
+# Agregar la ruta del directorio que contiene los paquetes al sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+from Paquetes.PaqueteFisica.componentes import *
+from Paquetes.PaqueteFisica.cohete import *
+
+#Se agrega pq se necesita el riel en el objeto cohete
+import condiciones_init as c_init
 
 #Dimensiones principales del cohete
 diam_ext = 0.152
@@ -149,7 +156,7 @@ componentes = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup
 componentes_externos = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup, 'Transferidor de carga': transfer, 'tanquevacio': tanquevacio,
             'oxidante': oxidante, 'valvulas': valvulas, 'grano': grano, 'Cámara Combustión': CC, 'Boattail': boattail}
 
-Vehiculo = Cohete("Xitle", "hibrido", componentes, componentes_externos, tabla_Cd_fpath, tabla_empuje_fpath, tabla_masa_fpath, riel)
+Vehiculo = Cohete("Xitle", "hibrido", componentes, componentes_externos, tabla_Cd_fpath, tabla_empuje_fpath, tabla_masa_fpath, c_init.riel)
 Vehiculo.d_ext=diam_ext
 #print(Xitle)
 
