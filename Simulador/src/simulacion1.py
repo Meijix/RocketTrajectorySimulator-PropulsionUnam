@@ -15,7 +15,6 @@ from Paquetes.PaqueteFisica.viento import Viento
 import condiciones_init as c_init
 import Xitle 
 
-#input()
 cohete_actual = Xitle.Xitle
 
 #quitar el paracaidas
