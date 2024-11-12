@@ -1,16 +1,18 @@
 
 def simular_dinamica(estado, t_max, dt, integrador, fun_derivada):
     sim = [estado]
-    print("Estado:",estado)
+    #print("Estado:",estado)
     tiempos = [0]
     t = 0.0
     it = 1
 
     Integracion = integrador(fun_derivada)
+    #print("Integracion:",Integracion)
 
     while t < t_max:
-        nuevo_estado = Integracion.step(t, estado, dt)
-        print("Nuevo estado:",nuevo_estado)
+        # Integracion numérica del estado actual (un paso)
+        nuevo_estado, dt = Integracion.step(t, estado, dt)
+        #print("Nuevo estado:",nuevo_estado)
         # Avanzar estado
         it += 1
         t += dt
