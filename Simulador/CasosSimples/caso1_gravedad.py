@@ -1,13 +1,13 @@
 #Caso 1
 #Movimiento vertical con gravedad y masa cte
+
 import sys
 import os
+import numpy as np
+import matplotlib.pyplot as plt
 
 # Agregar la ruta del directorio que contiene los paquetes al sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-
-import numpy as np
-import matplotlib.pyplot as plt
 
 # Importar modulos propios
 from fun_simular_dinamica import *
@@ -16,6 +16,7 @@ from cond_iniciales import *
 #Importar integradores del paquete Paquetes.PaqueteEDOs.integradores
 from Paquetes.PaqueteEDOs.integradores import *
 
+#Funciones de la derivada y solución analítica
 def der_gravedad_masa_cte(t, state):
     z, v = state
     derivs = np.array((v, -g))
@@ -41,8 +42,8 @@ print("Velocidad terminal: ", v_terminal, "[m/s]")
 print("Apogeo: ", apogeo, "[m]")
 '''
 #####################################################
-#####################################################
-###Diferentes pasos de tiempo y un mismo integrador
+# Simular la dinamica
+# Diferentes pasos de tiempo y un mismo integrador
 #####################################################
 # Inicialización de parámetros
 #Integrador_oficial = RungeKutta2 
@@ -51,7 +52,7 @@ Integrador_oficial = Euler
 dt_values = [0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.125, 0.15, 0.175, 0.2]
 resultados = {}
 
-# Simulaciones
+#Usar la funcion simular_dinamica y las condiciones iniciales de cond_iniciales.py
 for dt in dt_values:
     tiempos, sim = simular_dinamica(estado, t_max, dt, Integrador_oficial, der_gravedad_masa_cte)
     pos_sim, vel_sim = zip(*[(s[0], s[1]) for s in sim])
