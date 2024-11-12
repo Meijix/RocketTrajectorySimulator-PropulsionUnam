@@ -14,6 +14,8 @@ def simular_dinamica(estado, t_max, dt, integrador, fun_derivada):
         it += 1
         t += dt
         estado = nuevo_estado
+        #Debugging
+        print(estado)
 
         sim.append(estado)
         tiempos.append(t)
