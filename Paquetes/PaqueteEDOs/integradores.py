@@ -111,48 +111,49 @@ class AdaptiveEuler:
                 dt_new = S * dt * (tol / error) ** 0.5
                 dt = dt_new  # Actualizar dt para el próximo intento
 
-#Ejemplo para los metodos adptivos
-def fun_derivadas(t, state):
-    x, y, z = state
-    dxdt = -y
-    dydt = x
-    dzdt = 0
-    return np.array([dxdt, dydt, dzdt])
+if __name__ == '__main__':
+    #Ejemplo para los metodos adptivos
+    def fun_derivadas(t, state):
+        x, y, z = state
+        dxdt = -y
+        dydt = x
+        dzdt = 0
+        return np.array([dxdt, dydt, dzdt])
 
-#Elegir el integrador adaptivo a probar
-integrador = AdaptiveEuler(fun_derivadas)
-#integrador = RKF45(fun_derivadas)
+    #Elegir el integrador adaptivo a probar
+    integrador = AdaptiveEuler(fun_derivadas)
+    #integrador = RKF45(fun_derivadas)
 
-state = np.array([1, 0, 0])
-t = 0
-dt = 0.01
-t_max = 80
-it = 1
+    state = np.array([1, 0, 0])
+    t = 0
+    dt = 0.01
+    t_max = 80
+    it = 1
 
-print('Estado inicial:', state)
+    print('Estado inicial:', state)
 
-while t < t_max:
-    state, dt_new = integrador.step(t, state, dt)
+    while t < t_max:
+        state, dt_new = integrador.step(t, state, dt)
 
-    print(f'Iteración {it}: t={t:.2f}, state={state}')
-    print('dt_new', dt_new)
-    it += 1
-    t += dt_new
+        print(f'Iteración {it}: t={t:.2f}, state={state}')
+        print('dt_new', dt_new)
+        it += 1
+        t += dt_new
 
-#Grafica la solucion de ejemplo
-# Crear un rango de valores de t
-t_values = np.linspace(0, t_max, 1000)
-# Calcular el estado en cada valor de t
-state_values = np.array([integrador.step(t, state, 0.01)[0] for t in t_values])
-# Extraer las coordenadas x, y, z
-x_values = state_values[:, 0]
-y_values = state_values[:, 1]
-z_values = state_values[:, 2]
-# Graficar la trayectoria en 3D
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-ax.plot(x_values, y_values, z_values)
-ax.set_xlabel('x')
-ax.set_ylabel('y')
-ax.set_zlabel('z')
-plt.show()
+    #Grafica la solucion de ejemplo
+    # Crear un rango de valores de t
+    t_values = np.linspace(0, t_max, 1000)
+    # Calcular el estado en cada valor de t
+    state_values = np.array([integrador.step(t, state, 0.01)[0] for t in t_values])
+    # Extraer las coordenadas x, y, z
+    x_values = state_values[:, 0]
+    y_values = state_values[:, 1]
+    z_values = state_values[:, 2]
+    # Graficar la trayectoria en 3D
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot(x_values, y_values, z_values)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    plt.show()
