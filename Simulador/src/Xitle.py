@@ -64,6 +64,16 @@ componentes_externos = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': t
 
 Xitle = Cohete("Xitle", "hibrido", componentes, componentes_externos, tabla_Cd_fpath, tabla_empuje_fpath, tabla_masa_fpath, c_init.riel)
 Xitle.d_ext=diam_ext
+
+#Agregar paracaidas
+#Drogue
+drogue = Parachute(0.8, 0.7)
+Xitle.agregar_paracaidas(drogue)
+#Ahorita solo permite un paracaidas, se puede modificar para que permita más de uno
+""" #Mainchute
+mainchute = Parachute(2.0, 1.8)
+Xitle.agregar_paracaidas(mainchute) """
+
 #print(Xitle)
 
 if __name__ == "__main__":
