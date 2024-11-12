@@ -1,23 +1,34 @@
 #Simulacion CON paracaidas del Xitle2
-
-
 import numpy as np
 from math import pi
 
-from Simulador.src.condiciones_init import *
-from Simulador.src.Xitle import *
-from Simulador.PaqueteFisica.Vuelo import *
+import sys
+import os
+
+# Agregar la ruta del directorio que contiene los paquetes al sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+#Importar paquetes propios de carpeta superior Paquetes
+from Paquetes.PaqueteFisica.vuelo import Vuelo
+from Paquetes.PaqueteFisica.viento import Viento
+from Paquetes.PaqueteFisica.cohete import Parachute
+
+import condiciones_init as c_init
+import Xitle 
+
+cohete_actual = Xitle.Xitle
+
 #####EMPEZAR SIN PARACAIDAS
 #quitar el paracaidas
-Xitle.parachute_added = False
+cohete_actual.parachute_added = False
 #desactivar el paracaidas
-Xitle.parachute_active1 = False
+cohete_actual.parachute_active1 = False
 
 
 # Estado inicial
 x0, y0, z0 = 0, 0, 0
 vx0, vy0, vz0 = 0, 0, 0
-theta0, omega0 = np.deg2rad(riel.angulo), 0
+theta0, omega0 = np.deg2rad(c_init.riel.angulo), 0
 estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 
 #Parametros de la simulacion
@@ -30,7 +41,7 @@ integrador_actual = 'Euler'
 #####Agregar paracaidas
 Mainchute = Parachute(1.2, 0.802) #Crear paracaidas principal
 #print(Xitle.parachute_active1)
-Xitle.agregar_paracaidas(Mainchute)
+cohete_actual.agregar_paracaidas(Mainchute)
 #print(Xitle.parachute_active1)
 #print(Xitle.parachute_added)
 #########################################3
@@ -47,7 +58,7 @@ viento_actual.actualizar_viento3D()
 #print(viento_actual)
 #print(viento_actual.vector)
 
-vuelo_paracaidas = Vuelo(Xitle, atmosfera_actual, viento_actual)
+vuelo_paracaidas = Vuelo(cohete_actual, c_init.atmosfera_actual, viento_actual)
 tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo_paracaidas.simular_vuelo(estado,t_max, dt, dt_out, integrador_actual)
 
 # Guardar los datos de la simulación
@@ -77,7 +88,7 @@ wind_zs = [vec[2] for vec in viento_vuelo_vecs]
 stability=[]
 
 for i in range(len(tiempos)-1):
-    stab= (CPs[i]-CGs[i])/diam_ext
+    stab= (CPs[i]-CGs[i])/cohete_actual.d_ext
     stability.append(stab)
 
 max_altitude = max(posiciones[:, 2])
@@ -142,14 +153,14 @@ datos_simulados = pd.DataFrame({
     'estabilidad': stability
 })
 
-datos_simulados.to_csv('datos_simulacion.csv', index=False)
+datos_simulados.to_csv('datos_sim_paracaidas.csv', index=False)
 
 ############################
 #Guardar datos importantes en un archivo json
 import json
 datos_a_guardar = {
-    'd_ext': Xitle.d_ext,
-    't_MECO': Xitle.t_MECO,
+    'd_ext': cohete_actual.d_ext,
+    't_MECO': cohete_actual.t_MECO,
     'tiempo_salida_riel': vuelo_paracaidas.tiempo_salida_riel,
     'tiempo_apogeo': vuelo_paracaidas.tiempo_apogeo,
     'tiempo_impacto': vuelo_paracaidas.tiempo_impacto,
@@ -159,8 +170,10 @@ datos_a_guardar = {
     'max_acceleration_angular': np.max(accangs)
     #'velocidad de impacto': velocidades[-1]
 }
+print("csv guardado")
 
-with open('datos_simulacion.json', 'w') as f:
+with open('datos_sim_paracaidas.json', 'w') as f:
     json.dump(datos_a_guardar, f, indent=4)
+print("json guardado")
 
 print("LISTO")
