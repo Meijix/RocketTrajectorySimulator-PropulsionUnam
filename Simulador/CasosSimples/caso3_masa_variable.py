@@ -1,12 +1,20 @@
 # Caso 3: Gravedad + Empuje constante y masa variable
 
+
+import sys
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Simulador.CasosSimples.cond_iniciales import *
-from IntegradoresCasos import *
-from Simulador.CasosSimples.fun_simular_dinamica import *
-from Errores import *
+# Agregar la ruta del directorio que contiene los paquetes al sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+# Importar modulos propios
+from fun_simular_dinamica import *
+from errores import *
+from cond_iniciales import *
+#Importar integradores del paquete Paquetes.PaqueteEDOs.integradores
+from Paquetes.PaqueteEDOs.integradores import *
 
 # Función para la masa variable
 def masa_variable(t, m0, beta):
