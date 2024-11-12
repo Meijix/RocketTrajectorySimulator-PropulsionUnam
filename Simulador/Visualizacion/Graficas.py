@@ -3,11 +3,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import json
+import sys
+import os
 
-from Simulador.utils.angulos import *
-#from condiciones_init import *
-from Simulador.utils.dibujar_cohete import *
-from Simulador.utils.funciones import *
+# Agregar la ruta del directorio que contiene los paquetes al sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+#Importar paquetes propios de carpeta superior Paquetes
+from Paquetes.utils.angulos import *
+from Simulador.src.condiciones_init import *
+from Paquetes.utils.dibujar_cohete import *
+from Paquetes.utils.funciones import *
 
 #Para usar si se va a simular apenas
 #Cambiar el vuelo a graficar
