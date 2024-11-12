@@ -237,6 +237,7 @@ class Vuelo:
       sim=[estado] #lista de estados de vuelo
       tiempos=[0] #lista de tiempos
 
+      #Actualizar masa del vehiculo
       self.vehiculo.actualizar_masa(t)
       masavuelo=[self.vehiculo.masa]
 
