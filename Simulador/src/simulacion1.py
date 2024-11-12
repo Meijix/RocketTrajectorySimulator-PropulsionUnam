@@ -151,7 +151,8 @@ datos_simulados = pd.DataFrame({
     'Machs': Machs,
     'estabilidad': stability
 })
-
+#Crear un archivo csv con los datos de la simulación
+# Guardar archivo en la carpeta Simulador/Resultados/OuputFiles
 datos_simulados.to_csv('datos_simulacion.csv', index=False)
 print('csv guardado')
 ############################
@@ -171,7 +172,9 @@ datos_a_guardar = {
     #'velocidad de impacto': velocidades[-1]
 }
 
+# Guardar los datos en un archivo .json
+# Guardar archivo en la carpeta Simulador/Resultados/OuputFiles
 with open('datos_simulacion.json', 'w') as f:
     json.dump(datos_a_guardar, f, indent=4)
-    
+
 print('json guardado')
