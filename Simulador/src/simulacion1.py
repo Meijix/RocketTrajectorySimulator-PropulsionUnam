@@ -16,11 +16,12 @@ import condiciones_init as c_init
 import Xitle 
 
 #input()
+cohete_actual = Xitle.Xitle
 
 #quitar el paracaidas
-Xitle.parachute_added = False
+cohete_actual.parachute_added = False
 #desactivar el paracaidas
-Xitle.parachute_active1 = False
+cohete_actual.parachute_active1 = False
 
 # Estado inicial
 x0, y0, z0 = 0, 0, 0
@@ -57,7 +58,9 @@ viento_actual.actualizar_viento3D()
 #print(viento_actual)
 print("Viento actual",viento_actual.vector)
 
-vuelo1 = Vuelo(Xitle, c_init.atmosfera_actual, viento_actual)
+#Crear el vuelo
+vuelo1 = Vuelo(cohete_actual, c_init.atmosfera_actual, viento_actual)
+
 tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo1.simular_vuelo(estado,t_max, dt, dt_out, integrador_actual)
 #print(viento_vuelo_mags)
 #Medir tiempo que tarda en correr la simulacion
@@ -156,8 +159,8 @@ print('csv guardado')
 import json
 
 datos_a_guardar = {
-    'd_ext': Xitle.d_ext,
-    't_MECO': Xitle.t_MECO,
+    'd_ext': cohete_actual.d_ext,
+    't_MECO': cohete_actual.t_MECO,
     'tiempo_salida_riel': vuelo1.tiempo_salida_riel,
     'tiempo_apogeo': vuelo1.tiempo_apogeo,
     'tiempo_impacto': vuelo1.tiempo_impacto,
