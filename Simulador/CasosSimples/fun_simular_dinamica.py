@@ -25,7 +25,6 @@ def simular_dinamica(estado, t_max, dt, integrador, fun_derivada):
         if it%500==0:
             print(f"Iteracion {it}, t={t:.1f} s, altitud={estado[0]:.1f} m, vel vert={estado[1]:.1f}")
         #Terminar cuando llegue al suelo
-        print("Estado[0]:",estado[0])
         if estado[0] < 0:
             break
 
