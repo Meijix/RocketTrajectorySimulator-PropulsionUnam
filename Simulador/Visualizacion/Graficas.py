@@ -37,11 +37,11 @@ def muestra_tiempos(tiempos, ax):
 ###############################################
 #Elegir que vuelo se va a graficar
 ################################################
-#archivo_csv = 'datos_simulacion.csv'
-archivo_csv = 'datos_sim_paracaidas.csv'
+archivo_csv = 'datos_simulacion.csv'
+#archivo_csv = 'datos_sim_paracaidas.csv'
 
-#archivo_json = 'datos_simulacion.json'
-archivo_json = 'datos_sim_paracaidas.json'
+archivo_json = 'datos_simulacion.json'
+#archivo_json = 'datos_sim_paracaidas.json'
 
 ###############################################
 # Leer los datos de la simulación desde el archivo CSV
@@ -357,9 +357,10 @@ circle_y = impact_point[1] + circle_radius * np.sin(circle_points)
 ax.plot(circle_x, circle_y, 0, color='gray', linestyle='--', label='1000 m radio de seguridad')
 
 #Plot the projections of the trajectory in the XY, XZ, and YZ planes
+#Projections need to be plotted in the same plot to be able to see the 3D trajectory
 ax.plot(posiciones[:, 0], posiciones[:, 1], 0, color='purple', linestyle='--', label='Proyección en XY')
 ax.plot(posiciones[:, 0], 0, posiciones[:, 2], color='green', linestyle='--', label='Proyección en XZ')
-ax.plot(0, posiciones[:, 1], posiciones[:, 2], color='orange', linestyle='--', label='Proyección en YZ')
+ax.plot(0, posiciones[:, 1], posiciones[:, 2], color='orange', linestyle='--', label='Proyección en YZ') 
 
 
 # Set labels, title, and limits
@@ -375,7 +376,7 @@ ax.set_title("Trayectoria del cohete Xitle en el tiempo")
 #ax.legend()
 #Todos los ejes deben tener la misma escala
 ax.set_aspect('equal')
-plt.show()
+#plt.show()
 
 #Plot with 3 subplots of each plane of the trajectory
 fig, axs = plt.subplots(1, 3, figsize=(18, 6))
