@@ -9,7 +9,7 @@ from Paquetes.PaqueteFisica.componentes import *
 from Paquetes.PaqueteFisica.cohete import *
 
 #Se agrega pq se necesita el riel en el objeto cohete
-import condiciones_init as c_init
+from Simulador.src import condiciones_init as c_init
 
 #Dimensiones principales del cohete
 diam_ext = 0.152
