@@ -1,11 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+import os
 
-from Simulador.utils.angulos import *
-from simulacion1 import *
+# Agregar la ruta del directorio que contiene los paquetes al sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+from Paquetes.utils.angulos import *
+from Simulador.src.simulacion1 import *
 #from simulacion2 import *
 
-vuelo_graficar=vuelo1
+vuelo_graficar = vuelo1
 #vuelo_graficar=vuelo_paracaidas
 
 # Extract the positions of the trajectory
@@ -87,7 +92,7 @@ ax.legend()
 
 # Add an arrow indicating the launch angle
 # Create a rotation matrix
-theta_rad = np.deg2rad(riel.angulo)
+theta_rad = np.deg2rad(c_init.riel.angulo)
 #rotation_matrixY = np.array([[np.cos(theta_rad),0, np.sin(theta_rad)],
 #                               [0,1,0],
 #                            [-np.sin(theta_rad), 0, np.cos(theta_rad)]])
@@ -114,7 +119,7 @@ ax.plot(posiciones[:, 1], posiciones[:, 2], 0, color='black', linestyle='--', al
 plt.show()
 ###
 
-#  grafica sobre el mapa el punto dado por las coordenadas de lanzamiento y grafica la trayectoria del vuelo
+""" #  grafica sobre el mapa el punto dado por las coordenadas de lanzamiento y grafica la trayectoria del vuelo
 
 import numpy as np
 from mpl_toolkits.basemap import Basemap
@@ -158,4 +163,4 @@ m.drawmeridians(np.arange(-106, -106.05, 0.5), labels=[True, True, True, True], 
 plt.title("Trayectoria del cohete Xitle")
 
 # Show the plot
-plt.show()
+plt.show() """
