@@ -11,9 +11,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 #Importar paquetes propios de carpeta superior Paquetes
 from Paquetes.utils.angulos import *
-from Simulador.src.condiciones_init import *
 from Paquetes.utils.dibujar_cohete import *
 from Paquetes.utils.funciones import *
+
+from Simulador.src.condiciones_init import *
 
 #Para usar si se va a simular apenas
 #Cambiar el vuelo a graficar
@@ -32,12 +33,18 @@ def muestra_tiempos(tiempos, ax):
     #if tiempo_despliegue is not None:
         #ax.axvline(tiempo_despliegue, color="green", ls="--")
     #ax.legend()
+    
 ###############################################
+#Elegir que vuelo se va a graficar
+#archivo_csv = 'datos_simulacion.csv'
+archivo_csv = 'datos_sim_paracaidas.csv'
 
+#archivo_json = 'datos_simulacion.json'
+archivo_json = 'datos_sim_paracaidas.json'
 
 ###############################################
 # Leer los datos de la simulación desde el archivo CSV
-datos_simulacion = pd.read_csv('datos_simulacion.csv')
+datos_simulacion = pd.read_csv(archivo_csv)
 # Extarer los datos del csv
 (tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo,estabilidad,
 viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, wind_xs, wind_ys, wind_zs,
@@ -46,7 +53,7 @@ accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs) = extraer_datoscs
 
 #########################################
 # Leer los datos de la simulación desde el archivo JSON
-with open('datos_simulacion.json', 'r') as f:
+with open(archivo_json, 'r') as f:
     datos = json.load(f)
 # Extraer los datos del json
 (d_ext, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto,
