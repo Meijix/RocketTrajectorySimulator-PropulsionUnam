@@ -4,12 +4,13 @@ import matplotlib.patches as patches
 from matplotlib import transforms
 
 #Se le podrian pasar las mediidas del cohete_actual
-def dibujar_cohete2():
+def dibujar_cohete2(ax=None):
     #Colores
     color_cohete='navy'
     color_borde='silver'
     # Crear figura
     fig = plt.figure()
+    ax = fig.add_subplot(111)
     
     # Dimensiones del cohete
     body_l = 6
@@ -58,7 +59,7 @@ def dibujar_cohete2():
     return fig, parts
 
 #Función para rotar el cohete en el cm
-def rotar_cohete(fig, parts, x_cm,y_cm,angle):
+def rotar_cohete(fig, parts, x_cm,y_cm,angle,ax=None):
     #Transaladar y rotar el cohete
     trans = transforms.Affine2D().translate(-x_cm, -y_cm) + transforms.Affine2D().rotate_deg(angle)  + plt.gca().transData #+ transforms.Affine2D().translate(xpos, ypos)
     for p in parts:

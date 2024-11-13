@@ -4,13 +4,20 @@ import json
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-from Simulador.utils.funciones import *
-from Simulador.utils.dibujar_cohete import dibujar_cohete
-from Simulador.utils.dibujar_cohete2 import dibujar_cohete2
-from Simulador.utils.angulos import nice_angle
+import sys
+import os
+
+# Agregar la ruta del directorio que contiene los paquetes al sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+from Paquetes.utils.funciones import *
+from Paquetes.utils.dibujar_cohete import dibujar_cohete
+from Paquetes.utils.dibujar_cohete2 import dibujar_cohete2, rotar_cohete
+from Paquetes.utils.angulos import nice_angle
 
 # Leer los datos de la simulación desde el archivo CSV
 datos_simulacion = pd.read_csv('datos_simulacion.csv')
+
 
 print(datos_simulacion.columns)
 # Extraer los datos del CSV
@@ -52,14 +59,17 @@ ax2d.grid()
 # Cada cuántos frames graficar
 every = 40
 
-print(nice_angle(thetas))
+#print(nice_angle(thetas))
 
 # Función de actualización para la animación
 def update(frame):
     axcohete.clear()
     axcohete.set_xlim([-15, 15])
     axcohete.set_ylim([-15, 15])
-    dibujar_cohete(0, 0, np.degrees(thetas[frame]), tamaño, ax=axcohete)  # Dibujar el cohete inclinado
+    #dibujar_cohete(0, 0, np.degrees(thetas[frame]), tamaño, ax=axcohete)  # Dibujar el cohete inclinado
+    fig,parts = dibujar_cohete2(ax=axcohete)  # Dibujar el cohete inclinado
+    angulo = np.degrees(thetas[frame])
+    rotar_cohete(fig,parts,3, 0.5, angulo, ax=axcohete)  # Rotar el cohete
     #ax.set_xlim(-10, 10)
     #ax.set_ylim(-10, 10)
     axcohete.set_aspect("equal")
