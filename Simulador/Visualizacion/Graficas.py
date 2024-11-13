@@ -65,9 +65,10 @@ import time
 inicio = time.time()
 #print("Posiciones (x,y,z):",posiciones[1,:])
 print("Graficando...")
-# GRAFICAS
 ############################################
-""" #VIENTO
+#GRAFICAS DE LOS DATOS DE LA SIMULACION
+""" 
+#VIENTO
 #Magnitudes en el tiempo
 plt.figure(figsize=(8, 6))
 plt.plot(tiempos, viento_vuelo_mags)
@@ -102,7 +103,7 @@ plt.hist(viento_vuelo_dirs, bins=20)
 plt.xlabel('Dirección del viento (grados)')
 plt.ylabel('Frecuencia')
 plt.title('Histograma de la dirección del viento')
-#plt.show() """
+#plt.show() 
 
 #Rosa de los vientos
 #plt.figure(figsize=(8, 6))
@@ -114,7 +115,6 @@ plt.title('Histograma de la dirección del viento')
 #ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
 #plt.show()
 
-'''
 #Vectores viento en el tiempo
 #Falta corregir esta grafica
 # Vectores viento en el tiempo
@@ -128,7 +128,7 @@ ax.set_xlabel('x (m)')
 ax.set_ylabel('z (m)')
 ax.set_title('Vector de viento')
 plt.show()
-'''
+
 ###########################
 #####GRAFICAS DEL COHETE
 ############################
@@ -283,16 +283,6 @@ plt.plot(tiempos[:], nice_angle(accangs))
 muestra_tiempos(tiempos, plt)
 plt.title("Aceleración angular")
 
-""" plt.subplot(1, 4, 4)
-plt.plot(tiempos[:],)
-#plt.plot(tiempos[:], palancas[:,0],label= "comp x")
-#plt.plot(tiempos[:], palancas[:,1],label="comp y")
-#plt.plot(tiempos[:], palancas[:,2], label = "comp z")
-plt.title("Componentes del brazo de momento")
-plt.xlim(0,tiempo_apogeo+10)
-muestra_tiempos(tiempos, plt)
-#plt.legend()
-#plt.show() """
 
 
 #GRAFICA 8. Angulos
@@ -326,7 +316,6 @@ muestra_tiempos(tiempos, plt)
 plt.plot(tiempos, masavuelo)
 # plt.show()
 
-'''
 # GRAFICA 10. Trayectoria
 plt.xlabel('Alcance (m)')
 plt.ylabel('Altura (m)')
@@ -335,7 +324,8 @@ plt.plot(posiciones[:, 0], posiciones[:, 2])
 # plt.ylim(0, 10000)
 plt.gca().set_aspect("equal")
 plt.show()
-'''
+
+ """
 ####################
 # GRAFICAS 3D
 # Extract the launch and impact points
@@ -352,11 +342,10 @@ ax.plot(posiciones[:, 0], posiciones[:, 1], posiciones[:, 2])
 # Plot the launch and impact points with different colors
 ax.scatter(launch_point[0], launch_point[1], launch_point[2], c='blue', label='Punto de lanzamiento')
 ax.scatter(impact_point[0], impact_point[1], impact_point[2], c='red', label='Punto de impacto')
-#Escribir lanazamiento e impacto junto a los puntos
-ax.text(launch_point[0], launch_point[1], launch_point[2], 'Lanzamiento', color='blue')
-ax.text(impact_point[0], impact_point[1], impact_point[2], 'Impacto', color='red')
-#Escribir el tiempo de vuelo junto a la trayectoria
-ax.text(0, 0, 0, f'Tiempo de vuelo: {tiempos[-1]:.1f} s', color='black')
+#Escribir lanazamiento e impacto junto a los puntos 
+sep=100 #separacion del punto
+ax.text(launch_point[0]+sep, launch_point[1]+sep, launch_point[2]+sep, 'Lanzamiento', color='blue')
+ax.text(impact_point[0]+sep, impact_point[1]+sep, impact_point[2]+sep, 'Impacto', color='red')
 
 # Create a circle in the xy plane with a diameter of 1000 meters around the impact point
 circle_radius = 1000
@@ -367,7 +356,7 @@ circle_y = impact_point[1] + circle_radius * np.sin(circle_points)
 # Plot the circle in the xy plane
 ax.plot(circle_x, circle_y, 0, color='gray', linestyle='--', label='1000 m radio de seguridad')
 
-#Mostrar las proyecciones de la trayectoria en los 3 planos
+#Plot the projections of the trajectory in the XY, XZ, and YZ planes
 ax.plot(posiciones[:, 0], posiciones[:, 1], 0, color='purple', linestyle='--', label='Proyección en XY')
 ax.plot(posiciones[:, 0], 0, posiciones[:, 2], color='green', linestyle='--', label='Proyección en XZ')
 ax.plot(0, posiciones[:, 1], posiciones[:, 2], color='orange', linestyle='--', label='Proyección en YZ')
@@ -383,8 +372,45 @@ ax.set_title("Trayectoria del cohete Xitle en el tiempo")
 #ax.set_zlim(0, 10000)
 
 # Add legend and show plot
-ax.legend()
+#ax.legend()
+#Todos los ejes deben tener la misma escala
+ax.set_aspect('equal')
 plt.show()
+
+#Plot with 3 subplots of each plane of the trajectory
+fig, axs = plt.subplots(1, 3, figsize=(18, 6))
+axs[0].plot(posiciones[:, 0], posiciones[:, 1], 0, color='purple', linestyle='--', label='Proyección en XY')
+axs[0].set_title('Proyección en XY')
+axs[0].set_xlabel("Alcance (m)")
+axs[0].set_ylabel("Desplazamiento (m)")
+#axs[0].set_aspect('equal')
+#axs[0].set_xlim(0, 10000)
+#axs[0].set_ylim(0, 10000)
+#axs[0].set_zlim(0, 10000)
+#axs[0].legend()
+axs[1].plot(posiciones[:, 0], posiciones[:, 2], color='green', linestyle='--', label='Proyección en XZ')
+axs[1].set_title('Proyección en XZ')
+axs[1].set_xlabel("Alcance (m)")
+axs[1].set_ylabel("Altura (m)")
+#axs[1].set_aspect('equal')
+#axs[1].set_xlim(0, 10000)
+#axs[1].set_ylim(0, 10000)
+#axs[1].set_zlim(0, 10000)
+#axs[1].legend()
+axs[2].plot(posiciones[:, 1], posiciones[:, 2], color='orange', linestyle='--', label='Proyección en YZ')
+axs[2].set_title('Proyección en YZ')
+axs[2].set_xlabel("Desplazamiento (m)")
+axs[2].set_ylabel("Altura (m)")
+#axs[2].set_aspect('equal')
+#axs[2].set_xlim(0, 10000)
+#axs[2].set_ylim(0, 10000)
+#axs[2].set_zlim(0, 10000)
+#axs[2].legend()
+#axs[0].legend()
+#axs[1].legend()
+#axs[2].legend()
+plt.show()
+
 
 ##################
 fin = time.time()
