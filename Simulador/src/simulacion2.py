@@ -35,7 +35,10 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 dt=0.01 #[s]
 t_max = 1000 #[s]
 dt_out = dt
+
+#Permitir cambiar de integrador
 integrador_actual = 'Euler'
+integrador_actual = 'RungeKutta4'
 
 ######################################
 #####Agregar paracaidas
@@ -52,7 +55,7 @@ import time
 inicio = time.time()
 
 print("Simulando...")
-viento_actual = Viento(vel_base=10, vel_mean=0, vel_var=0, var_ang=0)
+viento_actual = Viento(vel_base=20, vel_mean=5, vel_var=5, var_ang=5)
 viento_actual.actualizar_viento3D()
 #viento_actual = Viento2D(vel_mean=30, vel_var=0)
 #print(viento_actual)
