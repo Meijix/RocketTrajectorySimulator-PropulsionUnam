@@ -33,9 +33,10 @@ def muestra_tiempos(tiempos, ax):
     #if tiempo_despliegue is not None:
         #ax.axvline(tiempo_despliegue, color="green", ls="--")
     #ax.legend()
-    
+
 ###############################################
 #Elegir que vuelo se va a graficar
+################################################
 #archivo_csv = 'datos_simulacion.csv'
 archivo_csv = 'datos_sim_paracaidas.csv'
 
@@ -66,7 +67,7 @@ inicio = time.time()
 print("Graficando...")
 # GRAFICAS
 ############################################
-#VIENTO
+""" #VIENTO
 #Magnitudes en el tiempo
 plt.figure(figsize=(8, 6))
 plt.plot(tiempos, viento_vuelo_mags)
@@ -101,7 +102,7 @@ plt.hist(viento_vuelo_dirs, bins=20)
 plt.xlabel('Dirección del viento (grados)')
 plt.ylabel('Frecuencia')
 plt.title('Histograma de la dirección del viento')
-#plt.show()
+#plt.show() """
 
 #Rosa de los vientos
 #plt.figure(figsize=(8, 6))
@@ -263,26 +264,26 @@ plt.legend()
 # GRAFICA 7. Theta, Velocidad y aceleración angular (derivada de theta)
 plt.figure(figsize=(16,5))
 
-plt.subplot(1, 4, 1)
+plt.subplot(1, 3, 1)
 plt.plot(tiempos[:], nice_angle(thetas))
 #plt.xlim(0,vuelo1.tiempo_apogeo+10)
 muestra_tiempos(tiempos, plt)
 plt.title("Ángulo de inclinación (Pitch)")#pitch (theta)
 
-plt.subplot(1, 4, 2)
+plt.subplot(1, 3, 2)
 plt.plot(tiempos[:], nice_angle(omegas))
 plt.axhline(0, ls="--", color="lightgray")
 #plt.xlim(0,vuelo1.tiempo_apogeo+10)
 muestra_tiempos(tiempos, plt)
 plt.title("Velocidad angular(omega)")
 
-plt.subplot(1, 4, 3)
+plt.subplot(1, 3, 3)
 plt.plot(tiempos[:], nice_angle(accangs))
 #plt.xlim(0,vuelo1.tiempo_apogeo+10)
 muestra_tiempos(tiempos, plt)
 plt.title("Aceleración angular")
 
-plt.subplot(1, 4, 4)
+""" plt.subplot(1, 4, 4)
 plt.plot(tiempos[:],)
 #plt.plot(tiempos[:], palancas[:,0],label= "comp x")
 #plt.plot(tiempos[:], palancas[:,1],label="comp y")
@@ -291,7 +292,7 @@ plt.title("Componentes del brazo de momento")
 plt.xlim(0,tiempo_apogeo+10)
 muestra_tiempos(tiempos, plt)
 #plt.legend()
-#plt.show()
+#plt.show() """
 
 
 #GRAFICA 8. Angulos
@@ -351,6 +352,11 @@ ax.plot(posiciones[:, 0], posiciones[:, 1], posiciones[:, 2])
 # Plot the launch and impact points with different colors
 ax.scatter(launch_point[0], launch_point[1], launch_point[2], c='blue', label='Punto de lanzamiento')
 ax.scatter(impact_point[0], impact_point[1], impact_point[2], c='red', label='Punto de impacto')
+#Escribir lanazamiento e impacto junto a los puntos
+ax.text(launch_point[0], launch_point[1], launch_point[2], 'Lanzamiento', color='blue')
+ax.text(impact_point[0], impact_point[1], impact_point[2], 'Impacto', color='red')
+#Escribir el tiempo de vuelo junto a la trayectoria
+ax.text(0, 0, 0, f'Tiempo de vuelo: {tiempos[-1]:.1f} s', color='black')
 
 # Create a circle in the xy plane with a diameter of 1000 meters around the impact point
 circle_radius = 1000
@@ -360,6 +366,12 @@ circle_y = impact_point[1] + circle_radius * np.sin(circle_points)
 
 # Plot the circle in the xy plane
 ax.plot(circle_x, circle_y, 0, color='gray', linestyle='--', label='1000 m radio de seguridad')
+
+#Mostrar las proyecciones de la trayectoria en los 3 planos
+ax.plot(posiciones[:, 0], posiciones[:, 1], 0, color='purple', linestyle='--', label='Proyección en XY')
+ax.plot(posiciones[:, 0], 0, posiciones[:, 2], color='green', linestyle='--', label='Proyección en XZ')
+ax.plot(0, posiciones[:, 1], posiciones[:, 2], color='orange', linestyle='--', label='Proyección en YZ')
+
 
 # Set labels, title, and limits
 ax.set_xlabel("Alcance (m)")
