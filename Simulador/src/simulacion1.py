@@ -11,9 +11,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 #Importar paquetes propios de carpeta superior Paquetes
 from Paquetes.PaqueteFisica.vuelo import Vuelo
 from Paquetes.PaqueteFisica.viento import Viento
-
-import condiciones_init as c_init
-import Xitle 
+from Simulador.src import condiciones_init as c_init
+from Simulador.src import Xitle
 
 cohete_actual = Xitle.Xitle
 

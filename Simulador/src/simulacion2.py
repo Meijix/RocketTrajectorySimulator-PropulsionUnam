@@ -13,8 +13,8 @@ from Paquetes.PaqueteFisica.vuelo import Vuelo
 from Paquetes.PaqueteFisica.viento import Viento
 from Paquetes.PaqueteFisica.cohete import Parachute
 
-import condiciones_init as c_init
-import Xitle 
+from Simulador.src import condiciones_init as c_init
+from Simulador.src import Xitle
 
 cohete_actual = Xitle.Xitle
 
