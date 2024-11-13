@@ -1,19 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-    
+from matplotlib import transforms
 
-
-def dibujar_cohete2(x_cm=3, y_cm=0.5, edge_color='b', alpha='0.8'):
-    """
-    Dibuja un cohete usando matplotlib
-    
-    Parámetros:
-    x_cm (float): Posición x del centro de masa (default 3)
-    y_cm (float): Posición y del centro de masa (default 0.5)
-    edge_color (str): Color del borde (default 'b')
-    alpha (str): Transparencia del relleno (default '0.8')
-    """
+#Se le podrian pasar las mediidas del cohete_actual
+def dibujar_cohete2():
+    #Colores
     color_cohete='navy'
     color_borde='silver'
     # Crear figura
@@ -26,7 +18,7 @@ def dibujar_cohete2(x_cm=3, y_cm=0.5, edge_color='b', alpha='0.8'):
     fin_w1 = 1.5
     fin_w2 = 2
     fin_h = 0.5
-    boattail_lenght = 0.5
+    boattail_lenght = 0.3
     
     parts = []
     
@@ -65,6 +57,18 @@ def dibujar_cohete2(x_cm=3, y_cm=0.5, edge_color='b', alpha='0.8'):
     
     return fig, parts
 
+#Función para rotar el cohete en el cm
+def rotar_cohete(fig, parts, x_cm,y_cm,angle):
+    #Transaladar y rotar el cohete
+    trans = transforms.Affine2D().translate(-x_cm, -y_cm) + transforms.Affine2D().rotate_deg(angle)  + plt.gca().transData #+ transforms.Affine2D().translate(xpos, ypos)
+    for p in parts:
+        p.set_transform(trans)
+    return fig, parts 
+
+
 # Ejemplo de uso:
 fig, parts = dibujar_cohete2()
+#usar rotar_cohete para rotar el cohete
+fig, parts = rotar_cohete(fig, parts,3,0.5,30)
+
 plt.show()
