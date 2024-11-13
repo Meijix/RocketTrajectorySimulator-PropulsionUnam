@@ -111,23 +111,94 @@ class AdaptiveEuler:
                 dt_new = S * dt * (tol / error) ** 0.5
                 dt = dt_new  # Actualizar dt para el próximo intento
 
+#Metodo de Runge-Kutta 4 adaptivo
+class AdaptiveRungeKutta4:
+    def __init__(self, fun_derivs):
+        self.fun_derivadas = fun_derivs
+        self.tol = 1
+        self.S = 0.9
+
+    def step(self, t, state, dt):
+        retry = True
+        tol = self.tol
+        S = self.S
+
+        while retry:
+            # Estimar el paso de Runge-Kutta 4 con un paso completo
+            k1 = self.fun_derivadas(t, state)
+            k2 = self.fun_derivadas(t + 0.5 * dt, state +
+                                    0.5 * dt * k1)
+            k3 = self.fun_derivadas(t + 0.5 * dt, state +
+                                    0.5 * dt * k2)
+            k4 = self.fun_derivadas(t + dt, state + dt * k3)
+            state_full = state + dt * (k1 + 2 * k2 + 2 * k3 + k4) / 6
+
+            # Estimar el paso de Runge-Kutta 4 con dos pasos a la mitad
+            dt_half = dt / 2
+            k1_half = self.fun_derivadas(t, state)
+            k2_half = self.fun_derivadas(t + 0.5 * dt_half, state + 0.5 * dt_half * k1_half)
+            k3_half = self.fun_derivadas(t + 0.5 * dt_half, state + 0.5 * dt_half * k2_half)
+            k4_half = self.fun_derivadas(t + dt_half, state + dt_half * k3_half)
+            state_half = state + dt_half * (k1_half + 2 * k2_half + 2 * k3_half + k4_half) / 6
+            state_half = state_half + dt_half * (k1_half + 2 * k2_half + 2 * k3_half + k4_half) / 6
+            # Calcular el error
+            error = np.linalg.norm(state_half - state_full)
+            # Calcular nuevo tamaño de paso basado en el error
+            if error < tol:
+                # Si el error es aceptable, incrementar el tamaño del paso
+                print('Error aceptable--Incrementando tamaño del paso')
+                dt_new = S * dt * (tol / error) ** 0.5
+                retry = False  # No necesitamos repetir el paso
+                print('Avanzando...con dt_new', dt_new)
+                return state_full, dt_new
+            else:
+                # Si el error es demasiado grande, reducir el tamaño del paso y repetir
+                print('Error no aceptable--Reduciendo tamaño del paso')
+                dt_new = S * dt * (tol / error) ** 0.5
+                dt = dt_new  # Actualizar dt para el próximo intento
+
+#Metodo de Runge-Kutta 2 adaptivo
+class AdaptiveRungeKutta2:
+    def __init__(self, fun_derivs):
+        self.fun_derivadas = fun_derivs
+        self.tol = 1e-4
+        self.S = 0.9
+        def step(self, t, state, dt):
+            # Estimar el paso de Runge-Kutta 2 con un paso completo
+            k1 = self.fun_derivadas(t, state)
+            k2 = self.fun_derivadas(t + dt, state + dt * k1)
+            state_full = state + dt * (k1 + k2) / 2
+            # Calcular el error
+            error = np.linalg.norm(k2 - k1)
+            # Calcular nuevo tamaño de paso basado en el error
+            if error < self.tol:
+                # Si el error es aceptable, incrementar el tamaño del paso
+                dt_new = self.S * dt * (self.tol / error) ** 0.5
+                return state_full, dt_new
+            else:
+                # Si el error es demasiado grande, reducir el tamaño del paso y repetir
+                dt_new = self.S * dt * (self.tol / error) ** 0.5
+                return state, dt_new
+
+
 if __name__ == '__main__':
     #Ejemplo para los metodos adptivos
-    def fun_derivadas(t, state):
-        x, y, z = state
-        dxdt = -y
-        dydt = x
-        dzdt = 0
-        return np.array([dxdt, dydt, dzdt])
+    #FUNCION SIMPLE DE DERIVADAS
+    def fun_derivadas_simple(t, state):
+        x =state[0]
+        dxdt = x**2 + x
+        return np.array([dxdt])
 
     #Elegir el integrador adaptivo a probar
-    integrador = AdaptiveEuler(fun_derivadas)
+    #integrador = AdaptiveEuler(fun_derivadas)
     #integrador = RKF45(fun_derivadas)
+    integrador = AdaptiveRungeKutta4(fun_derivadas_simple)
 
-    state = np.array([1, 0, 0])
+    #state = np.array([1, 0, 0])
+    state = np.array([1, 0])
     t = 0
-    dt = 0.01
-    t_max = 80
+    dt = 0.1
+    t_max = 10
     it = 1
 
     print('Estado inicial:', state)
@@ -147,13 +218,13 @@ if __name__ == '__main__':
     state_values = np.array([integrador.step(t, state, 0.01)[0] for t in t_values])
     # Extraer las coordenadas x, y, z
     x_values = state_values[:, 0]
-    y_values = state_values[:, 1]
-    z_values = state_values[:, 2]
-    # Graficar la trayectoria en 3D
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.plot(x_values, y_values, z_values)
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
+
+
+    # Graficar la trayectoria en el plano xy
+    plt.figure(figsize=(8, 8))
+    plt.plot(t_values, x_values, label='Solución de la EDO')
+    plt.xlabel('x')
+    plt.ylabel('tiempo')
+    plt.title('Solución de la EDO')
+    plt.legend()
     plt.show()
