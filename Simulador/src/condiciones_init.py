@@ -12,12 +12,12 @@ from Paquetes.PaqueteFisica.viento import Viento
 
 #riel inicial
 riel = Torrelanzamiento(10, 88)
-""" #lugar de lanzamiento
+#lugar de lanzamiento
 latitud_cord = 19.5
 longitud_cord = -98.8
 altitud_cord = 20
 #Indicar fecha actual
-fecha = "2024-11-06" """
+fecha = "2024-11-06" #año-mes-dia
 
 #viento
 #viento_actual = Viento( 10, 2, 0, 0)
