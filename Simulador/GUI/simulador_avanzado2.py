@@ -10,14 +10,20 @@ from math import pi
 import time
 from datetime import datetime
 
+import sys
+import os
+
+# Agregar la ruta del directorio que contiene los paquetes al sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 # Import necessary modules
 from Simulador.src.condiciones_init import *
-from Simulador.PaqueteFisica.Vuelo import *
-from Simulador.PaqueteFisica.Viento import Viento
-from Simulador.PaqueteFisica.riel import Torrelanzamiento
-from Simulador.PaqueteFisica.atmosfera import atmosfera
-from Simulador.PaqueteFisica.Componentes import Componente, Cono, Cilindro, Aletas, Boattail
-from Simulador.PaqueteFisica.cohete import Cohete
+from Paquetes.PaqueteFisica.vuelo import *
+from Paquetes.PaqueteFisica.viento import Viento
+from Paquetes.PaqueteFisica.riel import Torrelanzamiento
+from Paquetes.PaqueteFisica.atmosfera import atmosfera
+from Paquetes.PaqueteFisica.componentes import Componente, Cono, Cilindro, Aletas, Boattail
+from Paquetes.PaqueteFisica.cohete import Cohete
 
 class SimuladorCohetesAvanzado:
     def __init__(self, master):
