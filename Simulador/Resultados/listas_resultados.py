@@ -1,10 +1,15 @@
 ##Listas de resultados importantes
 
 import matplotlib.pyplot as plt
+import sys
+import os
+
+# Agregar la ruta del directorio que contiene los paquetes al sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 #from cohete import*
 from Simulador.src.Xitle import *
-from Simulador.utils.dibujar_cohete import *
+from Paquetes.utils.dibujar_cohete import *
 
 CG_list=[]
 CP_list=[]
