@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 #from cohete import*
 from Simulador.src.Xitle import *
-from Paquetes.utils.dibujar_cohete import *
+from Paquetes.utils.dibujar_cohete import dibujar_cohete
 
 CG_list=[]
 CP_list=[]
@@ -79,7 +79,7 @@ plt.title("CG y CP posicionados de los componentes en Cohete Xitle2")
 plt.show()
 '''
 # Dibujar un cohete
-dibujar_cohete(4.2, 0, 180, 3.5)
+dibujar_cohete(4.2, 0, 180, 3.5, plt.gca())
 
 
 print(CG_list)
