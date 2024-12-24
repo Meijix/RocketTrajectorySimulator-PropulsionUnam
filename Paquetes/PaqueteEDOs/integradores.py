@@ -200,12 +200,13 @@ if __name__ == '__main__':
     #integrador = AdaptiveEuler(fun_derivadas)
     #integrador = RKF45(fun_derivadas)
     integrador = Euler(fun_derivadas_ejemplo)
+    integrador = RungeKutta4(fun_derivadas_ejemplo)
 
     #state = np.array([1, 0])
     # Definir las condiciones iniciales
     state0 = np.array([1, 2, 3])
     t = 0
-    dt = 0.1
+    dt = 0.02
     t_max = 10
     it = 1
     t_values = []
@@ -234,12 +235,36 @@ if __name__ == '__main__':
     #####################################
     from scipy.integrate import solve_ivp
     #print(t_values)
-    state_values_scipy = solve_ivp(fun_derivadas_ejemplo, (0, t_max), state0, t_eval=t_values, method='RK45').y.T
-    print('Estado final scipy:', state_values_scipy[-1])
-    # Extraer las coordenadas x, y, z
-    x_values_scipy = state_values_scipy[:, 0]
-    y_values_scipy = state_values_scipy[:, 1]
-    z_values_scipy = state_values_scipy[:, 2]
+
+    state_values_LOSDA = solve_ivp(fun_derivadas_ejemplo, (0, t_max), state0, t_eval=t_values, method='LSODA').y.T
+    state_values_RK23 = solve_ivp(fun_derivadas_ejemplo, (0, t_max), state0, t_eval=t_values, method='RK23').y.T
+    state_values_RK45 = solve_ivp(fun_derivadas_ejemplo, (0, t_max), state0, t_eval=t_values, method='RK45').y.T
+    state_values_DOP853 = solve_ivp(fun_derivadas_ejemplo, (0, t_max), state0, t_eval=t_values, method='DOP853').y.T
+
+    print('Estado final LOSDA:', state_values_LOSDA[-1])
+    print('Estado final RK23:', state_values_RK23[-1])
+    print('Estado final RK45:', state_values_RK45[-1])
+    print('Estado final DOP853:', state_values_DOP853[-1])
+
+    #Extraer las coordenadas x, y, z
+    x_values_LOSDA = state_values_LOSDA[:, 0]
+    y_values_LOSDA = state_values_LOSDA[:, 1]
+    z_values_LOSDA = state_values_LOSDA[:, 2]
+
+    #Extraer las coordenadas x, y, z
+    x_values_RK23 = state_values_RK23[:, 0]
+    y_values_RK23 = state_values_RK23[:, 1]
+    z_values_RK23 = state_values_RK23[:, 2]
+
+    #Extraer las coordenadas x, y, z
+    x_values_RK45 = state_values_RK45[:, 0]
+    y_values_RK45 = state_values_RK45[:, 1]
+    z_values_RK45 = state_values_RK45[:, 2]
+
+    #Extraer las coordenadas x, y, z
+    x_values_DOP853 = state_values_DOP853[:, 0]
+    y_values_DOP853 = state_values_DOP853[:, 1]
+    z_values_DOP853 = state_values_DOP853[:, 2]
 
 
     # Graficar 
@@ -247,8 +272,11 @@ if __name__ == '__main__':
     fig, axs = plt.subplots(3, 1, figsize=(8, 12))
 
     # Gráfica para la coordenada x
-    axs[0].plot(t_values, x_values, label='x método artesanal', color='blue')
-    axs[0].plot(t_values, x_values_scipy, label='x scipy', color='red', linestyle='--')
+    axs[0].plot(t_values, x_values, label='artesanal', color='blue')
+    axs[0].plot(t_values, x_values_LOSDA, label='LOSDA', color='green', linestyle='-.')
+    axs[0].plot(t_values, x_values_RK23, label='RK23', color='purple', linestyle=':')
+    axs[0].plot(t_values, x_values_RK45, label='RK45', color='orange', linestyle='-.')
+    axs[0].plot(t_values, x_values_DOP853, label='DOP853', color='black', linestyle=':')
     #axs[0].set_xlabel('Tiempo')
     axs[0].set_ylabel('x')
     axs[0].set_title('Coordenada x')
@@ -256,8 +284,11 @@ if __name__ == '__main__':
     axs[0].grid(True)
 
     # Gráfica para la coordenada y
-    axs[1].plot(t_values, y_values, label='y método artesanal', color='blue')
-    axs[1].plot(t_values, y_values_scipy, label='y scipy', color='red', linestyle='--')
+    axs[1].plot(t_values, y_values, label='artesanal', color='blue')
+    axs[1].plot(t_values, y_values_LOSDA, label='LOSDA', color='green', linestyle='-.')
+    axs[1].plot(t_values, y_values_RK23, label='RK23', color='purple', linestyle=':')
+    axs[1].plot(t_values, y_values_RK45, label='RK45', color='orange', linestyle='-.')
+    axs[1].plot(t_values, y_values_DOP853, label='DOP853', color='black', linestyle=':')
     #axs[1].set_xlabel('Tiempo')
     axs[1].set_ylabel('y')
     axs[1].set_title('Coordenada y')
@@ -265,8 +296,11 @@ if __name__ == '__main__':
     axs[1].grid(True)
 
     # Gráfica para la coordenada z
-    axs[2].plot(t_values, z_values, label='z método artesanal', color='blue')
-    axs[2].plot(t_values, z_values_scipy, label='z scipy', color='red', linestyle='--')
+    axs[2].plot(t_values, z_values, label='artesanal', color='blue')
+    axs[2].plot(t_values, z_values_LOSDA, label='LOSDA', color='green', linestyle='-.')
+    axs[2].plot(t_values, z_values_RK23, label='RK23', color='purple', linestyle=':')
+    axs[2].plot(t_values, z_values_RK45, label='RK45', color='orange', linestyle='-.')
+    axs[2].plot(t_values, z_values_DOP853, label='DOP853', color='black', linestyle=':')
     axs[2].set_xlabel('Tiempo')
     axs[2].set_ylabel('z')
     axs[2].set_title('Coordenada z')
