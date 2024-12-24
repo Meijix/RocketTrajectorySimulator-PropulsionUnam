@@ -165,7 +165,7 @@ class AdaptiveRungeKutta2:
         self.fun_derivadas = fun_derivs
         self.tol = 1e-4
         self.S = 0.9
-        
+
     def step(self, t, state, dt):
         # Estimar el paso de Runge-Kutta 2 con un paso completo
         k1 = self.fun_derivadas(t, state)
@@ -210,7 +210,6 @@ class DormanPrince853:
 if __name__ == '__main__':
     #Ejemplo para los metodos adptivos
     #FUNCION SIMPLE DE DERIVADAS
-    
     # Definir la función de derivadas
     def fun_derivadas_ejemplo(t, state):
         # Derivadas de x, y, z
@@ -221,18 +220,32 @@ if __name__ == '__main__':
         dydt = x
         dzdt = -z
         return np.array([dxdt, dydt, dzdt])
+    
+    def sol_exacta(t, state0):
+        x0,y0,z0 = state0
+        x = x0* np.cos(t)+ y0*np.sin(t)
+        y = -x0* np.sin(t)+ y0*np.cos(t)
+        z = z0* np.exp(-t)
+        return np.array([x, y, z])
+    
+
 
     #Elegir el integrador
     #integrador = AdaptiveEuler(fun_derivadas)
     #integrador = RKF45(fun_derivadas)
     integrador = Euler(fun_derivadas_ejemplo)
     integrador = RungeKutta4(fun_derivadas_ejemplo)
+    integrador = RKF45(fun_derivadas_ejemplo)
+    #integrador = AdaptiveEuler(fun_derivadas_ejemplo) ##masomenos funciona
+    #integrador = AdaptiveRungeKutta4(fun_derivadas_ejemplo) ##este metodo no funciona
+    #integrador = AdaptiveRungeKutta2(fun_derivadas_ejemplo) ##este metodo no funciona
+    #integrador = DormanPrince853(fun_derivadas_ejemplo) ##este metodo no funciona
 
     #state = np.array([1, 0])
     # Definir las condiciones iniciales
     state0 = np.array([1, 2, 3])
     t = 0
-    dt = 0.02
+    dt = 0.01
     t_max = 10
     it = 1
     t_values = []
@@ -249,6 +262,14 @@ if __name__ == '__main__':
         state_values.append(estado_nuevo)
         it += 1
         t += dt_new
+
+    #Solucion exacta
+    time = np.linspace(0, t_max, 10000)
+    sol = sol_exacta(time, state0)
+    x_exacta = sol[0]
+    y_exacta = sol[1]
+    z_exacta = sol[2]
+
 
     #imprime el ultimo array
     print('Estado final artesanal:', state_values[-1])
@@ -298,6 +319,7 @@ if __name__ == '__main__':
 
     # Gráfica para la coordenada x
     axs[0].plot(t_values, x_values, label='artesanal', color='blue')
+    axs[0].plot(time, x_exacta, label='exacta', color='red', linestyle='--')
     axs[0].plot(t_values, x_values_LOSDA, label='LOSDA', color='green', linestyle='-.')
     axs[0].plot(t_values, x_values_RK23, label='RK23', color='purple', linestyle=':')
     axs[0].plot(t_values, x_values_RK45, label='RK45', color='orange', linestyle='-.')
@@ -310,6 +332,7 @@ if __name__ == '__main__':
 
     # Gráfica para la coordenada y
     axs[1].plot(t_values, y_values, label='artesanal', color='blue')
+    axs[1].plot(time, y_exacta, label='exacta', color='red', linestyle='--')
     axs[1].plot(t_values, y_values_LOSDA, label='LOSDA', color='green', linestyle='-.')
     axs[1].plot(t_values, y_values_RK23, label='RK23', color='purple', linestyle=':')
     axs[1].plot(t_values, y_values_RK45, label='RK45', color='orange', linestyle='-.')
@@ -322,6 +345,7 @@ if __name__ == '__main__':
 
     # Gráfica para la coordenada z
     axs[2].plot(t_values, z_values, label='artesanal', color='blue')
+    axs[2].plot(time, z_exacta, label='exacta', color='red', linestyle='--')
     axs[2].plot(t_values, z_values_LOSDA, label='LOSDA', color='green', linestyle='-.')
     axs[2].plot(t_values, z_values_RK23, label='RK23', color='purple', linestyle=':')
     axs[2].plot(t_values, z_values_RK45, label='RK45', color='orange', linestyle='-.')
