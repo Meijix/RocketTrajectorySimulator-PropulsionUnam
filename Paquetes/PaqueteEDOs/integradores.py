@@ -1,3 +1,4 @@
+from scipy.integrate import solve_ivp
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -75,7 +76,8 @@ class RKF45:
                 dt = dt_nuevo
 
         return zkp, dt
-    
+
+#############################################
 #Metodo de Euler adaptivo
 class AdaptiveEuler:
     def __init__(self, fun_derivs):
@@ -163,22 +165,46 @@ class AdaptiveRungeKutta2:
         self.fun_derivadas = fun_derivs
         self.tol = 1e-4
         self.S = 0.9
-        def step(self, t, state, dt):
-            # Estimar el paso de Runge-Kutta 2 con un paso completo
-            k1 = self.fun_derivadas(t, state)
-            k2 = self.fun_derivadas(t + dt, state + dt * k1)
-            state_full = state + dt * (k1 + k2) / 2
-            # Calcular el error
-            error = np.linalg.norm(k2 - k1)
-            # Calcular nuevo tamaño de paso basado en el error
-            if error < self.tol:
-                # Si el error es aceptable, incrementar el tamaño del paso
-                dt_new = self.S * dt * (self.tol / error) ** 0.5
-                return state_full, dt_new
-            else:
-                # Si el error es demasiado grande, reducir el tamaño del paso y repetir
-                dt_new = self.S * dt * (self.tol / error) ** 0.5
-                return state, dt_new
+        
+    def step(self, t, state, dt):
+        # Estimar el paso de Runge-Kutta 2 con un paso completo
+        k1 = self.fun_derivadas(t, state)
+        k2 = self.fun_derivadas(t + dt, state + dt * k1)
+        state_full = state + dt * (k1 + k2) / 2
+        # Calcular el error
+        error = np.linalg.norm(k2 - k1)
+        # Calcular nuevo tamaño de paso basado en el error
+        if error < self.tol:
+            # Si el error es aceptable, incrementar el tamaño del paso
+            dt_new = self.S * dt * (self.tol / error) ** 0.5
+            return state_full, dt_new
+        else:
+            # Si el error es demasiado grande, reducir el tamaño del paso y repetir
+            dt_new = self.S * dt * (self.tol / error) ** 0.5
+            return state, dt_new
+## Metodo Dormand-Prince 853
+class DormanPrince853:
+    def __init__(self, fun_derivs, tol=1e-4, S=0.9):
+        self.fun_derivadas = fun_derivs
+        self.tol = tol
+        self.S = S
+
+    def step(self, t, state, dt):
+        # Estimar el paso de Runge-Kutta 2 con un paso completo
+        k1 = self.fun_derivadas(t, state)
+        k2 = self.fun_derivadas(t + dt, state + dt * k1)
+        state_full = state + dt * (k1 + k2) / 2
+        # Calcular el error
+        error = np.linalg.norm(k2 - k1)
+        # Calcular nuevo tamaño de paso basado en el error
+        if error < self.tol:
+            # Si el error es aceptable, incrementar el tamaño del paso
+            dt_new = self.S * dt * (self.tol / error) ** 0.5
+            return state_full, dt_new
+        else:
+            # Si el error es demasiado grande, reducir el tamaño del paso y repetir
+            dt_new = self.S * dt * (self.tol / error) ** 0.5
+            return state, dt_new
 
 
 if __name__ == '__main__':
@@ -233,7 +259,6 @@ if __name__ == '__main__':
     z_values = [state[2] for state in state_values]
 
     #####################################
-    from scipy.integrate import solve_ivp
     #print(t_values)
 
     state_values_LOSDA = solve_ivp(fun_derivadas_ejemplo, (0, t_max), state0, t_eval=t_values, method='LSODA').y.T
