@@ -6,7 +6,6 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import pandas as pd
 import json
-from math import pi
 import time
 from datetime import datetime
 
