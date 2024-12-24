@@ -206,23 +206,26 @@ if __name__ == '__main__':
     state0 = np.array([1, 2, 3])
     t = 0
     dt = 0.1
-    t_max = 20
+    t_max = 10
     it = 1
     t_values = []
     state_values = []
     print('Estado inicial:', state0)
+    state = state0
 
     while t < t_max:
-        state, dt_new = integrador.step(t, state0, dt)
+        estado_nuevo, dt_new = integrador.step(t, state, dt)
         #print(f'Iteración {it}: t={t:.2f}, state={state}')
         #print('dt_new', dt_new)
-        it += 1
+        state = estado_nuevo
         t_values.append(t)
+        state_values.append(estado_nuevo)
+        it += 1
         t += dt_new
-        state_values.append(state)
 
     #imprime el ultimo array
     print('Estado final artesanal:', state_values[-1])
+    #print('estados:', state_values)
     # Extraer las coordenadas x, y, z
     x_values = [state[0] for state in state_values]
     y_values = [state[1] for state in state_values]
@@ -230,7 +233,8 @@ if __name__ == '__main__':
 
     #####################################
     from scipy.integrate import solve_ivp
-    state_values_scipy = solve_ivp(fun_derivadas_ejemplo, (0, t_max), state0, t_eval=t_values).y.T
+    #print(t_values)
+    state_values_scipy = solve_ivp(fun_derivadas_ejemplo, (0, t_max), state0, t_eval=t_values, method='RK45').y.T
     print('Estado final scipy:', state_values_scipy[-1])
     # Extraer las coordenadas x, y, z
     x_values_scipy = state_values_scipy[:, 0]
@@ -245,18 +249,18 @@ if __name__ == '__main__':
     # Gráfica para la coordenada x
     axs[0].plot(t_values, x_values, label='x método artesanal', color='blue')
     axs[0].plot(t_values, x_values_scipy, label='x scipy', color='red', linestyle='--')
-    axs[0].set_xlabel('Tiempo')
+    #axs[0].set_xlabel('Tiempo')
     axs[0].set_ylabel('x')
-    axs[0].set_title('Comparación de métodos para la coordenada x')
+    axs[0].set_title('Coordenada x')
     axs[0].legend()
     axs[0].grid(True)
 
     # Gráfica para la coordenada y
     axs[1].plot(t_values, y_values, label='y método artesanal', color='blue')
     axs[1].plot(t_values, y_values_scipy, label='y scipy', color='red', linestyle='--')
-    axs[1].set_xlabel('Tiempo')
+    #axs[1].set_xlabel('Tiempo')
     axs[1].set_ylabel('y')
-    axs[1].set_title('Comparación de métodos para la coordenada y')
+    axs[1].set_title('Coordenada y')
     axs[1].legend()
     axs[1].grid(True)
 
@@ -265,7 +269,7 @@ if __name__ == '__main__':
     axs[2].plot(t_values, z_values_scipy, label='z scipy', color='red', linestyle='--')
     axs[2].set_xlabel('Tiempo')
     axs[2].set_ylabel('z')
-    axs[2].set_title('Comparación de métodos para la coordenada z')
+    axs[2].set_title('Coordenada z')
     axs[2].legend()
     axs[2].grid(True)
 
