@@ -240,37 +240,37 @@ if __name__ == '__main__':
 
     # Graficar 
     # Crear subgráficas para cada coordenada
-fig, axs = plt.subplots(3, 1, figsize=(8, 12))
+    fig, axs = plt.subplots(3, 1, figsize=(8, 12))
 
-# Gráfica para la coordenada x
-axs[0].plot(t_values, x_values, label='x método artesanal', color='blue')
-axs[0].plot(t_values, x_values_scipy, label='x scipy', color='red', linestyle='--')
-axs[0].set_xlabel('Tiempo')
-axs[0].set_ylabel('x')
-axs[0].set_title('Comparación de métodos para la coordenada x')
-axs[0].legend()
-axs[0].grid(True)
+    # Gráfica para la coordenada x
+    axs[0].plot(t_values, x_values, label='x método artesanal', color='blue')
+    axs[0].plot(t_values, x_values_scipy, label='x scipy', color='red', linestyle='--')
+    axs[0].set_xlabel('Tiempo')
+    axs[0].set_ylabel('x')
+    axs[0].set_title('Comparación de métodos para la coordenada x')
+    axs[0].legend()
+    axs[0].grid(True)
 
-# Gráfica para la coordenada y
-axs[1].plot(t_values, y_values, label='y método artesanal', color='blue')
-axs[1].plot(t_values, y_values_scipy, label='y scipy', color='red', linestyle='--')
-axs[1].set_xlabel('Tiempo')
-axs[1].set_ylabel('y')
-axs[1].set_title('Comparación de métodos para la coordenada y')
-axs[1].legend()
-axs[1].grid(True)
+    # Gráfica para la coordenada y
+    axs[1].plot(t_values, y_values, label='y método artesanal', color='blue')
+    axs[1].plot(t_values, y_values_scipy, label='y scipy', color='red', linestyle='--')
+    axs[1].set_xlabel('Tiempo')
+    axs[1].set_ylabel('y')
+    axs[1].set_title('Comparación de métodos para la coordenada y')
+    axs[1].legend()
+    axs[1].grid(True)
 
-# Gráfica para la coordenada z
-axs[2].plot(t_values, z_values, label='z método artesanal', color='blue')
-axs[2].plot(t_values, z_values_scipy, label='z scipy', color='red', linestyle='--')
-axs[2].set_xlabel('Tiempo')
-axs[2].set_ylabel('z')
-axs[2].set_title('Comparación de métodos para la coordenada z')
-axs[2].legend()
-axs[2].grid(True)
+    # Gráfica para la coordenada z
+    axs[2].plot(t_values, z_values, label='z método artesanal', color='blue')
+    axs[2].plot(t_values, z_values_scipy, label='z scipy', color='red', linestyle='--')
+    axs[2].set_xlabel('Tiempo')
+    axs[2].set_ylabel('z')
+    axs[2].set_title('Comparación de métodos para la coordenada z')
+    axs[2].legend()
+    axs[2].grid(True)
 
-# Ajustar el layout para que no se solapen las subgráficas
-plt.tight_layout()
+    # Ajustar el layout para que no se solapen las subgráficas
+    plt.tight_layout()
 
-# Mostrar la gráfica
-plt.show()
+    # Mostrar la gráfica
+    plt.show()
