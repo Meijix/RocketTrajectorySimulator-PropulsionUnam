@@ -184,47 +184,93 @@ class AdaptiveRungeKutta2:
 if __name__ == '__main__':
     #Ejemplo para los metodos adptivos
     #FUNCION SIMPLE DE DERIVADAS
-    def fun_derivadas_simple(t, state):
-        x =state[0]
-        dxdt = x**2 + x
-        return np.array([dxdt])
+    
+    # Definir la función de derivadas
+    def fun_derivadas_ejemplo(t, state):
+        # Derivadas de x, y, z
+        x = state[0]
+        y = state[1]
+        z = state[2]
+        dxdt = -y
+        dydt = x
+        dzdt = -z
+        return np.array([dxdt, dydt, dzdt])
 
-    #Elegir el integrador adaptivo a probar
+    #Elegir el integrador
     #integrador = AdaptiveEuler(fun_derivadas)
     #integrador = RKF45(fun_derivadas)
-    integrador = AdaptiveRungeKutta4(fun_derivadas_simple)
+    integrador = Euler(fun_derivadas_ejemplo)
 
-    #state = np.array([1, 0, 0])
-    state = np.array([1, 0])
+    #state = np.array([1, 0])
+    # Definir las condiciones iniciales
+    state0 = np.array([1, 2, 3])
     t = 0
     dt = 0.1
-    t_max = 10
+    t_max = 20
     it = 1
-
-    print('Estado inicial:', state)
+    t_values = []
+    state_values = []
+    print('Estado inicial:', state0)
 
     while t < t_max:
-        state, dt_new = integrador.step(t, state, dt)
-
-        print(f'Iteración {it}: t={t:.2f}, state={state}')
-        print('dt_new', dt_new)
+        state, dt_new = integrador.step(t, state0, dt)
+        #print(f'Iteración {it}: t={t:.2f}, state={state}')
+        #print('dt_new', dt_new)
         it += 1
+        t_values.append(t)
         t += dt_new
+        state_values.append(state)
 
-    #Grafica la solucion de ejemplo
-    # Crear un rango de valores de t
-    t_values = np.linspace(0, t_max, 1000)
-    # Calcular el estado en cada valor de t
-    state_values = np.array([integrador.step(t, state, 0.01)[0] for t in t_values])
+    #imprime el ultimo array
+    print('Estado final artesanal:', state_values[-1])
     # Extraer las coordenadas x, y, z
-    x_values = state_values[:, 0]
+    x_values = [state[0] for state in state_values]
+    y_values = [state[1] for state in state_values]
+    z_values = [state[2] for state in state_values]
+
+    #####################################
+    from scipy.integrate import solve_ivp
+    state_values_scipy = solve_ivp(fun_derivadas_ejemplo, (0, t_max), state0, t_eval=t_values).y.T
+    print('Estado final scipy:', state_values_scipy[-1])
+    # Extraer las coordenadas x, y, z
+    x_values_scipy = state_values_scipy[:, 0]
+    y_values_scipy = state_values_scipy[:, 1]
+    z_values_scipy = state_values_scipy[:, 2]
 
 
-    # Graficar la trayectoria en el plano xy
-    plt.figure(figsize=(8, 8))
-    plt.plot(t_values, x_values, label='Solución de la EDO')
-    plt.xlabel('x')
-    plt.ylabel('tiempo')
-    plt.title('Solución de la EDO')
-    plt.legend()
-    plt.show()
+    # Graficar 
+    # Crear subgráficas para cada coordenada
+fig, axs = plt.subplots(3, 1, figsize=(8, 12))
+
+# Gráfica para la coordenada x
+axs[0].plot(t_values, x_values, label='x método artesanal', color='blue')
+axs[0].plot(t_values, x_values_scipy, label='x scipy', color='red', linestyle='--')
+axs[0].set_xlabel('Tiempo')
+axs[0].set_ylabel('x')
+axs[0].set_title('Comparación de métodos para la coordenada x')
+axs[0].legend()
+axs[0].grid(True)
+
+# Gráfica para la coordenada y
+axs[1].plot(t_values, y_values, label='y método artesanal', color='blue')
+axs[1].plot(t_values, y_values_scipy, label='y scipy', color='red', linestyle='--')
+axs[1].set_xlabel('Tiempo')
+axs[1].set_ylabel('y')
+axs[1].set_title('Comparación de métodos para la coordenada y')
+axs[1].legend()
+axs[1].grid(True)
+
+# Gráfica para la coordenada z
+axs[2].plot(t_values, z_values, label='z método artesanal', color='blue')
+axs[2].plot(t_values, z_values_scipy, label='z scipy', color='red', linestyle='--')
+axs[2].set_xlabel('Tiempo')
+axs[2].set_ylabel('z')
+axs[2].set_title('Comparación de métodos para la coordenada z')
+axs[2].legend()
+axs[2].grid(True)
+
+# Ajustar el layout para que no se solapen las subgráficas
+plt.tight_layout()
+
+# Mostrar la gráfica
+plt.show()
