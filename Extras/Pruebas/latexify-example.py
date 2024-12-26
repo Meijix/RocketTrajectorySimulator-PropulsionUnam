@@ -25,19 +25,3 @@ def der_gravedad_arrastre(t, state):
 
 der_gravedad_arrastre
 print(der_gravedad_arrastre)
-
-
-# latexify.algorithmic generates an algorithmic environment instead of an equation.
-@latexify.algorithmic
-def der_gravedad_arrastre(t, state):
-    v = state[1]
-    if v == 0:
-        Drag = 0
-    else:
-        Drag = (D_mag/m) * (v**2) * np.sign(v)
-    
-    derivs = np.array((v, -g - Drag))
-    #print(derivs)
-    return derivs
-
-print(der_gravedad_arrastre)  # The function is displayed as an algorithm.
