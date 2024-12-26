@@ -1,6 +1,4 @@
 #Caso 2: Gravedad + Arrastre cuadratico y masa cte
-
-
 import sys
 import os
 import numpy as np
@@ -26,7 +24,7 @@ def der_gravedad_arrastre(t, state):
     derivs = np.array((v, -g - Drag))
     #print(derivs)
     return derivs
-import numpy as np
+
 
 def sol_analitica_gravedad_arrastre(state, t, m, g, D_mag):
     z0= state[0]
