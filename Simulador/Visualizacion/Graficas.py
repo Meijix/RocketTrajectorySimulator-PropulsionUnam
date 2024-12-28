@@ -415,6 +415,7 @@ plt.show()
 
 ##################
 fin = time.time()
-minutos = (fin-inicio)/60
-sec_restantes = (fin-inicio)%60
-print(f"Tiempo graficando: {minutos:.1f}sm {sec_restantes:.1f}s")
+secs = fin-inicio
+minutos = int(secs/60)
+sec_restantes = secs - (minutos*60)
+print(f"Tiempo graficando: {minutos:.1f}min {sec_restantes:.1f}s")
