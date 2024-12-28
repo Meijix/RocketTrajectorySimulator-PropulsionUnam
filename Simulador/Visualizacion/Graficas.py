@@ -41,10 +41,14 @@ def muestra_tiempos(tiempos, ax):
 #archivo_csv = 'datos_simulacion.csv'
 #archivo_csv = 'datos_sim_paracaidas.csv'
 archivo_csv = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\src\datos_sim_paracaidas.csv'
+archivo_csv = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\src\datos_simulacion.csv'
 
 #archivo_json = 'datos_simulacion.json'
 #archivo_json = 'datos_sim_paracaidas.json'
 archivo_json = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\src\datos_sim_paracaidas.json'
+
+archivo_json= r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\src\datos_simulacion.json'
+
 
 ###############################################
 # Leer los datos de la simulación desde el archivo CSV
@@ -373,10 +377,8 @@ ax.set_title("Trayectoria del cohete Xitle en el tiempo")
 #ax.set_zlim(0, 10000)
 
 # Add legend and show plot
-#ax.legend()
-#Todos los ejes deben tener la misma escala
-ax.set_aspect('equal')
-#plt.show()
+ax.legend()
+ax.set_box_aspect([1, 1, 1])  # Aspect ratio is 1:1:1
 
 #Plot with 3 subplots of each plane of the trajectory
 fig, axs = plt.subplots(1, 3, figsize=(14, 5))
@@ -384,32 +386,17 @@ axs[0].plot(posiciones[:, 0], posiciones[:, 1], 0, color='purple', linestyle='--
 axs[0].set_title('Proyección en XY')
 axs[0].set_xlabel("Alcance (m)")
 axs[0].set_ylabel("Desplazamiento (m)")
-#axs[0].set_aspect('equal')
-#axs[0].set_xlim(0, 10000)
-#axs[0].set_ylim(0, 10000)
-#axs[0].set_zlim(0, 10000)
-#axs[0].legend()
+
 axs[1].plot(posiciones[:, 0], posiciones[:, 2], color='green', linestyle='--', label='Proyección en XZ')
 axs[1].set_title('Proyección en XZ')
 axs[1].set_xlabel("Alcance (m)")
 axs[1].set_ylabel("Altura (m)")
-#axs[1].set_aspect('equal')
-#axs[1].set_xlim(0, 10000)
-#axs[1].set_ylim(0, 10000)
-#axs[1].set_zlim(0, 10000)
-#axs[1].legend()
+
 axs[2].plot(posiciones[:, 1], posiciones[:, 2], color='orange', linestyle='--', label='Proyección en YZ')
 axs[2].set_title('Proyección en YZ')
 axs[2].set_xlabel("Desplazamiento (m)")
 axs[2].set_ylabel("Altura (m)")
-#axs[2].set_aspect('equal')
-#axs[2].set_xlim(0, 10000)
-#axs[2].set_ylim(0, 10000)
-#axs[2].set_zlim(0, 10000)
-#axs[2].legend()
-#axs[0].legend()
-#axs[1].legend()
-#axs[2].legend()
+plt.tight_layout()
 plt.show()
 
 
