@@ -27,7 +27,7 @@ print(datos_simulacion.columns)
     accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs) = extraer_datoscsv(datos_simulacion)
 
 # Leer los datos de la simulación desde el archivo JSON
-with open('datos_simulacion.json', 'r') as f:
+with open('datos_simulacion.json', 'r', encoding='utf-8') as f:
     datos = json.load(f)
 
 # Extraer los datos del JSON
@@ -64,8 +64,8 @@ every = 40
 # Función de actualización para la animación
 def update(frame):
     axcohete.clear()
-    axcohete.set_xlim([-15, 15])
-    axcohete.set_ylim([-15, 15])
+    axcohete.set_xlim(-15, 15)
+    axcohete.set_ylim(-15, 15)
     #dibujar_cohete(0, 0, np.degrees(thetas[frame]), tamaño, ax=axcohete)  # Dibujar el cohete inclinado
     fig,parts = dibujar_cohete2(ax=axcohete)  # Dibujar el cohete inclinado
     angulo = np.degrees(thetas[frame])

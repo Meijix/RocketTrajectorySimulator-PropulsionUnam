@@ -2,11 +2,11 @@ import numpy as np
 import pandas as pd
 import json
 import matplotlib.pyplot as plt
-
-from mpl_toolkits.mplot3d import Axes3D
+#from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
 
-from Simulador.utils.funciones import *
+#from Paquetes.utils.funciones import *
+from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson
 
 ###############################################
 # Leer los datos de la simulación desde el archivo CSV
@@ -19,7 +19,7 @@ accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs) = extraer_datoscs
 
 #########################################
 # Leer los datos de la simulación desde el archivo JSON
-with open('datos_simulacion.json', 'r') as f:
+with open('datos_simulacion.json', 'r', encoding= 'utf-8') as f:
     datos = json.load(f)
 # Extraer los datos del json
 (d_ext, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto,

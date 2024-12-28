@@ -1,6 +1,5 @@
 #Simulacion sin paracaidas del Xitle2
 import numpy as np
-from math import pi
 
 import sys
 import os
@@ -31,7 +30,7 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 #estado=list(estado)
 #print(estado)
 #Parametros de la simulacion
-dt = 0.1 #0.1 #[s]
+dt = 0.01 #0.1 #[s]
 t_max = 800 #[s]
 dt_out =  0.01
 integrador_actual = 'RungeKutta4'
@@ -173,7 +172,7 @@ datos_a_guardar = {
 
 # Guardar los datos en un archivo .json
 # Guardar archivo en la carpeta Simulador/Resultados/OuputFiles
-with open('datos_simulacion.json', 'w') as f:
+with open('datos_simulacion.json', 'w', encoding='utf-8') as f:
     json.dump(datos_a_guardar, f, indent=4)
 
 print('json guardado')

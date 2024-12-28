@@ -25,7 +25,7 @@ print(datos_simulacion.columns)
  accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs) = extraer_datoscsv(datos_simulacion)
 
 # Leer los datos de la simulación desde el archivo JSON
-with open('datos_simulacion.json', 'r') as f:
+with open('datos_simulacion.json', 'r', encoding='utf-8') as f:
     datos = json.load(f)
 
 # Extraer los datos del JSON
@@ -67,7 +67,7 @@ def update(frame):
     axcohete.set_ylim([-15, 15])
 
     angle = thetas[frame]
-    fig,parts = rotar_cohete(fig, parts, 0, 0, np.degrees(angle), ax=axcohete)
+    #fig,parts = rotar_cohete(fig, parts, 0, 0, np.degrees(angle), ax=axcohete)
     # Dibujar el cohete inclinado
     #ax.set_xlim(-10, 10)
     #ax.set_ylim(-10, 10)
