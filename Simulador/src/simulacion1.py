@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from Paquetes.PaqueteFisica.vuelo import Vuelo
 from Paquetes.PaqueteFisica.viento import Viento
 from Simulador.src import condiciones_init as c_init
-from Simulador.src.XitleFile import Xitle, diam_ext, espesor
+from Simulador.src.XitleFile import Xitle, diam_ext
 
 
 cohete_actual = Xitle
@@ -22,17 +22,8 @@ cohete_actual.parachute_added = False
 #desactivar el paracaidas
 cohete_actual.parachute_active1 = False
 
-
-#Sin viento
-#viento_actual = Viento(vel_base=0, vel_mean=0, vel_var=0, var_ang=0)
-viento_actual = Viento(vel_base=10, vel_mean=2, vel_var=0.01, var_ang=5)
-
-viento_actual.actualizar_viento3D()
-#print(viento_actual)
-print("Viento actual",viento_actual.vector)
-
 #Crear el vuelo
-vuelo1 = Vuelo(cohete_actual, c_init.atmosfera_actual, viento_actual)
+vuelo1 = Vuelo(cohete_actual, c_init.atmosfera_actual, c_init.viento_actual)
 
 inicio = time.time()
 print("Simulando...")

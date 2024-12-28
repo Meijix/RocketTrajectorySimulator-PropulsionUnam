@@ -34,14 +34,9 @@ cohete_actual.agregar_paracaidas(Mainchute)
 #print(Xitle.parachute_added)
 #########################################3
 
-viento_actual = Viento(vel_base=20, vel_mean=5, vel_var=5, var_ang=5)
-viento_actual.actualizar_viento3D()
-#print(viento_actual)
-#print(viento_actual.vector)
-
 inicio = time.time()
 print("Simulando...")
-vuelo_paracaidas = Vuelo(cohete_actual, c_init.atmosfera_actual, viento_actual)
+vuelo_paracaidas = Vuelo(cohete_actual, c_init.atmosfera_actual, c_init.viento_actual)
 tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo_paracaidas.simular_vuelo(c_init.estado, c_init.t_max, c_init.dt, c_init.dt_out, c_init.integrador_actual)
 
 # Guardar los datos de la simulación
