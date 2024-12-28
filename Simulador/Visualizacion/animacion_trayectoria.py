@@ -85,7 +85,12 @@ ax2d.set_ylim([-10, apogee[2]+200])
 ax2d.set_title('Trayectoria 2D del cohete')
 ax2d.set_xlabel("Tiempo (s)")
 ax2d.set_ylabel("Altura (m)")
+#Scatter del apogeo
+ax2d.scatter(tiempo_apogeo, apogee[2], c='c', label='Apogeo', s=200, marker='*')
+#Scatter del MECO
+ax2d.scatter(t_MECO, z[t_MECO], c='orange', label='MECO', s=200, marker='*')
 ax2d.grid()
+ax2d.legend()
 muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, ax2d)
 
 # Cada cuantos frames graficar
@@ -123,10 +128,7 @@ def update(frame):
     ax2d.set_xlim([0, t_fin])
     ax2d.set_ylim([0, apogee[2]+200])
     ax2d.plot(t[:frame], z[:frame], 'darkblue')
-    #Scatter del apogeo
-    ax2d.scatter(tiempo_apogeo, apogee[2], c='c', label='Apogeo', s=200, marker='*')
-    #Scatter del MECO
-    ax2d.scatter(t_MECO, z[t_MECO], c='orange', label='MECO', s=200, marker='*')
+
 
 
     return ax3d, ax2d
@@ -137,7 +139,7 @@ if frames[-1] > len(t):
     frames[-1] = len(t)-1
 #print(frames)
 
-fps=30
+fps=40
 animation = FuncAnimation(fig, update, frames=frames, interval=1000/fps, repeat=False)
 plt.show()
 
