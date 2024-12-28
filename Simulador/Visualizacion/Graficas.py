@@ -1,5 +1,6 @@
 #Graficar los resultados de la simulacion
 import numpy as np
+import time 
 import matplotlib.pyplot as plt
 import pandas as pd
 import json
@@ -38,10 +39,10 @@ def muestra_tiempos(tiempos, ax):
 #Elegir que vuelo se va a graficar
 ################################################
 archivo_csv = 'datos_simulacion.csv'
-#archivo_csv = 'datos_sim_paracaidas.csv'
+archivo_csv = 'datos_sim_paracaidas.csv'
 
 archivo_json = 'datos_simulacion.json'
-#archivo_json = 'datos_sim_paracaidas.json'
+archivo_json = 'datos_sim_paracaidas.json'
 
 ###############################################
 # Leer los datos de la simulación desde el archivo CSV
@@ -54,14 +55,13 @@ accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs) = extraer_datoscs
 
 #########################################
 # Leer los datos de la simulación desde el archivo JSON
-with open(archivo_json, 'r') as f:
+with open(archivo_json, 'r', encoding='utf-8') as f:
     datos = json.load(f)
 # Extraer los datos del json
 (d_ext, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto,
     max_altitude, max_speed, max_acceleration_linear, max_acceleration_angular) = extraer_datosjson(datos)
 
 ############################################
-import time 
 inicio = time.time()
 #print("Posiciones (x,y,z):",posiciones[1,:])
 print("Graficando...")
@@ -284,7 +284,6 @@ muestra_tiempos(tiempos, plt)
 plt.title("Aceleración angular")
 
 
-
 #GRAFICA 8. Angulos
 plt.figure(figsize=(14,4))
 plt.title("Ángulos en el tiempo")
@@ -325,7 +324,7 @@ plt.plot(posiciones[:, 0], posiciones[:, 2])
 plt.gca().set_aspect("equal")
 plt.show()
 
- """
+"""
 ####################
 # GRAFICAS 3D
 # Extract the launch and impact points
