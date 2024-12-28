@@ -26,6 +26,12 @@ class Vuelo:
         self.viento = viento_actual
         self.parachute1 = None #vehiculo_actual.parachute1 #paracaidas
 
+        self.tiempo_salida_riel = None
+        self.tiempo_apogeo = None
+        self.tiempo_impacto = None
+        self.apogeo = None
+        self.impacto = None
+
         #hacer una lista de etapas de vuelo
         #self. etapas = [enriel , motorON, apogeo, droguerec, mainrec]
         #para cada etapa guardar el tiempo en que ocurrio y sus valores máximos
@@ -244,82 +250,78 @@ class Vuelo:
         #print(self.vehiculo.parachute_active1)
 
         ultima_altitud = 0
-        self.tiempo_salida_riel = None
-        self.tiempo_apogeo = None
-        self.tiempo_impacto = None
 
         while t <= t_max:
         # print("t=", t)
             if t + dt > next_tout:
                 dt = next_tout - t
 
-        # -------------------------
-        # Integracion numérica del estado actual
-        #el dt_new se usa para que el inetgrador actualize el paso de tiempo
-        #if integrador in ['Euler', 'RungeKutta4', 'RungeKutta2']:
-        nuevo_estado, dt = Integracion.step(t, estado, dt)
-        #else:
-        #nuevo_estado, dt = Integracion.step(t, estado, dt, tol=1e-4, S=0.9)
-        # print("dt_new={}".format(dt_new))
-        #dt = dt_new
-        #print("dt= ", dt)
+            # -------------------------
+            # Integracion numérica del estado actual
+            #el dt_new se usa para que el inetgrador actualize el paso de tiempo
+            #if integrador in ['Euler', 'RungeKutta4', 'RungeKutta2']:
+            nuevo_estado, dt = Integracion.step(t, estado, dt)
+            #else:
+            #nuevo_estado, dt = Integracion.step(t, estado, dt, tol=1e-4, S=0.9)
+            # print("dt_new={}".format(dt_new))
+            #dt = dt_new
+            #print("dt= ", dt)
 
-        # Avanzar estado
-        it += 1
-        t += dt
-        estado = nuevo_estado
+            # Avanzar estado
+            it += 1
+            t += dt
+            estado = nuevo_estado
 
-        # -------------------------
-        # Actualizar variables (viento, masa del vehiculo, etc)
+            # -------------------------
+            # Actualizar variables (viento, masa del vehiculo, etc)
 
-        # Actualizar masa del vehiculo
-        self.vehiculo.actualizar_masa(t)
+            # Actualizar masa del vehiculo
+            self.vehiculo.actualizar_masa(t)
 
-        # Actualizar viento_actual
-        #self.viento.actualizar_viento2D()
-        self.viento.actualizar_viento3D()
-        #print("Nuevos vientos", self.viento)
-        v_viento = self.viento.vector
+            # Actualizar viento_actual
+            #self.viento.actualizar_viento2D()
+            self.viento.actualizar_viento3D()
+            #print("Nuevos vientos", self.viento)
+            v_viento = self.viento.vector
 
-        #FASE 1. VUELO EN RIEL
-        if self.tiempo_salida_riel is None:
-            r = np.linalg.norm(estado[0:3])
-            if r > self.vehiculo.riel.longitud:
-                self.tiempo_salida_riel = t
-        
-        #FASE 2. MECO
+            #FASE 1. VUELO EN RIEL
+            if self.tiempo_salida_riel is None:
+                r = np.linalg.norm(estado[0:3])
+                if r > self.vehiculo.riel.longitud:
+                    self.tiempo_salida_riel = t
+            
+            #FASE 2. MECO
 
-        # APOGEO: Determinar tiempo de apogeo
-        altitud = estado[2]
-        if self.tiempo_apogeo is None and altitud > 5 and altitud < ultima_altitud:
-            self.tiempo_apogeo = t
-            self.apogeo = altitud
+            # APOGEO: Determinar tiempo de apogeo
+            altitud = estado[2]
+            if self.tiempo_apogeo is None and altitud > 5 and altitud < ultima_altitud:
+                self.tiempo_apogeo = t
+                self.apogeo = altitud
 
-        ultima_altitud = altitud
+            ultima_altitud = altitud
 
-        #FASE3.RECUPERACIÓN
-        #FALTA IMPLEMENTAR RECUPERACION DE DOS ETAPAS JE
-        #activar el paracaidas en el apogeo
-        if self.tiempo_apogeo is not None and self.vehiculo.parachute_added == True:
-            #print(self.vehiculo.parachute_active1,"antes")
-            self.vehiculo.parachute_active1 = True
-            #print(self.vehiculo.parachute_active1,"despues")
-            #print("Se ha abierto el paracaídas")
-            #self.vehiculo.activar_paracaidas(self.vehiculo.parachute1)
-        else:
-            pass
+            #FASE3.RECUPERACIÓN
+            #FALTA IMPLEMENTAR RECUPERACION DE DOS ETAPAS JE
+            #activar el paracaidas en el apogeo
+            if self.tiempo_apogeo is not None and self.vehiculo.parachute_added == True:
+                #print(self.vehiculo.parachute_active1,"antes")
+                self.vehiculo.parachute_active1 = True
+                #print(self.vehiculo.parachute_active1,"despues")
+                #print("Se ha abierto el paracaídas")
+                #self.vehiculo.activar_paracaidas(self.vehiculo.parachute1)
+            else:
+                pass
 
-        #CAIDA: Terminar simulación cuando cae al piso
-        if estado[2] < 0 and t > 1:
-            self.tiempo_impacto = t
-            break
+            #CAIDA: Terminar simulación cuando cae al piso
+            if estado[2] < 0 and t > 1:
+                self.tiempo_impacto = t
 
-        # -------------------------
-        # Guardar cantidades en listas
+            # -------------------------
+            # Guardar cantidades en listas
 
-        if t >= next_tout:
+            if t >= next_tout:
 
-            next_tout += dt_out
+                next_tout += dt_out
 
             #Agrega el nuevo estado a la lista
             sim.append(nuevo_estado)
