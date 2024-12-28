@@ -1,15 +1,16 @@
 ##Listas de resultados importantes
-
 import matplotlib.pyplot as plt
 import sys
 import os
+import numpy as np
 
 # Agregar la ruta del directorio que contiene los paquetes al sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 #from cohete import*
-from Simulador.src.XitleFile import *
+from Simulador.src.XitleFile import Xitle
 from Paquetes.utils.dibujar_cohete import dibujar_cohete
+#from Paquetes.utils.dibujar_cohete2 import dibujar_cohete2
 
 CG_list=[]
 CP_list=[]
@@ -18,36 +19,36 @@ long_list=[]
 masas_list=[]
 
 for comp in Xitle.componentes.values():
-  long_list.append(0.0)
-  long_list.append(comp.bottom[2])
+    long_list.append(0.0)
+    long_list.append(comp.bottom[2])
 
 print("\nMasas")
 for comp in Xitle.componentes.values():
-  masas_list.append(comp.masa)
-  print(comp.nombre, comp.masa)
+    masas_list.append(comp.masa)
+    print(comp.nombre, comp.masa)
 
 masas_list.append(Xitle.masa)
 print(Xitle.nombre, Xitle.masa)
 
 print("\nCentros de gravedad")
 for comp in Xitle.componentes.values():
-  CG_list.append(comp.posicion[2]+comp.CG[2])
-  print(comp.nombre, comp.posicion[2] + comp.CG[2])
+    CG_list.append(comp.posicion[2]+comp.CG[2])
+    print(comp.nombre, comp.posicion[2] + comp.CG[2])
 
 CG_list.append(Xitle.CG[2])
 print(Xitle.nombre, Xitle.CG[2])
 
 print("\nCentros de presión")
 for comp in Xitle.componentes.values():
-  CP_list.append(comp.posicion[2]+comp.CP[2])
-  print(comp.nombre, comp.posicion[2] + comp.CP[2], comp.CN)
+    CP_list.append(comp.posicion[2]+comp.CP[2])
+    print(comp.nombre, comp.posicion[2] + comp.CP[2], comp.CN)
 
 CP_list.append(Xitle.CP[2])
 print(Xitle.nombre, Xitle.CP[2])
 
 print("\nMomentos de inercia")
 for comp in Xitle.componentes.values():
-  print(comp.nombre, comp.Ix)
+    print(comp.nombre, comp.Ix)
 print(Xitle.nombre, Xitle.Ix, "[kg m^2]")
 
 print("\n Datos generales")
@@ -56,13 +57,10 @@ print("La masa total de Xitle es", Xitle.masa, "[kg]")
 print("El impulso total del motor es", Xitle.I_total)
 
 
-print(CG_list)
-print(CP_list)
-print(long_list)
+#print(CG_list)
+#print(CP_list)
+#print(long_list)
 p=len(CG_list)-1
-
-
-
 y = np.zeros_like(CG_list)
 y_long = np.zeros_like(long_list)
 
@@ -80,12 +78,6 @@ plt.show()
 '''
 # Dibujar un cohete
 dibujar_cohete(4.2, 0, 180, 3.5, plt.gca())
-
-
-print(CG_list)
-print(CP_list)
-print(long_list)
-p=len(CG_list)-1
 
 #plt.plot(long_list,y_long,color= 'lightblue',alpha=0.9)
 plt.scatter(long_list,y_long,color='navy',marker="|", s=500)

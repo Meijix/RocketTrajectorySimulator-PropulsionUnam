@@ -1,12 +1,17 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import sys
+import os
 
-from src.simulacion1 import *
+# Agregar la ruta del directorio que contiene los paquetes al sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+from Simulador.src.simulacion1 import *
 
 # Load the data from the CSV file
 #Corregir el path file
-df = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Archivos\AlturavsTiempo-Xitle2.csv')
+df = pd.read_csv(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Archivos\AlturavsTiempo-Xitle2.csv')
 
 # Extract the altitude and time columns
 altitude = df['ALTURA [km]']
