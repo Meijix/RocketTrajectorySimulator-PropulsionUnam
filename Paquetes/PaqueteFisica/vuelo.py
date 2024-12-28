@@ -8,7 +8,6 @@ import os
 
 # Agregar la ruta del directorio que contiene los paquetes al sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-#sys.path.append(r"c:\Users\Natalia\OneDrive\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Paquetes")
 #print(sys.path)
 
 
@@ -32,61 +31,62 @@ class Vuelo:
         #para cada etapa guardar el tiempo en que ocurrio y sus valores máximos
 
     def calc_arrastre_normal(self, pos, vel, alpha):
-      altura = pos[2] #self.posicion[2]
-      vel_mag = np.linalg.norm(vel)
-      #print(altura)
-      _, rho, _, cs = self.atmosfera.calc_propiedades(altura)
-      mach =  vel_mag / cs #mach variable
-      Cd = self.vehiculo.calc_Cd(mach)
-      CNalpha = self.vehiculo.CN
-      A = self.vehiculo.A
-      # DEBUG: aumentar Cd
-      # Cd *= 5
-      f_arrastre = (0.5 * rho * vel_mag**2) * A * Cd 
-      # f_normal = 0.5 * rho * CN * A * vel_mag**2 * np.sin(alpha)**2
-      # f_normal = 0.5 * rho * CN * A * vel_mag**2 * np.sin(alpha)**2
-      f_normal = (0.5 * rho * vel_mag**2) * A * abs(np.sin(alpha)) * CNalpha
+        altura = pos[2] #self.posicion[2]
+        vel_mag = np.linalg.norm(vel)
+        #print(altura)
+        _, rho, _, cs = self.atmosfera.calc_propiedades(altura)
+        mach =  vel_mag / cs #mach variable
+        Cd = self.vehiculo.calc_Cd(mach)
+        CNalpha = self.vehiculo.CN
+        A = self.vehiculo.A
+        # DEBUG: aumentar Cd
+        # Cd *= 5
+        f_arrastre = (0.5 * rho * vel_mag**2) * A * Cd 
+        # f_normal = 0.5 * rho * CN * A * vel_mag**2 * np.sin(alpha)**2
+        # f_normal = 0.5 * rho * CN * A * vel_mag**2 * np.sin(alpha)**2
+        f_normal = (0.5 * rho * vel_mag**2) * A * abs(np.sin(alpha)) * CNalpha
 
-      if self.vehiculo.parachute_active1 == True:
-        coef_par = self.vehiculo.parachute1.cd
-        area_par = self.vehiculo.parachute1.Area_trans
-        f_paracaidas = 0.5 * rho * coef_par * area_par * vel_mag**2
-        f_arrastre = f_arrastre  + f_paracaidas
-      else:
-        pass
+        if self.vehiculo.parachute_active1 == True:
+            coef_par = self.vehiculo.parachute1.cd
+            area_par = self.vehiculo.parachute1.Area_trans
+            f_paracaidas = 0.5 * rho * coef_par * area_par * vel_mag**2
+            f_arrastre = f_arrastre  + f_paracaidas
+        else:
+            pass
         #print(f_paracaidas)
 
-      # if alpha == 0:
-      #   f_normal = 0.5 * rho * self.CN * self.A  * vel_mag**2
-      # else:
-      #   f_normal = 0.5 * rho * np.sin(alpha)/alpha * self.CN * self.A  * vel_mag**2
+        # if alpha == 0:
+        #   f_normal = 0.5 * rho * self.CN * self.A  * vel_mag**2
+        # else:
+        #   f_normal = 0.5 * rho * np.sin(alpha)/alpha * self.CN * self.A  * vel_mag**2
 
-      #print(f_arrastre, "arrastre")
-      #print(f_normal, "normal")
-      return f_arrastre, f_normal, Cd, mach
+        #print(f_arrastre, "arrastre")
+        #print(f_normal, "normal")
+        return f_arrastre, f_normal, Cd, mach
 
     def calc_empuje(self, t, theta):
-      #Calcular las componentes del empuje
-      #La direccion del empuje es longitudinal hacia la nariz
-      zbhat = np.array((np.cos(theta), 0, np.sin(theta)))
-      Tmag = self.vehiculo.calc_empuje_magn(t)
-      Tvec = Tmag * zbhat
-      return Tvec
+        #Calcular las componentes del empuje
+        #La direccion del empuje es longitudinal hacia la nariz
+        zbhat = np.array((np.cos(theta), 0, np.sin(theta)))
+        Tmag = self.vehiculo.calc_empuje_magn(t)
+        Tvec = Tmag * zbhat
+        return Tvec
 
     def calc_alpha(self, v_rel, theta):
-      # Ángulo de ataque (relativo al viento)
-      gamma_rel = math.atan2(v_rel[2], v_rel[0])
-      alpha = theta - gamma_rel
-      return alpha
+        # Ángulo de ataque (relativo al viento)
+        gamma_rel = math.atan2(v_rel[2], v_rel[0])
+        alpha = theta - gamma_rel
+        return alpha
 
     def calc_aero(self, pos, v_rel, theta):
-      if np.linalg.norm(v_rel) == 0 or pos[2] > self.atmosfera.h_max:
-        return np.zeros(3), np.zeros(3)
-      else:
+        if np.linalg.norm(v_rel) == 0 or pos[2] > self.atmosfera.h_max:
+            return np.zeros(3), np.zeros(3)
+        else:
         #si todavía esta en la atmosfera definida
         #print(self.calc_arrastre_normal(pos,vel,alpha))
-        v_rel_hat = normalized(v_rel)
-        alpha = self.calc_alpha(v_rel, theta)
+            v_rel_hat = normalized(v_rel)
+            alpha = self.calc_alpha(v_rel, theta)
+        
         Dmag, Nmag, Cd, mach = self.calc_arrastre_normal(pos, v_rel, alpha)
         #print(Cd,mach)
         #print(Dmag,"mag arrastre")
@@ -105,156 +105,153 @@ class Vuelo:
         return Dvec, Nvec
 
     def accangular(self, theta, Dvec, Nvec, Gvec):
-      # Calcular brazo de momentos
-      # r es un vector que apunta del CG al CP, en coords de cuerpo del cohete,
-      # donde la nariz es el origen y el eje Z apunta hacia la cola
-      palanca_b = self.vehiculo.CP - self.vehiculo.CG
-      s = np.sin(theta)
-      c = np.cos(theta)
-      # Transformar a coordenadas del suelo
-      M_rot = np.array([[s,0,-c],[0, 1, 0],[c, 0 , -s]])
-      palanca = M_rot @ palanca_b   # palanca en coord del suelo
+        # Calcular brazo de momentos
+        # r es un vector que apunta del CG al CP, en coords de cuerpo del cohete,
+        # donde la nariz es el origen y el eje Z apunta hacia la cola
+        palanca_b = self.vehiculo.CP - self.vehiculo.CG
+        s = np.sin(theta)
+        c = np.cos(theta)
+        # Transformar a coordenadas del suelo
+        M_rot = np.array([[s,0,-c],[0, 1, 0],[c, 0 , -s]])
+        palanca = M_rot @ palanca_b   # palanca en coord del suelo
 
-      #Calcular las torcas
-      #print(Dvec,"arrastre")
-      tau_D = np.cross(palanca, Dvec)
+        #Calcular las torcas
+        #print(Dvec,"arrastre")
+        tau_D = np.cross(palanca, Dvec)
 
-      tau_N = np.cross(palanca, Nvec)
-      tau_tot = tau_D + tau_N
-      #torcas.append((tau_D, tau_N))
-      #torcas.append((tau_tot))
-      #palancas.append(palanca)
+        tau_N = np.cross(palanca, Nvec)
+        tau_tot = tau_D + tau_N
+        #torcas.append((tau_D, tau_N))
+        #torcas.append((tau_tot))
+        #palancas.append(palanca)
 
-      #suma de torcas/ momento de inercia total
-      # se toma la componente y (perpendicular al plano de vuelo ZX) y se
-      # multiplica por -1 porque el eje y apunta hacia "adentro"
-      Torca = -tau_tot[1]
-      #Torca = Torca*10
-      accang = Torca / self.vehiculo.Ix # se debe usar el momento de inercia actualizado
-      #angaccels.append(accang)
-      return palanca, accang, Torca
+        #suma de torcas/ momento de inercia total
+        # se toma la componente y (perpendicular al plano de vuelo ZX) y se
+        # multiplica por -1 porque el eje y apunta hacia "adentro"
+        Torca = -tau_tot[1]
+        #Torca = Torca*10
+        accang = Torca / self.vehiculo.Ix # se debe usar el momento de inercia actualizado
+        #angaccels.append(accang)
+        return palanca, accang, Torca
 
     def fun_derivs(self, t, state):
+        # state, posicion y velocidad son estados intermedios
+        #no necsariamente los del cohete
+        pos = state[0:3]
+        vel = state[3:6]
+        #velocidadvector.append(vel)
+        theta = state[6]   # En radianes internamente siempre
+        omega = state[7] #omeg a= theta dot
+        # r = np.linalg.norm(pos)
+        # v = np.linalg.norm(vel)
+        z = pos[2] #Coordenada z
 
-      # state, posicion y velocidad son estados intermedios
-      #no necsariamente los del cohete
-      pos = state[0:3]
-      vel = state[3:6]
-      #velocidadvector.append(vel)
-      theta = state[6]   # En radianes internamente siempre
-      omega = state[7] #omeg a= theta dot
-      # r = np.linalg.norm(pos)
-      # v = np.linalg.norm(vel)
-      z = pos[2] #Coordenada z
+        accel = np.array([0,0,0])
 
-      accel = np.array([0,0,0])
+        # vectores para velocidad considerando el viento
+        v_viento = self.viento.vector
+        #print(v_viento)
 
-      # vectores para velocidad considerando el viento
-      v_viento = self.viento.vector
-      #print(v_viento)
+        # Fuerzas aerodinámica: Arrastre y fuerza normal
+        #print("Vectores de arrastre y normal",Dvec, Nvec)
+        v_rel = vel - v_viento
+        Dvec, Nvec = self.calc_aero(pos, v_rel, theta)
 
-      # Fuerzas aerodinámica: Arrastre y fuerza normal
-      #print("Vectores de arrastre y normal",Dvec, Nvec)
-      v_rel = vel - v_viento
-      Dvec, Nvec = self.calc_aero(pos, v_rel, theta)
+        #Calcular las componentes del empuje
+        Tvec = self.calc_empuje(t, theta)
+        #print(Tvec)
 
-      #Calcular las componentes del empuje
-      Tvec = self.calc_empuje(t, theta)
-      #print(Tvec)
+        # Gravedad
+        grav = calc_gravedad(z)
+        Gvec = np.array([0,0,-grav])
 
-      # Gravedad
-      grav = calc_gravedad(z)
-      Gvec = np.array([0,0,-grav])
+        # Aceleración resultante de todas las fuerzas
+        accel = Gvec + Dvec/self.vehiculo.masa + Nvec/self.vehiculo.masa + Tvec/self.vehiculo.masa
 
-      # Aceleración resultante de todas las fuerzas
-      accel = Gvec + Dvec/self.vehiculo.masa + Nvec/self.vehiculo.masa + Tvec/self.vehiculo.masa
+        # Parte angular
+        r = np.linalg.norm(pos)
+        #esto esta bien?
+        if r <= self.vehiculo.riel.longitud:
+            omega = 0
+            accang = 0
+        else:
+            #Velocidad angular
+            velang = omega
+            # aceleracion angular
+            _, accang, _ = self.accangular(theta, Dvec, Nvec, Gvec)
 
-      # Parte angular
-      r = np.linalg.norm(pos)
-      #esto esta bien?
-      if r <= self.vehiculo.riel.longitud:
-        omega = 0
-        accang = 0
-      else:
-        #Velocidad angular
-        velang = omega
-        # aceleracion angular
-        _, accang, _ = self.accangular(theta, Dvec, Nvec, Gvec)
+        # PRUEBA: apagar parte angular
+        # omega = 0
+        # accang= 0
 
-      # PRUEBA: apagar parte angular
-      # omega = 0
-      # accang= 0
+        derivs = np.concatenate((vel, accel, [omega], [accang]))
+        #print(derivs)
 
-      derivs = np.concatenate((vel, accel, [omega], [accang]))
-      #print(derivs)
-
-      return derivs
+        return derivs
 
     def simular_vuelo(self, estado, t_max, dt, dt_out, integrador):
 
-      Tvecs = []
-      Dvecs = []
-      Nvecs = []
+        Tvecs = []
+        Dvecs = []
+        Nvecs = []
 
-      accels=[]
-      palancas=[]
-      accangs=[]
-      torcas = []
+        accels=[]
+        palancas=[]
+        accangs=[]
+        torcas = []
 
-      Gammas = []
-      Alphas = []
+        Gammas = []
+        Alphas = []
 
-      Cds=[]
-      Machs=[]
+        Cds=[]
+        Machs=[]
 
-      CPs=[]
-      CGs=[]
-      masavuelo=[]
+        CPs=[]
+        CGs=[]
+        masavuelo=[]
 
-      viento_vuelo_mags=[]
-      viento_vuelo_dirs=[]
-      viento_vuelo_vecs=[]
+        viento_vuelo_mags=[]
+        viento_vuelo_dirs=[]
+        viento_vuelo_vecs=[]
 
-      t = 0.0
-      it = 0
-      next_tout = dt_out
-      #########################################
-      #CAMBIO DE METODO DE INTEGRACIÓN
-      if integrador == 'Euler':
-        Integracion = Euler(self.fun_derivs) #ocupa dt=0.005
-      elif integrador == 'RungeKutta2':
-        Integracion = RungeKutta2(self.fun_derivs)
-      elif integrador == 'RungeKutta4':
-        Integracion = RungeKutta4(self.fun_derivs)
-      elif integrador == 'RKF45':
-        Integracion = RKF45(self.fun_derivs)
-      elif integrador == 'AdaptiveEuler':
-        Integracion = AdaptiveEuler(self.fun_derivs)
-      else:
-        print('Error: Integrador no reconocido')
-      ##########################################
-      
-      sim=[estado] #lista de estados de vuelo
-      tiempos=[0] #lista de tiempos
+        t = 0.0
+        it = 0
+        next_tout = dt_out
+        #########################################
+        #CAMBIO DE METODO DE INTEGRACIÓN
+        if integrador == 'Euler':
+            Integracion = Euler(self.fun_derivs) #ocupa dt=0.005
+        elif integrador == 'RungeKutta2':
+            Integracion = RungeKutta2(self.fun_derivs)
+        elif integrador == 'RungeKutta4':
+            Integracion = RungeKutta4(self.fun_derivs)
+        elif integrador == 'RKF45':
+            Integracion = RKF45(self.fun_derivs)
+        elif integrador == 'AdaptiveEuler':
+            Integracion = AdaptiveEuler(self.fun_derivs)
+        else:
+            print('Error: Integrador no reconocido')
+        ##########################################
+        
+        sim=[estado] #lista de estados de vuelo
+        tiempos=[0] #lista de tiempos
 
-      #Actualizar masa del vehiculo
-      self.vehiculo.actualizar_masa(t)
-      masavuelo=[self.vehiculo.masa]
+        #Actualizar masa del vehiculo
+        self.vehiculo.actualizar_masa(t)
+        masavuelo=[self.vehiculo.masa]
 
-      self.vehiculo.parachute_active1 = False
-      #print(self.vehiculo.parachute_active1)
+        self.vehiculo.parachute_active1 = False
+        #print(self.vehiculo.parachute_active1)
 
-      ultima_altitud = 0
-      self.tiempo_salida_riel = None
-      self.tiempo_apogeo = None
-      self.tiempo_impacto = None
+        ultima_altitud = 0
+        self.tiempo_salida_riel = None
+        self.tiempo_apogeo = None
+        self.tiempo_impacto = None
 
-      while t <= t_max:
-
+        while t <= t_max:
         # print("t=", t)
-
-        if t + dt > next_tout:
-          dt = next_tout - t
+            if t + dt > next_tout:
+                dt = next_tout - t
 
         # -------------------------
         # Integracion numérica del estado actual
@@ -286,108 +283,108 @@ class Vuelo:
 
         #FASE 1. VUELO EN RIEL
         if self.tiempo_salida_riel is None:
-          r = np.linalg.norm(estado[0:3])
-          if r > self.vehiculo.riel.longitud:
-            self.tiempo_salida_riel = t
+            r = np.linalg.norm(estado[0:3])
+            if r > self.vehiculo.riel.longitud:
+                self.tiempo_salida_riel = t
         
         #FASE 2. MECO
 
         # APOGEO: Determinar tiempo de apogeo
         altitud = estado[2]
         if self.tiempo_apogeo is None and altitud > 5 and altitud < ultima_altitud:
-          self.tiempo_apogeo = t
-          self.apogeo = altitud
+            self.tiempo_apogeo = t
+            self.apogeo = altitud
 
         ultima_altitud = altitud
 
-      #FASE3.RECUPERACIÓN
-      #FALTA IMPLEMENTAR RECUPERACION DE DOS ETAPAS JE
+        #FASE3.RECUPERACIÓN
+        #FALTA IMPLEMENTAR RECUPERACION DE DOS ETAPAS JE
         #activar el paracaidas en el apogeo
         if self.tiempo_apogeo is not None and self.vehiculo.parachute_added == True:
-          #print(self.vehiculo.parachute_active1,"antes")
-          self.vehiculo.parachute_active1 = True
-          #print(self.vehiculo.parachute_active1,"despues")
-          #print("Se ha abierto el paracaídas")
-          #self.vehiculo.activar_paracaidas(self.vehiculo.parachute1)
+            #print(self.vehiculo.parachute_active1,"antes")
+            self.vehiculo.parachute_active1 = True
+            #print(self.vehiculo.parachute_active1,"despues")
+            #print("Se ha abierto el paracaídas")
+            #self.vehiculo.activar_paracaidas(self.vehiculo.parachute1)
         else:
-          pass
+            pass
 
         #CAIDA: Terminar simulación cuando cae al piso
         if estado[2] < 0 and t > 1:
-          self.tiempo_impacto = t
-          break
+            self.tiempo_impacto = t
+            break
 
         # -------------------------
         # Guardar cantidades en listas
 
         if t >= next_tout:
 
-          next_tout += dt_out
+            next_tout += dt_out
 
-          #Agrega el nuevo estado a la lista
-          sim.append(nuevo_estado)
-          tiempos.append(t)
+            #Agrega el nuevo estado a la lista
+            sim.append(nuevo_estado)
+            tiempos.append(t)
 
-          #Guardar centros de presión y centros de gravedad
-          CPs.append(self.vehiculo.CP[2])
-          CGs.append(self.vehiculo.CG[2])
+            #Guardar centros de presión y centros de gravedad
+            CPs.append(self.vehiculo.CP[2])
+            CGs.append(self.vehiculo.CG[2])
 
-          #Guardar magnitudes y direcciones del viento
-          viento_vuelo_vecs.append(v_viento)
-          viento_vuelo_mags.append(self.viento.magnitud_total)
-          viento_vuelo_dirs.append(self.viento.direccion_total)
-        
-          #Agregar nueva masa a la lista
-          masavuelo.append(self.vehiculo.masa)    
+            #Guardar magnitudes y direcciones del viento
+            viento_vuelo_vecs.append(v_viento)
+            viento_vuelo_mags.append(self.viento.magnitud_total)
+            viento_vuelo_dirs.append(self.viento.direccion_total)
+            
+            #Agregar nueva masa a la lista
+            masavuelo.append(self.vehiculo.masa)    
 
-          #CALCULAR CANTIDADES SECUNDARIAS
-          # Desempaquetar vector de estado      
-          pos = nuevo_estado[0:3]
-          vel = nuevo_estado[3:6]
-          theta = nuevo_estado[6]   # En radianes internamente siempre
-          omega = nuevo_estado[7] #omeg a= theta dot
-          r = np.linalg.norm(pos)
-          #v = np.linalg.norm(vel)
-          z = pos[2] #Coordenada z
+            #CALCULAR CANTIDADES SECUNDARIAS
+            # Desempaquetar vector de estado      
+            pos = nuevo_estado[0:3]
+            vel = nuevo_estado[3:6]
+            theta = nuevo_estado[6]   # En radianes internamente siempre
+            omega = nuevo_estado[7] #omeg a= theta dot
+            r = np.linalg.norm(pos)
+            #v = np.linalg.norm(vel)
+            z = pos[2] #Coordenada z
 
-          vrel = np.array(vel) - v_viento
-          #print("viento relativo: ", vrel)
+            vrel = np.array(vel) - v_viento
+            #print("viento relativo: ", vrel)
 
-          #Guardar Angulos
-          gamma = math.atan2(vel[2], vel[0])
-          alpha = self.calc_alpha(vrel, theta)
-          Gammas.append(gamma)
-          Alphas.append(alpha)
+            #Guardar Angulos
+            gamma = math.atan2(vel[2], vel[0])
+            alpha = self.calc_alpha(vrel, theta)
+            Gammas.append(gamma)
+            Alphas.append(alpha)
 
-          #Guardar Fuerzas:Empuje,Arrastre y Normal
-          Tvec = self.calc_empuje(t, theta)
-          _, _, Cd, mach = self.calc_arrastre_normal(pos, vrel, alpha)
-          Dvec, Nvec = self.calc_aero(pos, vrel, theta)
-          Tvecs.append(Tvec)
-          Dvecs.append(Dvec)
-          Nvecs.append(Nvec)
-          Cds.append(Cd)
-          Machs.append(mach)
+            #Guardar Fuerzas:Empuje,Arrastre y Normal
+            Tvec = self.calc_empuje(t, theta)
+            _, _, Cd, mach = self.calc_arrastre_normal(pos, vrel, alpha)
+            Dvec, Nvec = self.calc_aero(pos, vrel, theta)
+            Tvecs.append(Tvec)
+            Dvecs.append(Dvec)
+            Nvecs.append(Nvec)
+            Cds.append(Cd)
+            Machs.append(mach)
 
-          # Gravedad
-          grav = calc_gravedad(z)
-          #Cambiar la direccion de la gravedad cuando esta en el riel
-          #if r< #longitud del riel
-          Gvec = np.array([0,0,-grav])
+            # Gravedad
+            grav = calc_gravedad(z)
+            #Cambiar la direccion de la gravedad cuando esta en el riel
+            #if r< #longitud del riel
+            Gvec = np.array([0,0,-grav])
 
-          # Aceleración resultante
-          masa = self.vehiculo.masa
-          accel = Gvec + Dvec/masa + Nvec/masa + Tvec/masa
-          accels.append(accel)
+            # Aceleración resultante
+            masa = self.vehiculo.masa
+            accel = Gvec + Dvec/masa + Nvec/masa + Tvec/masa
+            accels.append(accel)
 
-          # aceleracion angular
-          palanca, accang, torca = self.accangular( theta, Dvec, Nvec, Gvec)
-          palancas.append(palanca)
-          accangs.append(accang)
-          torcas.append(torca)
+            # aceleracion angular
+            palanca, accang, torca = self.accangular( theta, Dvec, Nvec, Gvec)
+            palancas.append(palanca)
+            accangs.append(accang)
+            torcas.append(torca)
 
-        #Indicar el avance en la simulacion
-        if it%500==0:
-          print(f"Iteracion {it}, t={t:.1f} s, dt={dt:g}, altitud={altitud:.1f} m, vel vert={estado[5]:.1f}")
+            #Indicar el avance en la simulacion
+            if it%2500==0:
+                print(f"Iteracion {it}, t={t:.1f} s, dt={dt:g}, altitud={altitud:.1f} m, vel vert={estado[5]:.1f}")
 
-      return tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs
+        return tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs
