@@ -49,3 +49,8 @@ integrador_actual = 'RungeKutta4'
 #integrador_actual = 'AdaptiveEuler'
 # t_max = 1200 #[s]
 # t_max = 5 #[s]
+
+viento_actual = Viento(vel_base=20, vel_mean=5, vel_var=5, var_ang=5)
+viento_actual.actualizar_viento3D()
+#print(viento_actual)
+#print(viento_actual.vector)
