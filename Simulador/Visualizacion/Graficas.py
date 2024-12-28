@@ -22,20 +22,6 @@ from Simulador.src.condiciones_init import *
 #vuelo_graficar=vuelo1
 #vuelo_graficar=vuelo_paracaidas
 
-##########################################
-# Funcion para graficar los tiempos importantes
-def muestra_tiempos(tiempos, ax):
-    ax.axvline(tiempo_salida_riel, color="orange", ls="--")
-    ax.axvline(t_MECO, color="darkred", ls="--")
-    if tiempo_apogeo is not None:
-        ax.axvline(tiempo_apogeo, color="navy", ls="--")
-    if tiempo_impacto is not None:
-        ax.axvline(tiempo_impacto, color="0.2", ls="--")
-    #if tiempo_despliegue is not None:
-        #ax.axvline(tiempo_despliegue, color="green", ls="--")
-    #ax.legend()
-
-###############################################
 #Elegir que vuelo se va a graficar
 ################################################
 #archivo_csv = 'datos_simulacion.csv'

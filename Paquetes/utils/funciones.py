@@ -93,3 +93,19 @@ def extraer_datosjson(datos):
     max_acceleration_angular = datos["max_acceleration_angular"]
     return (diam_ext, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto, 
             max_altitude, max_speed, max_acceleration_linear, max_acceleration_angular)
+
+
+##########################################
+# Funcion para graficar los tiempos importantes
+def muestra_tiempos(tiempo_salida_riel,t_MECO,tiempo_apogeo, tiempo_impacto, ax):
+    ax.axvline(tiempo_salida_riel, color="orange", ls="--")
+    ax.axvline(t_MECO, color="darkred", ls="--")
+    if tiempo_apogeo is not None:
+        ax.axvline(tiempo_apogeo, color="darkgreen", ls="--")
+    if tiempo_impacto is not None:
+        ax.axvline(tiempo_impacto, color="0.2", ls="--")
+    #if tiempo_despliegue is not None:
+        #ax.axvline(tiempo_despliegue, color="green", ls="--")
+    #ax.legend()
+
+###############################################
