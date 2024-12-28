@@ -8,7 +8,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 #from cohete import*
-from Simulador.src.Xitle import *
+from Simulador.src.XitleFile import *
 from Paquetes.utils.dibujar_cohete import dibujar_cohete
 
 CG_list=[]

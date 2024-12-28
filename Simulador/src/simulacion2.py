@@ -14,9 +14,9 @@ from Paquetes.PaqueteFisica.viento import Viento
 from Paquetes.PaqueteFisica.cohete import Parachute
 
 from Simulador.src import condiciones_init as c_init
-from Simulador.src import Xitle
+from Simulador.src import XitleFile
 
-cohete_actual = Xitle.Xitle
+cohete_actual = XitleFile.Xitle
 
 #####EMPEZAR SIN PARACAIDAS
 #quitar el paracaidas
@@ -175,7 +175,7 @@ datos_a_guardar = {
 }
 print("csv guardado")
 
-with open('datos_sim_paracaidas.json', 'w') as f:
+with open('datos_sim_paracaidas.json', 'w', encoding='utf-8') as f:
     json.dump(datos_a_guardar, f, indent=4)
 print("json guardado")
 

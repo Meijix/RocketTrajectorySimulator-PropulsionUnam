@@ -6,7 +6,7 @@ import os
 # Agregar la ruta del directorio que contiene los paquetes al sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from Simulador.src.Xitle import Xitle
+from Simulador.src.XitleFile import Xitle
 
 def dibujar_cohete(x, y, theta, tamaño, ax):
   theta = theta-90

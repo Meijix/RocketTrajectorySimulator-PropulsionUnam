@@ -6,7 +6,7 @@ import time
 import random  # Para variar las condiciones en cada simulación
 
 from Simulador.src.condiciones_init import *
-from Simulador.src.Xitle import *
+from Simulador.src.XitleFile import *
 from Simulador.PaqueteFisica.Vuelo import *
 from Simulador.PaqueteFisica.Viento import Viento
 
@@ -24,12 +24,12 @@ for sim_num in range(1, n_simulaciones + 1):
     print(f"Simulación {sim_num} de {n_simulaciones}")
     
     # Asignar el valor de la lista a la masa inicial variada
-    Xitle.masa = masa_inicial_variada[sim_num - 1]
-    print(f"Masa inicial para la simulación {sim_num}: {Xitle.masa} kg")
+    XitleFile.masa = masa_inicial_variada[sim_num - 1]
+    print(f"Masa inicial para la simulación {sim_num}: {XitleFile.masa} kg")
 
     # Configuración inicial para cada simulación
-    Xitle.parachute_added = False
-    Xitle.parachute_active1 = False
+    XitleFile.parachute_added = False
+    XitleFile.parachute_active1 = False
 
     # Estado inicial
     x0, y0, z0 = 0, 0, 0
@@ -45,7 +45,7 @@ for sim_num in range(1, n_simulaciones + 1):
     viento_actual = Viento(vel_base=10, vel_mean=2 + random.uniform(-1, 1), vel_var=0.01, var_ang=20)
     viento_actual.actualizar_viento3D()
 
-    vuelo1 = Vuelo(Xitle, atmosfera_actual, viento_actual)
+    vuelo1 = Vuelo(XitleFile, atmosfera_actual, viento_actual)
     tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo1.simular_vuelo(estado, t_max, dt, dt_out)
 
     # Resultados de posiciones y velocidades
@@ -123,8 +123,8 @@ for sim_num in range(1, n_simulaciones + 1):
 
     # Guardar los datos importantes en un archivo JSON
     datos_a_guardar = {
-        'd_ext': Xitle.d_ext,
-        't_MECO': Xitle.t_MECO,
+        'd_ext': XitleFile.d_ext,
+        't_MECO': XitleFile.t_MECO,
         'tiempo_salida_riel': vuelo1.tiempo_salida_riel,
         'tiempo_apogeo': vuelo1.tiempo_apogeo,
         'tiempo_impacto': vuelo1.tiempo_impacto,

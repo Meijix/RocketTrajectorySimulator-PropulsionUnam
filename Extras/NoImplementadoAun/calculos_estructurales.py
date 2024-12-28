@@ -1,2 +1,2 @@
-from Simulador.src.Xitle import *
+from Simulador.src.XitleFile import *
 
