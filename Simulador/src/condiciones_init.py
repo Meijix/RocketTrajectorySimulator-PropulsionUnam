@@ -25,6 +25,10 @@ fecha = "2024-11-06" #año-mes-dia
 #viento_actual = Viento( 10, 2, 0, 0)
 #Sin viento
 viento_actual = Viento( 0, 2, 0, 0)
+viento_actual.actualizar_viento3D()
+#print(viento_actual)
+#print(viento_actual.vector)
+
 #atmosfera
 atmosfera_actual = atmosfera()
 #cohete
@@ -42,15 +46,10 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 #print(estado)
 #Parametros de la simulacion
 dt = 0.01 #0.1 #[s]
-t_max = 800 #[s]
+t_max = 400 #[s]
 dt_out =  0.01
 integrador_actual = 'RungeKutta4'
 #integrador_actual = 'RKF45'
 #integrador_actual = 'AdaptiveEuler'
 # t_max = 1200 #[s]
 # t_max = 5 #[s]
-
-viento_actual = Viento(vel_base=20, vel_mean=5, vel_var=5, var_ang=5)
-viento_actual.actualizar_viento3D()
-#print(viento_actual)
-#print(viento_actual.vector)

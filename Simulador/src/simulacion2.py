@@ -148,7 +148,7 @@ datos_a_guardar = {
 }
 print("csv guardado")
 
-with open('datos_sim_paracaidas.json', 'w', encoding='utf-8') as f:
+with open('././datos_sim_paracaidas.json', 'w', encoding='utf-8') as f:
     json.dump(datos_a_guardar, f, indent=4)
 print("json guardado")
 

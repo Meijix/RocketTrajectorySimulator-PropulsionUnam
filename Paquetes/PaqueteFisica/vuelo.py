@@ -315,6 +315,7 @@ class Vuelo:
             #CAIDA: Terminar simulación cuando cae al piso
             if estado[2] < 0 and t > 1:
                 self.tiempo_impacto = t
+                break
 
             # -------------------------
             # Guardar cantidades en listas
@@ -387,6 +388,6 @@ class Vuelo:
 
             #Indicar el avance en la simulacion
             if it%2500==0:
-                print(f"Iteracion {it}, t={t:.1f} s, dt={dt:g}, altitud={altitud:.1f} m, vel vert={estado[5]:.1f}")
+                print(f"Iter= {it}, t={t:.1f} s, dt={dt:g}, altitud={altitud:.1f} m, vel vert={estado[5]:.1f}")
 
         return tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs
