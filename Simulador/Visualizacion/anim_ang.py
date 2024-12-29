@@ -10,7 +10,7 @@ from matplotlib.animation import FuncAnimation
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 # Supongamos que estas funciones ya están definidas
 from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson, muestra_tiempos
-from Paquetes.utils.dibujar_cohete2 import dibujar_cohete2, actualizar
+from Paquetes.utils.dibujar_cohete2 import dibujar_cohete2
 
 # Leer datos de simulación
 datos_simulacion = pd.read_csv(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\src\datos_simulacion.csv')
@@ -38,7 +38,7 @@ ax_theta_omega.set_xlim([0, tiempos[-1]])
 ax_theta_omega.set_ylim([min(thetas.min(), omegas.min())-0.2, max(thetas.max(), omegas.max())+0.2])
 ax_theta_omega.set_xlabel("Tiempo (s)")
 ax_theta_omega.set_ylabel("Ángulo (rad) / Velocidad Angular (rad/s)")
-ax_theta_omega.set_title("Theta y Omega vs Tiempo")
+ax_theta_omega.set_title("Inclinacion y vel angula vs Tiempo")
 
 # Función de actualización de la animación
 def update(frame):
@@ -79,4 +79,10 @@ def update(frame):
 frames = np.arange(0, len(tiempos), 10)  # Intervalos optimizados
 animation = FuncAnimation(fig, update, frames=frames, interval=100, repeat=False)
 
-plt.show()
+#plt.show()
+
+#Guardar la animacion
+print("Guardando animación...")
+animation.save('cohete_rotado.mp4', writer='ffmpeg', fps=30)
+print("Animación guardada con éxito")
+#animation.save('cohete_rotado.gif', writer='imagemagick', fps=30)

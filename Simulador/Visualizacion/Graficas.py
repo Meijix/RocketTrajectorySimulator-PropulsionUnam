@@ -339,7 +339,7 @@ ax.text(launch_point[0]+sep, launch_point[1]+sep, launch_point[2]+sep, 'Lanzamie
 ax.text(impact_point[0]+sep, impact_point[1]+sep, impact_point[2]+sep, 'Impacto', color='red')
 
 # Create a circle in the xy plane with a diameter of 1000 meters around the impact point
-circle_radius = 1000
+circle_radius = 500
 circle_points = np.linspace(0, 2*np.pi, 100)
 circle_x = impact_point[0] + circle_radius * np.cos(circle_points)
 circle_y = impact_point[1] + circle_radius * np.sin(circle_points)
