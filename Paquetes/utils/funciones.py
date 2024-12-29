@@ -103,7 +103,7 @@ def muestra_tiempos(tiempo_salida_riel,t_MECO,tiempo_apogeo, tiempo_impacto, ax)
     if tiempo_apogeo is not None:
         ax.axvline(tiempo_apogeo, color="darkgreen", ls="--")
     if tiempo_impacto is not None:
-        ax.axvline(tiempo_impacto, color="0.2", ls="--")
+        ax.axvline(tiempo_impacto, color="0.5", ls="--")
     #if tiempo_despliegue is not None:
         #ax.axvline(tiempo_despliegue, color="green", ls="--")
     #ax.legend()

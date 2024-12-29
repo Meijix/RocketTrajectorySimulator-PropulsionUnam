@@ -66,60 +66,18 @@ fig = plt.figure(figsize=(10, 8))
 
 # Eje 3D para la trayectoria del cohete
 ax3d = fig.add_subplot(121, projection='3d')
-ax3d.set_xlim([0, alcance+80])
-ax3d.set_ylim([0, apogee[1]+80])
-ax3d.set_zlim([0, apogee[2]+80])
-ax3d.set_title('Trayectoria 3D')
-ax3d.set_xlabel("Alcance(m)")
-ax3d.set_ylabel("Desplazamiento(m)")
-ax3d.set_zlabel("Altura(m)")
-#Escribir lanazamiento, apogeo e impacto junto a los puntos 
 sep=50 #separacion del punto
-ax3d.text(launch_point[0]+sep, launch_point[1]+sep, launch_point[2]+sep, 'Lanzamiento', color='blue')
-ax3d.text(impact_point[0]+sep, impact_point[1]+sep, impact_point[2]+sep, 'Impacto', color='red')
-ax3d.text(apogee[0]+sep, apogee[1]+sep, apogee[2]+sep, 'Apogeo', color='deeppink')
-ax3d.text(MECO_point[0]+sep, MECO_point[1]+sep, MECO_point[2]+sep, 'MECO', color='orangered')
-
-# Plot the launch and impact points with different colors
-ax3d.scatter(launch_point[0], launch_point[1], launch_point[2], c='blue', label='Punto de lanzamiento')
-ax3d.scatter(impact_point[0], impact_point[1], impact_point[2], c='red', label='Punto de impacto')
-ax3d.scatter(apogee[0], apogee[1], apogee[2], c='deeppink', label='Apogeo')
-ax3d.scatter(MECO_point[0], MECO_point[1], MECO_point[2], c='orangered', label='MECO')
-ax3d.set_box_aspect([1, 0.5, 2])  # Aspect ratio is 1:1:1
-
-sap=150 #separacion de los puntos`
 # Eje 2D para la visualización
 ax2d = fig.add_subplot(122)
-ax2d.set_xlim([-10, t_fin+15])
-ax2d.set_ylim([-10, apogee[2]+400])
-ax2d.set_title('Trayectoria 2D')
-ax2d.set_xlabel("Tiempo(s)")
-ax2d.set_ylabel("Altura(m)")
-#Scatter del apogeo
-ax2d.scatter(tiempo_apogeo, apogee[2], c='deeppink', label='Apogeo', s=200, marker='*')
-#Scatter del MECO
-ax2d.scatter(t_MECO, MECO_point[2], c='orangered', label='MECO', s=200, marker='*')
-#Scatter del impacto y lanzamiento
-ax2d.scatter(t[-1], impact_point[2], c='red', label='Impacto', s=200, marker='*')
-ax2d.scatter(t[0], z[0], c='blue', label='Lanzamiento', s=200, marker='*')
-ax2d.grid()
-#ax2d.legend()
-muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, ax2d)
-#label a las lineas
-#ax2d.text(tiempo_salida_riel, z[tiempo_salida_riel], 'Salida riel', color='pink')
-ax2d.text(t_MECO+3, MECO_point[2]+sap,'MECO', color='orangered')
-ax2d.text(tiempo_apogeo+3, apogee[2]+sap, 'Apogeo', color='deeppink')
-ax2d.text(tiempo_impacto+3, impact_point[2]+sap, 'Impacto', color='red')
-ax2d.text(t[0]+3, z[0]+sap, 'Lanzamiento', color='blue')
+sap=150 #separacion de los puntos`
 
-plt.tight_layout()
 # Cada cuantos frames graficar
-every = 500
+every = 200
 y_max = max(y)
 #print('y_max:', y_max)
 # Función de actualización para la animación
 def update(frame):
-
+    ax3d.clear()
     #print(frame)
     ax3d.set_xlim([-50, alcance+50])
     ax3d.set_ylim([-50, y_max+50])
@@ -127,10 +85,23 @@ def update(frame):
 
     # Plot the trajectory
     ax3d.plot(x[:frame], y[:frame], z[:frame], 'darkblue')
-    #ax3d.scatter(x[frame], y[frame], z[frame], 'g', s=20, marker='*')
+    ax3d.scatter(x[frame], y[frame], z[frame], c='darkblue', s=80, marker='o')
 
+    ax3d.text(launch_point[0]+sep, launch_point[1]+sep, launch_point[2]+sep, 'Lanzamiento', color='blue')
+    ax3d.text(impact_point[0]+sep, impact_point[1]+sep, impact_point[2]+sep, 'Impacto', color='red')
+    ax3d.text(apogee[0]+sep, apogee[1]+sep, apogee[2]+sep, 'Apogeo', color='deeppink')
+    ax3d.text(MECO_point[0]+sep, MECO_point[1]+sep, MECO_point[2]+sep, 'MECO', color='orangered')
 
-    #ax3d.scatter(MECO_point[0], MECO_point[1], MECO_point[2], c='orangered', label='MECO')
+    # Plot the launch and impact points with different colors
+    ax3d.scatter(launch_point[0], launch_point[1], launch_point[2], c='blue', label='Punto de lanzamiento', s=100, marker='*')
+    ax3d.scatter(impact_point[0], impact_point[1], impact_point[2], c='red', label='Punto de impacto', s=100, marker='*')
+    ax3d.scatter(apogee[0], apogee[1], apogee[2], c='deeppink', label='Apogeo', s=100, marker='*')
+    ax3d.scatter(MECO_point[0], MECO_point[1], MECO_point[2], c='orangered', label='MECO', s=100, marker='*')
+    ax3d.set_title('Trayectoria 3D')
+    ax3d.set_ylabel("Alcance(m)")
+    ax3d.set_xlabel("Desplazamiento(m)")
+    ax3d.set_zlabel("Altura(m)")
+    ax3d.set_box_aspect([1, 0.5, 2]) 
     
     if frame == frames[-1]:
         #Create a circle in the xy plane with a diameter of 1000 meters around the impact point
@@ -144,9 +115,31 @@ def update(frame):
 
     #######################################
     ## Grafica 2D
+    ax2d.clear()
     ax2d.set_xlim([-15, t_fin+15])
     ax2d.set_ylim([-500, apogee[2]+800])
     ax2d.plot(t[:frame], z[:frame], 'darkblue')
+    ax2d.scatter(t[frame], z[frame], c='darkblue', s=80, marker='o')
+
+    muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, ax2d)
+
+    ax2d.set_title('Trayectoria 2D')
+    ax2d.set_xlabel("Tiempo(s)")
+    ax2d.set_ylabel("Altura(m)")
+
+    #ax2d.text(tiempo_salida_riel, z[tiempo_salida_riel], 'Salida riel', color='pink')
+    ax2d.text(t_MECO+3, MECO_point[2]+sap,'MECO', color='orangered')
+    ax2d.text(tiempo_apogeo+3, apogee[2]+sap, 'Apogeo', color='deeppink')
+    ax2d.text(tiempo_impacto+3, impact_point[2]+sap, 'Impacto', color='red')
+    ax2d.text(t[0]+3, z[0]+sap, 'Lanzamiento', color='blue')
+
+    ax2d.scatter(tiempo_apogeo, apogee[2], c='deeppink', label='Apogeo', s=200, marker='*')
+    ax2d.scatter(t_MECO, MECO_point[2], c='orangered', label='MECO', s=200, marker='*')
+    ax2d.scatter(t[-1], impact_point[2], c='red', label='Impacto', s=200, marker='*')
+    ax2d.scatter(t[0], z[0], c='blue', label='Lanzamiento', s=200, marker='*')
+    ax2d.grid()
+    #ax2d.legend()
+    plt.tight_layout()
 
 
 
