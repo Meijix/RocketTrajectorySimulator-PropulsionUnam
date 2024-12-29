@@ -98,8 +98,8 @@ def extraer_datosjson(datos):
 ##########################################
 # Funcion para graficar los tiempos importantes
 def muestra_tiempos(tiempo_salida_riel,t_MECO,tiempo_apogeo, tiempo_impacto, ax):
-    ax.axvline(tiempo_salida_riel, color="orange", ls="--")
-    ax.axvline(t_MECO, color="darkred", ls="--")
+    ax.axvline(tiempo_salida_riel, color="darkred", ls="--")
+    ax.axvline(t_MECO, color="orange", ls="--")
     if tiempo_apogeo is not None:
         ax.axvline(tiempo_apogeo, color="darkgreen", ls="--")
     if tiempo_impacto is not None:
