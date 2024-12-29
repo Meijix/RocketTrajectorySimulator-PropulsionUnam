@@ -4,7 +4,7 @@ import matplotlib.patches as patches
 from matplotlib import transforms
 from matplotlib.animation import FuncAnimation
 
-def dibujar_cohete(ax, angle=0, x_cm=0, y_cm=0, long=6):
+def dibujar_cohete2(ax, angle=0, x_cm=0, y_cm=0, long=6):
     """
     Dibuja un cohete en un gráfico especificando su centro de gravedad (x_cm, y_cm),
     el ángulo de rotación, y el escalado del cohete.
@@ -82,8 +82,8 @@ def actualizar(frame, ax, parts, x_cm, y_cm, scale):
     angle = frame  # Rotación incremental en cada frame
     trans = (transforms.Affine2D()
              .translate(-6 * scale / 2, -1 * scale / 2)  # Trasladar al origen relativo del cohete
-             .rotate_deg(angle)                        # Rotar alrededor del centro de gravedad
-             .translate(x_cm, y_cm)                    # Mover al centro de gravedad
+             .rotate_deg(angle)      # Rotar alrededor del centro de gravedad
+             .translate(x_cm, y_cm)  # Mover al centro de gravedad
              + ax.transData)
     for part in parts:
         part.set_transform(trans)
@@ -101,7 +101,7 @@ def on_click(event):
         ax.set_xlim(-20, 20)
         ax.set_ylim(-20, 20)
         ax.set_aspect('equal')
-        parts = dibujar_cohete(ax, angle=0, x_cm=x_cm, y_cm=y_cm, long=5)
+        parts = dibujar_cohete2(ax, angle=0, x_cm=x_cm, y_cm=y_cm, long=5)
         anim = FuncAnimation(fig, actualizar, frames=np.arange(0, 360, 2), 
                              fargs=(ax, parts, x_cm, y_cm, scale), interval=50)
         plt.draw()
@@ -115,7 +115,7 @@ ax.set_aspect('equal')
 # Variables globales
 x_cm, y_cm = 0, 0  # Centro de gravedad inicial
 scale = 1          # Escala inicial
-parts = dibujar_cohete(ax, angle=0, x_cm=x_cm, y_cm=y_cm, long=5)
+parts = dibujar_cohete2(ax, angle=0, x_cm=x_cm, y_cm=y_cm, long=5)
 
 # Crear animación inicial
 anim = FuncAnimation(fig, actualizar, frames=np.arange(0, 360, 2), 
