@@ -2,16 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib import transforms
+from matplotlib.animation import FuncAnimation
 
-#Se le podrian pasar las mediidas del cohete_actual
-def dibujar_cohete2(ax=None):
-    #Colores
-    color_cohete='navy'
-    color_borde='silver'
-    # Crear figura
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    
+def dibujar_cohete(ax, angle=0, x_cm=0, y_cm=0):
+    """
+    Dibuja un cohete en un gráfico especificando su centro de gravedad (x_cm, y_cm)
+    y el ángulo de rotación alrededor de dicho centro.
+    """
+    # Colores
+    color_cohete = 'navy'
+    color_borde = 'silver'
+
     # Dimensiones del cohete
     body_l = 6
     body_w = 1
@@ -19,57 +20,91 @@ def dibujar_cohete2(ax=None):
     fin_w1 = 1.5
     fin_w2 = 2
     fin_h = 0.5
-    boattail_lenght = 0.3
+    boattail_length = 0.3
     
+    # Partes del cohete
     parts = []
     
-    # Cuerpo del cohete
-    points = np.array([(0,0), (0,body_w), (body_l,body_w), (body_l, 0)])
+    # Cuerpo
+    points = np.array([(0, 0), (0, body_w), (body_l, body_w), (body_l, 0)])
     body = patches.Polygon(points, facecolor=color_cohete, edgecolor=color_borde)
+    parts.append(body)
     
     # Cono de la nariz
-    points = np.array([(body_l,0), (body_l,body_w), (body_l+nose_l,body_w/2)])
+    points = np.array([(body_l, 0), (body_l, body_w), (body_l + nose_l, body_w / 2)])
     nose_cone = patches.Polygon(points, facecolor=color_cohete, edgecolor=color_borde)
+    parts.append(nose_cone)
     
     # Aletas
-    fin_d = (fin_w2 - fin_w1)/2
-    points = np.array([(0, 0), (fin_d, fin_h), (fin_d+fin_w1, fin_h), (fin_w2, 0)])
+    fin_d = (fin_w2 - fin_w1) / 2
+    points = np.array([(0, 0), (fin_d, fin_h), (fin_d + fin_w1, fin_h), (fin_w2, 0)])
+    
+    # Aleta superior
     points1 = np.copy(points)
     points1[:, 1] += body_w
     fin1 = patches.Polygon(points1, facecolor=color_cohete, edgecolor=color_borde)
+    parts.append(fin1)
+    
+    # Aleta inferior
     points2 = np.copy(points)
     points2[:, 1] *= -1
     fin2 = patches.Polygon(points2, facecolor=color_cohete, edgecolor=color_borde)
+    parts.append(fin2)
     
-    # Boattail (parte trasera)
-    points = np.array([(0,0), (0,body_w), (-boattail_lenght, body_w-0.1), (-boattail_lenght, 0.1)])
+    # Boattail
+    points = np.array([
+        (0, 0), 
+        (0, body_w), 
+        (-boattail_length, body_w - 0.1), 
+        (-boattail_length, 0.1)
+    ])
     boattail = patches.Polygon(points, facecolor=color_cohete, edgecolor=color_borde)
+    parts.append(boattail)
     
-    # Añadir todas las partes
-    parts = [body, nose_cone, fin1, fin2, boattail]
+    # Añadir partes al eje
+    for part in parts:
+        ax.add_patch(part)
     
-    for p in parts:
-        plt.gca().add_artist(p)
+    # Aplicar transformación: mover al CM y rotar alrededor de él
+    trans = (transforms.Affine2D()
+             .translate(-body_l / 2, -body_w / 2)  # Trasladar el cohete al origen del CM
+             .rotate_deg(angle)                   # Rotar el cohete
+             .translate(x_cm, y_cm)               # Mover al centro de gravedad
+             + ax.transData)
     
-    # Configurar los límites y aspecto del gráfico
-    plt.xlim(-10, 10)
-    plt.ylim(-10, 10)
-    plt.gca().set_aspect("equal")
+    for part in parts:
+        part.set_transform(trans)
     
-    return fig, parts
+    return parts
 
-#Función para rotar el cohete en el cm
-def rotar_cohete(fig, parts, x_cm,y_cm,angle,ax=None):
-    #Transaladar y rotar el cohete
-    trans = transforms.Affine2D().translate(-x_cm, -y_cm) + transforms.Affine2D().rotate_deg(angle)  + plt.gca().transData #+ transforms.Affine2D().translate(xpos, ypos)
-    for p in parts:
-        p.set_transform(trans)
-    return fig, parts 
+# Función de animación
+def actualizar(frame, ax, parts, x_cm, y_cm):
+    """
+    Actualiza la rotación del cohete en cada cuadro.
+    """
+    angle = frame  # Rotación incremental en cada frame
+    trans = (transforms.Affine2D()
+             .translate(-6 / 2, -1 / 2)  # Dimensiones del cuerpo del cohete
+             .rotate_deg(angle)
+             .translate(x_cm, y_cm)
+             + ax.transData)
+    for part in parts:
+        part.set_transform(trans)
+    return parts
 
+# Configuración del gráfico
+fig, ax = plt.subplots()
+ax.set_xlim(-10, 10)
+ax.set_ylim(-10, 10)
+ax.set_aspect('equal')
 
-# Ejemplo de uso:
-fig, parts = dibujar_cohete2()
-#usar rotar_cohete para rotar el cohete
-fig, parts = rotar_cohete(fig, parts,3,0.5,30)
+# Dibuja el cohete en la posición inicial
+x_cm, y_cm = 0, 0  # Centro de gravedad
+parts = dibujar_cohete(ax, angle=0, x_cm=x_cm, y_cm=y_cm)
 
+# Crear animación
+anim = FuncAnimation(fig, actualizar, frames=np.arange(0, 360, 2), 
+                     fargs=(ax, parts, x_cm, y_cm), interval=50)
+
+# Mostrar la animación
 plt.show()
