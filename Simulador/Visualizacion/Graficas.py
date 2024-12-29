@@ -153,19 +153,7 @@ muestra_tiempos(tiempos, plt)
 plt.legend()
 plt.grid(True)
 
-# GRAFICA 2. Velocidades
-plt.figure(figsize=(10, 6))
-plt.title("Velocidad en el tiempo")
-plt.xlabel("Tiempo (s)")
-plt.ylabel("Velocidad (m/s)")
-plt.plot(tiempos[:], velocidades[:, 0], label="Vx")
-plt.plot(tiempos[:], velocidades[:, 1], label="Vy")
-plt.plot(tiempos[:], velocidades[:, 2], label="Vz")
-# plt.plot(tiempos[1:], np.linalg.norm(velocidades[:, :]), label="Total", color="black")
-muestra_tiempos(tiempos, plt)
-plt.legend()
-plt.grid(True)
-# Mostrar las gráficas
+
 # plt.show()
 
 # GRAFICA 3. Angulos contra el tiempo
@@ -183,7 +171,6 @@ plt.grid(True)
 # plt.xlim(150,300); plt.ylim(-20, 20)
 # plt.show()
 
-
 #GRAFICA 4. Fuerzas (magnitudes)
 plt.figure()
 plt.title("Fuerzas en el tiempo")
@@ -193,43 +180,6 @@ plt.plot(tiempos[:], Dmags, label= "Arrastre")
 muestra_tiempos(tiempos, plt)
 if tiempo_apogeo is not None:
     plt.xlim(0,tiempo_apogeo+10)
-plt.legend()
-# plt.show()
-
-# GRAFICA 5. Componentes de las fuerzas
-plt.figure(figsize=(18,4))
-
-plt.subplot(1, 3, 1)
-plt.title("Empuje [N]")
-plt.ylabel("Newtons")
-plt.plot(tiempos[:], Txs, label="X")
-plt.plot(tiempos[:], Tys, label="Y")
-plt.plot(tiempos[:], Tzs, label="Z")
-muestra_tiempos(tiempos, plt)
-plt.xlim(0,t_MECO+1)
-plt.legend()
-
-plt.subplot(1, 3, 2)
-plt.title("Arrastre [N]")
-#plt.ylabel("Newtons")
-plt.plot(tiempos[:], Dxs, label="X")
-plt.plot(tiempos[:], Dys, label="Y")
-plt.plot(tiempos[:], Dzs, label="Z")
-muestra_tiempos(tiempos, plt)
-if tiempo_apogeo is not None:
-    plt.xlim(0,tiempo_apogeo+1)
-plt.legend()
-
-plt.subplot(1, 3, 3)
-plt.title("Normal [N]")
-#plt.ylabel("Newtons")
-plt.plot(tiempos[:], Nxs, label="X")
-plt.plot(tiempos[:], Nys, label="Y")
-plt.plot(tiempos[:], Nzs, label="Z")
-muestra_tiempos(tiempos, plt)
-if tiempo_apogeo is not None:
-    plt.xlim(0,tiempo_apogeo+1)
-#plt.ylim(-6,2.2)
 plt.legend()
 # plt.show()
 
@@ -257,6 +207,57 @@ plt.legend()
 
 # plt.show()
 """
+# GRAFICA 2. Velocidades
+plt.figure(figsize=(10, 6))
+plt.title("Velocidad en el tiempo")
+plt.xlabel("Tiempo (s)")
+plt.ylabel("Velocidad (m/s)")
+plt.plot(tiempos[:], velocidades[:, 0], label="Vx", color='tomato')
+plt.plot(tiempos[:], velocidades[:, 1], label="Vy", color='royalblue')
+plt.plot(tiempos[:], velocidades[:, 2], label="Vz", color='green')
+# plt.plot(tiempos[1:], np.linalg.norm(velocidades[:, :]), label="Total", color="black")
+muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
+plt.legend()
+plt.grid(True)
+
+
+# GRAFICA 5. Componentes de las fuerzas
+plt.figure(figsize=(14,6))
+
+plt.subplot(1, 3, 1)
+plt.title("Empuje")
+plt.ylabel("Fuerza[Newtons]")
+plt.plot(tiempos[:], Txs, label="X", color='tomato')
+plt.plot(tiempos[:], Tys, label="Y", color='royalblue')
+plt.plot(tiempos[:], Tzs, label="Z", color='green')
+muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
+plt.xlim(0,t_MECO+1)
+plt.legend()
+
+plt.subplot(1, 3, 2)
+plt.title("Arrastre")
+#plt.ylabel("Newtons")
+plt.plot(tiempos[:], Dxs, label="X", color='tomato')
+plt.plot(tiempos[:], Dys, label="Y", color='royalblue')
+plt.plot(tiempos[:], Dzs, label="Z", color='green')
+muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
+if tiempo_apogeo is not None:
+    plt.xlim(0,tiempo_apogeo+1)
+plt.legend()
+
+plt.subplot(1, 3, 3)
+plt.title("Normal")
+#plt.ylabel("Newtons")
+plt.plot(tiempos[:], Nxs, label="X", color='tomato')
+plt.plot(tiempos[:], Nys, label="Y", color='royalblue')
+plt.plot(tiempos[:], Nzs, label="Z", color='green')
+muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
+if tiempo_apogeo is not None:
+    plt.xlim(0,tiempo_apogeo+1)
+#plt.ylim(-6,2.2)
+plt.legend()
+# plt.show()
+
 # GRAFICA 7. Theta, Velocidad y aceleración angular (derivada de theta)
 plt.figure(figsize=(14,5))
 
@@ -276,8 +277,7 @@ plt.plot(tiempos[:], nice_angle(accangs), color='khaki')
 muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
 plt.title("Aceleración angular")
 
-plt.show()
-'''
+
 #GRAFICA 8. Angulos
 plt.figure(figsize=(12,6))
 plt.title("Ángulos en el tiempo")
@@ -334,7 +334,7 @@ axs[2].set_xlabel("Desplazamiento (m)")
 axs[2].set_ylabel("Altura (m)")
 plt.tight_layout()
 plt.show()
-'''
+
 
 
 ##################
