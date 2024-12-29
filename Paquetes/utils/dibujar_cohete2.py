@@ -10,8 +10,8 @@ def dibujar_cohete2(ax, angle=0, x_cm=0, y_cm=0, long=6):
     el ángulo de rotación, y el escalado del cohete.
     """
     # Colores
-    color_cohete = 'navy'
-    color_borde = 'silver'
+    color_cohete = 'midnightblue'
+    color_borde = 'lavender'
 
     # Dimensiones del cohete escaladas
     body_l = long
@@ -66,22 +66,22 @@ def dibujar_cohete2(ax, angle=0, x_cm=0, y_cm=0, long=6):
     
     # Aplicar transformación inicial
     trans = (transforms.Affine2D()
-             .translate(-body_l / 2, -body_w / 2)  # Trasladar el cohete al origen relativo
-             .translate(x_cm, y_cm)               # Mover al centro de gravedad inicial
-             + ax.transData)
+            .translate(-body_l / 2, -body_w / 2)  # Trasladar el cohete al origen relativo
+            .translate(x_cm, y_cm) 
+            .rotate_deg(angle)      # Rotar alrededor del centro de gravedad    
+            + ax.transData)
     for part in parts:
         part.set_transform(trans)
     
     return parts
 
 # Función de animación
-def actualizar(frame, ax, parts, x_cm, y_cm, scale):
+def actualizar(frame, ax, parts, x_cm, y_cm, angle):
     """
     Actualiza la rotación del cohete en cada cuadro.
     """
-    angle = frame  # Rotación incremental en cada frame
+    # Rotación incremental en cada frame
     trans = (transforms.Affine2D()
-             .translate(-6 * scale / 2, -1 * scale / 2)  # Trasladar al origen relativo del cohete
              .rotate_deg(angle)      # Rotar alrededor del centro de gravedad
              .translate(x_cm, y_cm)  # Mover al centro de gravedad
              + ax.transData)
@@ -106,23 +106,24 @@ def on_click(event):
                              fargs=(ax, parts, x_cm, y_cm, scale), interval=50)
         plt.draw()
 
-# Configuración inicial del gráfico
-fig, ax = plt.subplots()
-ax.set_xlim(-20, 20)
-ax.set_ylim(-20, 20)
-ax.set_aspect('equal')
+if __name__ == '__main__':
+    # Configuración inicial del gráfico
+    fig, ax = plt.subplots()
+    ax.set_xlim(-20, 20)
+    ax.set_ylim(-20, 20)
+    ax.set_aspect('equal')
 
-# Variables globales
-x_cm, y_cm = 0, 0  # Centro de gravedad inicial
-scale = 1          # Escala inicial
-parts = dibujar_cohete2(ax, angle=0, x_cm=x_cm, y_cm=y_cm, long=5)
+    # Variables globales
+    x_cm, y_cm = 0, 0  # Centro de gravedad inicial
+    scale = 1          # Escala inicial
+    parts = dibujar_cohete2(ax, angle=0, x_cm=x_cm, y_cm=y_cm, long=5)
 
-# Crear animación inicial
-anim = FuncAnimation(fig, actualizar, frames=np.arange(0, 360, 2), 
-                     fargs=(ax, parts, x_cm, y_cm, scale), interval=50)
+    # Crear animación inicial
+    anim = FuncAnimation(fig, actualizar, frames=np.arange(0, 360, 2), 
+                        fargs=(ax, parts, x_cm, y_cm, scale), interval=50)
 
-# Conectar evento de clic
-fig.canvas.mpl_connect('button_press_event', on_click)
+    # Conectar evento de clic
+    fig.canvas.mpl_connect('button_press_event', on_click)
 
-# Mostrar el gráfico interactivo
-plt.show()
+    # Mostrar el gráfico interactivo
+    plt.show()
