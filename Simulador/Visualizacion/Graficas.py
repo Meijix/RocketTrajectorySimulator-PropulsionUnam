@@ -253,119 +253,69 @@ plt.title("Estabilidad (calibres)")
 plt.legend()
 # plt.show()
 
+
+
+# plt.show()
+"""
 # GRAFICA 7. Theta, Velocidad y aceleración angular (derivada de theta)
-plt.figure(figsize=(16,5))
+plt.figure(figsize=(14,5))
 
 plt.subplot(1, 3, 1)
-plt.plot(tiempos[:], nice_angle(thetas))
-#plt.xlim(0,vuelo1.tiempo_apogeo+10)
-muestra_tiempos(tiempos, plt)
-plt.title("Ángulo de inclinación (Pitch)")#pitch (theta)
+plt.plot(tiempos[:], nice_angle(thetas),color='limegreen', label="Theta")
+muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
+plt.title("Ángulo de inclinación")#pitch (theta)
 
 plt.subplot(1, 3, 2)
-plt.plot(tiempos[:], nice_angle(omegas))
+plt.plot(tiempos[:], nice_angle(omegas), color='hotpink', label="Omega")
 plt.axhline(0, ls="--", color="lightgray")
-#plt.xlim(0,vuelo1.tiempo_apogeo+10)
-muestra_tiempos(tiempos, plt)
-plt.title("Velocidad angular(omega)")
+muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
+plt.title("Velocidad angular")
 
 plt.subplot(1, 3, 3)
-plt.plot(tiempos[:], nice_angle(accangs))
-#plt.xlim(0,vuelo1.tiempo_apogeo+10)
-muestra_tiempos(tiempos, plt)
+plt.plot(tiempos[:], nice_angle(accangs), color='khaki')
+muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
 plt.title("Aceleración angular")
 
-
+plt.show()
+'''
 #GRAFICA 8. Angulos
-plt.figure(figsize=(14,4))
+plt.figure(figsize=(12,6))
 plt.title("Ángulos en el tiempo")
 plt.xlabel("Tiempo (s)")
 plt.ylabel("Ángulo (grados º)")
-plt.plot(tiempos[:], [normalize_angle(x) for x in np.rad2deg(thetas)], label = 'Ángulo de inclinación (theta)')#pitch
-plt.plot(tiempos[:], [normalize_angle(x) for x in np.rad2deg(Gammas)], label = 'Ángulo de vuelo (gamma)')#FPA
-plt.plot(tiempos[:], [normalize_angle(x) for x in np.rad2deg(Alphas)],label = 'Ángulo de ataque (alpha)')
+plt.plot(tiempos[:], [normalize_angle(x) for x in np.rad2deg(thetas)], label = 'Ángulo de inclinación (theta)', color='green')#pitch
+plt.plot(tiempos[:], [normalize_angle(x) for x in np.rad2deg(Gammas)], label = 'Ángulo de vuelo (gamma)', color='royalblue')#FPA
+plt.plot(tiempos[:], [normalize_angle(x) for x in np.rad2deg(Alphas)],label = 'Ángulo de ataque (alpha)' ,color='purple')#AoA
 if tiempo_apogeo is not None:
     plt.axvline(tiempo_apogeo, color="0.5")
 plt.axhline(0, ls="--", color="gray")
 plt.axhline(riel.angulo, ls="--", color="lightgray")
 plt.axhline(-90, ls="--", color="lightgray")
-#plt.xlim(0,tiempo_apogeo+20)
-muestra_tiempos(tiempos, plt)
+plt.xlim(0,tiempo_impacto)
+muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
 plt.legend()
-# plt.xlim(0,100)
-#plt.ylim(75,80.5)
-# plt.show()
+
 
 #GRAFICA 9. Variacion de masa
 plt.figure()
 plt.xlabel('Tiempo (s)')
 plt.ylabel('Masa (kg)')
-plt.title('Masa del cohete Xitle en el tiempo')
-if tiempo_apogeo is not None:
-    plt.xlim(0,tiempo_apogeo+5)
-muestra_tiempos(tiempos, plt)
-plt.plot(tiempos, masavuelo)
-# plt.show()
+plt.title('Variacion de masa en el tiempo')
+#linea horizontal de masa seca
+plt.axhline(masavuelo[-1], ls="--", color="lightgray")
+muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
+#texto de masa inicial, masa propelente y masa seca
+plt.text(tiempos[4500], masavuelo[-1]+12.5, f'Masa seca: {masavuelo[-1]:.2f} kg', color='k')
+plt.text(tiempos[4500], masavuelo[-1]+11.5, f'Masa propelente: {masavuelo[0]-masavuelo[-1]:.2f} kg', color='k')
+plt.text(tiempos[4500], masavuelo[-1]+10.5, f'Masa inicial: {masavuelo[0]:.2f} kg', color='k')
 
-# GRAFICA 10. Trayectoria
-plt.xlabel('Alcance (m)')
-plt.ylabel('Altura (m)')
-plt.title('Trayectoria del cohete Xitle en el tiempo')
-plt.plot(posiciones[:, 0], posiciones[:, 2])
-# plt.ylim(0, 10000)
-plt.gca().set_aspect("equal")
-plt.show()
+#Grafica de la masa
+plt.plot(tiempos, masavuelo, label='Masa del cohete', color='darkblue')
+#Scatter de los puntos de interes
+plt.scatter(t_MECO, masavuelo[-1], color='indigo', label='Masa seca', marker='x', s=100)
+plt.scatter(tiempos[0], masavuelo[0], color='darkturquoise', label='Masa inicial',marker='x', s=100)
 
-"""
-####################
-# GRAFICAS 3D
-# Extract the launch and impact points
-launch_point = posiciones[0]
-impact_point = posiciones[-1]
-
-# Create the figure and 3D axes
-fig = plt.figure(figsize=(12, 8))
-ax = fig.add_subplot(111, projection="3d")
-
-# Plot the trajectory
-ax.plot(posiciones[:, 0], posiciones[:, 1], posiciones[:, 2])
-
-# Plot the launch and impact points with different colors
-ax.scatter(launch_point[0], launch_point[1], launch_point[2], c='blue', label='Punto de lanzamiento')
-ax.scatter(impact_point[0], impact_point[1], impact_point[2], c='red', label='Punto de impacto')
-#Escribir lanazamiento e impacto junto a los puntos 
-sep=100 #separacion del punto
-ax.text(launch_point[0]+sep, launch_point[1]+sep, launch_point[2]+sep, 'Lanzamiento', color='blue')
-ax.text(impact_point[0]+sep, impact_point[1]+sep, impact_point[2]+sep, 'Impacto', color='red')
-
-# Create a circle in the xy plane with a diameter of 1000 meters around the impact point
-circle_radius = 500
-circle_points = np.linspace(0, 2*np.pi, 100)
-circle_x = impact_point[0] + circle_radius * np.cos(circle_points)
-circle_y = impact_point[1] + circle_radius * np.sin(circle_points)
-
-# Plot the circle in the xy plane
-ax.plot(circle_x, circle_y, 0, color='gray', linestyle='--', label='1000 m radio de seguridad')
-
-#Plot the projections of the trajectory in the XY, XZ, and YZ planes
-#Projections need to be plotted in the same plot to be able to see the 3D trajectory
-#ax.plot(posiciones[:, 0], posiciones[:, 1], 0, color='purple', linestyle='--', label='Proyección en XY')
-#ax.plot(posiciones[:, 0], 0, posiciones[:, 2], color='green', linestyle='--', label='Proyección en XZ')
-#ax.plot(0, posiciones[:, 1], posiciones[:, 2], color='orange', linestyle='--', label='Proyección en YZ') 
-
-# Set labels, title, and limits
-ax.set_xlabel("Alcance (m)")
-ax.set_ylabel("Desplazamiento (m)")
-ax.set_zlabel("Altura (m)")
-ax.set_title("Trayectoria del cohete Xitle en el tiempo")
-#ax.set_xlim(0, 10000)
-#ax.set_ylim(0, 10000)
-#ax.set_zlim(0, 10000)
-
-# Add legend and show plot
-ax.legend()
-ax.set_box_aspect([1, 1, 1])  # Aspect ratio is 1:1:1
-
+#GRAFICA 10. Proyecciones de la trayectoria
 #Plot with 3 subplots of each plane of the trajectory
 fig, axs = plt.subplots(1, 3, figsize=(14, 5))
 axs[0].plot(posiciones[:, 0], posiciones[:, 1], 0, color='purple', linestyle='--', label='Proyección en XY')
@@ -384,6 +334,7 @@ axs[2].set_xlabel("Desplazamiento (m)")
 axs[2].set_ylabel("Altura (m)")
 plt.tight_layout()
 plt.show()
+'''
 
 
 ##################
