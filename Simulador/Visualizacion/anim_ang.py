@@ -79,7 +79,7 @@ def update(frame):
 frames = np.arange(0, len(tiempos), 10)  # Intervalos optimizados
 animation = FuncAnimation(fig, update, frames=frames, interval=100, repeat=False)
 
-#plt.show()
+plt.show()
 
 #Guardar la animacion
 print("Guardando animación...")
