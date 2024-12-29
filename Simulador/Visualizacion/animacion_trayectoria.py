@@ -17,22 +17,19 @@ from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson, muestr
 ###############################################
 # Leer los datos de la simulación desde el archivo CSV
 datos_simulacion = pd.read_csv('datos_simulacion.csv')
-datos_simulacion = pd.read_csv(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\src\datos_sim_paracaidas.csv')
+datos_simulacion = pd.read_csv(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\src\datos_simulacion.csv')
 
 
 # Extarer los datos del csv
-(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo,estabilidad,
-viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, wind_xs, wind_ys, wind_zs,
-Dmags, Nmags, Tmags, Dxs, Dys, Dzs, Nxs, Nys, Nzs, Txs, Tys, Tzs, Tvecs, Dvecs, Nvecs,
-accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs) = extraer_datoscsv(datos_simulacion)
+(tiempos, posiciones, _, thetas, omegas, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Gammas, _, _, _, _) = extraer_datoscsv(datos_simulacion)
 
 #########################################
 # Leer los datos de la simulación desde el archivo JSON
 with open('datos_simulacion.json', 'r', encoding= 'utf-8') as f:
     datos = json.load(f)
 # Extraer los datos del json
-(d_ext, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto,
-    max_altitude, max_speed, max_acceleration_linear, max_acceleration_angular) = extraer_datosjson(datos)
+(_, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto,
+    max_altitude, _, _, _) = extraer_datosjson(datos)
 
 ############################################
 
