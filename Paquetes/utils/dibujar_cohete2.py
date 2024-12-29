@@ -4,24 +4,23 @@ import matplotlib.patches as patches
 from matplotlib import transforms
 from matplotlib.animation import FuncAnimation
 
-def dibujar_cohete(ax, angle=0, x_cm=0, y_cm=0):
+def dibujar_cohete(ax, angle=0, x_cm=0, y_cm=0, long=6):
     """
-    Dibuja un cohete en un gráfico especificando su centro de gravedad (x_cm, y_cm)
-    y el ángulo de rotación alrededor de dicho centro.
+    Dibuja un cohete en un gráfico especificando su centro de gravedad (x_cm, y_cm),
+    el ángulo de rotación, y el escalado del cohete.
     """
     # Colores
     color_cohete = 'navy'
     color_borde = 'silver'
 
-    # Dimensiones del cohete
-    body_l = 6
-    body_w = 1
-    nose_l = 1.5
-    fin_w1 = 1.5
-    fin_w2 = 2
-    fin_h = 0.5
-    boattail_length = 0.3
-    
+    # Dimensiones del cohete escaladas
+    body_l = long
+    body_w = long / 6
+    nose_l = long / 4
+    fin_w1 = long / 4
+    fin_w2 = long / 3
+    fin_h = long / 8
+    boattail_length = long / 9    
     # Partes del cohete
     parts = []
     
@@ -65,46 +64,65 @@ def dibujar_cohete(ax, angle=0, x_cm=0, y_cm=0):
     for part in parts:
         ax.add_patch(part)
     
-    # Aplicar transformación: mover al CM y rotar alrededor de él
+    # Aplicar transformación inicial
     trans = (transforms.Affine2D()
-             .translate(-body_l / 2, -body_w / 2)  # Trasladar el cohete al origen del CM
-             .rotate_deg(angle)                   # Rotar el cohete
-             .translate(x_cm, y_cm)               # Mover al centro de gravedad
+             .translate(-body_l / 2, -body_w / 2)  # Trasladar el cohete al origen relativo
+             .translate(x_cm, y_cm)               # Mover al centro de gravedad inicial
              + ax.transData)
-    
     for part in parts:
         part.set_transform(trans)
     
     return parts
 
 # Función de animación
-def actualizar(frame, ax, parts, x_cm, y_cm):
+def actualizar(frame, ax, parts, x_cm, y_cm, scale):
     """
     Actualiza la rotación del cohete en cada cuadro.
     """
     angle = frame  # Rotación incremental en cada frame
     trans = (transforms.Affine2D()
-             .translate(-6 / 2, -1 / 2)  # Dimensiones del cuerpo del cohete
-             .rotate_deg(angle)
-             .translate(x_cm, y_cm)
+             .translate(-6 * scale / 2, -1 * scale / 2)  # Trasladar al origen relativo del cohete
+             .rotate_deg(angle)                        # Rotar alrededor del centro de gravedad
+             .translate(x_cm, y_cm)                    # Mover al centro de gravedad
              + ax.transData)
     for part in parts:
         part.set_transform(trans)
     return parts
 
-# Configuración del gráfico
+# Manejar clic del usuario para posicionar el cohete
+def on_click(event):
+    """
+    Evento que captura el clic del usuario para posicionar el cohete.
+    """
+    global x_cm, y_cm, parts, anim
+    if event.inaxes is not None:
+        x_cm, y_cm = event.xdata, event.ydata  # Nueva posición
+        ax.clear()  # Limpia el eje para redibujar
+        ax.set_xlim(-20, 20)
+        ax.set_ylim(-20, 20)
+        ax.set_aspect('equal')
+        parts = dibujar_cohete(ax, angle=0, x_cm=x_cm, y_cm=y_cm, long=5)
+        anim = FuncAnimation(fig, actualizar, frames=np.arange(0, 360, 2), 
+                             fargs=(ax, parts, x_cm, y_cm, scale), interval=50)
+        plt.draw()
+
+# Configuración inicial del gráfico
 fig, ax = plt.subplots()
-ax.set_xlim(-10, 10)
-ax.set_ylim(-10, 10)
+ax.set_xlim(-20, 20)
+ax.set_ylim(-20, 20)
 ax.set_aspect('equal')
 
-# Dibuja el cohete en la posición inicial
-x_cm, y_cm = 0, 0  # Centro de gravedad
-parts = dibujar_cohete(ax, angle=0, x_cm=x_cm, y_cm=y_cm)
+# Variables globales
+x_cm, y_cm = 0, 0  # Centro de gravedad inicial
+scale = 1          # Escala inicial
+parts = dibujar_cohete(ax, angle=0, x_cm=x_cm, y_cm=y_cm, long=5)
 
-# Crear animación
+# Crear animación inicial
 anim = FuncAnimation(fig, actualizar, frames=np.arange(0, 360, 2), 
-                     fargs=(ax, parts, x_cm, y_cm), interval=50)
+                     fargs=(ax, parts, x_cm, y_cm, scale), interval=50)
 
-# Mostrar la animación
+# Conectar evento de clic
+fig.canvas.mpl_connect('button_press_event', on_click)
+
+# Mostrar el gráfico interactivo
 plt.show()
