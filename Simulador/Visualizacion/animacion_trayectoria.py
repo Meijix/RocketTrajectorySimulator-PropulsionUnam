@@ -42,7 +42,6 @@ t_fin = tiempos[-1]
 #Apogeo
 apogee = [x[z.argmax()], y[z.argmax()], z[z.argmax()]]
 tiempo_apogeo = t[z.argmax()]
-print('Apogeo:', apogee)
 
 #MECO
 for ts in t:
@@ -55,16 +54,10 @@ for index in range(len(t)):
         MECO_index = index
         break
 
-
-print('t_MECO:', t_MECO)
 MECO_point = posiciones[MECO_index]
-print('MECO:', MECO_point)
-
 tiempo_salida_riel = int(tiempo_salida_riel)
-
 alcance = x.max()
 launch_point = posiciones[0]
-
 impact_point = posiciones[-1]
 tiempo_impacto = t[-1]
 
