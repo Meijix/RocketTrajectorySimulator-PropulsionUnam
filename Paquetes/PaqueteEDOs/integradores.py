@@ -40,7 +40,7 @@ class RungeKutta2:
 class RKF45:
     def __init__(self, fun_derivs):
         self.fun_derivadas = fun_derivs
-        self.tol=1e-4
+        self.tol=1e-2
         self.S= 0.9
 
     def step(self, t, state, dt):
