@@ -51,7 +51,7 @@ Integrador_oficial = RungeKutta2
 #dt_values = [0.005, 0.01, 0.02, 0.05, 0.1, 0.15, 0.2]
 dt_values = [0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.125, 0.15, 0.175, 0.2]
 resultados = {}
-
+'''
 #Usar la funcion simular_dinamica y las condiciones iniciales de cond_iniciales.py
 for dt in dt_values:
     tiempos, sim = simular_dinamica(estado, t_max, dt, Integrador_oficial, der_gravedad_masa_cte)
@@ -66,6 +66,7 @@ for dt in dt_values:
         "pos_analitica": list(pos_analitica),
         "vel_analitica": list(vel_analitica)
     }
+
 
 # Graficar posiciones y velocidades
 graficar_resultados(dt_values, resultados, tipo='posición')
@@ -286,4 +287,41 @@ for i, value in enumerate(errores_vel_medabs):
     plt.text(i, value, f"{value:.2e}", ha='center', va='bottom')
 
 plt.show()
+'''
+#####################################################
+###Simular con solve_ivp
+#####################################################
+tiempos_python_RK45, sim_python_RK45 = simular_python(estado, t_max, 'RK45', der_gravedad_masa_cte)
+tiempos_python_RK23, sim_python_RK23 = simular_python(estado, t_max, 'RK23', der_gravedad_masa_cte)
+tiempos_python_BDF, sim_python_BDF = simular_python(estado, t_max, 'BDF', der_gravedad_masa_cte)
+tiempos_python_LSODA, sim_python_LSODA = simular_python(estado, t_max, 'LSODA', der_gravedad_masa_cte)
+
+# Graficar resultados de la simulación con solve_ivp
+# Gráfica de posición
+plt.figure(figsize=(10, 5))
+plt.plot(tiempos_python_RK45, sim_python_RK45[0], label='RK45', marker='o')
+plt.plot(tiempos_python_RK23, sim_python_RK23[0], label='RK23', marker='o')
+plt.plot(tiempos_python_BDF, sim_python_BDF[0], label='BDF', marker='o')
+plt.plot(tiempos_python_LSODA, sim_python_LSODA[0], label='LSODA', marker='o')
+
+plt.title('Simulación de Posición con solve_ivp')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Posición [m]')
+plt.legend()
+plt.grid()
+plt.show()
+
+# Gráfica de velocidad
+plt.figure(figsize=(10, 5))
+plt.plot(tiempos_python_RK45, sim_python_RK45[1], label='RK45', marker='o')
+plt.plot(tiempos_python_RK23, sim_python_RK23[1], label='RK23', marker='o')
+plt.plot(tiempos_python_BDF, sim_python_BDF[1], label='BDF', marker='o')
+plt.plot(tiempos_python_LSODA, sim_python_LSODA[1], label='LSODA', marker='o')
+plt.title('Simulación de Velocidad con solve_ivp')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Velocidad [m/s]')
+plt.legend()
+plt.grid()
+plt.show()
+
 
