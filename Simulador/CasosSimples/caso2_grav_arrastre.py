@@ -322,7 +322,7 @@ for label, res in resultados.items():
 # Agregar solución analítica
 plt.plot(resultados['RK4']['tiempos'], pos_analitica, label='Solución analítica', ls='--')
 
-plt.title('Simulación de Posición con solve_ivp')
+plt.title('Simulación de Posición')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Posición [m]')
 plt.legend()
@@ -330,17 +330,17 @@ plt.grid()
 
 # Gráfica de velocidad
 plt.figure(figsize=(10, 5))
-plt.plot(tiempos_py_RK45, sim_py_RK45[1], label='RK45', marker='o')
-plt.plot(tiempos_py_RK23, sim_py_RK23[1], label='RK23', marker='o')
-plt.plot(tiempos_py_BDF, sim_py_BDF[1], label='BDF', marker='o')
-plt.plot(tiempos_py_LSODA, sim_py_LSODA[1], label='LSODA', marker='o')
-plt.plot(tiempos_py_DOP853, sim_py_DOP853[1], label='DOP853', marker='o')
+plt.plot(tiempos_py_RK45, sim_py_RK45[1], label='RK45-py', marker='o')
+plt.plot(tiempos_py_RK23, sim_py_RK23[1], label='RK23-py', marker='o')
+plt.plot(tiempos_py_BDF, sim_py_BDF[1], label='BDF-py', marker='o')
+plt.plot(tiempos_py_LSODA, sim_py_LSODA[1], label='LSODA-py', marker='o')
+plt.plot(tiempos_py_DOP853, sim_py_DOP853[1], label='DOP853-py', marker='o')
 # Agregar resultados de la simulación con integradores propios
 for label, res in resultados.items():
     plt.plot(res['tiempos'], res['velocidades'], label=f'{label}', marker='o')
 # Agregar solución analítica
 plt.plot(resultados['RK4']['tiempos'], vel_analitica, label='Solución analítica', ls='--')
-plt.title('Simulación de Velocidad con solve_ivp')
+plt.title('Simulación de Velocidad')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
 plt.legend()
