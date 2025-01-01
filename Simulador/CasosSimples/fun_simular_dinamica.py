@@ -47,13 +47,14 @@ def simular_python(estado, t_max, integrador, fun_derivada):
 
 from scipy.integrate import solve_ivp
 
-def simular_python(estado, t_max, integrador, fun_derivada):
+def simular_python(estado, t_max, dt, integrador, fun_derivada):
     # Definir la función de evento
     def evento_cero(t, y):
         if t > 1e-8:  # Excluir el caso en que el tiempo es inicial
             return y[0]  # Monitorea la solución que debe alcanzar cero
         return 1  # Retorna un valor diferente de cero para no disparar el evento
     
+    max_step=dt  # Limita el tamaño máximo de los pasos a dt
     evento_cero.terminal = True  # Detener la integración si el evento ocurre
     evento_cero.direction = 0   # Detectar el cruce en cualquier dirección
 
@@ -62,7 +63,7 @@ def simular_python(estado, t_max, integrador, fun_derivada):
     # Extraer tiempos, soluciones y eventos
     tiempos = solucion.t
     sim = solucion.y
-    eventos = solucion.t_events  # Tiempos donde ocurrieron los eventos
+    #eventos = solucion.t_events  # Tiempos donde ocurrieron los eventos
 
     return tiempos, sim
 

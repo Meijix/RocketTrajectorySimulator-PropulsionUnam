@@ -302,11 +302,11 @@ plt.show()
 #####################################################
 ###Simular con solve_ivp
 #####################################################
-tiempos_py_RK45, sim_py_RK45 = simular_python(estado, t_max, 'RK45', der_gravedad_arrastre)
-tiempos_py_RK23, sim_py_RK23 = simular_python(estado, t_max, 'RK23', der_gravedad_arrastre)
-tiempos_py_BDF, sim_py_BDF = simular_python(estado, t_max, 'BDF', der_gravedad_arrastre)
-tiempos_py_LSODA, sim_py_LSODA = simular_python(estado, t_max, 'LSODA', der_gravedad_arrastre)
-tiempos_py_DOP853, sim_py_DOP853 = simular_python(estado, t_max, 'DOP853', der_gravedad_arrastre)
+tiempos_py_RK45, sim_py_RK45 = simular_python(estado, t_max, dt, 'RK45', der_gravedad_arrastre)
+tiempos_py_RK23, sim_py_RK23 = simular_python(estado, t_max, dt, 'RK23', der_gravedad_arrastre)
+tiempos_py_BDF, sim_py_BDF = simular_python(estado, t_max, dt, 'BDF', der_gravedad_arrastre)
+tiempos_py_LSODA, sim_py_LSODA = simular_python(estado, t_max, dt, 'LSODA', der_gravedad_arrastre)
+tiempos_py_DOP853, sim_py_DOP853 = simular_python(estado, t_max, dt, 'DOP853', der_gravedad_arrastre)
 
 # Graficar resultados de la simulación con solve_ivp
 # Gráfica de posición
