@@ -51,7 +51,7 @@ Integrador_oficial = RungeKutta2
 #dt_values = [0.005, 0.01, 0.02, 0.05, 0.1, 0.15, 0.2]
 dt_values = [0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.125, 0.15, 0.175, 0.2]
 resultados = {}
-'''
+
 #Usar la funcion simular_dinamica y las condiciones iniciales de cond_iniciales.py
 for dt in dt_values:
     tiempos, sim = simular_dinamica(estado, t_max, dt, Integrador_oficial, der_gravedad_masa_cte)
@@ -66,7 +66,7 @@ for dt in dt_values:
         "pos_analitica": list(pos_analitica),
         "vel_analitica": list(vel_analitica)
     }
-
+'''
 
 # Graficar posiciones y velocidades
 graficar_resultados(dt_values, resultados, tipo='posición')
@@ -141,7 +141,7 @@ integradores = {
     'Euler': Euler,
     'RK2': RungeKutta2,
     'RK4': RungeKutta4,
-    'RK45': RKF45
+    #'RKF45': RKF45
 }
 
 resultados = {}
@@ -307,15 +307,18 @@ plt.plot(tiempos_py_RK23, sim_py_RK23[0], label='RK23-py', marker='o')
 plt.plot(tiempos_py_BDF, sim_py_BDF[0], label='BDF-py', marker='o')
 plt.plot(tiempos_py_LSODA, sim_py_LSODA[0], label='LSODA-py', marker='o')
 plt.plot(tiempos_py_DOP853, sim_py_DOP853[0], label='DOP853-py', marker='o')
+# Agregar resultados de la simulación con integradores propios
 for label, res in resultados.items():
     plt.plot(res['tiempos'], res['posiciones'], label=f'{label}', marker='o')
+# Agregar solución analítica
+plt.plot(resultados['RK4']['tiempos'], resultados['RK4']['posiciones_analiticas'], label='Sol. Analítica', ls='--')
 
-plt.title('Simulación de Posición con solve_ivp')
+plt.title('Simulación de Posición')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Posición [m]')
 plt.legend()
 plt.grid()
-plt.show()
+
 
 # Gráfica de velocidad
 plt.figure(figsize=(10, 5))
@@ -324,9 +327,12 @@ plt.plot(tiempos_py_RK23, sim_py_RK23[1], label='RK23', marker='o')
 plt.plot(tiempos_py_BDF, sim_py_BDF[1], label='BDF', marker='o')
 plt.plot(tiempos_py_LSODA, sim_py_LSODA[1], label='LSODA', marker='o')
 plt.plot(tiempos_py_DOP853, sim_py_DOP853[1], label='DOP853', marker='o')
+# Agregar resultados de la simulación con integradores propios
 for label, res in resultados.items():
     plt.plot(res['tiempos'], res['velocidades'], label=f'{label}', marker='o')
-plt.title('Simulación de Velocidad con solve_ivp')
+# Agregar solución analítica
+plt.plot(resultados['RK4']['tiempos'], resultados['RK4']['velocidades_analiticas'], label='Sol. Analítica', ls='--')
+plt.title('Simulación de Velocidad')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
 plt.legend()

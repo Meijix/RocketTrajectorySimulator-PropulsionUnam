@@ -54,6 +54,7 @@ print("Tiempo de apogeo: ",t_apogeo, "[s]")
 print("Velocidad terminal: ", v_terminal, "[m/s]")
 print("Apogeo: ", apogeo, "[m]")
 
+
 #####################################################
 #####################################################
 ###Diferentes pasos de tiempo y un mismo integrador
@@ -79,7 +80,7 @@ for dt in dt_values:
         "pos_analitica": list(pos_analitica),
         "vel_analitica": list(vel_analitica)
     }
-
+'''
 # Graficar posiciones y velocidades
 graficar_resultados(dt_values, resultados, tipo='posición')
 graficar_resultados(dt_values, resultados, tipo='velocidad')
@@ -142,7 +143,7 @@ plt.ylabel('Error')
 plt.legend()
 
 plt.show()
-
+'''
 #####################################################
 ####################################################
 ###Un mismo paso de tiempo y diferentes integradores
@@ -151,7 +152,8 @@ plt.show()
 integradores = {
     'Euler': Euler,
     'RK2': RungeKutta2,
-    'RK4': RungeKutta4
+    'RK4': RungeKutta4,
+    #'RKF45': RKF45,
 }
 
 resultados = {}
@@ -177,6 +179,7 @@ for t in resultados['RK4']['tiempos']:  # Usando RK4
     pos_analitica.append(pos)
     vel_analitica.append(vel)
 
+'''
 # Graficar resultados de posiciones
 plt.figure(figsize=(12, 6))
 for label, res in resultados.items():
@@ -294,4 +297,54 @@ for i, value in enumerate(errores_vel_medabs):
     plt.text(i, value, f"{value:.2e}", ha='center', va='bottom')
 
 plt.show()
+'''
+
+#####################################################
+###Simular con solve_ivp
+#####################################################
+tiempos_py_RK45, sim_py_RK45 = simular_python(estado, t_max, 'RK45', der_gravedad_arrastre)
+tiempos_py_RK23, sim_py_RK23 = simular_python(estado, t_max, 'RK23', der_gravedad_arrastre)
+tiempos_py_BDF, sim_py_BDF = simular_python(estado, t_max, 'BDF', der_gravedad_arrastre)
+tiempos_py_LSODA, sim_py_LSODA = simular_python(estado, t_max, 'LSODA', der_gravedad_arrastre)
+tiempos_py_DOP853, sim_py_DOP853 = simular_python(estado, t_max, 'DOP853', der_gravedad_arrastre)
+
+# Graficar resultados de la simulación con solve_ivp
+# Gráfica de posición
+plt.figure(figsize=(10, 5))
+plt.plot(tiempos_py_RK45, sim_py_RK45[0], label='RK45-py', marker='o')
+plt.plot(tiempos_py_RK23, sim_py_RK23[0], label='RK23-py', marker='o')
+plt.plot(tiempos_py_BDF, sim_py_BDF[0], label='BDF-py', marker='o')
+plt.plot(tiempos_py_LSODA, sim_py_LSODA[0], label='LSODA-py', marker='o')
+plt.plot(tiempos_py_DOP853, sim_py_DOP853[0], label='DOP853-py', marker='o')
+# Agregar resultados de la simulación con integradores propios
+for label, res in resultados.items():
+    plt.plot(res['tiempos'], res['posiciones'], label=f'{label}', marker='o')
+# Agregar solución analítica
+plt.plot(resultados['RK4']['tiempos'], pos_analitica, label='Solución analítica', ls='--')
+
+plt.title('Simulación de Posición con solve_ivp')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Posición [m]')
+plt.legend()
+plt.grid()
+
+# Gráfica de velocidad
+plt.figure(figsize=(10, 5))
+plt.plot(tiempos_py_RK45, sim_py_RK45[1], label='RK45', marker='o')
+plt.plot(tiempos_py_RK23, sim_py_RK23[1], label='RK23', marker='o')
+plt.plot(tiempos_py_BDF, sim_py_BDF[1], label='BDF', marker='o')
+plt.plot(tiempos_py_LSODA, sim_py_LSODA[1], label='LSODA', marker='o')
+plt.plot(tiempos_py_DOP853, sim_py_DOP853[1], label='DOP853', marker='o')
+# Agregar resultados de la simulación con integradores propios
+for label, res in resultados.items():
+    plt.plot(res['tiempos'], res['velocidades'], label=f'{label}', marker='o')
+# Agregar solución analítica
+plt.plot(resultados['RK4']['tiempos'], vel_analitica, label='Solución analítica', ls='--')
+plt.title('Simulación de Velocidad con solve_ivp')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Velocidad [m/s]')
+plt.legend()
+plt.grid()
+plt.show()
+
 
