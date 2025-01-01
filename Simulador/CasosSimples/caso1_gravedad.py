@@ -313,9 +313,13 @@ for label, res in resultados.items():
 # Agregar solución analítica
 plt.plot(resultados['RK4']['tiempos'], resultados['RK4']['posiciones_analiticas'], label='Sol. Analítica', ls='--')
 #linea vertical cada dt
-dts=np.linspace(0,t_max,round(t_max/dt)+1)
-for i in range(1,len(resultados['RK4']['tiempos'])):
-    plt.axvline(x=dts[i], color='k', linestyle='--', alpha=0.2)
+#dts=np.linspace(0,t_max,round(t_max/dt)+1)
+#for i in range(1,len(resultados['RK4']['tiempos'])):
+    #plt.axvline(x=dts[i], color='k', linestyle='--', alpha=0.2)
+#linea en el tiempo del apogeo y punto del apogeo
+#Cambiar a los valores analiticos
+plt.axvline(x=resultados['RK4']['tiempos'][resultados['RK4']['posiciones'].index(max(resultados['RK4']['posiciones']))], color='r', linestyle='--', alpha=0.5)
+plt.scatter(resultados['RK4']['tiempos'][resultados['RK4']['posiciones'].index(max(resultados['RK4']['posiciones']))],max(resultados['RK4']['posiciones']),color='r',label='Apogeo', s=100)
 
 plt.title('Simulación de Posición')
 plt.xlabel('Tiempo [s]')
