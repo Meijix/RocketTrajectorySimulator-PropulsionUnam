@@ -31,6 +31,16 @@ def simular_dinamica(estado, t_max, dt, integrador, fun_derivada):
     return tiempos, sim
 
 
+###########################################
+#Funcion para simular la dinamica 
+#usando solve_ivp de python
+from scipy.integrate import solve_ivp
+
+def simular_python(estado, t_max, integrador, fun_derivada):
+    t = 0.0
+    tiempos, sim = solve_ivp(fun_derivada, [t, t_max], estado, method=integrador)
+    return tiempos, sim
+
 '''
 def simular_dinamica(estado, t_max, dt):
     #print(estado)
