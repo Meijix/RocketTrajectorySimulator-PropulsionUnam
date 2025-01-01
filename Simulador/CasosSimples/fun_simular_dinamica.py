@@ -35,17 +35,7 @@ def simular_dinamica(estado, t_max, dt, integrador, fun_derivada):
 ###########################################
 #Funcion para simular la dinamica 
 #usando solve_ivp de python
-'''
-def simular_python(estado, t_max, integrador, fun_derivada):
-    # Resolvemos el sistema de ecuaciones diferenciales
-    solucion = solve_ivp(fun_derivada, [0, t_max], estado, method=integrador)
-    # Extraemos los tiempos y las soluciones
-    tiempos = solucion.t
-    sim = solucion.y
-    return tiempos, sim
-'''
 
-from scipy.integrate import solve_ivp
 
 def simular_python(estado, t_max, dt, integrador, fun_derivada):
     # Definir la función de evento
