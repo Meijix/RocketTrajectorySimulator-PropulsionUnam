@@ -53,13 +53,13 @@ dt_values = [0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.125, 0.15, 0.175, 0.2]
 resultados = {}
 
 #Usar la funcion simular_dinamica y las condiciones iniciales de cond_iniciales.py
-for dt in dt_values:
+for dete in dt_values:
     tiempos, sim = simular_dinamica(estado, t_max, dt, Integrador_oficial, der_gravedad_masa_cte)
     pos_sim, vel_sim = zip(*[(s[0], s[1]) for s in sim])
     
     pos_analitica, vel_analitica = zip(*[sol_analitica_gravedad_masa_cte(t, estado) for t in tiempos])
     
-    resultados[dt] = {
+    resultados[dete] = {
         "tiempos": list(tiempos),
         "pos_sim": list(pos_sim),
         "vel_sim": list(vel_sim),
@@ -145,7 +145,7 @@ integradores = {
 }
 
 resultados = {}
-
+print("paso de tiempo: ",dt)
 # Simulación con diferentes integradores
 for label, integrador in integradores.items():
     tiempos_sim, sim = simular_dinamica(estado, t_max, dt, integrador, der_gravedad_masa_cte)

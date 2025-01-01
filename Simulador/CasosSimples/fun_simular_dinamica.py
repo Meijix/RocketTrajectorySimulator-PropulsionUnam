@@ -24,7 +24,7 @@ def simular_dinamica(estado, t_max, dt, integrador, fun_derivada):
 
         #Indicar el avance en la simulacion
         if it%500==0:
-            print(f"Iteracion {it}, t={t:.1f} s, altitud={estado[0]:.1f} m, vel vert={estado[1]:.1f}")
+            print(f"Iteracion {it},dt={dt}, t={t:.1f} s, altitud={estado[0]:.1f} m, vel vert={estado[1]:.1f}")
         #Terminar cuando llegue al suelo
         if estado[0] < 0:
             break
@@ -49,7 +49,7 @@ def simular_python(estado, t_max, dt, integrador, fun_derivada):
     evento_cero.direction = 0   # Detectar el cruce en cualquier dirección
 
     # Resolver con solve_ivp
-    solucion = solve_ivp(fun_derivada, [0, t_max], estado, method=integrador, events=evento_cero, dense_output=True, max_step=dt)  # Limita el tamaño máximo de los pasos a dt
+    solucion = solve_ivp(fun_derivada, [0, t_max], estado, method=integrador, events=evento_cero, dense_output=True, first_step=dt, max_step=dt)  # Limita el tamaño máximo de los pasos a dt
     # Extraer tiempos, soluciones y eventos
     tiempos = solucion.t
     sim = solucion.y
@@ -63,10 +63,11 @@ if __name__== "__main__":
     print("Este modulo no debe ejecutarse directamente")
     #ejemplo de uso de la funcion simular_python
     estado = [20, 0]
+    dt=0.1
     t_max = 50
     integrador = 'RK45'
     fun_derivada = lambda t, y: [y[1], -9.8]
-    tiempos, sim = simular_python(estado, t_max, integrador, fun_derivada)
+    tiempos, sim = simular_python(estado, t_max, dt, integrador, fun_derivada)
     print("Tiempos:",tiempos)
     print("Simulacion:",sim)
     print("Fin del ejemplo")
