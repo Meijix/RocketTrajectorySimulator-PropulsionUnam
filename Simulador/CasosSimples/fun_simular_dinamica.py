@@ -54,12 +54,12 @@ def simular_python(estado, t_max, dt, integrador, fun_derivada):
             return y[0]  # Monitorea la solución que debe alcanzar cero
         return 1  # Retorna un valor diferente de cero para no disparar el evento
     
-    max_step=dt  # Limita el tamaño máximo de los pasos a dt
+
     evento_cero.terminal = True  # Detener la integración si el evento ocurre
     evento_cero.direction = 0   # Detectar el cruce en cualquier dirección
 
     # Resolver con solve_ivp
-    solucion = solve_ivp(fun_derivada, [0, t_max], estado, method=integrador, events=evento_cero, dense_output=True)
+    solucion = solve_ivp(fun_derivada, [0, t_max], estado, method=integrador, events=evento_cero, dense_output=True, max_step=dt)  # Limita el tamaño máximo de los pasos a dt
     # Extraer tiempos, soluciones y eventos
     tiempos = solucion.t
     sim = solucion.y

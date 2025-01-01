@@ -312,6 +312,10 @@ for label, res in resultados.items():
     plt.plot(res['tiempos'], res['posiciones'], label=f'{label}', marker='o')
 # Agregar solución analítica
 plt.plot(resultados['RK4']['tiempos'], resultados['RK4']['posiciones_analiticas'], label='Sol. Analítica', ls='--')
+#linea vertical cada dt
+dts=np.linspace(0,t_max,round(t_max/dt)+1)
+for i in range(1,len(resultados['RK4']['tiempos'])):
+    plt.axvline(x=dts[i], color='k', linestyle='--', alpha=0.2)
 
 plt.title('Simulación de Posición')
 plt.xlabel('Tiempo [s]')
@@ -332,6 +336,8 @@ for label, res in resultados.items():
     plt.plot(res['tiempos'], res['velocidades'], label=f'{label}', marker='o')
 # Agregar solución analítica
 plt.plot(resultados['RK4']['tiempos'], resultados['RK4']['velocidades_analiticas'], label='Sol. Analítica', ls='--')
+
+
 plt.title('Simulación de Velocidad')
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
