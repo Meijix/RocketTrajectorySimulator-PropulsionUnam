@@ -58,7 +58,7 @@ def simular_python(estado, t_max, integrador, fun_derivada):
     evento_cero.direction = 0   # Detectar el cruce en cualquier dirección
 
     # Resolver con solve_ivp
-    solucion = solve_ivp(fun_derivada, [0, t_max], estado, method=integrador, events=evento_cero)
+    solucion = solve_ivp(fun_derivada, [0, t_max], estado, method=integrador, events=evento_cero, dense_output=True)
     # Extraer tiempos, soluciones y eventos
     tiempos = solucion.t
     sim = solucion.y
