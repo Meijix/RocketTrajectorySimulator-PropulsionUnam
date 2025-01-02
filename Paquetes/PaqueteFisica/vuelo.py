@@ -226,27 +226,25 @@ class Vuelo:
         t = 0.0
         ultima_altitud = 0
         ##########################################
-
-        #Actualizar masa del vehiculo
-        self.vehiculo.actualizar_masa(t)
-        masavuelo=[self.vehiculo.masa]
-
-        self.vehiculo.parachute_active1 = False
-        #print(self.vehiculo.parachute_active1)
-
-
-        while t <= t_max:
         # print("t=", t)
             # -------------------------
             # Integraccion con metodos propios
             # -------------------------
-            if integrador in propios_integ:
-                print("Integrador propio detectado")
-                it = 0
-                next_tout = dt_out
+        if integrador in propios_integ:
+            print("Integrador propio detectado")
+            it = 0
+            next_tout = dt_out
 
-                sim=[estado] #lista de estados de vuelo
-                tiempos=[0] #lista de tiempos
+            sim=[estado] #lista de estados de vuelo
+            tiempos=[0] #lista de tiempos
+            #Iniciar ciclo
+            while t <= t_max:
+                #Actualizar masa del vehiculo
+                self.vehiculo.actualizar_masa(t)
+                masavuelo=[self.vehiculo.masa]
+
+                self.vehiculo.parachute_active1 = False
+                #print(self.vehiculo.parachute_active1)
 
                 if t + dt > next_tout:
                     dt = next_tout - t
@@ -278,8 +276,139 @@ class Vuelo:
                 t += dt
                 estado = nuevo_estado
 
-                # -------------------------
-                # Actualizar variables (viento, masa del vehiculo, etc)
+            # -------------------------
+            # Actualizar variables (viento, masa del vehiculo, etc)
+
+            # Actualizar masa del vehiculo
+            self.vehiculo.actualizar_masa(t)
+
+            # Actualizar viento_actual
+            #self.viento.actualizar_viento2D()
+            self.viento.actualizar_viento3D()
+            #print("Nuevos vientos", self.viento)
+            v_viento = self.viento.vector
+
+            #FASE 1. VUELO EN RIEL
+            if self.tiempo_salida_riel is None:
+                r = np.linalg.norm(estado[0:3])
+                if r > self.vehiculo.riel.longitud:
+                    self.tiempo_salida_riel = t
+            
+            #FASE 2. MECO
+
+            # APOGEO: Determinar tiempo de apogeo
+            altitud = estado[2]
+            if self.tiempo_apogeo is None and altitud > 5 and altitud < ultima_altitud:
+                self.tiempo_apogeo = t
+                self.apogeo = altitud
+
+            ultima_altitud = altitud
+
+            #FASE3.RECUPERACIÓN
+            #FALTA IMPLEMENTAR RECUPERACION DE DOS ETAPAS JE
+            #activar el paracaidas en el apogeo
+            if self.tiempo_apogeo is not None and self.vehiculo.parachute_added == True:
+                #print(self.vehiculo.parachute_active1,"antes")
+                self.vehiculo.parachute_active1 = True
+                #print(self.vehiculo.parachute_active1,"despues")
+                #print("Se ha abierto el paracaídas")
+                #self.vehiculo.activar_paracaidas(self.vehiculo.parachute1)
+            else:
+                pass
+
+            #CAIDA: Terminar simulación cuando cae al piso
+            if estado[2] < 0 and t > 1:
+                self.tiempo_impacto = t
+
+            # -------------------------
+            # Guardar cantidades en listas
+            if t >= next_tout:
+
+                next_tout += dt_out
+
+            #Agrega el nuevo estado a la lista
+            sim.append(nuevo_estado)
+            tiempos.append(t)
+
+            #Guardar centros de presión y centros de gravedad
+            CPs.append(self.vehiculo.CP[2])
+            CGs.append(self.vehiculo.CG[2])
+
+            #Guardar magnitudes y direcciones del viento
+            viento_vuelo_vecs.append(v_viento)
+            viento_vuelo_mags.append(self.viento.magnitud_total)
+            viento_vuelo_dirs.append(self.viento.direccion_total)
+            
+            #Agregar nueva masa a la lista
+            masavuelo.append(self.vehiculo.masa)    
+
+            #CALCULAR CANTIDADES SECUNDARIAS
+            # Desempaquetar vector de estado      
+            pos = nuevo_estado[0:3]
+            vel = nuevo_estado[3:6]
+            theta = nuevo_estado[6]   # En radianes internamente siempre
+            omega = nuevo_estado[7] #omeg a= theta dot
+            r = np.linalg.norm(pos)
+            #v = np.linalg.norm(vel)
+            z = pos[2] #Coordenada z
+
+            vrel = np.array(vel) - v_viento
+            #print("viento relativo: ", vrel)
+
+            #Guardar Angulos
+            gamma = math.atan2(vel[2], vel[0])
+            alpha = self.calc_alpha(vrel, theta)
+            Gammas.append(gamma)
+            Alphas.append(alpha)
+
+            #Guardar Fuerzas:Empuje,Arrastre y Normal
+            Tvec = self.calc_empuje(t, theta)
+            _, _, Cd, mach = self.calc_arrastre_normal(pos, vrel, alpha)
+            Dvec, Nvec = self.calc_aero(pos, vrel, theta)
+            Tvecs.append(Tvec)
+            Dvecs.append(Dvec)
+            Nvecs.append(Nvec)
+            Cds.append(Cd)
+            Machs.append(mach)
+
+            # Gravedad
+            grav = calc_gravedad(z)
+            #Cambiar la direccion de la gravedad cuando esta en el riel
+            #if r< #longitud del riel
+            Gvec = np.array([0,0,-grav])
+
+            # Aceleración resultante
+            masa = self.vehiculo.masa
+            accel = Gvec + Dvec/masa + Nvec/masa + Tvec/masa
+            accels.append(accel)
+
+            # aceleracion angular
+            palanca, accang, torca = self.accangular( theta, Dvec, Nvec, Gvec)
+            palancas.append(palanca)
+            accangs.append(accang)
+            torcas.append(torca)
+
+            #Indicar el avance en la simulacion
+            if it%2500==0:
+                print('Simulando con método propio')
+                print(f"Iter= {it}, t={t:.1f} s, dt={dt:g}, altitud={altitud:.1f} m, vel vert={estado[5]:.1f}")
+        # -------------------------
+        # Integración con scipy solve_ivp
+        # -------------------------
+        elif integrador in python_integ:
+            print("Integrador python detectado")
+            solucion = solve_ivp(self.fun_derivs, (t, t+dt), estado, method=integrador, dense_output=True, first_step=dt, max_step=dt)
+
+            time = solucion.t
+            sol_estado = solucion.y
+            #print(estado)
+            #print(t)
+
+            # -------------------------
+            # Actualizar variables (viento, masa del vehiculo, etc)
+            for i in range(len(time)):
+                t = time[i]
+                estado = sol_estado[:,i]
 
                 # Actualizar masa del vehiculo
                 self.vehiculo.actualizar_masa(t)
@@ -325,14 +454,6 @@ class Vuelo:
 
                 # -------------------------
                 # Guardar cantidades en listas
-
-                if t >= next_tout:
-
-                    next_tout += dt_out
-
-                #Agrega el nuevo estado a la lista
-                sim.append(nuevo_estado)
-                tiempos.append(t)
 
                 #Guardar centros de presión y centros de gravedad
                 CPs.append(self.vehiculo.CP[2])
@@ -394,134 +515,9 @@ class Vuelo:
 
                 #Indicar el avance en la simulacion
                 if it%2500==0:
-                    print('Simulando con método propio')
+                    print('Simulando con scipy.solve_ivp')
                     print(f"Iter= {it}, t={t:.1f} s, dt={dt:g}, altitud={altitud:.1f} m, vel vert={estado[5]:.1f}")
-            # -------------------------
-            # Integración con scipy solve_ivp
-            # -------------------------
-            elif integrador in python_integ:
-                print("Integrador python detectado")
-                solucion = solve_ivp(self.fun_derivs, (t, t+dt), estado, method=integrador, dense_output=True, first_step=dt, max_step=dt)
-
-                time = solucion.t
-                sol_estado = solucion.y
-                #print(estado)
-                #print(t)
-
-                # -------------------------
-                # Actualizar variables (viento, masa del vehiculo, etc)
-                for i in range(len(time)):
-                    t = time[i]
-                    estado = sol_estado[:,i]
-
-                    # Actualizar masa del vehiculo
-                    self.vehiculo.actualizar_masa(t)
-
-                    # Actualizar viento_actual
-                    #self.viento.actualizar_viento2D()
-                    self.viento.actualizar_viento3D()
-                    #print("Nuevos vientos", self.viento)
-                    v_viento = self.viento.vector
-
-                    #FASE 1. VUELO EN RIEL
-                    if self.tiempo_salida_riel is None:
-                        r = np.linalg.norm(estado[0:3])
-                        if r > self.vehiculo.riel.longitud:
-                            self.tiempo_salida_riel = t
-                    
-                    #FASE 2. MECO
-
-                    # APOGEO: Determinar tiempo de apogeo
-                    altitud = estado[2]
-                    if self.tiempo_apogeo is None and altitud > 5 and altitud < ultima_altitud:
-                        self.tiempo_apogeo = t
-                        self.apogeo = altitud
-
-                    ultima_altitud = altitud
-
-                    #FASE3.RECUPERACIÓN
-                    #FALTA IMPLEMENTAR RECUPERACION DE DOS ETAPAS JE
-                    #activar el paracaidas en el apogeo
-                    if self.tiempo_apogeo is not None and self.vehiculo.parachute_added == True:
-                        #print(self.vehiculo.parachute_active1,"antes")
-                        self.vehiculo.parachute_active1 = True
-                        #print(self.vehiculo.parachute_active1,"despues")
-                        #print("Se ha abierto el paracaídas")
-                        #self.vehiculo.activar_paracaidas(self.vehiculo.parachute1)
-                    else:
-                        pass
-
-                    #CAIDA: Terminar simulación cuando cae al piso
-                    if estado[2] < 0 and t > 1:
-                        self.tiempo_impacto = t
-                        break
-
-                    # -------------------------
-                    # Guardar cantidades en listas
-
-                    #Guardar centros de presión y centros de gravedad
-                    CPs.append(self.vehiculo.CP[2])
-                    CGs.append(self.vehiculo.CG[2])
-
-                    #Guardar magnitudes y direcciones del viento
-                    viento_vuelo_vecs.append(v_viento)
-                    viento_vuelo_mags.append(self.viento.magnitud_total)
-                    viento_vuelo_dirs.append(self.viento.direccion_total)
-                    
-                    #Agregar nueva masa a la lista
-                    masavuelo.append(self.vehiculo.masa)    
-
-                    #CALCULAR CANTIDADES SECUNDARIAS
-                    # Desempaquetar vector de estado      
-                    pos = nuevo_estado[0:3]
-                    vel = nuevo_estado[3:6]
-                    theta = nuevo_estado[6]   # En radianes internamente siempre
-                    omega = nuevo_estado[7] #omeg a= theta dot
-                    r = np.linalg.norm(pos)
-                    #v = np.linalg.norm(vel)
-                    z = pos[2] #Coordenada z
-
-                    vrel = np.array(vel) - v_viento
-                    #print("viento relativo: ", vrel)
-
-                    #Guardar Angulos
-                    gamma = math.atan2(vel[2], vel[0])
-                    alpha = self.calc_alpha(vrel, theta)
-                    Gammas.append(gamma)
-                    Alphas.append(alpha)
-
-                    #Guardar Fuerzas:Empuje,Arrastre y Normal
-                    Tvec = self.calc_empuje(t, theta)
-                    _, _, Cd, mach = self.calc_arrastre_normal(pos, vrel, alpha)
-                    Dvec, Nvec = self.calc_aero(pos, vrel, theta)
-                    Tvecs.append(Tvec)
-                    Dvecs.append(Dvec)
-                    Nvecs.append(Nvec)
-                    Cds.append(Cd)
-                    Machs.append(mach)
-
-                    # Gravedad
-                    grav = calc_gravedad(z)
-                    #Cambiar la direccion de la gravedad cuando esta en el riel
-                    #if r< #longitud del riel
-                    Gvec = np.array([0,0,-grav])
-
-                    # Aceleración resultante
-                    masa = self.vehiculo.masa
-                    accel = Gvec + Dvec/masa + Nvec/masa + Tvec/masa
-                    accels.append(accel)
-
-                    # aceleracion angular
-                    palanca, accang, torca = self.accangular( theta, Dvec, Nvec, Gvec)
-                    palancas.append(palanca)
-                    accangs.append(accang)
-                    torcas.append(torca)
-
-                    #Indicar el avance en la simulacion
-                    if it%2500==0:
-                        print('Simulando con scipy.solve_ivp')
-                        print(f"Iter= {it}, t={t:.1f} s, dt={dt:g}, altitud={altitud:.1f} m, vel vert={estado[5]:.1f}")
-            else:
-                raise ValueError(f"Integrador '{integrador}' no reconocido")
+        else:
+            raise ValueError(f"Integrador '{integrador}' no reconocido")
 
         return tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs
