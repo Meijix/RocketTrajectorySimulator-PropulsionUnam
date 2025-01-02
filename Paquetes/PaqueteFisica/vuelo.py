@@ -232,7 +232,7 @@ class Vuelo:
             }
             Integracion = integradores[integrador]
 
-            print(f"Iniciando ciclo con {integrador}")
+            #print(f"Iniciando ciclo con {integrador}")
             while t <= t_max:
                 
                 if t + dt > next_tout:
@@ -328,7 +328,6 @@ class Vuelo:
             sim = solucion.y.T.tolist()
             ultima_altitud = 0
 
-            #print("len solucion",len(solucion.t))
             for k, t in enumerate(tiempos):
                 estado = solucion.y[:, k]
 
@@ -399,8 +398,6 @@ class Vuelo:
             #solo tiempos y sim hasta el impacto
             tiempos=tiempos[:iteracion_final]
             sim=sim[:iteracion_final]
-            #print("len tiempos",len(tiempos))
-            #print("len sim",len(sim))
 
         else:
             raise ValueError(f"Integrador '{integrador}' no reconocido")
