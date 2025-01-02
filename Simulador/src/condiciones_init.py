@@ -39,7 +39,7 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 #estado=list(estado)
 #print(estado)
 #Parametros de la simulacion
-dt = 0.1 #0.1 #[s]
+dt = 0.01 #0.1 #[s]
 t_max = 400 #[s]
 dt_out =  0.01
 integrador_actual = 'RungeKutta4'
