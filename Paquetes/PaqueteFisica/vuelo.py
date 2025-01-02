@@ -246,29 +246,28 @@ class Vuelo:
 
             self.vehiculo.parachute_active1 = False
             #print(self.vehiculo.parachute_active1)
+            #CAMBIO DE METODO DE INTEGRACIÓN
+            print("Checando metodo de integración")
+            if integrador == 'Euler':
+                Integracion = Euler(self.fun_derivs) #ocupa dt=0.005
+            elif integrador == 'RungeKutta2':
+                Integracion = RungeKutta2(self.fun_derivs)
+            elif integrador == 'RungeKutta4':
+                Integracion = RungeKutta4(self.fun_derivs)
+            elif integrador == 'RKF45':
+                Integracion = RKF45(self.fun_derivs)
+            elif integrador == 'AdaptiveEuler':
+                Integracion = AdaptiveEuler(self.fun_derivs)
+            
 
             #Iniciar ciclo
+            print("Iniciando ciclo con {Integracion}")
             while t <= t_max:
-                
-
                 if t + dt > next_tout:
                     dt = next_tout - t
                 else:
                     pass
                 #########################################
-                #CAMBIO DE METODO DE INTEGRACIÓN
-                print("Integrando")
-                if integrador == 'Euler':
-                    Integracion = Euler(self.fun_derivs) #ocupa dt=0.005
-                elif integrador == 'RungeKutta2':
-                    Integracion = RungeKutta2(self.fun_derivs)
-                elif integrador == 'RungeKutta4':
-                    Integracion = RungeKutta4(self.fun_derivs)
-                elif integrador == 'RKF45':
-                    Integracion = RKF45(self.fun_derivs)
-                elif integrador == 'AdaptiveEuler':
-                    Integracion = AdaptiveEuler(self.fun_derivs)
-                
                 #el dt_new se usa para que el inetgrador actualize el paso de tiempo
                 nuevo_estado, dt = Integracion.step(t, estado, dt)
                 #else:
@@ -278,7 +277,7 @@ class Vuelo:
                 #print("dt= ", dt)
 
                 # Avanzar estado
-                print("Avanzando estado")
+                #print("Avanzando estado")
                 it += 1
                 t += dt
                 estado = nuevo_estado
@@ -288,7 +287,9 @@ class Vuelo:
 
             # Actualizar masa del vehiculo
             print("Actualizando masa 2")
+            print("Masa actual", self.vehiculo.masa)
             self.vehiculo.actualizar_masa(t)
+            print("Masa actualizada", self.vehiculo.masa)
 
             # Actualizar viento_actual
             #self.viento.actualizar_viento2D()
