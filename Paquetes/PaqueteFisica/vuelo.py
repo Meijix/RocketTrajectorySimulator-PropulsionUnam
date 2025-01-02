@@ -389,6 +389,9 @@ class Vuelo:
                 accangs.append(accang)
                 torcas.append(torca)
 
+                tiempos = solucion.t
+                sim = solucion.y.T
+
         else:
             raise ValueError(f"Integrador '{integrador}' no reconocido")
 

@@ -4,6 +4,7 @@ import pandas as pd
 import sys
 import os
 import time
+import json
 
 # Agregar la ruta del directorio que contiene los paquetes al sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -123,7 +124,6 @@ datos_simulados.to_csv('datos_simulacion.csv', index=False)
 print('csv guardado')
 ############################
 #Guardar datos importantes en un archivo json
-import json
 
 datos_a_guardar = {
     'd_ext': cohete_actual.d_ext,

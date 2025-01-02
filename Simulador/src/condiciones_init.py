@@ -49,6 +49,7 @@ dt = 0.01 #0.1 #[s]
 t_max = 400 #[s]
 dt_out =  0.01
 integrador_actual = 'RungeKutta4'
+integrador_actual = 'LSODA'
 #integrador_actual = 'RKF45'
 #integrador_actual = 'AdaptiveEuler'
 # t_max = 1200 #[s]
