@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 #Importar paquetes propios de carpeta superior Paquetes
 from Paquetes.PaqueteFisica.vuelo import Vuelo
 from Simulador.src import condiciones_init as c_init
-from Simulador.src.XitleFile import Xitle, diam_ext
+from Simulador.src.XitleFile import Xitle
 
 
 cohete_actual = Xitle
@@ -68,22 +68,6 @@ max_speed = max(np.linalg.norm(velocidades, axis=1))
 #print("Máxima velocidad:", max_speed, "m/s")
 #print("Equivalente a:",max_speed/340, "Mach")
 #########################################
-print("Guardando datos de la simulación")
-print("Tiempos", len(tiempos))
-print("Sim ", len(sim))
-print("CPs", len(CPs))
-print("CGs", len(CGs))
-print("masavuelo", len(masavuelo))
-print("viento_vuelo_mags", len(viento_vuelo_mags))
-print("viento_vuelo_dirs", len(viento_vuelo_dirs))
-print("viento_vuelo_vecs", len(viento_vuelo_vecs))
-print("Tvecs", len(Tvecs))
-print("Dvecs", len(Dvecs))
-print("Nvecs", len(Nvecs))
-print("viento_vuelo_vecs", len(viento_vuelo_vecs))
-
-
-
 
 # Guardar los datos de la simulación en un archivo .csv
 datos_simulados = pd.DataFrame({
@@ -130,13 +114,21 @@ datos_simulados = pd.DataFrame({
     'Cds': Cds,
     'Machs': Machs
 })
-#Crear un archivo csv con los datos de la simulación
-# Guardar archivo en la carpeta Simulador/Resultados/OuputFiles
-datos_simulados.to_csv('datos_simulacion.csv', index=False)
-print('csv guardado')
-############################
-#Guardar datos importantes en un archivo json
 
+nombre_carpeta = f'VueloLibre-{c_init.integrador_actual}'
+ruta_carpeta = f'Simulador/Resultados/OutputFiles/{nombre_carpeta}'
+
+# Crear la carpeta si no existe
+if not os.path.exists(ruta_carpeta):
+    os.makedirs(ruta_carpeta)
+
+# Guardar archivo CSV en la carpeta
+ruta_archivo_csv = f'{ruta_carpeta}/datos.csv'
+datos_simulados.to_csv(ruta_archivo_csv, index=False)
+print(f'Archivo CSV guardado en: {ruta_archivo_csv}')
+########################################
+########################################
+#Guardar datos importantes en un archivo json
 datos_a_guardar = {
     'nombre cohete': cohete_actual.nombre,
     'd_ext': cohete_actual.d_ext,
@@ -152,8 +144,7 @@ datos_a_guardar = {
 }
 
 # Guardar los datos en un archivo .json
-# Guardar archivo en la carpeta Simulador/Resultados/OuputFiles
-with open('././datos_simulacion.json', 'w', encoding='utf-8') as f:
+ruta_archivo_json = f'{ruta_carpeta}/datos.json'
+with open(ruta_archivo_json, 'w', encoding='utf-8') as f:
     json.dump(datos_a_guardar, f, indent=4)
-
-print('json guardado')
+print(f'Archivo JSON guardado en: {ruta_archivo_json}')
