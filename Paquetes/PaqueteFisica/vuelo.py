@@ -206,8 +206,8 @@ class Vuelo:
         viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs = [], [], []
 
         # Listas de integradores
-        propios_integ = ['Euler', 'RungeKutta2', 'RungeKutta4', 'RKF45', 'AdaptiveEuler']
-        python_integ = ['RK45', 'RK23', 'DOP853', 'LSODA', 'BDF', 'Radau']
+        propios_integ = ['Euler', 'RungeKutta2', 'RungeKutta4']#, 'RKF45', 'AdaptiveEuler']
+        python_integ = ['RK45', 'RK23', 'DOP853', 'LSODA', 'BDF']
 
         # Métodos propios de integración
         if integrador in propios_integ:
