@@ -1,5 +1,4 @@
-#Agregar condiciones iniciales
-
+#Agregar condiciones iniciales para el vuelo
 import sys
 import os
 import numpy as np
@@ -10,7 +9,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from Paquetes.PaqueteFisica.riel import Torrelanzamiento
 from Paquetes.PaqueteFisica.atmosfera import atmosfera
 from Paquetes.PaqueteFisica.viento import Viento
-
 
 #riel inicial
 riel = Torrelanzamiento(10, 87)
@@ -26,14 +24,10 @@ fecha = "2024-11-06" #año-mes-dia
 #Sin viento
 viento_actual = Viento( 0, 2, 0, 0)
 viento_actual.actualizar_viento3D()
-#print(viento_actual)
 #print(viento_actual.vector)
 
 #atmosfera
 atmosfera_actual = atmosfera()
-#cohete
-
-
 
 # Estado inicial
 x0, y0, z0 = 0, 0, 0
@@ -45,9 +39,10 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 #estado=list(estado)
 #print(estado)
 #Parametros de la simulacion
-dt = 0.01 #0.1 #[s]
+dt = 0.1 #0.1 #[s]
 t_max = 400 #[s]
 dt_out =  0.01
 integrador_actual = 'RungeKutta4'
+integrador_actual = 'Euler'
 #integrador_actual = 'BDF'
 #integrador_actual = 'RKF45'
