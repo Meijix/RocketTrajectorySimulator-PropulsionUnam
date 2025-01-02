@@ -88,21 +88,21 @@ print("viento_vuelo_vecs", len(viento_vuelo_vecs))
 # Guardar los datos de la simulación en un archivo .csv
 datos_simulados = pd.DataFrame({
     #En los integradores propios se debe cambiar el tamano de los estados para que coincida con el número de tiempos
-    'tiempos': tiempos[:],#Se quita el primer tiempo para que coincida con el número de estados
-    'posiciones_x': posiciones[:, 0], #Se quita el primer estado para que coincida con el número de tiempos
-    'posiciones_y': posiciones[:, 1], #Se quita el primer estado para que coincida con el número de tiempos
-    'posiciones_z': posiciones[:, 2], #Se quita el primer estado para que coincida con el número de tiempos
-    'velocidades_x': velocidades[:, 0], #Se quita el primer estado para que coincida con el número de tiempos
-    'velocidades_y': velocidades[:, 1], #Se quita el primer estado para que coincida con el número de tiempos
-    'velocidades_z': velocidades[:, 2], #Se quita el primer estado para que coincida con el número de tiempos
+    't': tiempos[:],#Se quita el primer tiempo para que coincida con el número de estados
+    'x': posiciones[:, 0], #Se quita el primer estado para que coincida con el número de tiempos
+    'y': posiciones[:, 1], #Se quita el primer estado para que coincida con el número de tiempos
+    'z': posiciones[:, 2], #Se quita el primer estado para que coincida con el número de tiempos
+    'vx': velocidades[:, 0], #Se quita el primer estado para que coincida con el número de tiempos
+    'vy': velocidades[:, 1], #Se quita el primer estado para que coincida con el número de tiempos
+    'vz': velocidades[:, 2], #Se quita el primer estado para que coincida con el número de tiempos
     'thetas': thetas[:], #Se quita el primer estado para que coincida con el número de tiempos
     'omegas': omegas[:], #Se quita el primer estado para que coincida con el número de tiempos
     'CPs': CPs,
     'CGs': CGs,
     'masavuelo': masavuelo[:], #Se quita el primer estado para que coincida con el número de tiempos
-    'viento_vuelo_mags': viento_vuelo_mags,
-    'viento_vuelo_dirs': viento_vuelo_dirs,
-    'viento_vuelo_vecs': viento_vuelo_vecs,
+    'viento_mags': viento_vuelo_mags,
+    'viento_dirs': viento_vuelo_dirs,
+    'viento_vecs': viento_vuelo_vecs,
     'wind_xs': wind_xs,
     'wind_ys': wind_ys,
     'wind_zs': wind_zs,
@@ -138,6 +138,7 @@ print('csv guardado')
 #Guardar datos importantes en un archivo json
 
 datos_a_guardar = {
+    'nombre cohete': cohete_actual.nombre,
     'd_ext': cohete_actual.d_ext,
     't_MECO': cohete_actual.t_MECO,
     'tiempo_salida_riel': vuelo1.tiempo_salida_riel,
