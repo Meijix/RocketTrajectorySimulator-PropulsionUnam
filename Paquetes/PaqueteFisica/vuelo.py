@@ -324,10 +324,11 @@ class Vuelo:
 
             tiempos = solucion.t.tolist()
             sim = solucion.y.T.tolist()
+            ultima_altitud = 0
 
-            for i in range(len(solucion.t)):
-                t = solucion.t[i]
-                estado = solucion.y[:, i]
+            print("len solucion",len(solucion.t))
+            for k, t in enumerate(tiempos):
+                estado = solucion.y[:, k]
 
                 # Actualizar variables
                 self.vehiculo.actualizar_masa(t)
@@ -349,7 +350,7 @@ class Vuelo:
                 if self.tiempo_apogeo is not None and self.vehiculo.parachute_added:
                     self.vehiculo.parachute_active1 = True
 
-                if estado[2] < 0 and t > 1:
+                if altitud < 0 and t > 1:
                     self.tiempo_impacto = t
                     break
 
@@ -364,7 +365,6 @@ class Vuelo:
                 pos = estado[0:3]
                 vel = estado[3:6]
                 theta = estado[6]
-                z = pos[2]
                 vrel = np.array(vel) - v_viento
 
                 gamma = math.atan2(vel[2], vel[0])
@@ -381,7 +381,7 @@ class Vuelo:
                 Cds.append(Cd)
                 Machs.append(mach)
 
-                grav = calc_gravedad(z)
+                grav = calc_gravedad(altitud)
                 Gvec = np.array([0, 0, -grav])
 
                 accel = Gvec + Dvec/self.vehiculo.masa + Nvec/self.vehiculo.masa + Tvec/self.vehiculo.masa
@@ -391,6 +391,12 @@ class Vuelo:
                 palancas.append(palanca)
                 accangs.append(accang)
                 torcas.append(torca)
+
+            #solo tiempos y sim hasta el impacto
+            tiempos=tiempos[:k]
+            sim=sim[:k]
+            print("len tiempos",len(tiempos))
+            print("len sim",len(sim))
 
         else:
             raise ValueError(f"Integrador '{integrador}' no reconocido")

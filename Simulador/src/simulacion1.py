@@ -25,14 +25,16 @@ cohete_actual.parachute_active1 = False
 #Crear el vuelo
 vuelo1 = Vuelo(cohete_actual, c_init.atmosfera_actual, c_init.viento_actual)
 
+print("Inicio de la simulación")
 inicio = time.time()
-print("Simulando...")
 #Simular el vuelo
 tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo1.simular_vuelo(c_init.estado,c_init.t_max, c_init.dt, c_init.dt_out, c_init.integrador_actual)
 #print(viento_vuelo_mags)
 #Medir tiempo que tarda en correr la simulacion
 fin = time.time()
 print(f"Tiempo de ejecución: {fin-inicio:.1f}s")
+
+print("Simulación terminada")
 
 #Extraer datos de la simulación
 posiciones = np.array([state[0:3] for state in sim])
@@ -52,12 +54,7 @@ wind_xs = [vec[0] for vec in viento_vuelo_vecs]
 wind_ys = [vec[1] for vec in viento_vuelo_vecs]
 wind_zs = [vec[2] for vec in viento_vuelo_vecs]
 
-stability=[]
-
-for i in range(len(tiempos)-1):
-    stab= (CPs[i]-CGs[i])/diam_ext
-    stability.append(stab)
-
+print("Posiciones",posiciones)
 max_altitude = max(posiciones[:, 2])
 max_speed = max(np.linalg.norm(velocidades, axis=1))
 ####################################
@@ -72,6 +69,11 @@ max_speed = max(np.linalg.norm(velocidades, axis=1))
 #print("Máxima velocidad:", max_speed, "m/s")
 #print("Equivalente a:",max_speed/340, "Mach")
 #########################################
+print("Guardando datos de la simulación")
+print("Tiempos", len(tiempos))
+print("Sim ", len(sim))
+print("CPs", len(CPs))
+
 
 # Guardar los datos de la simulación en un archivo .csv
 datos_simulados = pd.DataFrame({
@@ -115,8 +117,7 @@ datos_simulados = pd.DataFrame({
     'Alphas': Alphas,
     'torcas': torcas,
     'Cds': Cds,
-    'Machs': Machs,
-    'estabilidad': stability
+    'Machs': Machs
 })
 #Crear un archivo csv con los datos de la simulación
 # Guardar archivo en la carpeta Simulador/Resultados/OuputFiles
