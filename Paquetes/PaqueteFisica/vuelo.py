@@ -322,6 +322,9 @@ class Vuelo:
             print(f"Integrador Python detectado: {integrador}")
             solucion = solve_ivp(self.fun_derivs, (0, t_max), estado, method=integrador, dense_output=True, first_step=dt, max_step=dt)
 
+            tiempos = solucion.t.tolist()
+            sim = solucion.y.T.tolist()
+
             for i in range(len(solucion.t)):
                 t = solucion.t[i]
                 estado = solucion.y[:, i]
@@ -388,9 +391,6 @@ class Vuelo:
                 palancas.append(palanca)
                 accangs.append(accang)
                 torcas.append(torca)
-
-                tiempos = solucion.t
-                sim = solucion.y.T
 
         else:
             raise ValueError(f"Integrador '{integrador}' no reconocido")
