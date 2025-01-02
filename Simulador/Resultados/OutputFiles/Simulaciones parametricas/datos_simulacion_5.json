@@ -1,0 +1,18 @@
+{
+    "d_ext": 0.152,
+    "t_MECO": 10.0,
+    "tiempo_salida_riel": 0.49000000000000027,
+    "tiempo_apogeo": 41.17000000000038,
+    "tiempo_impacto": 88.9400000000086,
+    "max_altitude": 8992.374244299373,
+    "max_speed": 535.9636777243862,
+    "max_acceleration_linear": 99.16507080085029,
+    "max_acceleration_angular": 2.23489265899805,
+    "masa_inicial": [
+        30,
+        35,
+        40,
+        45,
+        50
+    ]
+}
