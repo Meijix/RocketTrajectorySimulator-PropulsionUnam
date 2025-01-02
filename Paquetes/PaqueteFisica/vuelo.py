@@ -223,8 +223,7 @@ class Vuelo:
 
         propios_integ = ['Euler', 'RungeKutta2', 'RungeKutta4', 'RKF45', 'AdaptiveEuler']
         python_integ = ['RK45', 'RK23', 'DOP853', 'LSODA', 'BDF', 'Radau']
-        t = 0.0
-        ultima_altitud = 0
+        
         ##########################################
         # print("t=", t)
             # -------------------------
@@ -234,17 +233,23 @@ class Vuelo:
             print("Integrador propio detectado")
             it = 0
             next_tout = dt_out
+            t = 0.0
+            ultima_altitud = 0
 
             sim=[estado] #lista de estados de vuelo
             tiempos=[0] #lista de tiempos
+
+            #Actualizar masa del vehiculo
+            print("Actualizando masa")
+            self.vehiculo.actualizar_masa(t)
+            masavuelo=[self.vehiculo.masa]
+
+            self.vehiculo.parachute_active1 = False
+            #print(self.vehiculo.parachute_active1)
+
             #Iniciar ciclo
             while t <= t_max:
-                #Actualizar masa del vehiculo
-                self.vehiculo.actualizar_masa(t)
-                masavuelo=[self.vehiculo.masa]
-
-                self.vehiculo.parachute_active1 = False
-                #print(self.vehiculo.parachute_active1)
+                
 
                 if t + dt > next_tout:
                     dt = next_tout - t
@@ -252,6 +257,7 @@ class Vuelo:
                     pass
                 #########################################
                 #CAMBIO DE METODO DE INTEGRACIÓN
+                print("Integrando")
                 if integrador == 'Euler':
                     Integracion = Euler(self.fun_derivs) #ocupa dt=0.005
                 elif integrador == 'RungeKutta2':
@@ -272,6 +278,7 @@ class Vuelo:
                 #print("dt= ", dt)
 
                 # Avanzar estado
+                print("Avanzando estado")
                 it += 1
                 t += dt
                 estado = nuevo_estado
@@ -280,15 +287,18 @@ class Vuelo:
             # Actualizar variables (viento, masa del vehiculo, etc)
 
             # Actualizar masa del vehiculo
+            print("Actualizando masa 2")
             self.vehiculo.actualizar_masa(t)
 
             # Actualizar viento_actual
             #self.viento.actualizar_viento2D()
+            print("Actualizando viento")
             self.viento.actualizar_viento3D()
             #print("Nuevos vientos", self.viento)
             v_viento = self.viento.vector
 
             #FASE 1. VUELO EN RIEL
+            print("Revisando vuelo en riel")
             if self.tiempo_salida_riel is None:
                 r = np.linalg.norm(estado[0:3])
                 if r > self.vehiculo.riel.longitud:
@@ -297,6 +307,7 @@ class Vuelo:
             #FASE 2. MECO
 
             # APOGEO: Determinar tiempo de apogeo
+            print("Revisando apogeo")
             altitud = estado[2]
             if self.tiempo_apogeo is None and altitud > 5 and altitud < ultima_altitud:
                 self.tiempo_apogeo = t
@@ -307,6 +318,7 @@ class Vuelo:
             #FASE3.RECUPERACIÓN
             #FALTA IMPLEMENTAR RECUPERACION DE DOS ETAPAS JE
             #activar el paracaidas en el apogeo
+            print("Revisando recuperacion")
             if self.tiempo_apogeo is not None and self.vehiculo.parachute_added == True:
                 #print(self.vehiculo.parachute_active1,"antes")
                 self.vehiculo.parachute_active1 = True
@@ -317,6 +329,7 @@ class Vuelo:
                 pass
 
             #CAIDA: Terminar simulación cuando cae al piso
+            print("Revisando caida")
             if estado[2] < 0 and t > 1:
                 self.tiempo_impacto = t
 
@@ -327,6 +340,7 @@ class Vuelo:
                 next_tout += dt_out
 
             #Agrega el nuevo estado a la lista
+            print("Guardando datos")
             sim.append(nuevo_estado)
             tiempos.append(t)
 
