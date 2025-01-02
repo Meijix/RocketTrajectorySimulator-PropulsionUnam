@@ -213,12 +213,13 @@ class Vuelo:
         if integrador in propios_integ:
             print(f"Integrador propio detectado: {integrador}")
             t, it, next_tout = 0.0, 0, dt_out
-            sim, tiempos = [estado], [0]
+            #sim, tiempos = [estado], [0]
+            sim, tiempos= [], []
             ultima_altitud = 0
 
             # Actualización inicial de la masa
             self.vehiculo.actualizar_masa(t)
-            masavuelo.append(self.vehiculo.masa)
+            #masavuelo.append(self.vehiculo.masa)
             self.vehiculo.parachute_active1 = False
 
             # Selección del integrador
@@ -233,6 +234,7 @@ class Vuelo:
 
             print(f"Iniciando ciclo con {integrador}")
             while t <= t_max:
+                
                 if t + dt > next_tout:
                     dt = next_tout - t
 
@@ -273,6 +275,7 @@ class Vuelo:
                 if t >= next_tout:
                     next_tout += dt_out
 
+                masavuelo.append(self.vehiculo.masa)
                 sim.append(nuevo_estado)
                 tiempos.append(t)
                 CPs.append(self.vehiculo.CP[2])
@@ -280,13 +283,11 @@ class Vuelo:
                 viento_vuelo_vecs.append(v_viento)
                 viento_vuelo_mags.append(self.viento.magnitud_total)
                 viento_vuelo_dirs.append(self.viento.direccion_total)
-                masavuelo.append(self.vehiculo.masa)
 
                 # Cálculos secundarios
                 pos = estado[0:3]
                 vel = estado[3:6]
                 theta = estado[6]
-                z = pos[2]
                 vrel = np.array(vel) - v_viento
 
                 gamma = math.atan2(vel[2], vel[0])
@@ -303,7 +304,7 @@ class Vuelo:
                 Cds.append(Cd)
                 Machs.append(mach)
 
-                grav = calc_gravedad(z)
+                grav = calc_gravedad(altitud)
                 Gvec = np.array([0, 0, -grav])
 
                 accel = Gvec + Dvec/self.vehiculo.masa + Nvec/self.vehiculo.masa + Tvec/self.vehiculo.masa
@@ -316,6 +317,7 @@ class Vuelo:
 
                 if it % 2500 == 0:
                     print(f"Iter={it}, t={t:.1f}s, dt={dt:g}, altitud={altitud:.1f}m, vel vert={estado[5]:.1f}")
+                it += 1
 
         # Métodos de Python (solve_ivp)
         elif integrador in python_integ:
@@ -326,7 +328,7 @@ class Vuelo:
             sim = solucion.y.T.tolist()
             ultima_altitud = 0
 
-            print("len solucion",len(solucion.t))
+            #print("len solucion",len(solucion.t))
             for k, t in enumerate(tiempos):
                 estado = solucion.y[:, k]
 
@@ -352,6 +354,7 @@ class Vuelo:
 
                 if altitud < 0 and t > 1:
                     self.tiempo_impacto = t
+                    iteracion_final = k
                     break
 
                 # Guardar datos
@@ -391,12 +394,13 @@ class Vuelo:
                 palancas.append(palanca)
                 accangs.append(accang)
                 torcas.append(torca)
+                
 
             #solo tiempos y sim hasta el impacto
-            tiempos=tiempos[:k]
-            sim=sim[:k]
-            print("len tiempos",len(tiempos))
-            print("len sim",len(sim))
+            tiempos=tiempos[:iteracion_final]
+            sim=sim[:iteracion_final]
+            #print("len tiempos",len(tiempos))
+            #print("len sim",len(sim))
 
         else:
             raise ValueError(f"Integrador '{integrador}' no reconocido")

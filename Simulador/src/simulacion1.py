@@ -54,7 +54,6 @@ wind_xs = [vec[0] for vec in viento_vuelo_vecs]
 wind_ys = [vec[1] for vec in viento_vuelo_vecs]
 wind_zs = [vec[2] for vec in viento_vuelo_vecs]
 
-print("Posiciones",posiciones)
 max_altitude = max(posiciones[:, 2])
 max_speed = max(np.linalg.norm(velocidades, axis=1))
 ####################################
@@ -73,22 +72,34 @@ print("Guardando datos de la simulación")
 print("Tiempos", len(tiempos))
 print("Sim ", len(sim))
 print("CPs", len(CPs))
+print("CGs", len(CGs))
+print("masavuelo", len(masavuelo))
+print("viento_vuelo_mags", len(viento_vuelo_mags))
+print("viento_vuelo_dirs", len(viento_vuelo_dirs))
+print("viento_vuelo_vecs", len(viento_vuelo_vecs))
+print("Tvecs", len(Tvecs))
+print("Dvecs", len(Dvecs))
+print("Nvecs", len(Nvecs))
+print("viento_vuelo_vecs", len(viento_vuelo_vecs))
+
+
 
 
 # Guardar los datos de la simulación en un archivo .csv
 datos_simulados = pd.DataFrame({
-    'tiempos': tiempos[1:],
-    'posiciones_x': posiciones[1:, 0],
-    'posiciones_y': posiciones[1:, 1],
-    'posiciones_z': posiciones[1:, 2],
-    'velocidades_x': velocidades[1:, 0],
-    'velocidades_y': velocidades[1:, 1],
-    'velocidades_z': velocidades[1:, 2],
-    'thetas': thetas[1:],
-    'omegas': omegas[1:],
+    #En los integradores propios se debe cambiar el tamano de los estados para que coincida con el número de tiempos
+    'tiempos': tiempos[:],#Se quita el primer tiempo para que coincida con el número de estados
+    'posiciones_x': posiciones[:, 0], #Se quita el primer estado para que coincida con el número de tiempos
+    'posiciones_y': posiciones[:, 1], #Se quita el primer estado para que coincida con el número de tiempos
+    'posiciones_z': posiciones[:, 2], #Se quita el primer estado para que coincida con el número de tiempos
+    'velocidades_x': velocidades[:, 0], #Se quita el primer estado para que coincida con el número de tiempos
+    'velocidades_y': velocidades[:, 1], #Se quita el primer estado para que coincida con el número de tiempos
+    'velocidades_z': velocidades[:, 2], #Se quita el primer estado para que coincida con el número de tiempos
+    'thetas': thetas[:], #Se quita el primer estado para que coincida con el número de tiempos
+    'omegas': omegas[:], #Se quita el primer estado para que coincida con el número de tiempos
     'CPs': CPs,
     'CGs': CGs,
-    'masavuelo': masavuelo[1:],
+    'masavuelo': masavuelo[:], #Se quita el primer estado para que coincida con el número de tiempos
     'viento_vuelo_mags': viento_vuelo_mags,
     'viento_vuelo_dirs': viento_vuelo_dirs,
     'viento_vuelo_vecs': viento_vuelo_vecs,
