@@ -241,6 +241,7 @@ class Vuelo:
             # Integraccion con metodos propios
             # -------------------------
             if integrador in propios_integ:
+                print("Integrador propio detectado")
                 it = 0
                 next_tout = dt_out
 
@@ -399,6 +400,7 @@ class Vuelo:
             # Integración con scipy solve_ivp
             # -------------------------
             elif integrador in python_integ:
+                print("Integrador python detectado")
                 solucion = solve_ivp(self.fun_derivs, (t, t+dt), estado, method=integrador, dense_output=True, first_step=dt, max_step=dt)
 
                 time = solucion.t
