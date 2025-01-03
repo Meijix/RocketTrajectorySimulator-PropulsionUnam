@@ -9,18 +9,32 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 #from cohete import*
 from Simulador.src.XitleFile import Xitle
-from Paquetes.utils.dibujar_cohete import dibujar_cohete
 from Paquetes.utils.dibujar_cohete2 import dibujar_cohete2
 
 CG_list=[]
 CP_list=[]
 Ix_list=[]
 long_list=[]
+long_ext_list=[]
 masas_list=[]
 
 for comp in Xitle.componentes.values():
     long_list.append(0.0)
     long_list.append(comp.bottom[2])
+
+print("\nLongitudes")
+for comp in Xitle.componentes.values():
+    print(comp.nombre, comp.bottom[2])
+
+#Lista de longitudes de los componentes externos 
+#Se empieza a medir desde la punta de la nariz
+avance = 0
+for comp in Xitle.componentes_externos.values():
+    avance += comp.long
+    avance_volteado = Xitle.longtotal - avance
+    #print(comp.nombre, comp.long)
+    long_ext_list.append(avance)
+print("Separaciones componentes", long_ext_list)
 
 print("\nMasas")
 for comp in Xitle.componentes.values():
@@ -59,6 +73,7 @@ print("El impulso total del motor es", Xitle.I_total)
 p=len(CG_list)-1
 y = np.zeros_like(CG_list)
 y_long = np.zeros_like(long_list)
+y_ext = np.zeros_like(long_ext_list)
 
 '''
 # Dibujar un cohete
@@ -88,10 +103,12 @@ rear_boat=Xitle.componentes['Boattail'].dR
 
 # Crear figura
 fig, ax = plt.subplots(figsize=(10, 4))  # Ajustar el tamaño de la figura
-dibujar_cohete2(ax, angle=0, x_cm=Xitle.CG[2], y_cm=0, body_l=long_fuselaje, body_w=Xitle.d_ext, nose_l=long_nariz, fin_w1= tip_aletas, fin_w2=root_aletas, fin_h=fin_height, boattail_length=long_boat, boat_rear=rear_boat)
+dibujar_cohete2(ax, angle=180, x_cm=Xitle.CG[2], y_cm=0, body_l=long_fuselaje, body_w=Xitle.d_ext, nose_l=long_nariz, fin_tip= tip_aletas, fin_root=root_aletas, fin_h=fin_height, boattail_length=long_boat, boat_rear=rear_boat)
 
 # Dibujar elementos del cohete
-plt.scatter(long_list, y_long, color='gold', marker="|", s=500) #label="Separacion entre componentes")
+
+#plt.scatter(long_list, y_long, color='gold', marker="|", s=500) #label="Separacion entre componentes")
+plt.scatter(long_ext_list, y_ext, color='gold', marker="|", s=500)  # label="Separacion entre componentes")
 plt.scatter(CG_list[:p], y[:p], color='darkorange', s=50, alpha=0.8, marker="P", label="CGs componentes")  # CGs de los componentes
 plt.scatter(CP_list[:p], y[:p], color='green', s=50, alpha=0.8, marker="X", label="CPs componentes")       # CPs de los componentes
 plt.scatter(CG_list[-1], y[-1], color='red', marker="P", s=150, label="CG total")  # CG del cohete completo
