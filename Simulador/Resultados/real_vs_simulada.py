@@ -7,7 +7,7 @@ import os
 # Agregar la ruta del directorio que contiene los paquetes al sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from Simulador.src.simulacion1 import *
+from Simulador.src.VueloLibre import *
 
 # Load the data from the CSV file
 #Corregir el path file

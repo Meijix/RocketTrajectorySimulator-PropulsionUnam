@@ -1,0 +1,12 @@
+{
+    "nombre cohete": "Xitle",
+    "d_ext": 0.152,
+    "t_MECO": 10.0,
+    "tiempo_salida_riel": 0.4930811694857284,
+    "tiempo_apogeo": 41.713081169486,
+    "tiempo_impacto": 86.74308116949321,
+    "max_altitude": 8583.47301123455,
+    "max_speed": 462.1772476864561,
+    "max_acceleration_linear": 1893.0090520928395,
+    "max_acceleration_angular": 38.68443033645403
+}
