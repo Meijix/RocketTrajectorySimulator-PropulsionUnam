@@ -10,11 +10,22 @@ from matplotlib.animation import FuncAnimation
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 # Supongamos que estas funciones ya están definidas
 from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson, muestra_tiempos
-from Paquetes.utils.dibujar_cohete2 import dibujar_cohete2
+from Paquetes.utils.dibujar_cohete2 import dibujar_cohete2, acomodar_cohete2
+from Paquetes.utils.funciones import guardar_animacion
+from Simulador.src.XitleFile import Xitle
 
 # Leer datos de simulación
-datos_simulacion = pd.read_csv(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\src\datos_simulacion.csv')
-(tiempos, _, _, thetas, omegas, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) = extraer_datoscsv(datos_simulacion)
+datos_simulacion = pd.read_csv(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloParacaidas-RungeKutta4\datos.csv')
+(tiempos, _, _, thetas, omegas, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) = extraer_datoscsv(datos_simulacion)
+
+#Longitud de los componentes para el dibujo
+long_nariz=Xitle.componentes['Nariz'].long
+long_fuselaje=Xitle.long_fuselaje
+root_aletas=Xitle.componentes['Aletas'].C_r
+tip_aletas=Xitle.componentes['Aletas'].C_t
+long_boat=Xitle.componentes['Boattail'].long
+fin_height=Xitle.componentes['Aletas'].span
+rear_boat=Xitle.componentes['Boattail'].dR
 
 # Leer los datos de la simulación desde el archivo JSON
 with open('datos_simulacion.json', 'r', encoding= 'utf-8') as f:
@@ -50,7 +61,9 @@ def update(frame):
     theta_deg = np.degrees(thetas[frame])
     
     # Dibujar el cohete actualizado
-    dibujar_cohete2(ax=ax_cohete, angle=theta_deg, x_cm=0, y_cm=0, long=4.5)
+    #dibujar_cohete2(ax=ax_cohete, angle=theta_deg, x_cm=0, y_cm=0, long=4.5)
+    partes = dibujar_cohete2(ax=ax_cohete, angle=180-theta_deg, x_cm=Xitle.CG[2], y_cm=0, body_l=long_fuselaje, body_w=Xitle.d_ext, nose_l=long_nariz, fin_tip= tip_aletas, fin_root=root_aletas, fin_h=fin_height, boattail_length=long_boat, boat_rear=rear_boat)
+    acomodar_cohete2(ax=ax_cohete, parts=partes, x_cm=Xitle.CG[2], y_cm=0, angle=theta_deg)
     ax_cohete.set_title(f"Ángulo: {theta_deg:.2f}°")
     #linea vertical para el cohete
     ax_cohete.axvline(x=0, color='0.5', linestyle='--')
@@ -73,16 +86,21 @@ def update(frame):
     # Configurar leyenda y etiquetas
     ax_theta_omega.legend()
     ax_theta_omega.set_xlabel("Tiempo (s)")
+    ax_theta_omega.set_ylabel("Ángulo (rad) / Velocidad Angular (rad/s)")
+    ax_theta_omega.set_title("Inclinacion y vel angula vs Tiempo")
     return ax_cohete, ax_theta_omega
 
 # Crear la animación
 frames = np.arange(0, len(tiempos), 10)  # Intervalos optimizados
 animation = FuncAnimation(fig, update, frames=frames, interval=100, repeat=False)
+#plt.show()
+# Guardar la animación
+guardar_animacion(animation, 'cohete_rotacion.mp4', formato='mp4', fps=30)
 
-plt.show()
-
+'''
 #Guardar la animacion
 print("Guardando animación...")
 animation.save('cohete_rotado.mp4', writer='ffmpeg', fps=30)
 print("Animación guardada con éxito")
 #animation.save('cohete_rotado.gif', writer='imagemagick', fps=30)
+'''

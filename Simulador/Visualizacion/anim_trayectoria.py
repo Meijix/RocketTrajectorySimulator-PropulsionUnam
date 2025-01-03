@@ -5,27 +5,25 @@ import matplotlib.pyplot as plt
 import sys
 import os
 
+
 #from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
 
 # Agregar la ruta del directorio que contiene los paquetes al sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 #from Paquetes.utils.funciones import *
-from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson, muestra_tiempos
+from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson, muestra_tiempos, guardar_animacion
 
 
 ###############################################
 # Leer los datos de la simulación desde el archivo CSV
-datos_simulacion = pd.read_csv('datos_simulacion.csv')
-datos_simulacion = pd.read_csv(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\src\datos_simulacion.csv')
+datos_simulacion = pd.read_csv(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloParacaidas-RungeKutta4\datos.csv')
+(tiempos, posiciones, velocidades, thetas, omegas, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) = extraer_datoscsv(datos_simulacion)
 
-
-# Extarer los datos del csv
-(tiempos, posiciones, _, thetas, omegas, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Gammas, _, _, _, _) = extraer_datoscsv(datos_simulacion)
 
 #########################################
 # Leer los datos de la simulación desde el archivo JSON
-with open('datos_simulacion.json', 'r', encoding= 'utf-8') as f:
+with open(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloParacaidas-RungeKutta4\datos.json', 'r', encoding= 'utf-8') as f:
     datos = json.load(f)
 # Extraer los datos del json
 (_, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto,
@@ -151,10 +149,9 @@ if frames[-1] > len(t):
     frames[-1] = len(t)-1
 #print(frames)
 
-fps=40
-animation = FuncAnimation(fig, update, frames=frames, interval=1000/fps, repeat=False)
-plt.show()
-
+animation = FuncAnimation(fig, update, frames=frames, interval=100, repeat=False)
+#plt.show()
+guardar_animacion(animation, 'cohete_trayectoria.mp4', formato='mp4', fps=30)
 #animation.save("TrayectoriaAnimada.gif")
 #animation.save("Trayectoria-pelicula.mp4", fps)
 #print("Mp4 Guardado")

@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 import os
 import json
+import tqdm
+from tqdm import tqdm
+import sys
 
 # Constantes universales
 GravUn = 6.67430E-11  # m^3/kg/s^2 Constante de gravitación universal
@@ -26,21 +29,20 @@ g0 = calc_gravedad(0)
 #Funciones que extraen datos de los archivos 
 def extraer_datoscsv(datos_simulacion):
     # Convertir los datos a arrays de numpy
-    tiempos = datos_simulacion['tiempos'].values
+    tiempos = datos_simulacion['t'].values
 
-    posiciones = datos_simulacion[['posiciones_x', 'posiciones_y', 'posiciones_z']].values
-    velocidades = datos_simulacion[['velocidades_x', 'velocidades_y', 'velocidades_z']].values
+    posiciones = datos_simulacion[['x', 'y', 'z']].values
+    velocidades = datos_simulacion[['vx', 'vy', 'vz']].values
     thetas = datos_simulacion['thetas'].values
     omegas = datos_simulacion['omegas'].values
 
     CPs = datos_simulacion['CPs'].values
     CGs = datos_simulacion['CGs'].values
     masavuelo = datos_simulacion['masavuelo'].values
-    estabilidad = datos_simulacion['estabilidad'].values
 
-    viento_vuelo_mags = datos_simulacion['viento_vuelo_mags'].values
-    viento_vuelo_dirs = datos_simulacion['viento_vuelo_dirs'].values
-    viento_vuelo_vecs = datos_simulacion['viento_vuelo_vecs'].values
+    viento_vuelo_mags = datos_simulacion['viento_mags'].values
+    viento_vuelo_dirs = datos_simulacion['viento_dirs'].values
+    viento_vuelo_vecs = datos_simulacion['viento_vecs'].values
     wind_xs = datos_simulacion['wind_xs'].values
     wind_ys = datos_simulacion['wind_ys'].values
     wind_zs = datos_simulacion['wind_zs'].values
@@ -77,7 +79,7 @@ def extraer_datoscsv(datos_simulacion):
 
     CGs = np.array(CGs)
     CPs = np.array(CPs)
-    return (tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo,estabilidad,
+    return (tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo,
             viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, wind_xs, wind_ys, wind_zs,
             Dmags, Nmags, Tmags, Dxs, Dys, Dzs, Nxs, Nys, Nzs, Txs, Tys, Tzs, Tvecs, Dvecs, Nvecs,
             accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs)
@@ -198,3 +200,43 @@ def guardar_datos_json(cohete_actual,vuelo1, max_altitude, max_speed, accels, ac
     with open(ruta_archivo_json, 'w', encoding='utf-8') as f:
         json.dump(datos_a_guardar, f, indent=4)
     print(f'Archivo JSON guardado en: {ruta_archivo_json}')
+
+
+def guardar_animacion(animation, nombre_archivo, formato='mp4', fps=30):
+    """
+    Guarda la animación con una barra de progreso.
+
+    :param animation: Objeto de animación de Matplotlib.
+    :param nombre_archivo: Nombre del archivo de salida.
+    :param formato: Formato de salida ('mp4' o 'gif').
+    :param fps: Fotogramas por segundo.
+    """
+    print("Guardando animación...")
+    #ruta_archivo
+    ruta_archivo = f'Simulador/Resultados/OutputFiles/{nombre_archivo}'
+    if formato == 'mp4':
+        with tqdm(total=100, file=sys.stdout, desc="Progreso") as pbar:
+            def progress_callback(i, n):
+                pbar.update(int(100 * i / n) - pbar.n)
+
+            animation.save(
+                ruta_archivo, 
+                writer='ffmpeg', 
+                fps=fps, 
+                progress_callback=progress_callback
+            )
+    elif formato == 'gif':
+        with tqdm(total=100, file=sys.stdout, desc="Progreso") as pbar:
+            def progress_callback(i, n):
+                pbar.update(int(100 * i / n) - pbar.n)
+
+            animation.save(
+                nombre_archivo, 
+                writer='imagemagick', 
+                fps=fps, 
+                progress_callback=progress_callback
+            )
+    else:
+        raise ValueError("Formato no soportado. Use 'mp4' o 'gif'.")
+
+    print("Animación guardada con éxito")
