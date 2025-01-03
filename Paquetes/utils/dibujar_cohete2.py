@@ -4,7 +4,7 @@ import matplotlib.patches as patches
 from matplotlib import transforms
 from matplotlib.animation import FuncAnimation
 
-def dibujar_cohete2(ax, angle=0, x_cm=0, y_cm=0, long=6):
+def dibujar_cohete2(ax, angle=0, x_cm=0, y_cm=0, body_l=5, body_w=5/6, nose_l=5/4, fin_w1=5/4, fin_w2=5/3, fin_h=5/8, boattail_length=5/9, boat_rear=5/2):
     """
     Dibuja un cohete en un gráfico especificando su centro de gravedad (x_cm, y_cm),
     el ángulo de rotación, y el escalado del cohete.
@@ -12,15 +12,17 @@ def dibujar_cohete2(ax, angle=0, x_cm=0, y_cm=0, long=6):
     # Colores
     color_cohete = 'midnightblue'
     color_borde = 'lavender'
-
+    
+    '''
     # Dimensiones del cohete escaladas
-    body_l = long
-    body_w = long / 6
-    nose_l = long / 4
-    fin_w1 = long / 4
-    fin_w2 = long / 3
-    fin_h = long / 8
-    boattail_length = long / 9    
+    body_l = long # Longitud del cuerpo
+    body_w = long / 6 # Ancho del cuerpo
+    nose_l = long / 4 # Longitud de la nariz
+    fin_w1 = long / 4 # Root chord de la aleta
+    fin_w2 = long / 3 # Tip chord de la aleta
+    fin_h = long / 8 # Altura de la aleta- span??
+    boattail_length = long / 9  # Longitud del boattail  
+    '''
     # Partes del cohete
     parts = []
     
@@ -52,10 +54,10 @@ def dibujar_cohete2(ax, angle=0, x_cm=0, y_cm=0, long=6):
     
     # Boattail
     points = np.array([
-        (0, 0), 
-        (0, body_w), 
-        (-boattail_length, body_w - 0.1), 
-        (-boattail_length, 0.1)
+        (0, -body_w/2), 
+        (0, body_w/2), 
+        (-boattail_length, -boat_rear/2), 
+        (-boattail_length, boat_rear/2)
     ])
     boattail = patches.Polygon(points, facecolor=color_cohete, edgecolor=color_borde)
     parts.append(boattail)

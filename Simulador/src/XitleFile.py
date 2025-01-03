@@ -64,7 +64,9 @@ componentes_externos = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': t
 
 Xitle = Cohete("Xitle", "hibrido", componentes, componentes_externos, tabla_Cd_fpath, tabla_empuje_fpath, tabla_masa_fpath, c_init.riel)
 Xitle.d_ext=diam_ext
-
+#longitud del fuselaje
+Xitle.long_fuselaje = coples.long + tubo_recup.long + transfer.long + tanquevacio.long + valvulas.long + CC.long 
+print("Longitud del fuselaje",Xitle.long_fuselaje)
 #Agregar paracaidas
 #Drogue
 drogue = Parachute(0.8, 0.7)

@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 #from cohete import*
 from Simulador.src.XitleFile import Xitle
 from Paquetes.utils.dibujar_cohete import dibujar_cohete
-#from Paquetes.utils.dibujar_cohete2 import dibujar_cohete2
+from Paquetes.utils.dibujar_cohete2 import dibujar_cohete2
 
 CG_list=[]
 CP_list=[]
@@ -56,28 +56,16 @@ print("La longitud total de Xitle es", Xitle.longtotal, "[m]")
 print("La masa total de Xitle es", Xitle.masa, "[kg]")
 print("El impulso total del motor es", Xitle.I_total)
 
-
-#print(CG_list)
-#print(CP_list)
-#print(long_list)
 p=len(CG_list)-1
 y = np.zeros_like(CG_list)
 y_long = np.zeros_like(long_list)
 
 '''
-plt.figure(figsize=(12,1.5))
-plt.plot(long_list,y_long,color= 'lightblue',alpha=0.9)
-plt.scatter(long_list,y_long,color='navy',marker="|")
-plt.scatter(CG_list[:p],y[:p],color='darkorange')#CGs de los componentes
-plt.scatter(CP_list[:p],y[:p],color='green') #CPs de los componentes
-plt.scatter(CG_list[-1],y[-1],color='red',marker="*", s=100) #CG del cohete complfuncompleto
-plt.scatter(CP_list[-1],y[-1],color='blue',marker= "*", s=100) #CP del cohete complfuncompleto
-
-plt.title("CG y CP posicionados de los componentes en Cohete Xitle2")
-plt.show()
-'''
 # Dibujar un cohete
-dibujar_cohete(4.2, 0, 180, 3.5, plt.gca())
+#dibujar_cohete(4.2, 0, 180, 3.5, plt.gca())
+#crear figura
+fig, ax = plt.subplots()
+dibujar_cohete2(ax, angle=0, x_cm=Xitle.CG[2], y_cm=0, long=Xitle.longtotal)
 
 #plt.plot(long_list,y_long,color= 'lightblue',alpha=0.9)
 plt.scatter(long_list,y_long,color='navy',marker="|", s=500)
@@ -87,4 +75,36 @@ plt.scatter(CG_list[-1],y[-1],color='red',marker="P", s=100) #CG del cohete comp
 plt.scatter(CP_list[-1],y[-1],color='blue',marker= "X", s=100) #CP del cohete complfuncompleto
 
 plt.gca().set_aspect("equal")
+plt.show()
+'''
+#Longitud de los componentes para el dibujo
+long_nariz=Xitle.componentes['Nariz'].long
+long_fuselaje=Xitle.long_fuselaje
+root_aletas=Xitle.componentes['Aletas'].C_r
+tip_aletas=Xitle.componentes['Aletas'].C_t
+long_boat=Xitle.componentes['Boattail'].long
+fin_height=Xitle.componentes['Aletas'].span
+rear_boat=Xitle.componentes['Boattail'].dR
+
+# Crear figura
+fig, ax = plt.subplots(figsize=(10, 4))  # Ajustar el tamaño de la figura
+dibujar_cohete2(ax, angle=0, x_cm=Xitle.CG[2], y_cm=0, body_l=long_fuselaje, body_w=Xitle.d_ext, nose_l=long_nariz, fin_w1= tip_aletas, fin_w2=root_aletas, fin_h=fin_height, boattail_length=long_boat, boat_rear=rear_boat)
+
+# Dibujar elementos del cohete
+plt.scatter(long_list, y_long, color='gold', marker="|", s=500) #label="Separacion entre componentes")
+plt.scatter(CG_list[:p], y[:p], color='darkorange', s=50, alpha=0.8, marker="P", label="CGs componentes")  # CGs de los componentes
+plt.scatter(CP_list[:p], y[:p], color='green', s=50, alpha=0.8, marker="X", label="CPs componentes")       # CPs de los componentes
+plt.scatter(CG_list[-1], y[-1], color='red', marker="P", s=150, label="CG total")  # CG del cohete completo
+plt.scatter(CP_list[-1], y[-1], color='blue', marker="X", s=150, label="CP total")  # CP del cohete completo
+
+# Estética del gráfico
+ax.set_aspect("equal")  # Asegurar proporción igual en el eje
+plt.title("Visualización de componentes", fontsize=14, weight='bold')
+plt.xlabel("Longitud (m)", fontsize=12)
+plt.ylabel("Eje transversal (m)", fontsize=12)
+plt.legend(loc="best", fontsize=10)  # Colocar la leyenda automáticamente
+plt.grid(True, linestyle='--', alpha=0.7)  # Agregar una cuadrícula suave
+plt.tight_layout()  # Ajustar márgenes
+
+# Mostrar el gráfico
 plt.show()
