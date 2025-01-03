@@ -3,23 +3,23 @@ import numpy as np
 import time
 import sys
 import os
-import pandas as pd
-import json
+
 
 # Agregar la ruta del directorio que contiene los paquetes al sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 #Importar paquetes propios de carpeta superior Paquetes
 from Paquetes.PaqueteFisica.vuelo import Vuelo
-from Paquetes.PaqueteFisica.viento import Viento
 from Paquetes.PaqueteFisica.cohete import Parachute
+from Paquetes.utils.funciones import guardar_datos_csv, guardar_datos_json
 
 from Simulador.src import condiciones_init as c_init
-from Simulador.src.XitleFile import Xitle, diam_ext
+from Simulador.src.XitleFile import Xitle
 
 cohete_actual = Xitle
+TipoVuelo = 'VueloParacaidas'
 
-#####EMPEZAR SIN PARACAIDAS
+### EMPEZAR SIN PARACAIDAS
 #quitar el paracaidas
 cohete_actual.parachute_added = False
 #desactivar el paracaidas
@@ -83,73 +83,8 @@ max_speed = max(np.linalg.norm(velocidades, axis=1))
 #print("Máxima velocidad:", max_speed, "m/s")
 #print("Equivalente a:",max_speed/340, "Mach")
 #########################################
+# Guardar los datos de la simulación
 print("Guardando datos...")
-# Guardar los datos de la simulación en un archivo .csv
-datos_simulados = pd.DataFrame({
-    'tiempos': tiempos[1:],
-    'posiciones_x': posiciones[1:, 0],
-    'posiciones_y': posiciones[1:, 1],
-    'posiciones_z': posiciones[1:, 2],
-    'velocidades_x': velocidades[1:, 0],
-    'velocidades_y': velocidades[1:, 1],
-    'velocidades_z': velocidades[1:, 2],
-    'thetas': thetas[1:],
-    'omegas': omegas[1:],
-    'CPs': CPs,
-    'CGs': CGs,
-    'masavuelo': masavuelo[1:],
-    'viento_vuelo_mags': viento_vuelo_mags,
-    'viento_vuelo_dirs': viento_vuelo_dirs,
-    'viento_vuelo_vecs': viento_vuelo_vecs,
-    'wind_xs': wind_xs,
-    'wind_ys': wind_ys,
-    'wind_zs': wind_zs,
-    #'Tvecs': Tvecs,
-    #'Dvecs': Dvecs,
-    #'Nvecs': Nvecs,
-    'Tmags': Tmags,
-    'Dmags': Dmags,
-    'Nmags': Nmags,
-    'Txs': Txs,
-    'Tys': Tys,
-    'Tzs': Tzs,
-    'Dxs': Dxs,
-    'Dys': Dys,
-    'Dzs': Dzs,
-    'Nxs': Nxs,
-    'Nys': Nys,
-    'Nzs': Nzs,
-    'accels': accels,
-    'palancas': palancas,
-    'accangs': accangs,
-    'Gammas': Gammas,
-    'Alphas': Alphas,
-    'torcas': torcas,
-    'Cds': Cds,
-    'Machs': Machs,
-    'estabilidad': stability
-})
-
-datos_simulados.to_csv('datos_sim_paracaidas.csv', index=False)
-
-############################
-#Guardar datos importantes en un archivo json
-datos_a_guardar = {
-    'd_ext': cohete_actual.d_ext,
-    't_MECO': cohete_actual.t_MECO,
-    'tiempo_salida_riel': vuelo_paracaidas.tiempo_salida_riel,
-    'tiempo_apogeo': vuelo_paracaidas.tiempo_apogeo,
-    'tiempo_impacto': vuelo_paracaidas.tiempo_impacto,
-    'max_altitude': max_altitude,
-    'max_speed': max_speed,
-    'max_acceleration_linear': np.max(accels),
-    'max_acceleration_angular': np.max(accangs)
-    #'velocidad de impacto': velocidades[-1]
-}
-print("csv guardado")
-
-with open('././datos_sim_paracaidas.json', 'w', encoding='utf-8') as f:
-    json.dump(datos_a_guardar, f, indent=4)
-print("json guardado")
-
-print("LISTO")
+guardar_datos_csv(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, wind_xs, wind_ys, wind_zs, Tmags, Dmags, Nmags, Txs, Tys, Tzs, Dxs, Dys, Dzs, Nxs, Nys, Nzs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs, TipoVuelo, c_init.integrador_actual)
+########################################
+guardar_datos_json(cohete_actual,vuelo_paracaidas, max_altitude, max_speed, accels, accangs, TipoVuelo, c_init.integrador_actual)
