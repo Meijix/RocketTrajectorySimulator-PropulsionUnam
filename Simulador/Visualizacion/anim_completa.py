@@ -1,3 +1,5 @@
+####ESTA ANIMACION NO HA SIDO COMPLETADA
+
 import numpy as np
 import pandas as pd
 import json
