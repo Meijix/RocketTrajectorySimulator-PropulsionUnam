@@ -43,20 +43,19 @@ ax_cohete.set_xlim(-10, 10)
 ax_cohete.set_ylim(-10, 10)
 ax_cohete.set_aspect('equal')
 
+
 # Subgráfico 2: Theta y Omega vs Tiempo
 ax_theta_omega = fig.add_subplot(122)
 ax_theta_omega.set_xlim([0, tiempos[-1]])
 ax_theta_omega.set_ylim([min(thetas.min(), omegas.min())-0.2, max(thetas.max(), omegas.max())+0.2])
-ax_theta_omega.set_xlabel("Tiempo (s)")
-ax_theta_omega.set_ylabel("Ángulo (rad) / Velocidad Angular (rad/s)")
-ax_theta_omega.set_title("Inclinacion y vel angula vs Tiempo")
+
 
 # Función de actualización de la animación
 def update(frame):
     # Limpieza y configuración del subgráfico del cohete
     ax_cohete.clear()
-    ax_cohete.set_xlim(-4, 4)
-    ax_cohete.set_ylim(-5, 5)
+    ax_cohete.set_xlim(-3, 3)
+    ax_cohete.set_ylim(-3, 3)
     ax_cohete.set_aspect('equal')
     theta_deg = np.degrees(thetas[frame])
     
@@ -67,10 +66,15 @@ def update(frame):
     ax_cohete.set_title(f"Ángulo: {theta_deg:.2f}°")
     #linea vertical para el cohete
     ax_cohete.axvline(x=0, color='0.5', linestyle='--')
+    #scatter el CG y CP
+    ax_cohete.scatter(0, 0, color='red', label='CG')
+    ax_cohete.scatter(0, Xitle.CP[2], color='blue', label='CP')
 
     # Limpieza y configuración del subgráfico Theta y Omega vs Tiempo
     ax_theta_omega.clear()
-    ax_theta_omega.set_title("Theta y Omega vs Tiempo")
+    ax_theta_omega.set_xlabel("Tiempo (s)")
+    ax_theta_omega.set_ylabel("Ángulo (rad) / Velocidad Angular (rad/s)")
+    ax_theta_omega.set_title("Inclinación y velocidad angular en el tiempo")
     ax_theta_omega.set_xlim([0, tiempos[-1]])
     ax_theta_omega.set_ylim([min(thetas.min(), omegas.min()), max(thetas.max(), omegas.max())])
     ax_theta_omega.plot(tiempos[:frame], thetas[:frame], color="yellowgreen")
@@ -79,21 +83,16 @@ def update(frame):
     # Etiquetas dinámicas para valores actuales
     ax_theta_omega.scatter(tiempos[frame], thetas[frame], color="yellowgreen", label=f"Theta: {thetas[frame]:.2f} rad")
     ax_theta_omega.scatter(tiempos[frame], omegas[frame], color="tomato", label=f"Omega: {omegas[frame]:.2f} rad/s")
-    
+    ax_theta_omega.legend()
     # Mostrar tiempos importantes
     muestra_tiempos(tiempo_salida_riel, t_MECO, tiempo_apogeo, tiempo_impacto, ax_theta_omega)
 
-    # Configurar leyenda y etiquetas
-    ax_theta_omega.legend()
-    ax_theta_omega.set_xlabel("Tiempo (s)")
-    ax_theta_omega.set_ylabel("Ángulo (rad) / Velocidad Angular (rad/s)")
-    ax_theta_omega.set_title("Inclinacion y vel angula vs Tiempo")
     return ax_cohete, ax_theta_omega
 
 # Crear la animación
 frames = np.arange(0, len(tiempos), 10)  # Intervalos optimizados
 animation = FuncAnimation(fig, update, frames=frames, interval=100, repeat=False)
-#plt.show()
+plt.show()
 # Guardar la animación
 guardar_animacion(animation, 'cohete_rotacion.mp4', formato='mp4', fps=30)
 
