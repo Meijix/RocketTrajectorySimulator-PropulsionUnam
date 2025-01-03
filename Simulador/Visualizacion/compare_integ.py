@@ -12,9 +12,9 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 #Importar paquetes propios de carpeta superior Paquetes
-from Paquetes.utils.angulos import nice_angle, normalize_angle
-from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson, muestra_tiempos
-from Simulador.src.condiciones_init import *
+from Paquetes.utils.angulos import nice_angle
+from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson
+#from Simulador.src.condiciones_init import *
 
 #Indicar el tipo de vuelo
 TipoVuelo = 'VueloLibre'
@@ -66,13 +66,19 @@ for integrador in integradores:
     #info[integrador]['tiempo_MECO'] = t_MECO
     info[integrador]['tiempo_salida_riel'] = tiempo_salida_riel
 
+
+###########################################################
 #Graficar las posiciones de los diferentes integradores
 plt.figure()
 for integrador in integradores:
     plt.plot(info[integrador]['tiempos'], info[integrador]['posiciones'][:, 2], label=integrador)
+    #scatter de apogeo
+    #plt.scatter(info[integrador]['tiempo_apogeo'], info[integrador]['apogeo'], color='red', label='Apogeo') 
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Altura [m]')
 plt.title('Altura vs Tiempo')
+plt.xlim(0, 85)
+plt.ylim(0, 10000)
 plt.legend()
 plt.grid()
 plt.show()
@@ -84,17 +90,26 @@ for integrador in integradores:
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Velocidad [m/s]')
 plt.title('Velocidad vs Tiempo')
+#linea horizontal en 0
+plt.axhline(y=0, color='k', linestyle='--')
 plt.legend()
 plt.grid()
+plt.ylim(-325, 550)
+plt.xlim(0, 85)
 plt.show()
 
 #Graficar thetas de los diferentes integradores
 plt.figure()
 for integrador in integradores:
-    plt.plot(info[integrador]['tiempos'], info[integrador]['thetas'], label=integrador)
+    plt.plot(info[integrador]['tiempos'], nice_angle(info[integrador]['thetas']), label=integrador)
 plt.xlabel('Tiempo [s]')
-plt.ylabel('Theta [rad]')
+plt.ylabel('Theta [deg]')
 plt.title('Theta vs Tiempo')
+#lineas en 90 y -90
+plt.axhline(y=90, color='darkslategray', linestyle='--')
+plt.axhline(y=-90, color='darkslategray', linestyle='--')
+plt.axhline(y=0, color='k', linestyle='--')
+plt.xlim(0, 85)
 plt.legend()
 plt.grid()
 plt.show()
@@ -106,10 +121,13 @@ for integrador in integradores:
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Omega [rad/s]')
 plt.title('Omega vs Tiempo')
+plt.xlim(0, 85)
+plt.ylim(-8,8)
 plt.legend()
 plt.grid()
 plt.show()
 
+###########################################
 # Comparar el apogeo de los diferentes integradores
 num_integradores = len(integradores)
 x_positions = range(1, num_integradores + 1)  # Posiciones únicas en el eje x
@@ -117,6 +135,8 @@ x_positions = range(1, num_integradores + 1)  # Posiciones únicas en el eje x
 plt.figure(figsize=(8, 6))
 for i, integrador in enumerate(integradores):
     plt.scatter(x_positions[i], info[integrador]['apogeo'], label=integrador)
+    #agregar el valor de apogeo junto a cada scatter
+    plt.annotate(f"{info[integrador]['apogeo']:.2f}", (x_positions[i], info[integrador]['apogeo']))
 
 plt.xticks(x_positions, integradores)  # Nombres de los integradores en el eje x
 plt.xlabel('Integrador')
@@ -130,6 +150,8 @@ plt.tight_layout()
 plt.figure(figsize=(8, 6))
 for i, integrador in enumerate(integradores):
     plt.scatter(x_positions[i], info[integrador]['tiempo_apogeo'], label=integrador)
+    #agregar el valor de tiempo de apogeo junto a cada scatter
+    plt.annotate(f"{info[integrador]['tiempo_apogeo']:.2f}", (x_positions[i], info[integrador]['tiempo_apogeo']))
 plt.xticks(x_positions, integradores)  # Nombres de los integradores en el ej
 plt.xlabel('Integrador')
 plt.ylabel('Tiempo [s]')
@@ -142,6 +164,8 @@ plt.tight_layout()
 plt.figure(figsize=(8, 6))
 for i, integrador in enumerate(integradores):
     plt.scatter(x_positions[i], info[integrador]['tiempo_impacto'], label=integrador)
+    #agregar el valor de tiempo de impacto junto a cada scatter
+    plt.annotate(f"{info[integrador]['tiempo_impacto']:.2f}", (x_positions[i], info[integrador]['tiempo_impacto']))
 plt.xticks(x_positions, integradores)  # Nombres de los integradores en el ej
 plt.xlabel('Integrador')
 plt.ylabel('Tiempo [s]')
@@ -154,6 +178,8 @@ plt.tight_layout()
 plt.figure(figsize=(8, 6))
 for i, integrador in enumerate(integradores):
     plt.scatter(x_positions[i], info[integrador]['velocidad_max'], label=integrador)
+    #agregar el valor de velocidad máxima junto a cada scatter
+    plt.annotate(f"{info[integrador]['velocidad_max']:.2f}", (x_positions[i], info[integrador]['velocidad_max']))
 plt.xticks(x_positions, integradores)  # Nombres de los integradores en el ej
 plt.xlabel('Integrador')
 plt.ylabel('Velocidad [m/s]')
