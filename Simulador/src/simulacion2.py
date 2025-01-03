@@ -63,12 +63,6 @@ wind_xs = [vec[0] for vec in viento_vuelo_vecs]
 wind_ys = [vec[1] for vec in viento_vuelo_vecs]
 wind_zs = [vec[2] for vec in viento_vuelo_vecs]
 
-stability=[]
-
-for i in range(len(tiempos)-1):
-    stab= (CPs[i]-CGs[i])/cohete_actual.d_ext
-    stability.append(stab)
-
 max_altitude = max(posiciones[:, 2])
 max_speed = max(np.linalg.norm(velocidades, axis=1))
 ####################################
