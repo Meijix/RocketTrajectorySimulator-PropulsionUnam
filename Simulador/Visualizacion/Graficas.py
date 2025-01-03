@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 #Importar paquetes propios de carpeta superior Paquetes
 from Paquetes.utils.angulos import *
-from Paquetes.utils.dibujar_cohete import *
+from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson, muestra_tiempos, guardar_animacion
 from Paquetes.utils.funciones import *
 
 from Simulador.src.condiciones_init import *
@@ -31,16 +31,17 @@ archivo_csv = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVue
 
 #archivo_json = 'datos_simulacion.json'
 #archivo_json = 'datos_sim_paracaidas.json'
-archivo_json = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\src\datos_sim_paracaidas.json'
+archivo_json = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloParacaidas-RungeKutta4\datos.json'
 
 #archivo_json= r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\src\datos_simulacion.json'
 
 
 ###############################################
 # Leer los datos de la simulación desde el archivo CSV
-datos_simulacion = pd.read_csv(archivo_csv)
-# Extarer los datos del csv
-(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo,estabilidad,
+datos_simulacion = pd.read_csv(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloParacaidas-RungeKutta4\datos.csv')
+
+# Extraer los datos del csv
+(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo,
 viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, wind_xs, wind_ys, wind_zs,
 Dmags, Nmags, Tmags, Dxs, Dys, Dzs, Nxs, Nys, Nzs, Txs, Tys, Tzs, Tvecs, Dvecs, Nvecs,
 accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs) = extraer_datoscsv(datos_simulacion)
