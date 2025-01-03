@@ -60,7 +60,7 @@ componentes = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup
                'oxidante': oxidante, 'valvulas': valvulas, 'grano': grano, 'Cámara Combustión': CC, 'Aletas': aletas, 'Boattail': boattail}
 
 componentes_externos = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup, 'Transferidor de carga': transfer, 'tanquevacio': tanquevacio,
-               'oxidante': oxidante, 'valvulas': valvulas, 'grano': grano, 'Cámara Combustión': CC, 'Boattail': boattail}
+                'valvulas': valvulas,'Cámara Combustión': CC, 'Boattail': boattail}
 
 Xitle = Cohete("Xitle", "hibrido", componentes, componentes_externos, tabla_Cd_fpath, tabla_empuje_fpath, tabla_masa_fpath, c_init.riel)
 Xitle.d_ext=diam_ext

@@ -30,11 +30,16 @@ for comp in Xitle.componentes.values():
 #Se empieza a medir desde la punta de la nariz
 avance = 0
 for comp in Xitle.componentes_externos.values():
+    #Separacion entre componentes
     avance += comp.long
-    avance_volteado = Xitle.longtotal - avance
-    #print(comp.nombre, comp.long)
     long_ext_list.append(avance)
-print("Separaciones componentes", long_ext_list)
+    #CG de los componentes
+    pos_CG = comp.posicion[2] + comp.CG[2]
+    CG_list.append(pos_CG)
+    #CP de los componentes
+    pos_CP = comp.posicion[2] + comp.CP[2]
+    CP_list.append(pos_CP)
+
 
 print("\nMasas")
 for comp in Xitle.componentes.values():
@@ -46,15 +51,14 @@ print(Xitle.nombre, Xitle.masa)
 
 print("\nCentros de gravedad")
 for comp in Xitle.componentes.values():
-    CG_list.append(comp.posicion[2]+comp.CG[2])
-    print(comp.nombre, comp.posicion[2] + comp.CG[2])
+    
+    print(comp.nombre, pos_CG)
 
 CG_list.append(Xitle.CG[2])
 print(Xitle.nombre, Xitle.CG[2])
 
 print("\nCentros de presión")
 for comp in Xitle.componentes.values():
-    CP_list.append(comp.posicion[2]+comp.CP[2])
     print(comp.nombre, comp.posicion[2] + comp.CP[2], comp.CN)
 
 CP_list.append(Xitle.CP[2])
@@ -75,23 +79,6 @@ y = np.zeros_like(CG_list)
 y_long = np.zeros_like(long_list)
 y_ext = np.zeros_like(long_ext_list)
 
-'''
-# Dibujar un cohete
-#dibujar_cohete(4.2, 0, 180, 3.5, plt.gca())
-#crear figura
-fig, ax = plt.subplots()
-dibujar_cohete2(ax, angle=0, x_cm=Xitle.CG[2], y_cm=0, long=Xitle.longtotal)
-
-#plt.plot(long_list,y_long,color= 'lightblue',alpha=0.9)
-plt.scatter(long_list,y_long,color='navy',marker="|", s=500)
-plt.scatter(CG_list[:p],y[:p],color='darkorange', s=25, alpha=0.7, marker="P")#CGs de los componentes
-plt.scatter(CP_list[:p],y[:p],color='green', s=25, alpha= 0.7, marker="X") #CPs de los componentes
-plt.scatter(CG_list[-1],y[-1],color='red',marker="P", s=100) #CG del cohete complfuncompleto
-plt.scatter(CP_list[-1],y[-1],color='blue',marker= "X", s=100) #CP del cohete complfuncompleto
-
-plt.gca().set_aspect("equal")
-plt.show()
-'''
 #Longitud de los componentes para el dibujo
 long_nariz=Xitle.componentes['Nariz'].long
 long_fuselaje=Xitle.long_fuselaje
@@ -103,23 +90,24 @@ rear_boat=Xitle.componentes['Boattail'].dR
 
 # Crear figura
 fig, ax = plt.subplots(figsize=(10, 4))  # Ajustar el tamaño de la figura
-dibujar_cohete2(ax, angle=180, x_cm=Xitle.CG[2], y_cm=0, body_l=long_fuselaje, body_w=Xitle.d_ext, nose_l=long_nariz, fin_tip= tip_aletas, fin_root=root_aletas, fin_h=fin_height, boattail_length=long_boat, boat_rear=rear_boat)
+dibujar_cohete2(ax, angle=0, x_cm=Xitle.CG[2], y_cm=0, body_l=long_fuselaje, body_w=Xitle.d_ext, nose_l=long_nariz, fin_tip= tip_aletas, fin_root=root_aletas, fin_h=fin_height, boattail_length=long_boat, boat_rear=rear_boat)
 
 # Dibujar elementos del cohete
 
 #plt.scatter(long_list, y_long, color='gold', marker="|", s=500) #label="Separacion entre componentes")
 plt.scatter(long_ext_list, y_ext, color='gold', marker="|", s=500)  # label="Separacion entre componentes")
 plt.scatter(CG_list[:p], y[:p], color='darkorange', s=50, alpha=0.8, marker="P", label="CGs componentes")  # CGs de los componentes
-plt.scatter(CP_list[:p], y[:p], color='green', s=50, alpha=0.8, marker="X", label="CPs componentes")       # CPs de los componentes
+plt.scatter(CP_list[:p], y[:p], color='yellowgreen', s=50, alpha=0.8, marker="X", label="CPs componentes")       # CPs de los componentes
 plt.scatter(CG_list[-1], y[-1], color='red', marker="P", s=150, label="CG total")  # CG del cohete completo
-plt.scatter(CP_list[-1], y[-1], color='blue', marker="X", s=150, label="CP total")  # CP del cohete completo
+plt.scatter(CP_list[-1], y[-1], color='dodgerblue', marker="X", s=150, label="CP total")  # CP del cohete completo
 
 # Estética del gráfico
 ax.set_aspect("equal")  # Asegurar proporción igual en el eje
-plt.title("Visualización de componentes", fontsize=14, weight='bold')
-plt.xlabel("Longitud (m)", fontsize=12)
-plt.ylabel("Eje transversal (m)", fontsize=12)
-plt.legend(loc="best", fontsize=10)  # Colocar la leyenda automáticamente
+plt.title("Visualización del vehiculo", fontsize=12, weight='bold')
+plt.xlabel("Longitud (m)")
+plt.ylabel("Eje transversal (m)")
+plt.ylim(-0.5, 0.5)  # Limitar el eje y
+plt.legend(loc="best", fontsize=8)  # Colocar la leyenda automáticamente
 plt.grid(True, linestyle='--', alpha=0.7)  # Agregar una cuadrícula suave
 plt.tight_layout()  # Ajustar márgenes
 
