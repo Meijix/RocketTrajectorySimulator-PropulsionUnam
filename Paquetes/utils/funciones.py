@@ -113,7 +113,7 @@ def muestra_tiempos(tiempo_salida_riel,t_MECO,tiempo_apogeo, tiempo_impacto, ax)
     #ax.legend()
 
 ###############################################
-def guardar_datos_csv(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, wind_xs, wind_ys, wind_zs, Tmags, Dmags, Nmags, Txs, Tys, Tzs, Dxs, Dys, Dzs, Nxs, Nys, Nzs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs, TipoVuelo, integrador_actual):
+def guardar_datos_csv(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, wind_xs, wind_ys, wind_zs, Tmags, Dmags, Nmags, Txs, Tys, Tzs, Dxs, Dys, Dzs, Nxs, Nys, Nzs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs, TipoVuelo, integrador_actual, eficiencia=100):
     # Guardar los datos de la simulación en un archivo .csv
     datos_simulados = pd.DataFrame({
         #En los integradores propios se debe cambiar el tamano de los estados para que coincida con el número de tiempos
@@ -160,7 +160,7 @@ def guardar_datos_csv(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs
         'Machs': Machs
     })
 
-    nombre_carpeta = f'{TipoVuelo}-{integrador_actual}'
+    nombre_carpeta = f'{TipoVuelo}-{integrador_actual}-{eficiencia}'
     ruta_carpeta = f'Simulador/Resultados/OutputFiles/{nombre_carpeta}'
 
     # Crear la carpeta si no existe
@@ -172,7 +172,7 @@ def guardar_datos_csv(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs
     datos_simulados.to_csv(ruta_archivo_csv, index=False)
     print(f'Archivo CSV guardado en: {ruta_archivo_csv}')
 
-def guardar_datos_json(cohete_actual,vuelo1, max_altitude, max_speed, accels, accangs, TipoVuelo, integrador_actual):
+def guardar_datos_json(cohete_actual,vuelo1, max_altitude, max_speed, accels, accangs, TipoVuelo, integrador_actual, eficiencia=100):
     #Guardar datos importantes en un archivo json
     datos_a_guardar = {
         'nombre cohete': cohete_actual.nombre,
@@ -188,7 +188,7 @@ def guardar_datos_json(cohete_actual,vuelo1, max_altitude, max_speed, accels, ac
         #'velocidad de impacto': velocidades[-1]
     }
 
-    nombre_carpeta = f'{TipoVuelo}-{integrador_actual}'
+    nombre_carpeta = f'{TipoVuelo}-{integrador_actual}-{eficiencia}'
     ruta_carpeta = f'Simulador/Resultados/OutputFiles/{nombre_carpeta}'
 
     # Crear la carpeta si no existe

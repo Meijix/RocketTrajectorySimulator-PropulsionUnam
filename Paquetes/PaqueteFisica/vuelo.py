@@ -75,7 +75,7 @@ class Vuelo:
         #Calcular las componentes del empuje
         #La direccion del empuje es longitudinal hacia la nariz
         zbhat = np.array((np.cos(theta), 0, np.sin(theta)))
-        Tmag = self.vehiculo.calc_empuje_magn(t)
+        Tmag = self.vehiculo.calc_empuje_magn(t)#*0.7 #factor de eficiencia
         Tvec = Tmag * zbhat
         return Tvec
 
