@@ -1,6 +1,8 @@
-
+#Funciones utiles para el guardar y extraer datos de los archivos
+import pandas as pd
 import numpy as np
-
+import os
+import json
 
 # Constantes universales
 GravUn = 6.67430E-11  # m^3/kg/s^2 Constante de gravitación universal
@@ -11,8 +13,8 @@ M_tierra = 5.972168e24  #[kg] Masa de la Tierra
 # Funciones
 #Funcion para normalizar vectores
 def normalized(vec):
-  assert np.linalg.norm(vec) > 0
-  return vec / np.linalg.norm(vec)
+    assert np.linalg.norm(vec) > 0
+    return vec / np.linalg.norm(vec)
 
 def calc_gravedad(altura_z):
   return GravUn * M_tierra / (altura_z + R_Tierra)**2
@@ -109,3 +111,90 @@ def muestra_tiempos(tiempo_salida_riel,t_MECO,tiempo_apogeo, tiempo_impacto, ax)
     #ax.legend()
 
 ###############################################
+def guardar_datos_csv(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, wind_xs, wind_ys, wind_zs, Tmags, Dmags, Nmags, Txs, Tys, Tzs, Dxs, Dys, Dzs, Nxs, Nys, Nzs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs, TipoVuelo, integrador_actual):
+    # Guardar los datos de la simulación en un archivo .csv
+    datos_simulados = pd.DataFrame({
+        #En los integradores propios se debe cambiar el tamano de los estados para que coincida con el número de tiempos
+        't': tiempos[:],#Se quita el primer tiempo para que coincida con el número de estados
+        'x': posiciones[:, 0], #Se quita el primer estado para que coincida con el número de tiempos
+        'y': posiciones[:, 1], #Se quita el primer estado para que coincida con el número de tiempos
+        'z': posiciones[:, 2], #Se quita el primer estado para que coincida con el número de tiempos
+        'vx': velocidades[:, 0], #Se quita el primer estado para que coincida con el número de tiempos
+        'vy': velocidades[:, 1], #Se quita el primer estado para que coincida con el número de tiempos
+        'vz': velocidades[:, 2], #Se quita el primer estado para que coincida con el número de tiempos
+        'thetas': thetas[:], #Se quita el primer estado para que coincida con el número de tiempos
+        'omegas': omegas[:], #Se quita el primer estado para que coincida con el número de tiempos
+        'CPs': CPs,
+        'CGs': CGs,
+        'masavuelo': masavuelo[:], #Se quita el primer estado para que coincida con el número de tiempos
+        'viento_mags': viento_vuelo_mags,
+        'viento_dirs': viento_vuelo_dirs,
+        'viento_vecs': viento_vuelo_vecs,
+        'wind_xs': wind_xs,
+        'wind_ys': wind_ys,
+        'wind_zs': wind_zs,
+        #'Tvecs': Tvecs,
+        #'Dvecs': Dvecs,
+        #'Nvecs': Nvecs,
+        'Tmags': Tmags,
+        'Dmags': Dmags,
+        'Nmags': Nmags,
+        'Txs': Txs,
+        'Tys': Tys,
+        'Tzs': Tzs,
+        'Dxs': Dxs,
+        'Dys': Dys,
+        'Dzs': Dzs,
+        'Nxs': Nxs,
+        'Nys': Nys,
+        'Nzs': Nzs,
+        'accels': accels,
+        'palancas': palancas,
+        'accangs': accangs,
+        'Gammas': Gammas,
+        'Alphas': Alphas,
+        'torcas': torcas,
+        'Cds': Cds,
+        'Machs': Machs
+    })
+
+    nombre_carpeta = f'{TipoVuelo}-{integrador_actual}'
+    ruta_carpeta = f'Simulador/Resultados/OutputFiles/{nombre_carpeta}'
+
+    # Crear la carpeta si no existe
+    if not os.path.exists(ruta_carpeta):
+        os.makedirs(ruta_carpeta)
+
+    # Guardar archivo CSV en la carpeta
+    ruta_archivo_csv = f'{ruta_carpeta}/datos.csv'
+    datos_simulados.to_csv(ruta_archivo_csv, index=False)
+    print(f'Archivo CSV guardado en: {ruta_archivo_csv}')
+
+def guardar_datos_json(cohete_actual,vuelo1, max_altitude, max_speed, accels, accangs, TipoVuelo, integrador_actual):
+    #Guardar datos importantes en un archivo json
+    datos_a_guardar = {
+        'nombre cohete': cohete_actual.nombre,
+        'd_ext': cohete_actual.d_ext,
+        't_MECO': cohete_actual.t_MECO,
+        'tiempo_salida_riel': vuelo1.tiempo_salida_riel,
+        'tiempo_apogeo': vuelo1.tiempo_apogeo,
+        'tiempo_impacto': vuelo1.tiempo_impacto,
+        'max_altitude': max_altitude,
+        'max_speed': max_speed,
+        'max_acceleration_linear': np.max(accels),
+        'max_acceleration_angular': np.max(accangs)
+        #'velocidad de impacto': velocidades[-1]
+    }
+
+    nombre_carpeta = f'{TipoVuelo}-{integrador_actual}'
+    ruta_carpeta = f'Simulador/Resultados/OutputFiles/{nombre_carpeta}'
+
+    # Crear la carpeta si no existe
+    if not os.path.exists(ruta_carpeta):
+        os.makedirs(ruta_carpeta)
+
+    # Guardar los datos en un archivo .json
+    ruta_archivo_json = f'{ruta_carpeta}/datos.json'
+    with open(ruta_archivo_json, 'w', encoding='utf-8') as f:
+        json.dump(datos_a_guardar, f, indent=4)
+    print(f'Archivo JSON guardado en: {ruta_archivo_json}')
