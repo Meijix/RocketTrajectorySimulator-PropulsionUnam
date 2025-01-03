@@ -2,8 +2,6 @@
 
 # Importar librerías
 #Graficar los resultados de la simulacion
-import numpy as np
-import time 
 import matplotlib.pyplot as plt
 import pandas as pd
 import json
@@ -20,7 +18,7 @@ from Simulador.src.condiciones_init import *
 
 #Indicar el tipo de vuelo
 TipoVuelo = 'VueloLibre'
-TipoVuelo = 'VueloParacaidas'
+#TipoVuelo = 'VueloParacaidas'
 #Integradores a comparar
 integradores = ['Euler', 'RungeKutta2', 'RungeKutta4', 'RK45', 'RK23', 'DOP853', 'BDF', 'LSODA']
 
@@ -110,4 +108,57 @@ plt.ylabel('Omega [rad/s]')
 plt.title('Omega vs Tiempo')
 plt.legend()
 plt.grid()
+plt.show()
+
+# Comparar el apogeo de los diferentes integradores
+num_integradores = len(integradores)
+x_positions = range(1, num_integradores + 1)  # Posiciones únicas en el eje x
+
+plt.figure(figsize=(8, 6))
+for i, integrador in enumerate(integradores):
+    plt.scatter(x_positions[i], info[integrador]['apogeo'], label=integrador)
+
+plt.xticks(x_positions, integradores)  # Nombres de los integradores en el eje x
+plt.xlabel('Integrador')
+plt.ylabel('Altura [m]')
+plt.title('Altura de Apogeo')
+plt.legend(title="Integradores")
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.tight_layout()
+
+# Comparar el tiempo de apogeo de los diferentes integradores
+plt.figure(figsize=(8, 6))
+for i, integrador in enumerate(integradores):
+    plt.scatter(x_positions[i], info[integrador]['tiempo_apogeo'], label=integrador)
+plt.xticks(x_positions, integradores)  # Nombres de los integradores en el ej
+plt.xlabel('Integrador')
+plt.ylabel('Tiempo [s]')
+plt.title('Tiempo de Apogeo')
+plt.legend(title="Integradores")
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.tight_layout()
+
+# Comparar el tiempo de impacto de los diferentes integradores
+plt.figure(figsize=(8, 6))
+for i, integrador in enumerate(integradores):
+    plt.scatter(x_positions[i], info[integrador]['tiempo_impacto'], label=integrador)
+plt.xticks(x_positions, integradores)  # Nombres de los integradores en el ej
+plt.xlabel('Integrador')
+plt.ylabel('Tiempo [s]')
+plt.title('Tiempo de Impacto')
+plt.legend(title="Integradores")
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.tight_layout()
+
+# Comparar la velocidad máxima de los diferentes integradores
+plt.figure(figsize=(8, 6))
+for i, integrador in enumerate(integradores):
+    plt.scatter(x_positions[i], info[integrador]['velocidad_max'], label=integrador)
+plt.xticks(x_positions, integradores)  # Nombres de los integradores en el ej
+plt.xlabel('Integrador')
+plt.ylabel('Velocidad [m/s]')
+plt.title('Velocidad Máxima')
+plt.legend(title="Integradores")
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.tight_layout()
 plt.show()
