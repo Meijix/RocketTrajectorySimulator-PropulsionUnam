@@ -4,7 +4,6 @@ import time
 import sys
 import os
 
-
 # Agregar la ruta del directorio que contiene los paquetes al sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -38,10 +37,6 @@ inicio = time.time()
 print("Simulando...")
 vuelo_paracaidas = Vuelo(cohete_actual, c_init.atmosfera_actual, c_init.viento_actual)
 tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs = vuelo_paracaidas.simular_vuelo(c_init.estado, c_init.t_max, c_init.dt, c_init.dt_out, c_init.integrador_actual)
-
-# Guardar los datos de la simulación
-#datos_simulados = (tiempos, sim, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, Tvecs, Dvecs, Nvecs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs)
-
 #Medir tiempo que tarda en correr la simulacion
 fin = time.time()
 print(f"Tiempo de ejecución: {fin-inicio:.1f}s")
