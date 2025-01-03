@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib import transforms
 from matplotlib.animation import FuncAnimation
+import matplotlib.transforms as transforms
 
-def dibujar_cohete2(ax, angle=0, x_cm=0, y_cm=0, body_l=3.3, body_w=0.16, nose_l=0.81, fin_tip=0.2, fin_root=0.3, fin_h=0.2, boattail_length=0.15, boat_rear=0.12):
+def dibujar_cohete2(ax, angle=0, x_cm=2.6, y_cm=0, body_l=3.3, body_w=0.16, nose_l=0.81, fin_tip=0.2, fin_root=0.3, fin_h=0.2, boattail_length=0.15, boat_rear=0.12):
     """
     Dibuja un cohete en un gráfico especificando su centro de gravedad (x_cm, y_cm),
     el ángulo de rotación, y el escalado del cohete.
@@ -58,7 +59,6 @@ def dibujar_cohete2(ax, angle=0, x_cm=0, y_cm=0, body_l=3.3, body_w=0.16, nose_l
     
     # Aplicar transformación inicial
     trans = (transforms.Affine2D()
-            #.translate(-body_l / 2, -body_w / 2)  # Trasladar el cohete al origen relativo
             #.translate(x_cm, y_cm) 
             .rotate_deg(angle)      # Rotar alrededor del centro de gravedad    
             + ax.transData)
@@ -66,6 +66,29 @@ def dibujar_cohete2(ax, angle=0, x_cm=0, y_cm=0, body_l=3.3, body_w=0.16, nose_l
         part.set_transform(trans)
     
     return parts
+
+def acomodar_cohete2(ax, parts, x_cm=2.6, y_cm=0, angle=0, x_pos=0, y_pos=0):
+    """
+    Acomoda el cohete en una nueva posición y rotación, 
+    considerando que la punta del cohete está en el origen (0, 0).
+    La rotación se realiza alrededor de (x_cm, y_cm).
+    """
+
+    # Crear la transformación para trasladar al centro de rotación y luego rotar
+    trans = (transforms.Affine2D()
+             .translate(-x_cm, -y_cm)  # Trasladar el sistema de coordenadas al centro de rotación
+             #.rotate_deg(360-angle)        # Rotar alrededor del nuevo origen (centro de rotación)
+             .rotate_deg(angle-180)      # Rotar alrededor del centro de gravedad
+             .translate(x_pos, y_pos)    # Regresar al sistema de coordenadas original
+             + ax.transData)
+
+    # Aplicar la transformación a cada parte del cohete
+    for part in parts:
+        part.set_transform(trans)
+
+    return parts
+
+
 
 # Función de animación
 def actualizar(ax, parts, x_cm, y_cm, angle):
@@ -102,7 +125,7 @@ if __name__ == '__main__':
     # Configuración inicial del gráfico
     fig, ax = plt.subplots()
     ax.set_xlim(0, 5)
-    ax.set_ylim(-0.5, 0.5)
+    ax.set_ylim(0, 5)
     ax.set_aspect('equal')
     #linea horizontal en y=0
     ax.axhline(0, color='black', lw=1)
@@ -110,7 +133,8 @@ if __name__ == '__main__':
     # Variables globales
     x_cm, y_cm = 2, 0  # Centro de gravedad inicial
     scale = 1          # Escala inicial
-    parts = dibujar_cohete2(ax, angle=0, x_cm=x_cm, y_cm=y_cm)
+    parts = dibujar_cohete2(ax, angle=90, x_cm=x_cm, y_cm=y_cm)
+    acomodar_cohete2(ax, parts, x_cm, y_cm, angle=90, x_pos=2, y_pos=2)
     '''
     # Crear animación inicial
     anim = FuncAnimation(fig, actualizar, frames=np.arange(0, 360, 2), 
