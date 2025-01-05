@@ -47,7 +47,7 @@ def graficar_resultados(dt_values, resultados, tipo='posición'):
         raise ValueError("El tipo debe ser 'posición' o 'velocidad'.")
 
     # Graficar resultados analíticos
-    plt.plot(tiempos_analiticos, datos_analiticos, label="Analítica", linestyle='--', linewidth=2)
+    plt.plot(tiempos_analiticos, datos_analiticos, label="Analítica", linestyle='solid',color='darkblue' ,linewidth=2)
 
     # Graficar resultados numéricos para cada dt
     for dt in dt_values:
@@ -56,7 +56,6 @@ def graficar_resultados(dt_values, resultados, tipo='posición'):
             datos_sim = resultados[dt]["pos_sim"]
         elif tipo == 'velocidad':
             datos_sim = resultados[dt]["vel_sim"]
-
         plt.plot(tiempos, datos_sim, label=f'dt={dt}', marker='o', linestyle='-.', alpha=0.8)
 
     # Configuración de etiquetas y título

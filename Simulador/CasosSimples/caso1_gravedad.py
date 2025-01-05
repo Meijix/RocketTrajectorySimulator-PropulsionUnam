@@ -53,7 +53,7 @@ resultados = {}
 
 #Usar la funcion simular_dinamica y las condiciones iniciales de cond_iniciales.py
 for dete in dt_values:
-    tiempos, sim = simular_dinamica(estado, t_max, dt, Integrador_oficial, der_gravedad_masa_cte)
+    tiempos, sim = simular_dinamica(estado, t_max, dete, Integrador_oficial, der_gravedad_masa_cte)
     pos_sim, vel_sim = zip(*[(s[0], s[1]) for s in sim])
     
     pos_analitica, vel_analitica = zip(*[sol_analitica_gravedad_masa_cte(t, estado) for t in tiempos])
