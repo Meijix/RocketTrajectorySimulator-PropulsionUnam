@@ -29,18 +29,17 @@ def sol_analitica_gravedad_masa_cte(t, state):
     v = v0 - (g*t)
     return z, v
 
-'''
-#Hay que hacer el calculo :/
-####################################################################
-v_terminal = 0
-t_apogeo = 0
-A = 0
-apogeo = 0
+#Calculo de la solución analítica
+t_apogeo = v0/g
+apogeo = z0 + ((v0*v0)/(2*g))
+#v_terminal = v0 - g*t_apogeo
+t_impacto = t_apogeo + np.sqrt((2*apogeo)/g)
 
 print("Tiempo de apogeo: ",t_apogeo, "[s]")
-print("Velocidad terminal: ", v_terminal, "[m/s]")
 print("Apogeo: ", apogeo, "[m]")
-'''
+#print("Velocidad terminal: ", v_terminal, "[m/s]")
+print("Tiempo de impacto: ", t_impacto, "[s]")
+
 #####################################################
 # Simular la dinamica
 # Diferentes pasos de tiempo y un mismo integrador
