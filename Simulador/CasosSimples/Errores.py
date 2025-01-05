@@ -74,7 +74,7 @@ def graficar_resultados(dt_values, resultados, tipo='posición'):
 def graficar_errores(dt_values, resultados, tipo='posicion'):
     opacidad=0.5
     plt.figure(figsize=(12, 6))
-    plt.suptitle(f"Errores en {'posición' if tipo == 'posición' else 'velocidad'} para distintos dt")
+    plt.suptitle(f"Errores en {'posición' if tipo == 'posicion' else 'velocidad'} para distintos dt")
     
     plt.subplot(1, 2, 1)
     for dt in dt_values:

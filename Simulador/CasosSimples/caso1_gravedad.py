@@ -48,7 +48,7 @@ print("Tiempo de impacto: ", t_impacto, "[s]")
 Integrador_oficial = RungeKutta2 
 Integrador_oficial = Euler
 #dt_values = [0.005, 0.01, 0.02, 0.05, 0.1, 0.15, 0.2]
-dt_values = [0.01, 0.05, 0.1, 0.2, 0.5, 1, 3, 5]
+dt_values = [0.005, 0.01, 0.05, 0.1, 0.2, 0.5, 1]
 resultados = {}
 
 #Usar la funcion simular_dinamica y las condiciones iniciales de cond_iniciales.py
