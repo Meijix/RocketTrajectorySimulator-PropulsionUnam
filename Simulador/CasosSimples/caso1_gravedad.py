@@ -45,8 +45,8 @@ print("Tiempo de impacto: ", t_impacto, "[s]")
 # Diferentes pasos de tiempo y un mismo integrador
 #####################################################
 # Inicialización de parámetros
-Integrador_oficial = RungeKutta2 
-Integrador_oficial = Euler
+Integrador_oficial = RungeKutta4 
+#Integrador_oficial = Euler
 #dt_values = [0.005, 0.01, 0.02, 0.05, 0.1, 0.15, 0.2]
 dt_values = [0.005, 0.01, 0.05, 0.1, 0.2, 0.5, 1]
 resultados = {}
@@ -114,16 +114,20 @@ for det in dt_values:
 plt.figure(figsize=(12, 6))
 plt.subplot(1, 2, 1)
 plt.title("Error L2")
-plt.plot(dt_values, errores_pos_L2, label='Error Posición', marker='*')
-plt.plot(dt_values, errores_vel_L2, label='Error Velocidad', marker='o')
+plt.plot(dt_values, errores_pos_L2)
+plt.scatter(dt_values, errores_pos_L2, label='Error Posición', marker='*', color='royalblue', s=100)
+plt.plot(dt_values, errores_vel_L2)
+plt.scatter(dt_values, errores_vel_L2, label='Error Velocidad', marker='x', color='salmon', s=100)
 plt.xlabel('Paso de tiempo dt')
 plt.ylabel('Error')
 plt.legend()
 
 plt.subplot(1, 2, 2)
 plt.title("Error Medio Absoluto")
-plt.plot(dt_values, errores_pos_medabs, label='Error Posición', marker='*')
-plt.plot(dt_values, errores_vel_medabs, label='Error Velocidad', marker='o')
+plt.plot(dt_values, errores_pos_medabs)
+plt.scatter(dt_values, errores_pos_medabs, label='Error Posición', marker='*', color='royalblue', s=100)
+plt.plot(dt_values, errores_vel_medabs)
+plt.scatter(dt_values, errores_vel_medabs, label='Error Velocidad', marker='x', color='salmon', s=100)
 plt.xlabel('Paso de tiempo dt')
 plt.ylabel('Error')
 plt.legend()
