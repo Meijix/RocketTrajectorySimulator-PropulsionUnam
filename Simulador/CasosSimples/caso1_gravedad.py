@@ -295,6 +295,8 @@ plt.show()
 '''
 #####################################################
 ###Simular con solve_ivp
+print('dt:',dt)
+dt=0.1
 #####################################################
 tiempos_py_RK45, sim_py_RK45 = simular_python(estado, t_max, dt, 'RK45', der_gravedad_masa_cte)
 tiempos_py_RK23, sim_py_RK23 = simular_python(estado, t_max, dt, 'RK23', der_gravedad_masa_cte)
@@ -305,16 +307,16 @@ tiempos_py_DOP853, sim_py_DOP853 = simular_python(estado, t_max, dt, 'DOP853', d
 # Graficar resultados de la simulación con solve_ivp
 # Gráfica de posición
 plt.figure(figsize=(10, 5))
-plt.plot(tiempos_py_RK45, sim_py_RK45[0], label='RK45-py', marker='o')
-plt.plot(tiempos_py_RK23, sim_py_RK23[0], label='RK23-py', marker='o')
-plt.plot(tiempos_py_BDF, sim_py_BDF[0], label='BDF-py', marker='o')
-plt.plot(tiempos_py_LSODA, sim_py_LSODA[0], label='LSODA-py', marker='o')
-plt.plot(tiempos_py_DOP853, sim_py_DOP853[0], label='DOP853-py', marker='o')
+plt.plot(tiempos_py_RK45, sim_py_RK45[0], label='RK45-py', marker='o', linestyle='-.')
+plt.plot(tiempos_py_RK23, sim_py_RK23[0], label='RK23-py', marker='o', linestyle='-.')
+plt.plot(tiempos_py_BDF, sim_py_BDF[0], label='BDF-py', marker='o', linestyle='-.')
+plt.plot(tiempos_py_LSODA, sim_py_LSODA[0], label='LSODA-py', marker='o', linestyle='-.')
+plt.plot(tiempos_py_DOP853, sim_py_DOP853[0], label='DOP853-py', marker='o', linestyle='-.')
 # Agregar resultados de la simulación con integradores propios
 for label, res in resultados.items():
-    plt.plot(res['tiempos'], res['posiciones'], label=f'{label}', marker='o')
+    plt.plot(res['tiempos'], res['posiciones'], label=f'{label}', marker='o', linestyle='-.')
 # Agregar solución analítica
-plt.plot(resultados['RK4']['tiempos'], resultados['RK4']['posiciones_analiticas'], label='Sol. Analítica', ls='--')
+plt.plot(resultados['RK4']['tiempos'], resultados['RK4']['posiciones_analiticas'], label='Sol. Analítica', color='darkblue')
 #linea vertical cada dt
 #dts=np.linspace(0,t_max,round(t_max/dt)+1)
 #for i in range(1,len(resultados['RK4']['tiempos'])):
