@@ -46,9 +46,9 @@ print("Tiempo de impacto: ", t_impacto, "[s]")
 #####################################################
 # Inicialización de parámetros
 Integrador_oficial = RungeKutta2 
-#Integrador_oficial = Euler
+Integrador_oficial = Euler
 #dt_values = [0.005, 0.01, 0.02, 0.05, 0.1, 0.15, 0.2]
-dt_values = [0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1, 0.125, 0.15, 0.175, 0.2]
+dt_values = [0.01, 0.05, 0.1, 0.2, 0.5, 1, 3, 5]
 resultados = {}
 
 #Usar la funcion simular_dinamica y las condiciones iniciales de cond_iniciales.py
@@ -65,27 +65,27 @@ for dete in dt_values:
         "pos_analitica": list(pos_analitica),
         "vel_analitica": list(vel_analitica)
     }
-'''
+
 
 # Graficar posiciones y velocidades
 graficar_resultados(dt_values, resultados, tipo='posición')
 graficar_resultados(dt_values, resultados, tipo='velocidad')
 
 # Cálculo de errores
-for dt in dt_values:
-    tiempos = resultados[dt]["tiempos"]
-    pos_sim = resultados[dt]["pos_sim"]
-    pos_analitica = resultados[dt]["pos_analitica"]
-    vel_sim = resultados[dt]["vel_sim"]
-    vel_analitica = resultados[dt]["vel_analitica"]
+for dit in dt_values:
+    tiempos = resultados[dit]["tiempos"]
+    pos_sim = resultados[dit]["pos_sim"]
+    pos_analitica = resultados[dit]["pos_analitica"]
+    vel_sim = resultados[dit]["vel_sim"]
+    vel_analitica = resultados[dit]["vel_analitica"]
 
     error_pos = errores(pos_sim, pos_analitica, tiempos)
     error_vel = errores(vel_sim, vel_analitica, tiempos)
 
-    resultados[dt]["error_posicion"] = error_pos[0]
-    resultados[dt]["error_posicion_rel"] = error_pos[1]
-    resultados[dt]["error_velocidad"] = error_vel[0]
-    resultados[dt]["error_velocidad_rel"] = error_vel[1]
+    resultados[dit]["error_posicion"] = error_pos[0]
+    resultados[dit]["error_posicion_rel"] = error_pos[1]
+    resultados[dit]["error_velocidad"] = error_vel[0]
+    resultados[dit]["error_velocidad_rel"] = error_vel[1]
 
 
 # Graficar errores de posición y velocidad
@@ -98,12 +98,12 @@ errores_vel_L2 = []
 errores_pos_medabs = []
 errores_vel_medabs = []
 
-for dt in dt_values:
-    error_pos = resultados[dt]["error_posicion"]
-    error_vel = resultados[dt]["error_velocidad"]
+for det in dt_values:
+    error_pos = resultados[det]["error_posicion"]
+    error_vel = resultados[det]["error_velocidad"]
     
-    error_pos_L2, error_pos_medabs = calcular_errores_globales(error_pos, resultados[dt]["tiempos"])
-    error_vel_L2, error_vel_medabs = calcular_errores_globales(error_vel, resultados[dt]["tiempos"])
+    error_pos_L2, error_pos_medabs = calcular_errores_globales(error_pos, resultados[det]["tiempos"])
+    error_vel_L2, error_vel_medabs = calcular_errores_globales(error_vel, resultados[det]["tiempos"])
     
     errores_pos_L2.append(error_pos_L2)
     errores_vel_L2.append(error_vel_L2)
@@ -129,7 +129,7 @@ plt.ylabel('Error')
 plt.legend()
 
 plt.show()
-'''
+
 #####################################################
 #################################################### 
 ### Un mismo paso de tiempo y diferentes integradores

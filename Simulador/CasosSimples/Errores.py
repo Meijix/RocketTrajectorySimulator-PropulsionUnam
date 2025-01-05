@@ -19,30 +19,57 @@ def calcular_errores_globales(error_abs, tiempos):
     
     return error_L2, error_medio_abs
 
-# Función auxiliar para graficar resultados
 def graficar_resultados(dt_values, resultados, tipo='posición'):
+    """
+    Función para graficar resultados analíticos y numéricos para diferentes valores de dt.
+
+    :param dt_values: Lista de valores de dt utilizados en las simulaciones.
+    :param resultados: Diccionario con resultados para cada dt.
+                       Debe contener "tiempos", "pos_analitica", "vel_analitica",
+                       "pos_sim" y "vel_sim" para cada dt.
+    :param tipo: Tipo de gráfico ('posición' o 'velocidad').
+    """
+    # Configuración inicial de la figura
     plt.figure(figsize=(12, 6))
+
+    # Seleccionar datos analíticos del primer dt como referencia
+    primer_dt = dt_values[0]
+    tiempos_analiticos = resultados[primer_dt]["tiempos"]
+    if tipo == 'posición':
+        datos_analiticos = resultados[primer_dt]["pos_analitica"]
+        titulo = 'Comparación de Posiciones'
+        ylabel = 'Posición [m]'
+    elif tipo == 'velocidad':
+        datos_analiticos = resultados[primer_dt]["vel_analitica"]
+        titulo = 'Comparación de Velocidades'
+        ylabel = 'Velocidad [m/s]'
+    else:
+        raise ValueError("El tipo debe ser 'posición' o 'velocidad'.")
+
+    # Graficar resultados analíticos
+    plt.plot(tiempos_analiticos, datos_analiticos, label="Analítica", linestyle='--', linewidth=2)
+
+    # Graficar resultados numéricos para cada dt
     for dt in dt_values:
         tiempos = resultados[dt]["tiempos"]
         if tipo == 'posición':
             datos_sim = resultados[dt]["pos_sim"]
-            datos_analitica = resultados[dt]["pos_analitica"]
-            plt.plot(tiempos, datos_sim, label=f'dt={dt}', marker='o')
-            #plt.plot(tiempos, datos_analitica, label=f'Pos. Analítica dt={dt}')
-            plt.title('Comparación de Posiciones')
-            plt.ylabel('Posición [m]')
         elif tipo == 'velocidad':
             datos_sim = resultados[dt]["vel_sim"]
-            datos_analitica = resultados[dt]["vel_analitica"]
-            plt.plot(tiempos, datos_sim, label=f'dt={dt}', marker='o')
-            #plt.plot(tiempos, datos_analitica, label=f'Velocidad Analítica dt={dt}')
-            plt.title('Comparación de Velocidades')
-            plt.ylabel('Velocidad [m/s]')
-        
-        plt.xlabel('Tiempo [s]')
-        plt.legend()
-        plt.grid()
+
+        plt.plot(tiempos, datos_sim, label=f'dt={dt}', marker='o', linestyle='-.', alpha=0.8)
+
+    # Configuración de etiquetas y título
+    plt.title(titulo, fontsize=14)
+    plt.xlabel('Tiempo [s]', fontsize=12)
+    plt.ylabel(ylabel, fontsize=12)
+    plt.legend(title="Método", fontsize=10)
+    plt.grid(True, linestyle='--', alpha=0.7)
+
+    # Mostrar el gráfico
+    plt.tight_layout()
     plt.show()
+
 
 # Graficar errores
 def graficar_errores(dt_values, resultados, tipo='posicion'):
