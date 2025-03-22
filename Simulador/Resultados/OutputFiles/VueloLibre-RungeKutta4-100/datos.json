@@ -3,10 +3,10 @@
     "d_ext": 0.152,
     "t_MECO": 10.0,
     "tiempo_salida_riel": 0.49000000000000027,
-    "tiempo_apogeo": 41.230000000000366,
+    "tiempo_apogeo": 41.240000000000364,
     "tiempo_impacto": 89.11000000000868,
-    "max_altitude": 9025.777039628996,
-    "max_speed": 535.764383573347,
-    "max_acceleration_linear": 98.889369663948,
-    "max_acceleration_angular": 2.257512215632629
+    "max_altitude": 9026.63098110059,
+    "max_speed": 535.7753353056806,
+    "max_acceleration_linear": 98.8997469925192,
+    "max_acceleration_angular": 3.022948982637098
 }
