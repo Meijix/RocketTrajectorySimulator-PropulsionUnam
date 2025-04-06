@@ -1,10 +1,10 @@
-import datetime as dtm
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.signal import savgol_filter
 
-df = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\Copia de FthrWtTRAKR_06-22-2024_12_37_13.csv')
+#df = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\Copia de FthrWtTRAKR_06-22-2024_12_37_13.csv')
+df = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\DatosVuelo\FTW.csv')
 
 ifirst = 934
 t_apogeo = 43
