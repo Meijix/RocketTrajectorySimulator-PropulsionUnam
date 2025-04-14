@@ -33,7 +33,7 @@ def sol_analitica_gravedad_masa_cte(t, state):
 t_apogeo = v0/g
 apogeo = z0 + ((v0*v0)/(2*g))
 #v_terminal = v0 - g*t_apogeo
-t_impacto = t_apogeo + np.sqrt((2*apogeo)/g)
+t_impacto = 2*z0/(g-2*v0)
 
 print("Tiempo de apogeo: ",t_apogeo, "[s]")
 print("Apogeo: ", apogeo, "[m]")

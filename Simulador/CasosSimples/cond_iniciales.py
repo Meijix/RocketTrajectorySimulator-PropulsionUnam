@@ -1,23 +1,23 @@
 import numpy as np
 
 # Parámetros del sistema
-m0 = 5.0  # masa inicial
+m0 = 5  # masa inicial
 m = m0 #masa cte
-beta = 0.1  # tasa de cambio de masa
-F0 = 10.0  # empuje constante
+#beta = 0.1  # tasa de cambio de masa
+#F0 = 10.0  # empuje constante
 g = 9.81  # aceleración de gravedad
-rho = 1.225
-A = 1
-cd = 0.45
-D_mag = 0.5 * cd * A * rho
+#rho = 1.225
+#A = 1
+#cd = 0.45
+#D_mag = 0.5 * cd * A * rho
 
 # Estado inicial
 z0 = 0
-v0 = 80
+v0 = 50
 
 # Parámetros de la simulación
 dt = 0.01  # paso de tiempo
-t_max = 80  # tiempo máximo
+t_max = 20  # tiempo máximo
 
 
 # Simulación
