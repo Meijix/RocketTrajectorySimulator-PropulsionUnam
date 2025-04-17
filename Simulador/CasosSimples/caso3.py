@@ -1,5 +1,5 @@
-#Caso 2
-#Movimiento vertical con gravedad y arrastre lineal
+#Caso 3
+#Movimiento vertical con gravedad y arrastre cuadratico
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -36,23 +36,39 @@ t_ap = -m/k * np.log(div/ (v0y + div))
 z_ap = m/k *(v0y + (div * np.log(div/(v0y + div))))
 
 # Funciones base
-def sol_analitica(t, state):
-    x0, y0, vx0, vy0 = state 
-    term_exp=np.exp(-(k/m) *t)
-    term = g*m /k
-    vx = vx0* term_exp
-    vy = (vy0+ (term))* term_exp - term
-    x = x0 +(vx0 * m/k*(1-term_exp))
-    y = y0 + (m/k *((vy0+term)*(1-term_exp)-g*t))
+def sol_analitica(t, estado0):
+    x0, y0, vx0, vy0 = estado0
 
-    return np.array([x, y, vx, vy])
+    # Constantes auxiliares
+    alpha = k / m
+    sqrt_gk = np.sqrt(g * alpha)
+    factor_v = np.sqrt(alpha / g)
+
+    # Componentes de la solución
+    vx_t = vx0 / (1 + alpha * vx0 * t)
+    x_t = (1 / alpha) * np.log(1 + alpha * vx0 * t) + x0
+
+    vy_t = np.sqrt(g / alpha) * np.tan(
+        -sqrt_gk * t + np.arctan(vy0 * factor_v)
+    )
+
+    y_t = (1 / alpha) * np.log(
+        np.sqrt(1 + vy0**2 * alpha / g) *
+        np.cos(sqrt_gk * t - np.arctan(vy0 * factor_v))
+    )
+
+    y_t += y0  # ajustar si y0 ≠ 0
+
+    return np.array([x_t, y_t, vx_t, vy_t])
+
 
 def fun_derivada(t, state):
-    _,_ , vx1, vy1 = state 
-    ax = -k/m * vx1
-    ay = -g - (k/m * vy1)
+    x, y, vx, vy = state
+    v = np.sqrt(vx**2 + vy**2)
+    ax = - (k / m) * v * vx
+    ay = -g - (k / m) * v * vy
+    return np.array([vx, vy, ax, ay])
 
-    return np.array([vx1, vy1, ax, ay])
 
 def evento_apogeo(t, y): return y[1]
 evento_apogeo.terminal = True
