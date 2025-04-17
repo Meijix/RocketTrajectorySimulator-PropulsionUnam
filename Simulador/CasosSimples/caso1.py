@@ -15,7 +15,7 @@ from Paquetes.PaqueteEDOs.integradores import Euler, RungeKutta4
 # Constantes y configuración
 g = 9.81
 z0, v0 = 0, 50
-t_max = 10
+t_max = 20
 dt_vals = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
 metodos_adaptativos = ['RK45', 'BDF', 'LSODA', 'DOP853']
 metodos_fijos = [(Euler, "Euler"), (RungeKutta4, "RK4")]
@@ -24,20 +24,110 @@ metodos_fijos = [(Euler, "Euler"), (RungeKutta4, "RK4")]
 def f_gravedad(t, y): return np.array([y[1], -g])
 def sol_analitica(t): return np.array([z0 + v0*t - 0.5*g*t**2, v0 - g*t])
 
+def evento_impacto(t, y):
+    """
+    Evento que detecta el impacto del objeto con el suelo.
+    Se activa cuando la posición z(t) cruza 0 descendiendo.
+    """
+    return y[0]  # z(t)
+evento_impacto.terminal = True  # Detiene la integración
+evento_impacto.direction = -1   # Solo detecta cruces descendentes (de arriba hacia abajo)
+
 # Almacenar resultados para análisis
 resultados = []
 
-# 1. Adaptativos automáticos
+# 1. Adaptativos automáticos (con registro de evolución de dt)
+dt_evolucion = []  # Lista para almacenar la evolución del paso de tiempo
+
 for metodo in metodos_adaptativos:
-    sol = solve_ivp(f_gravedad, [0, t_max], [z0, v0], method=metodo, events=lambda t, y: y[0])
+    sol = solve_ivp(f_gravedad, [0, t_max], [z0, v0], method=metodo, events=evento_impacto)
+    
+    # Guardar resultados principales
     for t, z, v in zip(sol.t, sol.y[0], sol.y[1]):
         z_a, v_a = sol_analitica(t)
-        resultados.append([metodo+"_auto", np.nan, t, z, v, z_a, v_a])
+        resultados.append([metodo + "_auto", np.nan, t, z, v, z_a, v_a])
+    
+    # Calcular y guardar pasos de tiempo locales
+    dt_locales = np.diff(sol.t)
+    t_locales = sol.t[:-1]
+    for ti, dti in zip(t_locales, dt_locales):
+        dt_evolucion.append([metodo, ti, dti])
+
+# Convertir evolución de pasos a DataFrame
+df_dtevo = pd.DataFrame(dt_evolucion, columns=["Método", "t", "dt"])
+
+
+# Gráfica: Evolución temporal del paso de tiempo para métodos automáticos
+plt.figure(figsize=(10, 6))
+for metodo in df_dtevo["Método"].unique():
+    sub = df_dtevo[df_dtevo["Método"] == metodo]
+    plt.plot(sub["t"], sub["dt"], label=metodo, marker='o', markersize=4, linestyle='-')
+plt.axhline(y=0.5, color='gray', linestyle='--', linewidth=1, label="dt=0.5 (fijo)")
+plt.axhline(y=0.2, color='gray', linestyle='--', linewidth=1, label="dt=0.2 (fijo)")
+plt.axhline(y=0.1, color='gray', linestyle='--', linewidth=1, label="dt=0.1 (fijo)")   
+
+plt.xlabel("Tiempo [s]")
+plt.ylabel("Paso de tiempo local (dt) [s]")
+plt.title("Evolución temporal del paso de tiempo en métodos automáticos")
+plt.grid(True)
+plt.legend(title="Método adaptativo")
+plt.tight_layout()
+plt.show()
+
+
+import seaborn as sns
+
+# Cargar el DataFrame df_dtevo simulado (puede sustituirse con lectura de CSV si fuera externo)
+# Simulación para prueba - este bloque se reemplaza al ejecutar en el entorno real con df_dtevo ya definido
+# Aquí simulamos el contenido de df_dtevo para continuar con la visualización
+# Reemplazar esta parte por: df_dtevo = pd.read_csv("archivo.csv") si se necesita cargar externamente
+
+# Aquí va el cálculo estadístico para dt por método
+def resumen_dt_por_metodo(df):
+    resumen = df.groupby("Método").agg(
+        #dt_inicial=("dt", lambda x: x.iloc[0]),
+        dt_final=("dt", lambda x: x.iloc[-1]),
+        #dt_min=("dt", "min"),
+        dt_max=("dt", "max"),
+        dt_promedio=("dt", "mean")
+    ).reset_index()
+    return resumen
+
+# Simulación de df_dtevo si no está presente
+# Este bloque debe omitirse en tu entorno real si ya tienes df_dtevo generado
+# df_dtevo = pd.DataFrame({
+#     "Método": ["RK45"]*5 + ["BDF"]*5,
+#     "t": [0, 0.2, 0.4, 0.6, 0.8]*2,
+#     "dt": [0.2, 0.2, 0.2, 0.2, 0.2, 0.1, 0.05, 0.03, 0.02, 0.01]
+# })
+
+# Asumimos que df_dtevo ya está disponible en el entorno (generado desde el script original)
+# Calculamos el resumen
+df_resumen_dt = resumen_dt_por_metodo(df_dtevo)
+
+# Gráfica de resumen por método
+plt.figure(figsize=(12, 6))
+df_melt = df_resumen_dt.melt(id_vars="Método", var_name="Estadística", value_name="dt")
+
+ax= sns.barplot(data=df_melt, x="Método", y="dt", hue="Estadística")
+
+# Agregar etiquetas numéricas en cada barra
+for container in ax.containers:
+    ax.bar_label(container, fmt="%.4f", padding=3)
+
+plt.title("Estadísticas de paso de tiempo por método adaptativo automático")
+plt.ylabel("Paso de tiempo (dt)")
+plt.xlabel("Método")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+####################################################
+######################################################
 
 # 2. Adaptativos con max_step
 for metodo in metodos_adaptativos:
     for dt in dt_vals:
-        sol = solve_ivp(f_gravedad, [0, t_max], [z0, v0], method=metodo, max_step=dt, events=lambda t, y: y[0])
+        sol = solve_ivp(f_gravedad, [0, t_max], [z0, v0], method=metodo, max_step=dt, events=evento_impacto)
         for t, z, v in zip(sol.t, sol.y[0], sol.y[1]):
             z_a, v_a = sol_analitica(t)
             resultados.append([f"{metodo}_dt={dt}", dt, t, z, v, z_a, v_a])
@@ -90,19 +180,23 @@ plt.xlabel("t [s]"); plt.ylabel("z(t) [m]")
 plt.legend(); plt.grid(); plt.tight_layout()
 plt.show()
 
-'''
-# 2. Velocidad para dt=0.5 con marcadores
+
 plt.figure()
 for metodo in df["Método"].unique():
     if "_dt=0.5" in metodo:
         sub = df[df["Método"] == metodo]
-        plt.plot(sub["t"], sub["v_num"], label=metodo.split("_")[0], marker='x', markersize=3, linestyle='-')
+        plt.plot(sub["t"], sub["v_num"], label=metodo.split("_")[0], marker='x', markersize=4, linestyle='-')
+
 plt.plot(sub["t"], sub["v_analítica"], label="Analítica", color="gray", linewidth=1, linestyle='--')
+plt.axhline(0, color='gray', linestyle=':', linewidth=1)
 plt.title("Velocidad para dt = 0.5")
-plt.xlabel("t [s]"); plt.ylabel("v(t) [m/s]")
-plt.legend(); plt.grid(); plt.tight_layout()
+plt.xlabel("t [s]")
+plt.ylabel("v(t) [m/s]")
+plt.legend()
+plt.grid()
+plt.tight_layout()
 plt.show()
-'''
+
 
 # Preparar errores por método
 errores = []
@@ -130,7 +224,7 @@ for base, metodos in base_metodos.items():
     for metodo in metodos:
         fila = df_err[df_err["Método"] == metodo]
         if fila.empty: continue
-        dt = df[df["Método"] == metodo]["dt"].dropna().values[0] if "_dt=" in metodo else 1e-3
+        dt = df[df["Método"] == metodo]["dt"].dropna().values[0] if "_dt=" in metodo else 0.55
         err = fila["L2_z"].values[0]
         if "_auto" in metodo:
             color = colors[color_idx % len(colors)]
@@ -150,8 +244,6 @@ plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
 plt.tight_layout()
 plt.show()
 
-# 5. Error L2 posición vs pasos
-# 5. Eficiencia numérica: Error L2 en posición vs número de pasos (colores por método base)
 # 5. Eficiencia numérica: Error L2 en posición vs número de pasos (color por método base, estrella para auto, línea identidad)
 plt.figure(figsize=(10, 6))
 base_metodos = {}
@@ -206,6 +298,7 @@ for base in bases:
 plt.axhline(v0**2 / (2 * g), color='black', linestyle='--', label="z apogeo analítico")
 plt.xlabel("Paso de tiempo (dt)")
 plt.ylabel("Altura de apogeo [m]")
+plt.ylim(127.2, 127.45)
 plt.title("Altura de apogeo vs paso de tiempo")
 plt.grid(True)
 plt.legend(loc='best')
@@ -249,9 +342,6 @@ for metodo in df["Método"].unique():
     tiempos.append([metodo, t1 - t0, e_l2])
 df_tiempos = pd.DataFrame(tiempos, columns=["Método", "tiempo", "error_L2"])
 
-# 13. Error L2 vs tiempo computacional (color por método base, etiquetas con dt)
-import matplotlib.cm as cm
-
 # 13. Error L2 vs tiempo computacional (color por método base, estrella para auto, etiquetas dt=..., leyenda por método)
 df_tiempos["base"] = df_tiempos["Método"].apply(lambda x: x.split("_")[0])
 bases = sorted(df_tiempos["base"].unique())
@@ -285,7 +375,7 @@ for i, row in df_tiempos.iterrows():
 
     # Etiqueta textual
     label_txt = f"dt={dt:.3f}" if dt is not None else "dt=auto"
-    plt.text(tiempo*1.003, error*1.003, label_txt, fontsize=8, ha='left', va='bottom', color=color)
+    plt.text(tiempo*1.007, error*1.006, label_txt, fontsize=8, ha='left', va='bottom', color=color)
 
 # Ejes y estética
 plt.xscale("log")
@@ -339,7 +429,7 @@ for i, row in df_err.iterrows():
 
     # Etiqueta con desplazamiento
     label_txt = f"dt={dt:.3f}" if dt is not None else "dt=auto"
-    plt.text(eff_z * 1.05, eff_v * 1.1, label_txt, fontsize=8, ha='left', va='bottom', color=color)
+    plt.text(eff_z * 1.05, eff_v * 1.05, label_txt, fontsize=8, ha='left', va='bottom', color=color)
 
     # Marcar los puntos de eficiencia máxima
     if eff_z == max_eff_z or eff_v == max_eff_v:
