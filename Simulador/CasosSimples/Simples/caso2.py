@@ -537,7 +537,7 @@ plt.title("Comparación de eficiencia relativa por método y paso de tiempo")
 plt.grid(True)
 
 # Leyenda por método base
-plt.legend(handles.values(), handles.keys(), title="Método", bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.legend(handles.values(), handles.keys(), title="Método", bbox_to_anchor=(1, 1), loc='upper left')
 plt.tight_layout()
 plt.show()
 
