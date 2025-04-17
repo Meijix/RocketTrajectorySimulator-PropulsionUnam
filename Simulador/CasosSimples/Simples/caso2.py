@@ -1,5 +1,5 @@
-#Caso 3
-#Movimiento vertical con gravedad y arrastre cuadratico
+#Caso 2
+#Movimiento vertical con gravedad y arrastre lineal
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,7 +9,7 @@ import sys
 
 
 # Agregar la ruta del directorio que contiene los paquetes al sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..','..')))
 from Paquetes.PaqueteEDOs.integradores import Euler, RungeKutta4
 
 # Constantes y configuración
@@ -27,41 +27,36 @@ dt_vals = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
 metodos_adaptativos = ['RK45', 'BDF', 'LSODA', 'DOP853']
 metodos_fijos = [(Euler, "Euler"), (RungeKutta4, "RK4")]
 
+# Coordenadas del apogeo analítico
+# Constantes
+div = m * g / k
+
+# Tiempo de apogeo corregido
+t_ap = (m / k) * np.log(1 + (k * v0y) / (m * g))
+
+# Altura de apogeo corregida
+z_ap = y0 + (m / k) * (v0y - div * np.log(1 + (k * v0y) / (m * g)))
+
+
 
 # Funciones base
-def sol_analitica(t, estado0):
-    x0, y0, vx0, vy0 = estado0
+def sol_analitica(t, state):
+    x0, y0, vx0, vy0 = state 
+    term_exp=np.exp(-(k/m) *t)
+    term = g*m /k
+    vx = vx0* term_exp
+    vy = (vy0+ (term))* term_exp - term
+    x = x0 +(vx0 * m/k*(1-term_exp))
+    y = y0 + (m/k *((vy0+term)*(1-term_exp)-g*t))
 
-    # Constantes auxiliares
-    alpha = k / m
-    sqrt_gk = np.sqrt(g * alpha)
-    factor_v = np.sqrt(alpha / g)
-
-    # Componentes de la solución
-    vx_t = vx0 / (1 + alpha * vx0 * t)
-    x_t = (1 / alpha) * np.log(1 + alpha * vx0 * t) + x0
-
-    vy_t = np.sqrt(g / alpha) * np.tan(
-        -sqrt_gk * t + np.arctan(vy0 * factor_v)
-    )
-
-    y_t = (1 / alpha) * np.log(
-        np.sqrt(1 + vy0**2 * alpha / g) *
-        np.cos(sqrt_gk * t - np.arctan(vy0 * factor_v))
-    )
-
-    y_t += y0  # ajustar si y0 ≠ 0
-
-    return np.array([x_t, y_t, vx_t, vy_t])
-
+    return np.array([x, y, vx, vy])
 
 def fun_derivada(t, state):
-    x, y, vx, vy = state
-    v = np.sqrt(vx**2 + vy**2)
-    ax = - (k / m) * v * vx
-    ay = -g - (k / m) * v * vy
-    return np.array([vx, vy, ax, ay])
+    _,_ , vx1, vy1 = state 
+    ax = -k/m * vx1
+    ay = -g - (k/m * vy1)
 
+    return np.array([vx1, vy1, ax, ay])
 
 def evento_apogeo(t, y): return y[1]
 evento_apogeo.terminal = True
@@ -82,12 +77,13 @@ dt_evolucion = []  # Lista para almacenar la evolución del paso de tiempo
 
 for metodo in metodos_adaptativos:
     sol = solve_ivp(fun_derivada, [0, t_max], estado0, method=metodo, events=evento_impacto)
-
+    
+    # Guardar resultados principales
     for t, x, y, vx, vy in zip(sol.t, sol.y[0], sol.y[1], sol.y[2], sol.y[3]):
         x_a, y_a, vx_a, vy_a = sol_analitica(t, estado0)
         resultados.append([f"{metodo}_auto", np.nan, t, x, y, vx, vy, x_a, y_a, vx_a, vy_a])
-
-    # Guardar pasos de tiempo locales
+    
+    # Guardar evolución de pasos de tiempo locales
     dt_locales = np.diff(sol.t)
     t_locales = sol.t[:-1]
     for ti, dti in zip(t_locales, dt_locales):
@@ -96,7 +92,7 @@ for metodo in metodos_adaptativos:
 df_dtevo = pd.DataFrame(dt_evolucion, columns=["Método", "t", "dt"])
 
 
-# Evolución temporal del paso de tiempo
+# 📈 Evolución temporal del paso de tiempo
 plt.figure(figsize=(10, 6))
 for metodo in df_dtevo["Método"].unique():
     sub = df_dtevo[df_dtevo["Método"] == metodo]
@@ -123,11 +119,13 @@ def resumen_dt_por_metodo(df):
 
 df_resumen_dt = resumen_dt_por_metodo(df_dtevo)
 
-# Gráfica de resumen de estadísticas de dt
+# 📊 Gráfica de estadísticas de dt por método
 plt.figure(figsize=(12, 6))
 df_melt = df_resumen_dt.melt(id_vars="Método", var_name="Estadística", value_name="dt")
 
 ax = sns.barplot(data=df_melt, x="Método", y="dt", hue="Estadística")
+
+# Etiquetas en las barras
 for container in ax.containers:
     ax.bar_label(container, fmt="%.4f", padding=3)
 
@@ -139,8 +137,15 @@ plt.tight_layout()
 plt.show()
 
 
-####################################
-#################################
+
+
+
+
+
+
+
+######################################
+######################################
 # 2. Adaptativos con max_step
 for metodo in metodos_adaptativos:
     for dt in dt_vals:
@@ -190,9 +195,12 @@ for metodo in df["Método"].unique():
     if "_dt=0.5" in metodo:
         sub = df[df["Método"] == metodo]
         plt.plot(sub["t"], sub["y_num"], label=metodo.split("_")[0], marker='o', markersize=4, linestyle='-')
+       # plt.plot(sub["t"], sub["x_num"], label=metodo.split("_")[0], marker='o', markersize=4, linestyle='-')
 
-plt.plot(sub["t"], sub["y_analitica"], label="Analítica", color="gray", linewidth=1, linestyle='--')
-#plt.plot(t_ap, z_ap, marker='*', color='red', markersize=14, label="Apogeo analítico (punto)")
+
+plt.plot(sub["t"], sub["y_analitica"], label="Analítica y", color="gray", linewidth=1, linestyle='--')
+#plt.plot(sub["t"], sub["x_analitica"], label="Analítica x", color="gray", linewidth=1, linestyle='--')
+plt.plot(t_ap, z_ap, marker='*', color='red', markersize=14, label="Apogeo analítico (punto)")
 #plt.axhline(v0y**2 / (2 * g), color='gray', linestyle=':', linewidth=2, label="Apogeo analítico")
 plt.title("Trayectoria para dt = 0.5")
 plt.xlabel("t [s]"); plt.ylabel("y(t) [m]")
@@ -246,7 +254,6 @@ plt.legend()
 plt.grid()
 plt.tight_layout()
 plt.show()
-
 
 # Preparar errores por método
 errores = []
@@ -380,9 +387,10 @@ for base in bases:
     if not auto_point.empty:
         plt.scatter(auto_point["dt_plot"], auto_point["z_apogeo"], marker='*', s=150, color=color_map[base], label=base + " (auto)")
 
-#plt.axhline(v0y**2 / (2 * g), color='black', linestyle='--', label="z apogeo analítico")
+#plt.axhline(v0y**2 / (2 * g), color='gray', linestyle='--', label="z apogeo analítico")
 plt.xlabel("Paso de tiempo (dt)")
 plt.ylabel("Altura de apogeo [m]")
+plt.ylim(95.8,95.93)
 plt.title("Altura de apogeo vs paso de tiempo")
 plt.grid(True)
 plt.legend(loc='best')
@@ -403,7 +411,7 @@ for base in bases:
     if not auto_point.empty:
         plt.scatter(auto_point["dt_plot"], auto_point["t_apogeo"], marker='*', s=150, color=color_map[base], label=base + " (auto)")
 
-#plt.axhline(v0y / g, color='black', linestyle='--', label="t apogeo analítico")
+#plt.axhline(v0y / g, color='gray', linestyle='--', label="t apogeo analítico")
 plt.xlabel("Paso de tiempo (dt)")
 plt.ylabel("Tiempo de apogeo [s]")
 plt.title("Tiempo de apogeo vs paso de tiempo")
@@ -411,9 +419,6 @@ plt.grid(True)
 plt.legend(loc='best')
 plt.tight_layout()
 plt.show()
-
-
-
 
 # Gráfica 13: Error L2 vs tiempo de cómputo (simulado)
 from time import perf_counter
@@ -425,6 +430,9 @@ for metodo in df["Método"].unique():
     t1 = perf_counter()
     tiempos.append([metodo, t1 - t0, e_l2])
 df_tiempos = pd.DataFrame(tiempos, columns=["Método", "tiempo", "error_L2"])
+
+# 13. Error L2 vs tiempo computacional (color por método base, etiquetas con dt)
+import matplotlib.cm as cm
 
 # 13. Error L2 vs tiempo computacional (color por método base, estrella para auto, etiquetas dt=..., leyenda por método)
 df_tiempos["base"] = df_tiempos["Método"].apply(lambda x: x.split("_")[0])
@@ -459,7 +467,7 @@ for i, row in df_tiempos.iterrows():
 
     # Etiqueta textual
     label_txt = f"dt={dt:.3f}" if dt is not None else "dt=auto"
-    plt.text(tiempo*1.003, error*1.003, label_txt, fontsize=8, ha='left', va='bottom', color=color)
+    plt.text(tiempo*1.005, error*1.005, label_txt, fontsize=8, ha='left', va='bottom', color=color)
 
 # Ejes y estética
 plt.xscale("log")
@@ -513,7 +521,7 @@ for i, row in df_err.iterrows():
 
     # Etiqueta con desplazamiento
     label_txt = f"dt={dt:.3f}" if dt is not None else "dt=auto"
-    plt.text(eff_z * 1.05, eff_v * 1.1, label_txt, fontsize=8, ha='left', va='bottom', color=color)
+    plt.text(eff_z * 1.005, eff_v * 1.005, label_txt, fontsize=8, ha='left', va='bottom', color=color)
 
     # Marcar los puntos de eficiencia máxima
     if eff_z == max_eff_z or eff_v == max_eff_v:
@@ -522,6 +530,9 @@ for i, row in df_err.iterrows():
 # Ejes y estética
 plt.xlabel("Eficiencia relativa en posición")
 plt.ylabel("Eficiencia relativa en velocidad")
+plt.ylim(0,3.2e11)
+plt.xlim(0,5.5e10)
+
 plt.title("Comparación de eficiencia relativa por método y paso de tiempo")
 plt.grid(True)
 
@@ -537,7 +548,7 @@ for metodo in df["Método"].unique():
     if "_dt=0.5" in metodo:
         sub = df[df["Método"] == metodo]
         plt.plot(sub["x_num"], sub["y_num"], label=metodo.split("_")[0], marker='o', markersize=4, linestyle='-')
-plt.plot(sub["x_analitica"], sub["y_analitica"], linestyle='--', color='gray', label='Analítica')
+plt.plot(sub["x_analitica"], sub["y_analitica"], marker= 'o', linestyle='--', color='gray', label='Analítica')
 plt.xlabel("x(t) [m]"); plt.ylabel("y(t) [m]"); plt.title("Trayectoria en el plano")
 plt.grid(); plt.legend(); plt.tight_layout(); plt.show()
 

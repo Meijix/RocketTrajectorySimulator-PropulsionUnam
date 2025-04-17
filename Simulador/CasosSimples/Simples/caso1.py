@@ -9,7 +9,7 @@ import sys
 
 
 # Agregar la ruta del directorio que contiene los paquetes al sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 from Paquetes.PaqueteEDOs.integradores import Euler, RungeKutta4
 
 # Constantes y configuración
