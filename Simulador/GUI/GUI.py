@@ -90,6 +90,9 @@ class SimuladorCohetesAvanzado:
         self.style.map('TNotebook.Tab', background=[('selected', azul)], foreground=[('selected', 'white')])
         self.style.configure('TFrame', background=azul)
         self.style.configure('Horizontal.TProgressbar', background=rojo)
+        # Estilo para botones de visualización
+        self.style.configure('Vis.TButton', font=font_selection, background='#ADD8E6', foreground='black', borderwidth=1) # Light Blue
+        self.style.map('Vis.TButton', background=[('active', '#87CEEB')]) # Sky Blue on hover
 
         # --- Variables de Estado ---
         self.rocket = None
@@ -626,11 +629,11 @@ class SimuladorCohetesAvanzado:
         self.mass_file_label.grid(row=1, column=2, padx=5, pady=1, sticky='ew')
 
         # --- Fila 3: Botones de Visualización ---
-        self.btn_visualize_thrust = ttk.Button(button_frame, text="Visualizar Empuje", command=lambda: self.plot_csv_data("thrust"), state=tk.DISABLED)
+        self.btn_visualize_thrust = ttk.Button(button_frame, text="Visualizar Empuje", command=lambda: self.plot_csv_data("thrust"), state=tk.DISABLED, style='Vis.TButton')
         self.btn_visualize_thrust.grid(row=2, column=0, padx=5, pady=2, sticky='ew')
-        self.btn_visualize_cd = ttk.Button(button_frame, text="Visualizar Arrastre", command=lambda: self.plot_csv_data("cd_vs_mach"), state=tk.DISABLED)
+        self.btn_visualize_cd = ttk.Button(button_frame, text="Visualizar Arrastre", command=lambda: self.plot_csv_data("cd_vs_mach"), state=tk.DISABLED, style='Vis.TButton')
         self.btn_visualize_cd.grid(row=2, column=1, padx=5, pady=2, sticky='ew')
-        self.btn_visualize_mass = ttk.Button(button_frame, text="Visualizar Masa", command=lambda: self.plot_csv_data("mass_vs_time"), state=tk.DISABLED)
+        self.btn_visualize_mass = ttk.Button(button_frame, text="Visualizar Masa", command=lambda: self.plot_csv_data("mass_vs_time"), state=tk.DISABLED, style='Vis.TButton')
         self.btn_visualize_mass.grid(row=2, column=2, padx=5, pady=2, sticky='ew')
 
         # Ajustar configuración de columnas para que se expandan
@@ -654,6 +657,8 @@ class SimuladorCohetesAvanzado:
             file_name = os.path.basename(file_path)
             print(f"Importando manualmente: {file_name} para {data_type}")
 
+            visualize_button = None # Botón a habilitar
+
             if data_type == "thrust":
                 # Verificar/Renombrar columnas
                 if 'Time' in df.columns and 'Thrust' in df.columns: pass
@@ -663,6 +668,8 @@ class SimuladorCohetesAvanzado:
                 else: raise ValueError("Archivo de empuje no tiene 2 columnas.")
                 self.thrust_data = df
                 self.loaded_thrust_path = file_path # Actualiza la ruta cargada
+                label_widget = self.thrust_file_label
+                visualize_button = self.btn_visualize_thrust
                 if self.rocket:
                      # Actualizar ruta en cohete y recargar tablas
                      # CORRECCION: Usar los nombres de atributo correctos de cohete.py
@@ -672,9 +679,6 @@ class SimuladorCohetesAvanzado:
                              print("Tabla de empuje/masa recargada en Cohete.")
                          except Exception as e:
                              print(f"Advertencia: Error al recargar tabla de empuje/masa en Cohete: {e}")
-                self.thrust_file_label.config(text=f"Empuje: {file_name}")
-                self.btn_visualize_thrust.config(state=tk.NORMAL) # Habilitar botón
-                self.plot_csv_data(data_type); messagebox.showinfo("Éxito", f"Empuje '{file_name}' importado.")
 
             elif data_type == "cd_vs_mach":
                  # Verificar/Renombrar columnas
@@ -685,6 +689,8 @@ class SimuladorCohetesAvanzado:
                  else: raise ValueError("Archivo Cd vs Mach no tiene 2 columnas.")
                  self.cd_data = df
                  self.loaded_cd_path = file_path # Actualiza la ruta cargada
+                 label_widget = self.cd_file_label
+                 visualize_button = self.btn_visualize_cd
                  if self.rocket:
                       # CORRECCION: Usar los nombres de atributo correctos de cohete.py
                       if hasattr(self.rocket, 'cargar_tabla_Cd'):
@@ -693,14 +699,13 @@ class SimuladorCohetesAvanzado:
                               print("Tabla Cd recargada en Cohete.")
                           except Exception as e:
                               print(f"Advertencia: Error al recargar tabla Cd en Cohete: {e}")
-                 self.cd_file_label.config(text=f"Arrastre: {file_name}")
-                 self.btn_visualize_cd.config(state=tk.NORMAL) # Habilitar botón
-                 self.plot_csv_data(data_type); messagebox.showinfo("Éxito", f"Cd vs Mach '{file_name}' importado.")
 
             elif data_type == "mass_vs_time":
                  # Verificar columnas necesarias para cohete.py
                  expected_cols_detailed = ['Time (s)', 'Oxidizer Mass (kg)', 'Fuel Mass (kg)']
                  is_detailed_format = all(col in df.columns for col in expected_cols_detailed)
+                 label_widget = self.mass_file_label
+                 visualize_button = self.btn_visualize_mass
 
                  if is_detailed_format:
                       print(f"Detectado formato detallado de masa en: {file_name}")
@@ -714,9 +719,9 @@ class SimuladorCohetesAvanzado:
                                     print("Tabla de empuje/masa recargada en Cohete.")
                                 except Exception as e:
                                     print(f"Advertencia: Error al recargar tabla de empuje/masa en Cohete: {e}")
-                      self.mass_file_label.config(text=f"Masa: {file_name}")
-                      self.btn_visualize_mass.config(state=tk.NORMAL) # Habilitar botón
-                      self.plot_csv_data(data_type); messagebox.showinfo("Éxito", f"Masa detallada '{file_name}' importada.")
+                      label_widget.config(text=f"Masa: {file_name}")
+                      visualize_button.config(state=tk.NORMAL) # Habilitar botón
+                      messagebox.showinfo("Éxito", f"Masa detallada '{file_name}' importada.")
                  else:
                       # Intentar formato simple 'Time', 'Mass' para graficar
                       if 'Time' in df.columns and 'Mass' in df.columns:
@@ -724,21 +729,27 @@ class SimuladorCohetesAvanzado:
                            self.mass_data = df # Almacenar para graficar
                            self.loaded_mass_path = None # Indicar que no es el formato esperado por Cohete
                            if self.rocket: self.rocket.tabla_masa_fpath = None # Limpiar ruta en cohete
-                           self.mass_file_label.config(text=f"Masa: {file_name} (Simple)")
-                           self.btn_visualize_mass.config(state=tk.NORMAL) # Habilitar botón
-                           self.plot_csv_data(data_type); messagebox.showinfo("Éxito", f"Masa simple '{file_name}' importada.")
+                           label_widget.config(text=f"Masa: {file_name} (Simple)")
+                           visualize_button.config(state=tk.NORMAL) # Habilitar botón
+                           messagebox.showinfo("Éxito", f"Masa simple '{file_name}' importada.")
                       elif df.shape[1] >= 2:
                            print(f"Advertencia: Renombrando columnas de {file_name} a ['Time', 'Mass'] (formato simple).")
                            df.columns = ['Time', 'Mass'] + list(df.columns[2:])
                            self.mass_data = df
                            self.loaded_mass_path = None
                            if self.rocket: self.rocket.tabla_masa_fpath = None
-                           self.mass_file_label.config(text=f"Masa: {file_name} (Simple)")
-                           self.btn_visualize_mass.config(state=tk.NORMAL) # Habilitar botón
-                           self.plot_csv_data(data_type); messagebox.showinfo("Éxito", f"Masa simple '{file_name}' importada.")
+                           label_widget.config(text=f"Masa: {file_name} (Simple)")
+                           visualize_button.config(state=tk.NORMAL) # Habilitar botón
+                           messagebox.showinfo("Éxito", f"Masa simple '{file_name}' importada.")
                       else:
                            raise ValueError(f"Archivo de masa no tiene columnas esperadas: {expected_cols_detailed} ni formato simple ['Time', 'Mass']")
 
+            # Actualizar etiqueta y botón si no es el caso de masa
+            if data_type != "mass_vs_time":
+                label_widget.config(text=f"{data_type.split('_')[0].capitalize()}: {file_name}")
+                visualize_button.config(state=tk.NORMAL)
+
+            self.plot_csv_data(data_type) # Graficar después de cargar/procesar
             if self.rocket: self.rocket.calcular_propiedades() # Recalcular siempre
 
         except FileNotFoundError: messagebox.showerror("Error", f"Archivo no encontrado: {file_path}")
@@ -856,7 +867,7 @@ class SimuladorCohetesAvanzado:
     def create_wind_tab(self): self.wind_frame = self.create_results_tab("wind", "Viento Relativo")
     def create_summary_tab(self): self.summary_frame = self.create_results_tab("summary", "Resumen"); self.summary_text_widget = tk.Text(self.summary_frame, wrap="word", height=20, width=80, font=('Courier New', 10), relief=tk.FLAT, bg=self.style.lookup('TFrame', 'background'), fg='white', state=tk.DISABLED)
 
-    # --- Simulation Logic (Ajustado para verificar rutas CSV y corregir print) ---
+    # --- Simulation Logic (Ajustado para verificar rutas y tablas CSV y corregir print) ---
     def run_simulation(self):
         """Runs the flight simulation using the selected integration method."""
         self.simulation_done = False
@@ -874,9 +885,9 @@ class SimuladorCohetesAvanzado:
 
         # --- Verificar que las tablas de datos estén cargadas en el objeto Cohete ---
         missing_tables = []
-        if not hasattr(self.rocket, 'CdTable'): missing_tables.append("CdTable")
-        if not hasattr(self.rocket, 'motorThrustTable'): missing_tables.append("motorThrustTable")
-        if not hasattr(self.rocket, 'motorMassTable'): missing_tables.append("motorMassTable")
+        if not hasattr(self.rocket, 'CdTable') or self.rocket.CdTable is None: missing_tables.append("CdTable")
+        if not hasattr(self.rocket, 'motorThrustTable') or self.rocket.motorThrustTable is None: missing_tables.append("motorThrustTable")
+        if not hasattr(self.rocket, 'motorMassTable') or self.rocket.motorMassTable is None: missing_tables.append("motorMassTable")
 
         if missing_tables:
             messagebox.showerror("Error Interno", f"Las tablas de datos CSV ({', '.join(missing_tables)}) no están cargadas en el objeto Cohete. Intente recargar los archivos CSV o reiniciar.")
@@ -918,28 +929,88 @@ class SimuladorCohetesAvanzado:
             fin_tiempo = time.time(); print(f"Integración numérica completada en {fin_tiempo - inicio_tiempo:.2f} s.")
             print("Iniciando post-procesamiento..."); num_puntos = len(tiempos_out)
             CPs, CGs, masavuelo, viento_mags, viento_dirs = (np.zeros(num_puntos) for _ in range(5)); viento_vecs, Tvecs, Dvecs, Nvecs = (np.zeros((num_puntos, 3)) for _ in range(4)); accels_lin, accels_ang, Gammas, Alphas, torcas, Cds, Machs = (np.zeros(num_puntos) for _ in range(7))
-            required_methods = ['calcular_masa_actual', 'calcular_cg_actual', 'calcular_cp_aero','calcular_viento_relativo', 'calcular_fuerzas_aero', 'calcular_angulo_ataque','calcular_angulo_trayectoria', 'calcular_mach', 'calcular_cd','calcular_torcas']
-            for method_name in required_methods:
+
+            # --- CORRECCIÓN: Usar los nombres de métodos correctos de vuelo.py ---
+            required_methods_vuelo = ['calc_arrastre_normal', 'calc_empuje', 'calc_alpha', 'calc_aero', 'accangular'] # Métodos de Vuelo
+            required_methods_cohete = ['actualizar_masa', 'calc_CG', 'calc_CP'] # Métodos/atributos de Cohete (accedidos vía vuelo_obj.vehiculo)
+
+            for method_name in required_methods_vuelo:
                  if not hasattr(vuelo_obj, method_name): print(f"ADVERTENCIA: Vuelo no tiene método '{method_name}'.")
+            for method_name in required_methods_cohete:
+                 if not hasattr(vuelo_obj.vehiculo, method_name): print(f"ADVERTENCIA: Cohete no tiene método/atributo '{method_name}'.")
+
             for i in range(num_puntos):
                 t, state = tiempos_out[i], states_out[i]
+                pos = state[0:3]
+                vel = state[3:6]
+                theta = state[6]
+                omega = state[7] # omega = theta_dot
+
                 try:
-                    # CORRECCIÓN: Usar self.rocket.masa en lugar de self.rocket.masa_total si aplica
-                    masavuelo[i] = vuelo_obj.calcular_masa_actual(t) if hasattr(vuelo_obj, 'calcular_masa_actual') else self.rocket.masa
-                    CGs[i] = vuelo_obj.calcular_cg_actual(t) if hasattr(vuelo_obj, 'calcular_cg_actual') else self.rocket.CG[2] # Asume CG es un array o usa el Z
-                    v_rel, v_rel_mag, v_rel_dir = vuelo_obj.calcular_viento_relativo(state, t) if hasattr(vuelo_obj, 'calcular_viento_relativo') else (np.zeros(3), 0, 0); viento_vecs[i], viento_mags[i], viento_dirs[i] = v_rel, v_rel_mag, v_rel_dir
-                    Machs[i] = vuelo_obj.calcular_mach(state, t) if hasattr(vuelo_obj, 'calcular_mach') else 0; Cds[i] = vuelo_obj.calcular_cd(state, t) if hasattr(vuelo_obj, 'calcular_cd') else 0; CPs[i] = vuelo_obj.calcular_cp_aero(state, t) if hasattr(vuelo_obj, 'calcular_cp_aero') else self.rocket.CP[2] # Asume CP es un array o usa el Z
-                    T, D, N = vuelo_obj.calcular_fuerzas_aero(state, t) if hasattr(vuelo_obj, 'calcular_fuerzas_aero') else (np.zeros(3), np.zeros(3), np.zeros(3)); Tvecs[i], Dvecs[i], Nvecs[i] = T, D, N
-                    Alphas[i] = vuelo_obj.calcular_angulo_ataque(state, t) if hasattr(vuelo_obj, 'calcular_angulo_ataque') else 0; Gammas[i] = vuelo_obj.calcular_angulo_trayectoria(state) if hasattr(vuelo_obj, 'calcular_angulo_trayectoria') else 0
-                    torca_vec = vuelo_obj.calcular_torcas(state, t) if hasattr(vuelo_obj, 'calcular_torcas') else np.zeros(3); torcas[i] = np.linalg.norm(torca_vec)
-                    derivadas = dynamics(t, state); accel_vec = derivadas[3:6]; accels_lin[i] = np.linalg.norm(accel_vec); accels_ang[i] = derivadas[7]
+                    # Actualizar masa y CG del cohete (dependen del tiempo)
+                    vuelo_obj.vehiculo.actualizar_masa(t) # Llama al método de Cohete
+                    masavuelo[i] = vuelo_obj.vehiculo.masa
+                    # CG y CP se recalculan dentro de actualizar_masa si es necesario
+                    CGs[i] = vuelo_obj.vehiculo.CG[2] # Accede al atributo Z del CG
+                    CPs[i] = vuelo_obj.vehiculo.CP[2] # Accede al atributo Z del CP
+
+                    # Calcular viento relativo
+                    v_viento = vuelo_obj.viento.vector # Obtener vector de viento actual
+                    v_rel = vel - v_viento
+
+                    # Calcular ángulos
+                    alpha = vuelo_obj.calc_alpha(v_rel, theta)
+                    gamma = math.atan2(vel[2], vel[0]) if vel[0] != 0 or vel[2] != 0 else 0 # Evitar atan2(0,0)
+                    Alphas.append(alpha)
+                    Gammas.append(gamma)
+
+                    # Calcular fuerzas aerodinámicas y Cd/Mach
+                    # calc_arrastre_normal devuelve Dmag, Nmag, Cd, mach
+                    Dmag, Nmag, Cd, mach = vuelo_obj.calc_arrastre_normal(pos, v_rel, alpha)
+                    # calc_aero devuelve Dvec, Nvec
+                    Dvec, Nvec = vuelo_obj.calc_aero(pos, v_rel, theta)
+                    Cds.append(Cd)
+                    Machs.append(mach)
+                    Dvecs.append(Dvec)
+                    Nvecs.append(Nvec)
+
+                    # Calcular empuje
+                    Tvec = vuelo_obj.calc_empuje(t, theta)
+                    Tvecs.append(Tvec)
+
+                    # Calcular gravedad
+                    grav = calc_gravedad(pos[2])
+                    Gvec = np.array([0, 0, -grav])
+
+                    # Calcular aceleraciones y torcas
+                    accel = Gvec + (Dvec + Nvec + Tvec) / vuelo_obj.vehiculo.masa
+                    accels_lin.append(np.linalg.norm(accel)) # Guardar magnitud de aceleración lineal
+
+                    # Calcular aceleración angular y torca
+                    if np.linalg.norm(pos) > vuelo_obj.vehiculo.riel.longitud: # Solo calcular fuera del riel
+                        palanca, accang, torca = vuelo_obj.accangular(theta, Dvec, Nvec, Gvec)
+                    else:
+                        palanca, accang, torca = np.zeros(3), 0.0, 0.0 # Dentro del riel
+
+                    palancas.append(palanca)
+                    accels_ang.append(accang) # CORRECCIÓN: Usar accels_ang consistentemente
+                    torcas.append(torca)
+
+                    # Guardar datos del viento
+                    viento_vuelo_vecs.append(v_viento)
+                    viento_vuelo_mags.append(np.linalg.norm(v_viento))
+                    # Calcular dirección del viento (ej. azimut en plano XY)
+                    wind_dir_rad = math.atan2(v_viento[1], v_viento[0]) if v_viento[0] != 0 or v_viento[1] != 0 else 0
+                    viento_vuelo_dirs.append(wind_dir_rad)
+
+
                 except AttributeError as ae: print(f"Error atributo post-proc t={t:.2f}: {ae}. Usando default."); pass
                 except Exception as ex: print(f"Error post-proc t={t:.2f}: {ex}. Usando default."); print(traceback.format_exc()); pass
             print("Post-procesamiento completado.")
             posiciones = states_out[:, 0:3]; velocidades = states_out[:, 3:6]; thetas = states_out[:, 6]; omegas = states_out[:, 7]; Tmags = np.linalg.norm(Tvecs, axis=1); Dmags = np.linalg.norm(Dvecs, axis=1); Nmags = np.linalg.norm(Nvecs, axis=1); stability = [(cp - cg) / self.rocket.d_ext if self.rocket.d_ext > 0 else 0 for cp, cg in zip(CPs, CGs)]
             idx_apogeo = np.argmax(posiciones[:, 2]) if len(posiciones) > 0 else 0; max_altitude = posiciones[idx_apogeo, 2] if len(posiciones) > 0 else 0; tiempo_apogeo = tiempos_out[idx_apogeo] if len(tiempos_out) > 0 else 0; velocidades_mag = np.linalg.norm(velocidades, axis=1); idx_max_vel = np.argmax(velocidades_mag) if len(velocidades_mag) > 0 else 0; max_speed = velocidades_mag[idx_max_vel] if len(velocidades_mag) > 0 else 0; tiempo_max_vel = tiempos_out[idx_max_vel] if len(tiempos_out) > 0 else 0; max_mach = Machs[idx_max_vel] if len(Machs) > idx_max_vel else 0
-            idx_impacto_candidates = np.where((posiciones[:, 2] <= riel.altitud) & (tiempos_out > tiempo_apogeo))[0] if len(tiempos_out) > 0 else []; tiempo_impacto = tiempos_out[idx_impacto_candidates[0]] if len(idx_impacto_candidates) > 0 else tiempos_out[-1] if len(tiempos_out) > 0 else 0; pos_impacto = posiciones[idx_impacto_candidates[0], 0:2] if len(idx_impacto_candidates) > 0 else posiciones[-1, 0:2] if len(posiciones) > 0 else [0,0]; distancia_impacto = np.linalg.norm(pos_impacto); max_accel_linear = np.max(accels_lin) if len(accels_lin) > 0 else 0; max_accel_angular = np.max(accels_ang) if len(accels_ang) > 0 else 0
-            self.simulation_data = pd.DataFrame({ 'Tiempo (s)': tiempos_out, 'X (m)': posiciones[:, 0], 'Y (m)': posiciones[:, 1], 'Z (m)': posiciones[:, 2], 'Vx (m/s)': velocidades[:, 0], 'Vy (m/s)': velocidades[:, 1], 'Vz (m/s)': velocidades[:, 2], 'Velocidad (m/s)': velocidades_mag, 'Theta (rad)': thetas, 'Omega (rad/s)': omegas, 'CP (m)': CPs, 'CG (m)': CGs, 'Masa (kg)': masavuelo, 'Viento Mag (m/s)': viento_mags, 'Viento Dir (rad)': viento_dirs, 'Viento X': viento_vecs[:,0], 'Viento Y': viento_vecs[:,1], 'Viento Z': viento_vecs[:,2], 'Empuje (N)': Tmags, 'Arrastre (N)': Dmags, 'Normal (N)': Nmags, 'Accel Lin (m/s^2)': accels_lin, 'Accel Ang (rad/s^2)': accels_ang, 'Gamma (rad)': Gammas, 'Alpha (rad)': Alphas, 'Torca (Nm)': torcas, 'Cd': Cds, 'Mach': Machs, 'Estabilidad (cal)': stability })
+            idx_impacto_candidates = np.where((posiciones[:, 2] <= riel.altitud) & (tiempos_out > tiempo_apogeo))[0] if len(tiempos_out) > 0 else []; tiempo_impacto = tiempos_out[idx_impacto_candidates[0]] if len(idx_impacto_candidates) > 0 else tiempos_out[-1] if len(tiempos_out) > 0 else 0; pos_impacto = posiciones[idx_impacto_candidates[0], 0:2] if len(idx_impacto_candidates) > 0 else posiciones[-1, 0:2] if len(posiciones) > 0 else [0,0]; distancia_impacto = np.linalg.norm(pos_impacto); max_accel_linear = np.max(accels_lin) if len(accels_lin) > 0 else 0; max_accel_angular = np.max(accels_ang) if len(accels_ang) > 0 else 0 # CORRECCIÓN: Usar accels_ang
+            self.simulation_data = pd.DataFrame({ 'Tiempo (s)': tiempos_out, 'X (m)': posiciones[:, 0], 'Y (m)': posiciones[:, 1], 'Z (m)': posiciones[:, 2], 'Vx (m/s)': velocidades[:, 0], 'Vy (m/s)': velocidades[:, 1], 'Vz (m/s)': velocidades[:, 2], 'Velocidad (m/s)': velocidades_mag, 'Theta (rad)': thetas, 'Omega (rad/s)': omegas, 'CP (m)': CPs, 'CG (m)': CGs, 'Masa (kg)': masavuelo, 'Viento Mag (m/s)': viento_vuelo_mags, 'Viento Dir (rad)': viento_vuelo_dirs, 'Viento X': viento_vecs[:,0], 'Viento Y': viento_vecs[:,1], 'Viento Z': viento_vecs[:,2], 'Empuje (N)': Tmags, 'Arrastre (N)': Dmags, 'Normal (N)': Nmags, 'Accel Lin (m/s^2)': accels_lin, 'Accel Ang (rad/s^2)': accels_ang, 'Gamma (rad)': Gammas, 'Alpha (rad)': Alphas, 'Torca (Nm)': torcas, 'Cd': Cds, 'Mach': Machs, 'Estabilidad (cal)': stability })
             self.simulation_summary = { 'Método Integración': integrator_method, 'Paso de Tiempo (s)': dt_sim if integrator_method in ['Euler', 'RungeKutta4'] else 'Adaptativo (solve_ivp)', 'Diámetro Cohete (m)': self.rocket.d_ext, 'Masa Inicial (kg)': self.rocket.masa, 'Masa Final (kg)': masavuelo[-1] if len(masavuelo) > 0 else 'N/A', 'Tiempo MECO (s)': getattr(self.rocket, 't_MECO', 'N/A'), 'Tiempo Salida Riel (s)': getattr(vuelo_obj, 'tiempo_salida_riel', 'N/A'), 'Tiempo Apogeo (s)': tiempo_apogeo, 'Altitud Máxima (m)': max_altitude, 'Tiempo Velocidad Máxima (s)': tiempo_max_vel, 'Velocidad Máxima (m/s)': max_speed, 'Mach Máximo': max_mach, 'Aceleración Lineal Máx (m/s²)': max_accel_linear, 'Aceleración Angular Máx (rad/s²)': max_accel_angular, 'Tiempo Impacto (s)': tiempo_impacto, 'Distancia Impacto (m)': distancia_impacto, }
             self.update_plots(); self.update_summary_tab(); self.simulation_done = True
             self.progress.stop(); self.progress['mode'] = 'determinate'; self.progress['value'] = 100; self.progress_label.config(text="Simulación completada")
