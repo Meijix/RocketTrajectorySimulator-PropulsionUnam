@@ -96,3 +96,5 @@ if __name__ == "__main__":
     print("Paracaidas activo", Xitle.parachute_active1)
     print("Cd Paracaidas", Xitle.parachute1.cd)
     print("area Paracaidas", Xitle.parachute1.Area_trans)
+
+
