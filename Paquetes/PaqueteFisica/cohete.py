@@ -72,25 +72,42 @@ class Cohete:
 
     # Calcular el área transversal efectiva del cohete (según fuselaje)
     # Método calc_A corregido en Paquetes/PaqueteFisica/cohete.py
+    # Método calc_A corregido en Paquetes/PaqueteFisica/cohete.py
     def calc_A(self):
-        # Intentar obtener el componente 'Fuselaje' que viene de la GUI
-        fuselaje_comp = self.componentes.get('Fuselaje')
-        if fuselaje_comp and hasattr(fuselaje_comp, 'rad_ext'):
-            self.A = math.pi * fuselaje_comp.rad_ext**2
-            print(f"Área calculada usando 'Fuselaje': {self.A}") # Mensaje de depuración
-        # Si no existe 'Fuselaje', intentar con 'coples' (por si se usa en otro lado)
-        elif 'coples' in self.componentes and hasattr(self.componentes['coples'], 'rad_ext'):
-            print("Advertencia: Usando 'coples' para calcular área.") # Mensaje de depuración
-            self.A = math.pi * self.componentes['coples'].rad_ext**2
-        # Fallback usando d_ext si está definido en el cohete
-        elif self.d_ext is not None:
-            print("Advertencia: Usando 'self.d_ext' para calcular área.") # Mensaje de depuración
-            self.A = math.pi * (self.d_ext / 2)**2
-        else:
-            print("Error Crítico: No se pudo calcular el área del cohete. Componente 'Fuselaje' o 'coples' con 'rad_ext' no encontrado, y self.d_ext no está definido.")
-            self.A = 0 # O lanzar una excepción: raise ValueError("No se puede calcular el área del cohete")
+        """Calcula el área de referencia del cohete (sección transversal máxima)."""
+        radio_ref = None
+        # Intentar usar el diámetro de la base de la nariz
+        nariz = self.componentes.get("Nariz")
+        if nariz and hasattr(nariz, 'diam'):
+            radio_ref = nariz.diam / 2.0
+            print(f"Usando radio de la nariz para área: {radio_ref}")
 
-    # Calcula la masa total del cohete sumando las masas de sus componentes
+        # Si no hay nariz o no tiene diámetro, buscar el primer componente externo con diámetro
+        elif self.componentes_externos:
+            for comp in self.componentes_externos.values():
+                if hasattr(comp, 'diam_ext'): # Para Cilindros
+                    radio_ref = comp.diam_ext / 2.0
+                    print(f"Usando radio de {comp.nombre} para área: {radio_ref}")
+                    break
+                elif hasattr(comp, 'dF'): # Para Boattail (diámetro frontal)
+                    radio_ref = comp.dF / 2.0
+                    print(f"Usando radio frontal de {comp.nombre} para área: {radio_ref}")
+                    break
+                # Añadir más casos si otros tipos de componentes definen el diámetro externo
+
+        # Si aún no se encuentra, usar self.d_ext si está definido
+        if radio_ref is None and self.d_ext is not None:
+            print(f"Usando self.d_ext para área: {self.d_ext}")
+            radio_ref = self.d_ext / 2.0
+
+        # Calcular el área o asignar 0 si no se pudo determinar el radio
+        if radio_ref is not None:
+            self.A = math.pi * radio_ref**2
+        else:
+            print("Error Crítico: No se pudo determinar el radio de referencia para calcular el área del cohete.")
+            self.A = 0 # O lanzar un error: raise ValueError("No se puede calcular el área del cohete")
+
+        # Calcula la masa total del cohete sumando las masas de sus componentes
     def calc_masa(self):
       self.masa = 0.0
       for comp in self.componentes.values():

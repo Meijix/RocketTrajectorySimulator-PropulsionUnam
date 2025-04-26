@@ -16,6 +16,7 @@ import math # Asegurarse que math está importado
 # --- Manejo de Dependencias ---
 SCIPY_AVAILABLE = False
 CUSTOM_INTEGRATORS_AVAILABLE = False
+VISUALIZATION_AVAILABLE = False
 
 try:
     from scipy.integrate import solve_ivp
@@ -50,10 +51,19 @@ try:
     except ImportError:
         print("Advertencia: No se encontraron los integradores personalizados (Euler, RungeKutta4) en Paquetes.PaqueteEDOs.integradores.")
 
+    # Intenta importar la función de dibujo
+    try:
+        from Paquetes.utils.dibujar_cohete2 import dibujar_cohete2
+        VISUALIZATION_AVAILABLE = True
+        print("Función dibujar_cohete2 encontrada en Paquetes.utils.dibujar_cohete2.")
+    except ImportError:
+        print("Advertencia: No se encontró la función 'dibujar_cohete2' en Paquetes.utils.dibujar_cohete2. La pestaña de visualización estará deshabilitada.")
+
+
 except ImportError as e:
-    messagebox.showerror("Error de Importación de Física",
-                         f"No se pudieron importar módulos de física necesarios: {e}\n"
-                         f"Asegúrate de que los paquetes 'Simulador' y 'Paquetes' estén en la ruta correcta:\n{package_path}\n"
+    messagebox.showerror("Error de Importación de Física/Utils",
+                         f"No se pudieron importar módulos necesarios: {e}\n"
+                         f"Asegúrate de que los paquetes 'Simulador', 'Paquetes' y 'Paquetes.utils' estén en la ruta correcta:\n{package_path}\n"
                          f"Traceback: {traceback.format_exc()}")
     sys.exit(1)
 except Exception as e:
@@ -65,23 +75,37 @@ class SimuladorCohetesAvanzado:
     """
     Clase principal para la interfaz gráfica del simulador de cohetes suborbitales.
     Permite selección de método de integración. Usa valores Xitle por defecto.
-    Nombres de propiedades ajustados según clases de componentes.py.
+    Muestra componentes externos e internos en pestañas separadas.
+    Incluye pestaña de visualización del cohete.
     Intenta cargar CSVs predeterminados al inicio considerando la estructura de archivos.
     """
     def __init__(self, master):
         self.master = master
-        self.master.title("Simulador de Cohetes Suborbitales Avanzado (Props Ajustadas)")
-        self.master.geometry("1200x850")
+        self.master.title("Simulador de Cohetes Suborbitales Avanzado (Xitle Detallado)")
+        self.master.geometry("1200x950") # Aumentar altura para más campos
 
         # --- Estilos ---
         azul = '#151E3D' # Dark Denim
         rojo = '#90091d' # Dark Red
+        verde_sim = '#228B22' # Forest Green
+        morado_upd = '#8A2BE2' # BlueViolet
         font_selection = ('Lucida Sans Unicode', 10)
         self.master.configure(bg=azul)
         self.style = ttk.Style()
         self.style.theme_use('clam')
+        # Estilo Botón Simular (Verde)
+        self.style.configure('Sim.TButton', font=(font_selection[0], font_selection[1], 'bold'), background=verde_sim, foreground='white', borderwidth=1)
+        self.style.map('Sim.TButton', background=[('active', '#2E8B57')]) # Sea Green on hover
+        # Estilo Botón Actualizar (Morado)
+        self.style.configure('Update.TButton', font=font_selection, background=morado_upd, foreground='white', borderwidth=1)
+        self.style.map('Update.TButton', background=[('active', '#9932CC')]) # DarkOrchid on hover
+        # Estilo Botones Normales (Rojo)
         self.style.configure('TButton', font=font_selection, background=rojo, foreground='white', borderwidth=1)
         self.style.map('TButton', background=[('active', '#b80b25')]) # Hover/active color
+        # Estilo Botones Visualizar CSV (Azul Claro)
+        self.style.configure('Vis.TButton', font=font_selection, background='#ADD8E6', foreground='black', borderwidth=1) # Light Blue
+        self.style.map('Vis.TButton', background=[('active', '#87CEEB')]) # Sky Blue on hover
+        # Otros estilos
         self.style.configure('TLabel', font=font_selection, background=azul, foreground='white')
         self.style.configure('TEntry', font=font_selection, fieldbackground='white', foreground='black')
         self.style.configure('TCombobox', font=font_selection, fieldbackground='white', foreground='black')
@@ -90,9 +114,7 @@ class SimuladorCohetesAvanzado:
         self.style.map('TNotebook.Tab', background=[('selected', azul)], foreground=[('selected', 'white')])
         self.style.configure('TFrame', background=azul)
         self.style.configure('Horizontal.TProgressbar', background=rojo)
-        # Estilo para botones de visualización
-        self.style.configure('Vis.TButton', font=font_selection, background='#ADD8E6', foreground='black', borderwidth=1) # Light Blue
-        self.style.map('Vis.TButton', background=[('active', '#87CEEB')]) # Sky Blue on hover
+
 
         # --- Variables de Estado ---
         self.rocket = None
@@ -106,6 +128,7 @@ class SimuladorCohetesAvanzado:
         self.simulation_summary = None
         self.simulation_done = False
         self.selected_integrator = tk.StringVar() # Para el combobox del integrador
+        self.component_widgets = {} # Diccionario para guardar widgets de componentes
 
         # --- Rutas Predeterminadas de Archivos CSV (Ajustadas a la estructura) ---
         script_dir = os.path.dirname(os.path.abspath(__file__)) # Directorio del script actual
@@ -119,79 +142,86 @@ class SimuladorCohetesAvanzado:
         print(f"Ruta default Masa: {self.default_mass_file_path}")
 
 
-        # --- Valores Predeterminados del Cohete Xitle (Ajustados) ---
-        self.diam_ext_xitle = 0.152
-        self.espesor_xitle = 0.003
-        long_nariz_xitle = 0.81; masa_nariz_xitle = 0.8; geom_nariz_xitle = "ogiva"; diam_nariz_xitle = self.diam_ext_xitle
-        self.long_fus_xitle = 0.176 + 0.92 + 0.25 + 1.25 + 0.167 + 0.573; masa_fus_xitle = 1.5 + 2.3 + 1.0 + 8.7 + 2.4 + 4.3
-        diam_ext_fus_xitle = self.diam_ext_xitle; diam_int_fus_xitle = self.diam_ext_xitle - 2 * self.espesor_xitle
-        num_aletas_xitle = 4; enverg_aletas_xitle = 0.11; cuerda_r_aletas_xitle = 0.3; cuerda_p_aletas_xitle = 0.1
-        barrido_aletas_xitle = 25; masa_aletas_xitle = 1.1
-        long_boat_xitle = 0.12; diam_boat_frontal_xitle = self.diam_ext_xitle; diam_boat_tras_xitle = 0.132
-        masa_boat_xitle = 0.251; espesor_boat_xitle = self.espesor_xitle
-        masa_motor_xitle = 8.7 + 2.4 + 4.3; self.long_motor_xitle = 1.25 + 0.167 + 0.573; self.diam_motor_xitle = self.diam_ext_xitle
+        # --- Valores Predeterminados del Cohete Xitle (Directamente de XitleFile.py) ---
+        self.xitle_defaults = {
+            "diam_ext": 0.152, "espesor": 0.003,
+            "nariz": {"masa": 0.8, "longitud": 0.81, "geometria": "ogiva"},
+            "coples": {"masa": 1.5, "longitud": 0.176},
+            "tubo_recup": {"masa": 2.3, "longitud": 0.92},
+            "transfer": {"masa": 1.0, "longitud": 0.25},
+            "tanquevacio": {"masa": 8.7, "longitud": 1.25},
+            "valvulas": {"masa": 2.4, "longitud": 0.167},
+            "cc": {"masa": 4.3, "longitud": 0.573}, # Clave en minúsculas como en XitleFile
+            "aletas": {"masa": 1.1, "numf": 4, "semispan": 0.11, "C_r": 0.3, "C_t": 0.1, "mid_sweep_deg": 25},
+            "boattail": {"masa": 0.251, "longitud": 0.12, "dR": 0.132}
+            # Componentes internos como Avionica, CU, Drogue, Main no tienen entradas GUI por ahora
+        }
 
-        # --- Inicialización del Objeto Cohete con valores Xitle y nombres correctos ---
+        # --- Crear Componentes Iniciales (sin crear objeto Cohete aún) ---
+        self.xitle_components_init = {}
+        current_z = 0.0 # Posición inicial Z
         try:
-            # Crear componentes usando los nombres de atributos de las clases
-            nariz_init = Cono("Nariz", masa_nariz_xitle, np.array([0.0, 0.0, 0.0]),
-                              longitud=long_nariz_xitle, diametro=diam_nariz_xitle, geometria=geom_nariz_xitle)
-            pos_fus_init = np.array([0.0, 0.0, nariz_init.bottom[2]]) # Usa el .bottom calculado por Cono
-            fuselaje_init = Cilindro("Fuselaje", masa_fus_xitle, pos_fus_init,
-                                     longitud=self.long_fus_xitle, diametroexterior=diam_ext_fus_xitle, diametrointerior=diam_int_fus_xitle)
-            # Asume montaje al final del fuselaje combinado
-            pos_aletas_init = np.array([0.0, 0.0, fuselaje_init.bottom[2] - cuerda_r_aletas_xitle])
-            aletas_init = Aletas("Aletas", masa_aletas_xitle, pos_aletas_init,
-                                 diametro=diam_ext_fus_xitle, # diametro del fuselaje donde se monta
-                                 numf=num_aletas_xitle, semispan=enverg_aletas_xitle,
-                                 C_r=cuerda_r_aletas_xitle, C_t=cuerda_p_aletas_xitle,
-                                 X_R=0.0, # X_R no está en la GUI, se asume 0? O se calcula desde sweep? -> Se usa mid_sweep
-                                 mid_sweep=np.deg2rad(barrido_aletas_xitle))
-            pos_boat_init = np.array([0.0, 0.0, fuselaje_init.bottom[2]])
-            boattail_init = Boattail("Boattail", masa_boat_xitle, pos_boat_init,
-                                     longitud=long_boat_xitle, diamF_boat=diam_boat_frontal_xitle,
-                                     diamR_boat=diam_boat_tras_xitle, espesor=espesor_boat_xitle)
-            # Posición del motor estimada (centrada en la longitud combinada tanque+valvulas+CC)
-            pos_motor_init_z = pos_fus_init[2] + (self.long_fus_xitle - self.long_motor_xitle / 2) # Centrado en la sección del motor
-            pos_motor_init = np.array([0.0, 0.0, pos_motor_init_z])
-            motor_init = Componente("Motor", masa_motor_xitle, pos_motor_init) # Usa Componente base
+            # Nariz
+            cfg = self.xitle_defaults["nariz"]
+            d_ext = self.xitle_defaults["diam_ext"]
+            nariz_init = Cono("Nariz", cfg["masa"], np.array([0.0, 0.0, current_z]),
+                              longitud=cfg["longitud"], diametro=d_ext, geometria=cfg["geometria"])
+            self.xitle_components_init["Nariz"] = nariz_init
+            current_z = nariz_init.bottom[2]
 
-            # --- WORKAROUND: Establecer explícitamente CG y CP para el componente Motor base ---
-            motor_init.CG = np.array([0.0, 0.0, self.long_motor_xitle / 2.0])
-            motor_init.CP = np.zeros(3); motor_init.CN = 0
-            # --- Fin WORKAROUND ---
+            # Componentes Cilíndricos (en orden)
+            cilindros_keys = ["coples", "tubo_recup", "transfer", "tanquevacio", "valvulas", "cc"] # Clave 'cc' en minúsculas
+            for key in cilindros_keys:
+                cfg = self.xitle_defaults[key]
+                d_int = d_ext - 2 * self.xitle_defaults["espesor"]
+                comp_key_title = key.replace("_", " ").capitalize() # Para nombre del objeto
+                comp = Cilindro(comp_key_title, cfg["masa"], np.array([0.0, 0.0, current_z]),
+                                longitud=cfg["longitud"], diametroexterior=d_ext, diametrointerior=d_int)
+                # Workaround para componentes base
+                comp.CG = np.array([0.0, 0.0, cfg["longitud"] / 2.0]) # CG en centro geométrico
+                comp.CP = np.zeros(3); comp.CN = 0
+                self.xitle_components_init[comp_key_title] = comp # Usar clave capitalizada
+                current_z = comp.bottom[2]
 
-            self.lista_componentes_init_gui = {
-                'Nariz': nariz_init, 'Fuselaje': fuselaje_init, 'Aletas': aletas_init,
-                'Boattail': boattail_init, 'Motor': motor_init
-            }
+            # Aletas (posición relativa al final del último cilindro - CC)
+            cfg_aletas = self.xitle_defaults["aletas"]
+            # Usar la Z final del último componente cilíndrico (CC)
+            pos_aletas_init = np.array([0.0, 0.0, current_z - cfg_aletas["C_r"]]) # Montaje por cuerda raíz al final de CC
+            aletas_init = Aletas("Aletas", cfg_aletas["masa"], pos_aletas_init,
+                                 diametro=d_ext, numf=cfg_aletas["numf"], semispan=cfg_aletas["semispan"],
+                                 C_r=cfg_aletas["C_r"], C_t=cfg_aletas["C_t"], X_R=0.0,
+                                 mid_sweep=np.deg2rad(cfg_aletas["mid_sweep_deg"]))
+            self.xitle_components_init["Aletas"] = aletas_init
 
-            # --- Crear instancia de Cohete (inicialmente sin rutas CSV, se cargarán después) ---
-            # Pasar None para las rutas, se actualizarán después de intentar cargar defaults
-            self.rocket = Cohete("Xitle (Default)", "hibrido", self.lista_componentes_init_gui, self.lista_componentes_init_gui,
-                                 None, None, None, riel)
-            self.rocket.d_ext = self.diam_ext_xitle
-            # calcular_propiedades se llamará después de cargar los CSVs
+            # Boattail (después del último cilindro - CC)
+            cfg_boat = self.xitle_defaults["boattail"]
+            pos_boat_init = np.array([0.0, 0.0, current_z]) # Al final de CC
+            boattail_init = Boattail("Boattail", cfg_boat["masa"], pos_boat_init,
+                                     longitud=cfg_boat["longitud"], diamF_boat=d_ext,
+                                     diamR_boat=cfg_boat["dR"], espesor=self.xitle_defaults["espesor"])
+            self.xitle_components_init["Boattail"] = boattail_init
 
+        except KeyError as e:
+             messagebox.showerror("Error Clave Xitle", f"No se encontró la clave '{e}' en xitle_defaults.")
+             self.xitle_components_init = {} # Vaciar si falla
         except NameError as e:
              messagebox.showwarning("Advertencia Componentes", f"No se pudieron crear los componentes iniciales (Xitle). Clase no definida: {e}")
-             self.lista_componentes_init_gui = {}
-             self.rocket = None
+             self.xitle_components_init = {}
         except TypeError as e:
              messagebox.showerror("Error Argumentos", f"Error al crear componente inicial (Xitle), revisa argumentos: {e}\n{traceback.format_exc()}")
-             self.lista_componentes_init_gui = {}
-             self.rocket = None
+             self.xitle_components_init = {}
         except Exception as e:
-            messagebox.showerror("Error Cohete Inicial", f"Error creando cohete inicial (Xitle): {e}\n{traceback.format_exc()}")
-            self.lista_componentes_init_gui = {}
-            self.rocket = None
+            messagebox.showerror("Error Componentes Iniciales", f"Error creando componentes iniciales (Xitle): {e}\n{traceback.format_exc()}")
+            self.xitle_components_init = {}
+
 
         # --- Interfaz Gráfica ---
         self.notebook = ttk.Notebook(self.master)
         self.notebook.pack(expand=True, fill="both", padx=10, pady=10)
 
-        # Crear pestañas
-        self.create_rocket_tab()
+        # Crear pestañas en el orden deseado
+        self.create_rocket_tabs() # Crea las pestañas de componentes externos e internos
+        self.create_visualization_tab() # Crear la pestaña de visualización DESPUÉS de las de componentes
         self.create_csv_import_tab() # Crea etiquetas y botones de visualización
         self.create_input_tab()
         self.create_trajectory_tab()
@@ -202,25 +232,37 @@ class SimuladorCohetesAvanzado:
         self.create_wind_tab()
         self.create_summary_tab()
 
+
         # --- Cargar Datos CSV Predeterminados (Ahora que los elementos GUI existen) ---
+        # Los botones de visualización se pasan para poder habilitarlos
         self._load_and_store_csv("thrust", self.default_thrust_file_path, self.thrust_file_label, self.btn_visualize_thrust)
         self._load_and_store_csv("cd_vs_mach", self.default_cd_file_path, self.cd_file_label, self.btn_visualize_cd)
         self._load_and_store_csv("mass_vs_time", self.default_mass_file_path, self.mass_file_label, self.btn_visualize_mass)
 
-        # --- Actualizar Objeto Cohete con rutas CSV y calcular propiedades ---
-        if self.rocket:
-            # Llamar a los métodos de carga de Cohete usando las rutas almacenadas en la GUI
-            try:
-                if self.loaded_cd_path:
-                    self.rocket.cargar_tabla_Cd(self.loaded_cd_path)
-                if self.loaded_thrust_path and self.loaded_mass_path:
-                    self.rocket.cargar_tablas_motor(self.loaded_thrust_path, self.loaded_mass_path)
-                self.rocket.calcular_propiedades() # Calcular con datos cargados
-                print("Propiedades del Cohete recalculadas con datos CSV predeterminados.")
-            except AttributeError as ae:
-                 print(f"Advertencia: Error llamando métodos de carga en Cohete ({ae}). Asegúrate que Cohete tiene 'cargar_tabla_Cd' y 'cargar_tablas_motor'.")
-            except Exception as e:
-                 print(f"Advertencia: Error al cargar tablas CSV en Cohete: {e}")
+        # --- Crear Objeto Cohete AHORA, usando las rutas cargadas (o None) ---
+        try:
+            if self.xitle_components_init: # Solo si los componentes iniciales se crearon bien
+                print("Creando instancia de Cohete con datos iniciales y rutas CSV...")
+                external_keys_init = ["Nariz", "Coples", "Tubo recup", "Transfer", "Tanquevacio", "Valvulas", "Cc", "Boattail"]
+                external_components_init = {k: v for k, v in self.xitle_components_init.items() if k in external_keys_init}
+
+                self.rocket = Cohete("Xitle (Default)", "hibrido",
+                                     self.xitle_components_init, # Todos los componentes
+                                     external_components_init,  # Solo externos
+                                     self.loaded_cd_path,      # Ruta o None
+                                     self.loaded_thrust_path,  # Ruta o None
+                                     self.loaded_mass_path,    # Ruta o None
+                                     riel)
+                self.rocket.d_ext = self.diam_ext_xitle # Establecer diámetro de referencia
+                self.rocket.calcular_propiedades() # Calcular propiedades iniciales
+                print("Objeto Cohete inicializado y propiedades calculadas.")
+            else:
+                 print("No se creará el objeto Cohete debido a errores previos en componentes.")
+                 self.rocket = None
+
+        except Exception as e:
+            messagebox.showerror("Error Creando Cohete", f"Error al crear el objeto Cohete: {e}\n{traceback.format_exc()}")
+            self.rocket = None # Asegurar que rocket sea None si falla
 
 
         # --- Intentar graficar datos predeterminados ---
@@ -317,26 +359,33 @@ class SimuladorCohetesAvanzado:
             elif data_type == "mass_vs_time": self.mass_data = None; self.loaded_mass_path = None
 
 
-    # --- Funciones Auxiliares de GUI (sin cambios) ---
-    def create_section(self, parent, text, row, column, columnspan=2):
+    # --- Funciones Auxiliares de GUI ---
+    def create_section(self, parent, text, row, column, columnspan=4): # Aumentar columnspan
+        """Crea una etiqueta de sección."""
         ttk.Label(parent, text=text, font=('Lucida Sans Unicode', 11, 'bold'), foreground='#48AAAD') \
            .grid(row=row, column=column, columnspan=columnspan, sticky="w", padx=5, pady=(10, 2))
 
-    def create_entry(self, parent, row, column, label, default_value=""):
-        ttk.Label(parent, text=label).grid(row=row, column=column, sticky="w", padx=5, pady=2)
+    def create_entry(self, parent, comp_key, param_name, label_text, default_value, row, col):
+        """Crea una etiqueta y un campo de entrada, y lo guarda en self.component_widgets."""
+        full_key = f"{comp_key}_{param_name}"
+        ttk.Label(parent, text=label_text).grid(row=row, column=col, sticky="w", padx=5, pady=2)
         entry = ttk.Entry(parent, width=15)
-        entry.grid(row=row, column=column+1, padx=5, pady=2, sticky="ew")
+        entry.grid(row=row, column=col + 1, padx=5, pady=2, sticky="ew")
         entry.insert(0, str(default_value))
+        self.component_widgets[full_key] = entry # Guardar referencia al widget
         return entry
 
-    def create_combobox(self, parent, row, column, label, values, default_value, textvariable=None):
-        ttk.Label(parent, text=label).grid(row=row, column=column, sticky="w", padx=5, pady=2)
-        combobox = ttk.Combobox(parent, values=values, state="readonly", width=13, textvariable=textvariable)
-        combobox.grid(row=row, column=column+1, padx=5, pady=2, sticky="ew")
+    def create_combobox(self, parent, comp_key, param_name, label_text, values, default_value, row, col):
+        """Crea una etiqueta y un combobox, y lo guarda en self.component_widgets."""
+        full_key = f"{comp_key}_{param_name}"
+        ttk.Label(parent, text=label_text).grid(row=row, column=col, sticky="w", padx=5, pady=2)
+        combobox = ttk.Combobox(parent, values=values, state="readonly", width=13)
+        combobox.grid(row=row, column=col + 1, padx=5, pady=2, sticky="ew")
         if default_value in values:
             combobox.set(default_value)
         elif values:
             combobox.current(0)
+        self.component_widgets[full_key] = combobox # Guardar referencia al widget
         return combobox
 
     def show_no_simulation_message(self, frame):
@@ -344,262 +393,276 @@ class SimuladorCohetesAvanzado:
         label = ttk.Label(frame, text="Realice una simulación para ver los resultados", font=('Lucida Sans Unicode', 14))
         label.pack(expand=True, padx=20, pady=20)
 
-    # --- Pestaña: Definición del Cohete (Etiquetas y defaults ajustados) ---
-    def create_rocket_tab(self):
-        """Crea la pestaña para definir las propiedades del cohete, usando defaults Xitle y nombres ajustados."""
-        self.rocket_frame = ttk.Frame(self.notebook, padding="10")
-        self.notebook.add(self.rocket_frame, text="Cohete")
+    # --- Pestañas de Definición del Cohete (Externos e Internos) ---
+    def create_rocket_tabs(self):
+        """Crea las pestañas para componentes externos e internos."""
+        self.component_widgets = {} # Reiniciar diccionario de widgets
 
-        col1_frame = ttk.Frame(self.rocket_frame); col1_frame.grid(row=0, column=0, padx=10, pady=5, sticky="nw")
-        col2_frame = ttk.Frame(self.rocket_frame); col2_frame.grid(row=0, column=1, padx=10, pady=5, sticky="nw")
-        col3_frame = ttk.Frame(self.rocket_frame); col3_frame.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+        # Crear frames contenedores principales para cada pestaña
+        ext_frame_main = ttk.Frame(self.notebook, padding="10")
+        self.notebook.add(ext_frame_main, text="Componentes Externos")
 
-        # Helper para obtener atributos iniciales de forma segura
-        def get_init_attr(comp_name, attr_name, default_val):
-            # Accede a la lista de componentes creada en __init__
-            comp = getattr(self, 'lista_componentes_init_gui', {}).get(comp_name)
-            # Devuelve el atributo si existe, sino el valor por defecto
-            return getattr(comp, attr_name, default_val) if comp else default_val
+        int_frame_main = ttk.Frame(self.notebook, padding="10")
+        self.notebook.add(int_frame_main, text="Componentes Internos")
 
-        # Nariz (Cono) - Usando nombres de atributos de la clase Cono
-        self.create_section(col1_frame, "Nariz (Cono):", 0, 0)
-        self.nose_length = self.create_entry(col1_frame, 1, 0, "Longitud (long):", f"{get_init_attr('Nariz', 'long', 0.81):.2f}")
-        self.nose_diameter = self.create_entry(col1_frame, 2, 0, "Diámetro base (diam):", f"{get_init_attr('Nariz', 'diam', 0.152):.3f}")
-        self.nose_mass = self.create_entry(col1_frame, 3, 0, "Masa:", f"{get_init_attr('Nariz', 'masa', 0.8):.1f}")
-        self.nose_geometry = self.create_combobox(col1_frame, 4, 0, "Geometría (geom):", ["conica", "ogiva", "parabolica", "eliptica"], get_init_attr('Nariz', 'geom', "ogiva"))
+        # --- Configurar Scroll para Pestaña Externa ---
+        ext_canvas = tk.Canvas(ext_frame_main, bg=self.style.lookup('TFrame', 'background'), highlightthickness=0)
+        ext_scrollbar = ttk.Scrollbar(ext_frame_main, orient="vertical", command=ext_canvas.yview)
+        ext_scrollable_frame = ttk.Frame(ext_canvas)
+        ext_scrollable_frame.bind("<Configure>", lambda e: ext_canvas.configure(scrollregion=ext_canvas.bbox("all")))
+        ext_canvas_window = ext_canvas.create_window((0, 0), window=ext_scrollable_frame, anchor="nw")
+        ext_canvas.configure(yscrollcommand=ext_scrollbar.set)
+        ext_canvas.pack(side="left", fill="both", expand=True); ext_scrollbar.pack(side="right", fill="y")
+        # Ajustar ancho del frame interior al canvas
+        ext_frame_main.bind('<Configure>', lambda e: ext_canvas.itemconfig(ext_canvas_window, width=e.width))
 
-        # Fuselaje (Cilindro) - Usando nombres de atributos de la clase Cilindro
-        fus_long_def = get_init_attr('Fuselaje', 'long', 3.336)
-        # CORRECCIÓN: Obtener diam_ext y diam_int usando get_init_attr
-        fus_diam_ext_def = get_init_attr('Fuselaje', 'diam_ext', self.diam_ext_xitle) # Usa valor de __init__ como fallback
-        fus_diam_int_def = get_init_attr('Fuselaje', 'diam_int', self.diam_ext_xitle - 2 * self.espesor_xitle) # Usa valores de __init__ como fallback
-        fus_mass_def = get_init_attr('Fuselaje', 'masa', 20.2)
-        # Calcular espesor basado en los diámetros obtenidos
-        fus_thick_def = (fus_diam_ext_def - fus_diam_int_def) / 2 if fus_diam_ext_def > 0 and fus_diam_int_def > 0 else self.espesor_xitle
 
-        self.create_section(col1_frame, "Fuselaje (Cilindro):", 5, 0)
-        self.body_length = self.create_entry(col1_frame, 6, 0, "Longitud (long):", f"{fus_long_def:.3f}")
-        self.body_diameter = self.create_entry(col1_frame, 7, 0, "Diámetro ext. (diam_ext):", f"{fus_diam_ext_def:.3f}")
-        self.body_thickness = self.create_entry(col1_frame, 8, 0, "Espesor pared:", f"{fus_thick_def:.3f}") # Calculado
-        self.body_mass = self.create_entry(col1_frame, 9, 0, "Masa:", f"{fus_mass_def:.1f}")
+        # --- Configurar Scroll para Pestaña Interna ---
+        int_canvas = tk.Canvas(int_frame_main, bg=self.style.lookup('TFrame', 'background'), highlightthickness=0)
+        int_scrollbar = ttk.Scrollbar(int_frame_main, orient="vertical", command=int_canvas.yview)
+        int_scrollable_frame = ttk.Frame(int_canvas)
+        int_scrollable_frame.bind("<Configure>", lambda e: int_canvas.configure(scrollregion=int_canvas.bbox("all")))
+        int_canvas_window = int_canvas.create_window((0, 0), window=int_scrollable_frame, anchor="nw")
+        int_canvas.configure(yscrollcommand=int_scrollbar.set)
+        int_canvas.pack(side="left", fill="both", expand=True); int_scrollbar.pack(side="right", fill="y")
+        # Ajustar ancho del frame interior al canvas
+        int_frame_main.bind('<Configure>', lambda e: int_canvas.itemconfig(int_canvas_window, width=e.width))
 
-        # Aletas - Usando nombres de atributos de la clase Aletas
-        fin_count_def = get_init_attr('Aletas', 'numf', 4)
-        fin_span_def = get_init_attr('Aletas', 'semispan', 0.11)
-        fin_root_chord_def = get_init_attr('Aletas', 'C_r', 0.3)
-        fin_tip_chord_def = get_init_attr('Aletas', 'C_t', 0.1)
-        fin_sweep_def = np.degrees(get_init_attr('Aletas', 'mid_sweep', np.deg2rad(25)))
-        fin_mass_def = get_init_attr('Aletas', 'masa', 1.1)
 
-        self.create_section(col2_frame, "Aletas:", 0, 0)
-        self.fin_count = self.create_entry(col2_frame, 1, 0, "Número (numf):", fin_count_def)
-        self.fin_span = self.create_entry(col2_frame, 2, 0, "Envergadura (semispan):", f"{fin_span_def:.2f}")
-        self.fin_root_chord = self.create_entry(col2_frame, 3, 0, "Cuerda Raíz (C_r):", f"{fin_root_chord_def:.1f}")
-        self.fin_tip_chord = self.create_entry(col2_frame, 4, 0, "Cuerda Punta (C_t):", f"{fin_tip_chord_def:.1f}")
-        self.fin_sweep = self.create_entry(col2_frame, 5, 0, "Barrido Medio (°):", f"{fin_sweep_def:.0f}") # mid_sweep
-        self.fin_mass = self.create_entry(col2_frame, 6, 0, "Masa total:", f"{fin_mass_def:.1f}")
+        # --- Layout de Componentes (según clasificación externa/interna) ---
+        external_layout = [
+            ("Nariz", ["masa", "longitud", "geometria"]),
+            ("Coples", ["masa", "longitud", "diametroexterior", "diametrointerior"]),
+            ("Tubo_recup", ["masa", "longitud", "diametroexterior", "diametrointerior"]),
+            ("Transfer", ["masa", "longitud", "diametroexterior", "diametrointerior"]),
+            ("Tanquevacio", ["masa", "longitud", "diametroexterior", "diametrointerior"]),
+            ("Valvulas", ["masa", "longitud", "diametroexterior", "diametrointerior"]),
+            ("Cc", ["masa", "longitud", "diametroexterior", "diametrointerior"]),
+            ("Boattail", ["masa", "longitud", "diamF_boat", "diamR_boat", "espesor"])
+        ]
+        internal_layout = [
+            ("Aletas", ["masa", "numf", "semispan", "C_r", "C_t", "mid_sweep_deg"]),
+            # Añadir aquí Avionica, CU, Drogue, Main si se definen parámetros editables
+        ]
 
-        # Boattail - Usando nombres de atributos de la clase Boattail
-        boat_len_def = get_init_attr('Boattail', 'long', 0.12)
-        boat_dF_def = get_init_attr('Boattail', 'dF', 0.152)
-        boat_dR_def = get_init_attr('Boattail', 'dR', 0.132)
-        boat_mass_def = get_init_attr('Boattail', 'masa', 0.251)
+        # Función auxiliar para crear widgets de componentes en un frame
+        def create_component_widgets(parent_frame, layout):
+            current_row = 0
+            for comp_key_lower, params in layout:
+                comp_key_title = comp_key_lower.replace("_", " ").capitalize()
+                # Asegurar que la clave 'cc' se maneje correctamente
+                defaults_key = comp_key_lower if comp_key_lower != "cc" else "cc"
+                comp_defaults = self.xitle_defaults.get(defaults_key, {})
+                comp_type = "Cilindro" # Tipo por defecto
+                if comp_key_lower == "nariz": comp_type = "Cono"
+                elif comp_key_lower == "aletas": comp_type = "Aletas"
+                elif comp_key_lower == "boattail": comp_type = "Boattail"
 
-        self.create_section(col2_frame, "Boattail:", 7, 0)
-        self.boattail_length = self.create_entry(col2_frame, 8, 0, "Longitud (long):", f"{boat_len_def:.2f}")
-        self.boattail_front_diameter = self.create_entry(col2_frame, 9, 0, "Diámetro Frontal (dF):", f"{boat_dF_def:.3f}")
-        self.boattail_rear_diameter = self.create_entry(col2_frame, 10, 0, "Diámetro Trasero (dR):", f"{boat_dR_def:.3f}")
-        self.boattail_mass = self.create_entry(col2_frame, 11, 0, "Masa:", f"{boat_mass_def:.3f}")
+                self.create_section(parent_frame, f"{comp_key_title} ({comp_type}):", current_row, 0, columnspan=4)
+                current_row += 1
 
-        # Motor (Sección GUI para masa/dimensiones estructurales)
-        motor_mass_def = get_init_attr('Motor', 'masa', 15.4) # Masa tanque + valvulas + CC
-        # CORRECCIÓN: Usar el valor numérico default directamente si get_init_attr falla
-        motor_len_def = get_init_attr('Motor', 'long', 1.99) # Valor default numérico
-        motor_diam_def = get_init_attr('Motor', 'diam', self.diam_ext_xitle) # Valor default numérico
+                col_idx = 0
+                for param in params:
+                    label_text = f"{param}:"
+                    default_val = comp_defaults.get(param, "")
+                    # Formatear valores numéricos
+                    if isinstance(default_val, (int, float)):
+                        if abs(default_val) < 0.01 and default_val != 0: default_val_str = f"{default_val:.3e}"
+                        elif abs(default_val) > 1000: default_val_str = f"{default_val:.3e}"
+                        elif param in ["masa", "semispan", "C_t", "C_r", "longitud", "diametroexterior", "diametrointerior", "diamF_boat", "diamR_boat", "espesor"]: default_val_str = f"{default_val:.3f}"
+                        elif param == "mid_sweep_deg": default_val_str = f"{default_val:.1f}"
+                        else: default_val_str = str(default_val)
+                    else: default_val_str = str(default_val)
 
-        self.create_section(col2_frame, "Motor (Estructural):", 12, 0)
-        self.motor_mass = self.create_entry(col2_frame, 13, 0, "Masa (sin prop.):", f"{motor_mass_def:.1f}")
-        self.motor_length = self.create_entry(col2_frame, 14, 0, "Longitud:", f"{motor_len_def:.3f}")
-        self.motor_diameter = self.create_entry(col2_frame, 15, 0, "Diámetro:", f"{motor_diam_def:.3f}")
+                    if param == "geometria":
+                        self.create_combobox(parent_frame, comp_key_lower, param, label_text,
+                                             ["conica", "ogiva", "parabolica", "eliptica"], default_val_str,
+                                             current_row, col_idx * 2)
+                    else:
+                        self.create_entry(parent_frame, comp_key_lower, param, label_text,
+                                          default_val_str, current_row, col_idx * 2)
 
-        # Buttons
-        self.btn_update_rocket = ttk.Button(col3_frame, text="Actualizar Cohete", command=self.update_rocket_from_gui)
-        self.btn_update_rocket.pack(side=tk.LEFT, padx=5, pady=10)
-        self.btn_save_rocket = ttk.Button(col3_frame, text="Guardar Definición", command=lambda: self.save_tab_data("rocket"))
-        self.btn_save_rocket.pack(side=tk.LEFT, padx=5, pady=10)
-        self.btn_load_rocket = ttk.Button(col3_frame, text="Cargar Definición", command=lambda: self.load_tab_data("rocket"))
-        self.btn_load_rocket.pack(side=tk.LEFT, padx=5, pady=10)
+                    col_idx += 1
+                    if col_idx >= 2: col_idx = 0; current_row += 1
+                if col_idx != 0: current_row += 1
+                current_row += 1 # Espacio extra
 
-    # --- Populate Rocket Tab (Usa nombres de atributos correctos) ---
-    def populate_rocket_tab(self):
-        """Rellena los campos de la pestaña Cohete con datos del objeto self.rocket."""
+        # Crear widgets en los frames correspondientes
+        create_component_widgets(ext_scrollable_frame, external_layout)
+        create_component_widgets(int_scrollable_frame, internal_layout)
+
+        # --- Botón Actualizar Cohete (Individual para cada pestaña) ---
+        btn_update_ext = ttk.Button(ext_frame_main, text="Actualizar Cohete", command=self.update_rocket_from_gui, style='Update.TButton')
+        btn_update_ext.pack(side="bottom", pady=10, padx=5)
+
+        btn_update_int = ttk.Button(int_frame_main, text="Actualizar Cohete", command=self.update_rocket_from_gui, style='Update.TButton')
+        btn_update_int.pack(side="bottom", pady=10, padx=5)
+
+
+    # --- Populate Rocket Tabs (Actualizado para componentes individuales) ---
+    def populate_rocket_tabs(self):
+        """Rellena los campos en las pestañas de componentes con datos del objeto self.rocket."""
         if not self.rocket or not hasattr(self.rocket, 'componentes'): return
-        try:
-            # Nariz
-            nariz = self.rocket.componentes.get('Nariz')
-            if nariz:
-                self.nose_length.delete(0, tk.END); self.nose_length.insert(0, str(getattr(nariz, 'long', '')))
-                self.nose_diameter.delete(0, tk.END); self.nose_diameter.insert(0, str(getattr(nariz, 'diam', '')))
-                self.nose_mass.delete(0, tk.END); self.nose_mass.insert(0, str(getattr(nariz, 'masa', '')))
-                if hasattr(nariz, 'geom') and nariz.geom in self.nose_geometry['values']: self.nose_geometry.set(nariz.geom)
-            # Fuselaje
-            fuselaje = self.rocket.componentes.get('Fuselaje')
-            if fuselaje:
-                self.body_length.delete(0, tk.END); self.body_length.insert(0, str(getattr(fuselaje, 'long', '')))
-                diam_ext = getattr(fuselaje, 'diam_ext', 0.0)
-                diam_int = getattr(fuselaje, 'diam_int', 0.0)
-                self.body_diameter.delete(0, tk.END); self.body_diameter.insert(0, str(diam_ext))
-                thickness = (diam_ext - diam_int) / 2 if diam_ext > 0 and diam_int > 0 else 0.0
-                self.body_thickness.delete(0, tk.END); self.body_thickness.insert(0, f"{thickness:.4f}")
-                self.body_mass.delete(0, tk.END); self.body_mass.insert(0, str(getattr(fuselaje, 'masa', '')))
-            # Aletas
-            aletas = self.rocket.componentes.get('Aletas')
-            if aletas:
-                self.fin_count.delete(0, tk.END); self.fin_count.insert(0, str(getattr(aletas, 'numf', '')))
-                self.fin_span.delete(0, tk.END); self.fin_span.insert(0, str(getattr(aletas, 'semispan', '')))
-                self.fin_root_chord.delete(0, tk.END); self.fin_root_chord.insert(0, str(getattr(aletas, 'C_r', '')))
-                self.fin_tip_chord.delete(0, tk.END); self.fin_tip_chord.insert(0, str(getattr(aletas, 'C_t', '')))
-                sweep_rad = getattr(aletas, 'mid_sweep', 0.0)
-                self.fin_sweep.delete(0, tk.END); self.fin_sweep.insert(0, f"{np.degrees(sweep_rad):.1f}")
-                self.fin_mass.delete(0, tk.END); self.fin_mass.insert(0, str(getattr(aletas, 'masa', '')))
-            # Boattail
-            boattail = self.rocket.componentes.get('Boattail')
-            if boattail:
-                self.boattail_length.delete(0, tk.END); self.boattail_length.insert(0, str(getattr(boattail, 'long', '')))
-                self.boattail_front_diameter.delete(0, tk.END); self.boattail_front_diameter.insert(0, str(getattr(boattail, 'dF', '')))
-                self.boattail_rear_diameter.delete(0, tk.END); self.boattail_rear_diameter.insert(0, str(getattr(boattail, 'dR', '')))
-                self.boattail_mass.delete(0, tk.END); self.boattail_mass.insert(0, str(getattr(boattail, 'masa', '')))
-            # Motor (Estructural)
-            motor = self.rocket.componentes.get('Motor')
-            if motor:
-                self.motor_mass.delete(0, tk.END); self.motor_mass.insert(0, str(getattr(motor, 'masa', '')))
-                # Usa getattr con default 'N/A' ya que Componente base no tiene long/diam
-                self.motor_length.delete(0, tk.END); self.motor_length.insert(0, str(getattr(motor, 'long', 'N/A')))
-                self.motor_diameter.delete(0, tk.END); self.motor_diameter.insert(0, str(getattr(motor, 'diam', 'N/A')))
-        except tk.TclError as e: messagebox.showerror("Error GUI", f"Error al actualizar campos: {e}")
-        except AttributeError as e: messagebox.showwarning("Atributo Faltante", f"Falta atributo en componente: {e}")
-        except Exception as e: messagebox.showerror("Error Inesperado", f"Error al poblar pestaña cohete: {e}\n{traceback.format_exc()}")
 
-    # --- Update Rocket from GUI (Usa __init__ de clases Componente y workaround para Motor) ---
+        print("Poblando pestañas de Cohete...")
+        for comp_key, comp_obj in self.rocket.componentes.items():
+            comp_key_lower = comp_key.lower().replace(" ", "_") # Clave para widgets
+            # print(f"  Poblando componente: {comp_key} (clave widget: {comp_key_lower})")
+            for param_name, widget in self.component_widgets.items():
+                # Extraer la clave del componente y el nombre del parámetro del widget_key
+                widget_comp_key, widget_param_name = param_name.split('_', 1)
+
+                if widget_comp_key == comp_key_lower:
+                    # Intentar obtener el valor del atributo del objeto componente
+                    value = getattr(comp_obj, widget_param_name, None)
+                    # Mapeo de nombres de atributos de clase a claves de widget (si son diferentes)
+                    if value is None and widget_param_name == "mid_sweep_deg": value = np.degrees(getattr(comp_obj, "mid_sweep", 0.0))
+                    elif value is None and widget_param_name == "diametroexterior": value = getattr(comp_obj, "diam_ext", None)
+                    elif value is None and widget_param_name == "diametrointerior": value = getattr(comp_obj, "diam_int", None)
+                    elif value is None and widget_param_name == "diamF_boat": value = getattr(comp_obj, "dF", None)
+                    elif value is None and widget_param_name == "diamR_boat": value = getattr(comp_obj, "dR", None)
+                    elif value is None and widget_param_name == "espesor": value = getattr(comp_obj, "e", None)
+                    elif value is None and widget_param_name == "longitud": value = getattr(comp_obj, "long", None) # Para Cono/Boattail
+                    elif value is None and widget_param_name == "geometria": value = getattr(comp_obj, "geom", None) # Para Cono
+
+                    if value is not None:
+                        # Formatear valor para mostrar
+                        if isinstance(value, (int, float)):
+                            if abs(value) < 0.01 and value != 0: value_str = f"{value:.3e}"
+                            elif abs(value) > 1000: value_str = f"{value:.3e}"
+                            elif widget_param_name in ["masa", "semispan", "C_t", "C_r", "longitud", "diametroexterior", "diametrointerior", "diamF_boat", "diamR_boat", "espesor"]: value_str = f"{value:.3f}"
+                            elif widget_param_name == "mid_sweep_deg": value_str = f"{value:.1f}"
+                            else: value_str = str(value)
+                        else:
+                            value_str = str(value)
+
+                        # Actualizar widget
+                        try:
+                            if isinstance(widget, ttk.Entry):
+                                widget.delete(0, tk.END); widget.insert(0, value_str)
+                            elif isinstance(widget, ttk.Combobox):
+                                if value_str in widget['values']: widget.set(value_str)
+                                else: widget.set(widget['values'][0])
+                        except tk.TclError as e: print(f"Error Tcl al actualizar widget {param_name}: {e}")
+                    # else: print(f"Advertencia: Atributo '{widget_param_name}' no encontrado en componente '{comp_key}'.")
+
+        print("Pestañas de Cohete pobladas.")
+
+
+    # --- Update Rocket from GUI (Actualizado para componentes individuales) ---
     def update_rocket_from_gui(self):
         """Actualiza el objeto self.rocket con datos de la GUI, usando los __init__ correctos."""
+        print("Actualizando cohete desde GUI...")
+        componentes_actualizados = {}
+        current_z = 0.0
+        d_ext_ref = None # Para guardar el diámetro del primer cilindro
+
         try:
-            # --- Validar y Obtener Datos Numéricos ---
-            def get_float(entry, name):
-                try: return float(entry.get())
-                except ValueError: raise ValueError(f"Valor inválido para '{name}': '{entry.get()}'")
-            def get_int(entry, name):
-                try: return int(entry.get())
-                except ValueError: raise ValueError(f"Valor inválido para '{name}': '{entry.get()}'")
+            def get_float(widget_key, name):
+                try: return float(self.component_widgets[widget_key].get())
+                except ValueError: raise ValueError(f"Valor inválido para '{name}': '{self.component_widgets[widget_key].get()}'")
+                except KeyError: raise KeyError(f"Widget no encontrado: {widget_key}")
+            def get_int(widget_key, name):
+                try: return int(self.component_widgets[widget_key].get())
+                except ValueError: raise ValueError(f"Valor inválido para '{name}': '{self.component_widgets[widget_key].get()}'")
+                except KeyError: raise KeyError(f"Widget no encontrado: {widget_key}")
+            def get_str(widget_key):
+                 try: return self.component_widgets[widget_key].get()
+                 except KeyError: raise KeyError(f"Widget no encontrado: {widget_key}")
 
+            # --- Leer y crear componentes en orden ---
             # Nariz
-            val_l_nariz=get_float(self.nose_length,"Longitud Nariz")
-            val_d_nariz=get_float(self.nose_diameter,"Diámetro Nariz")
-            val_m_nariz=get_float(self.nose_mass,"Masa Nariz")
-            val_g_nariz=self.nose_geometry.get()
-            # Fuselaje
-            val_l_fus=get_float(self.body_length,"Longitud Fuselaje")
-            val_d_ext_fus=get_float(self.body_diameter,"Diámetro Ext. Fuselaje")
-            val_thick_fus=get_float(self.body_thickness,"Espesor Fuselaje")
-            val_m_fus=get_float(self.body_mass,"Masa Fuselaje")
-            val_d_int_fus = val_d_ext_fus - 2 * val_thick_fus # Calcular diámetro interno
-            if val_d_int_fus <= 0: raise ValueError("Espesor de fuselaje inválido (diámetro interno <= 0).")
-            # Aletas
-            val_n_aletas=get_int(self.fin_count,"Número Aletas")
-            val_s_aletas=get_float(self.fin_span,"Envergadura Aletas")
-            val_cr_aletas=get_float(self.fin_root_chord,"Cuerda Raíz Aletas")
-            val_ct_aletas=get_float(self.fin_tip_chord,"Cuerda Punta Aletas")
-            val_sweep_aletas_deg=get_float(self.fin_sweep,"Barrido Medio Aletas")
-            val_m_aletas=get_float(self.fin_mass,"Masa Aletas")
-            # Boattail
-            val_l_boat=get_float(self.boattail_length,"Longitud Boattail")
-            val_df_boat=get_float(self.boattail_front_diameter,"Diámetro Frontal Boattail")
-            val_dr_boat=get_float(self.boattail_rear_diameter,"Diámetro Trasero Boattail")
-            val_m_boat=get_float(self.boattail_mass,"Masa Boattail")
-            val_e_boat = val_thick_fus # Asumir mismo espesor que fuselaje para consistencia
-            # Motor (Estructural)
-            val_m_motor=get_float(self.motor_mass,"Masa Motor")
-            val_l_motor=get_float(self.motor_length,"Longitud Motor")
-            val_d_motor=get_float(self.motor_diameter,"Diámetro Motor")
+            l_nariz = get_float("nariz_longitud", "Longitud Nariz")
+            d_nariz = get_float("nariz_diametro", "Diámetro Nariz")
+            m_nariz = get_float("nariz_masa", "Masa Nariz")
+            g_nariz = get_str("nariz_geometria")
+            nariz = Cono("Nariz", m_nariz, np.array([0.,0.,0.]), longitud=l_nariz, diametro=d_nariz, geometria=g_nariz)
+            componentes_actualizados["Nariz"] = nariz
+            current_z = nariz.bottom[2]
 
-            # --- Crear/Actualizar Componentes usando __init__ correctos ---
-            # Posiciones se calculan secuencialmente
-            nariz = Cono("Nariz", val_m_nariz, np.array([0.,0.,0.]),
-                         longitud=val_l_nariz, diametro=val_d_nariz, geometria=val_g_nariz)
-            pos_fus = np.array([0., 0., nariz.bottom[2]]) # Posición inicial del fuselaje
+            # Componentes Cilíndricos (Externos e Internos según layout)
+            cilindros_keys_lower = ["coples", "tubo_recup", "transfer", "tanquevacio", "valvulas", "cc"]
+            for key in cilindros_keys_lower:
+                comp_key_title = key.replace("_", " ").capitalize()
+                l_comp = get_float(f"{key}_longitud", f"Longitud {comp_key_title}")
+                m_comp = get_float(f"{key}_masa", f"Masa {comp_key_title}")
+                d_ext_comp = get_float(f"{key}_diametroexterior", f"Diámetro Ext {comp_key_title}")
+                d_int_comp = get_float(f"{key}_diametrointerior", f"Diámetro Int {comp_key_title}")
+                if d_int_comp >= d_ext_comp or d_int_comp <= 0: raise ValueError(f"Diámetros inválidos para {comp_key_title}")
 
-            fuselaje = Cilindro("Fuselaje", val_m_fus, pos_fus,
-                                longitud=val_l_fus, diametroexterior=val_d_ext_fus, diametrointerior=val_d_int_fus)
-            pos_boat = np.array([0., 0., fuselaje.bottom[2]]) # Posición inicial del boattail
+                comp = Cilindro(comp_key_title, m_comp, np.array([0., 0., current_z]),
+                                longitud=l_comp, diametroexterior=d_ext_comp, diametrointerior=d_int_comp)
+                comp.CG = np.array([0.0, 0.0, l_comp / 2.0]) # Workaround CG
+                comp.CP = np.zeros(3); comp.CN = 0 # Workaround CP/CN
+                componentes_actualizados[comp_key_title] = comp
+                current_z = comp.bottom[2]
+                if d_ext_ref is None: d_ext_ref = d_ext_comp # Guardar primer diámetro externo
 
-            boattail = Boattail("Boattail", val_m_boat, pos_boat,
-                                longitud=val_l_boat, diamF_boat=val_df_boat, diamR_boat=val_dr_boat, espesor=val_e_boat)
-            # Posición aletas relativa al fuselaje (ej: al final, ajustado por cuerda raíz)
-            pos_aletas = np.array([0., 0., fuselaje.bottom[2] - val_cr_aletas])
+            # Aletas (Internas según la nueva definición)
+            n_aletas = get_int("aletas_numf", "Número Aletas")
+            s_aletas = get_float("aletas_semispan", "Envergadura Aletas")
+            cr_aletas = get_float("aletas_C_r", "Cuerda Raíz Aletas")
+            ct_aletas = get_float("aletas_C_t", "Cuerda Punta Aletas")
+            sweep_aletas_deg = get_float("aletas_mid_sweep_deg", "Barrido Medio Aletas")
+            m_aletas = get_float("aletas_masa", "Masa Aletas")
+            # Calcular posición de aletas (relativa al final del último cilindro)
+            pos_aletas = np.array([0., 0., current_z - cr_aletas])
+            aletas = Aletas("Aletas", m_aletas, pos_aletas,
+                            diametro=d_ext_ref, # Usar diámetro de referencia
+                            numf=n_aletas, semispan=s_aletas,
+                            C_r=cr_aletas, C_t=ct_aletas,
+                            X_R=0.0, mid_sweep=np.deg2rad(sweep_aletas_deg))
+            componentes_actualizados["Aletas"] = aletas
 
-            aletas = Aletas("Aletas", val_m_aletas, pos_aletas,
-                            diametro=val_d_ext_fus, # Diametro fuselaje donde se monta
-                            numf=val_n_aletas, semispan=val_s_aletas,
-                            C_r=val_cr_aletas, C_t=val_ct_aletas,
-                            X_R=0.0, # Asumir 0 si no está en GUI
-                            mid_sweep=np.deg2rad(val_sweep_aletas_deg))
-
-            # Posición del motor (Ejemplo: centrado en su longitud, al final del fuselaje)
-            pos_motor_z = pos_fus[2] + val_l_fus - val_l_motor / 2 # Centrado en su propia longitud
-            pos_motor = np.array([0., 0., pos_motor_z])
-            # Usar Componente base para el motor estructural de la GUI
-            motor = Componente("Motor", val_m_motor, pos_motor)
-
-            # --- WORKAROUND: Establecer explícitamente CG y CP para el componente Motor base ---
-            # Asume que el CG del motor estructural está en su centro geométrico
-            motor.CG = np.array([0.0, 0.0, val_l_motor / 2.0])
-            # Asume que el CP del motor estructural es 0 (o en su origen relativo) y su CN es 0
-            motor.CP = np.zeros(3) # Evita NoneType
-            motor.CN = 0           # Evita posible división por cero o error si se usa
-            # --- Fin WORKAROUND ---
-
-
-            # Diccionario de componentes para actualizar el objeto Cohete
-            componentes_actualizados_gui = {'Nariz': nariz, 'Fuselaje': fuselaje, 'Aletas': aletas, 'Boattail': boattail, 'Motor': motor}
+            # Boattail (Externo)
+            l_boat = get_float("boattail_longitud", "Longitud Boattail")
+            df_boat = get_float("boattail_diamF_boat", "Diámetro Frontal Boattail")
+            dr_boat = get_float("boattail_diamR_boat", "Diámetro Trasero Boattail")
+            m_boat = get_float("boattail_masa", "Masa Boattail")
+            e_boat = get_float("boattail_espesor", "Espesor Boattail")
+            pos_boat = np.array([0., 0., current_z]) # Al final del último cilindro
+            boattail = Boattail("Boattail", m_boat, pos_boat,
+                                longitud=l_boat, diamF_boat=df_boat, diamR_boat=dr_boat, espesor=e_boat)
+            componentes_actualizados["Boattail"] = boattail
 
             # --- Actualizar el Objeto Cohete ---
             if self.rocket is None:
-                # Si no había cohete, crea uno nuevo usando las rutas cargadas (o None)
                 print("Creando nuevo objeto Cohete desde GUI...")
-                self.rocket = Cohete("Cohete GUI", "desconocido",
-                                     componentes_actualizados_gui, componentes_actualizados_gui,
+                # Crear cohete con todos los componentes y las rutas CSV actuales
+                external_keys_for_cohete = ["Nariz", "Coples", "Tubo recup", "Transfer", "Tanquevacio", "Valvulas", "Cc", "Boattail"]
+                external_components_dict = {k: v for k, v in componentes_actualizados.items() if k in external_keys_for_cohete}
+                self.rocket = Cohete("Cohete GUI", "hibrido",
+                                     componentes_actualizados, external_components_dict,
                                      self.loaded_cd_path, self.loaded_thrust_path, self.loaded_mass_path, riel)
             else:
-                # Actualiza el cohete existente
                 print("Actualizando objeto Cohete existente desde GUI...")
-                self.rocket.componentes = componentes_actualizados_gui
-                self.rocket.componentes_externos = componentes_actualizados_gui # Asume mismos para aero
-                # Actualizar rutas y recargar tablas si es necesario (o si cambiaron)
-                # CORRECCIÓN: Asignar rutas a atributos temporales si Cohete no los guarda
-                #             y llamar a los métodos de carga explícitamente.
-                temp_cd_path = self.loaded_cd_path
-                temp_thrust_path = self.loaded_thrust_path
-                temp_mass_path = self.loaded_mass_path
+                self.rocket.componentes = componentes_actualizados
+                # Definir componentes externos explícitamente según la nueva clasificación
+                external_keys_for_cohete = ["Nariz", "Coples", "Tubo recup", "Transfer", "Tanquevacio", "Valvulas", "Cc", "Boattail"]
+                self.rocket.componentes_externos = {k: v for k, v in componentes_actualizados.items() if k in external_keys_for_cohete}
+
+                # Recargar tablas CSV si las rutas existen
                 try:
-                    if temp_cd_path and hasattr(self.rocket, 'cargar_tabla_Cd'):
-                         self.rocket.cargar_tabla_Cd(temp_cd_path)
-                    if temp_thrust_path and temp_mass_path and hasattr(self.rocket, 'cargar_tablas_motor'):
-                         self.rocket.cargar_tablas_motor(temp_thrust_path, temp_mass_path)
+                    if self.loaded_cd_path and hasattr(self.rocket, 'cargar_tabla_Cd'):
+                         self.rocket.cargar_tabla_Cd(self.loaded_cd_path)
+                    if self.loaded_thrust_path and self.loaded_mass_path and hasattr(self.rocket, 'cargar_tablas_motor'):
+                         self.rocket.cargar_tablas_motor(self.loaded_thrust_path, self.loaded_mass_path)
                 except Exception as e:
                      print(f"Advertencia: Error al recargar tablas CSV en Cohete: {e}")
 
 
             # Actualiza propiedades clave del cohete
-            self.rocket.d_ext = val_d_ext_fus # Diámetro de referencia
+            self.rocket.d_ext = d_ext_ref if d_ext_ref is not None else self.diam_ext_xitle # Usar diámetro de referencia
             self.rocket.calcular_propiedades() # Recalcular CG, CP, Masa, etc.
 
             messagebox.showinfo("Éxito", "Cohete actualizado desde la GUI.")
             print(f"Cohete actualizado. CG: {self.rocket.CG[2]:.3f} m, CP: {self.rocket.CP[2]:.3f} m (estático)")
 
-        except (ValueError, AssertionError) as e: messagebox.showerror("Error Validación", str(e))
+        except (ValueError, AssertionError, KeyError) as e: messagebox.showerror("Error Validación/Clave", str(e))
         except NameError as e: messagebox.showerror("Error Clase", f"Clase de componente no encontrada: {e}")
         except TypeError as e: messagebox.showerror("Error Argumentos", f"Error al crear componente, revisa argumentos: {e}\n{traceback.format_exc()}")
         except Exception as e: messagebox.showerror("Error", f"Error al actualizar cohete: {e}\n{traceback.format_exc()}")
+
 
     # --- Tab: Import CSV (Añadidos botones de visualización) ---
     def create_csv_import_tab(self):
@@ -672,7 +735,6 @@ class SimuladorCohetesAvanzado:
                 visualize_button = self.btn_visualize_thrust
                 if self.rocket:
                      # Actualizar ruta en cohete y recargar tablas
-                     # CORRECCION: Usar los nombres de atributo correctos de cohete.py
                      if hasattr(self.rocket, 'cargar_tablas_motor') and self.loaded_mass_path: # Necesita también la de masa
                          try:
                              self.rocket.cargar_tablas_motor(self.loaded_thrust_path, self.loaded_mass_path)
@@ -692,7 +754,6 @@ class SimuladorCohetesAvanzado:
                  label_widget = self.cd_file_label
                  visualize_button = self.btn_visualize_cd
                  if self.rocket:
-                      # CORRECCION: Usar los nombres de atributo correctos de cohete.py
                       if hasattr(self.rocket, 'cargar_tabla_Cd'):
                           try:
                               self.rocket.cargar_tabla_Cd(self.loaded_cd_path) # Recarga tabla
@@ -712,7 +773,6 @@ class SimuladorCohetesAvanzado:
                       self.mass_data = df # Almacenar DataFrame completo
                       self.loaded_mass_path = file_path
                       if self.rocket:
-                           # CORRECCION: Usar los nombres de atributo correctos de cohete.py
                            if hasattr(self.rocket, 'cargar_tablas_motor') and self.loaded_thrust_path: # Necesita también la de empuje
                                 try:
                                     self.rocket.cargar_tablas_motor(self.loaded_thrust_path, self.loaded_mass_path) # Recarga tablas
@@ -799,38 +859,61 @@ class SimuladorCohetesAvanzado:
         self.fig_csv.tight_layout(); self.canvas_csv.draw()
 
 
-    # --- Tab: Simulation Parameters (Sin cambios) ---
+    # --- Tab: Simulation Parameters (Botón Simular con estilo verde) ---
     def create_input_tab(self):
+        """Crea la pestaña para configurar los parámetros de lanzamiento y simulación."""
         self.input_frame = ttk.Frame(self.notebook, padding="10")
         self.notebook.add(self.input_frame, text="Parámetros de Simulación")
+
         col1_frame = ttk.Frame(self.input_frame); col1_frame.grid(row=0, column=0, padx=10, pady=5, sticky="nw")
         col2_frame = ttk.Frame(self.input_frame); col2_frame.grid(row=0, column=1, padx=10, pady=5, sticky="nw")
         col3_frame = ttk.Frame(self.input_frame); col3_frame.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+
+        # Launch Site (Col 1)
         self.create_section(col1_frame, "Sitio de Lanzamiento:", 0, 0)
-        self.latitud = self.create_entry(col1_frame, 1, 0, "Latitud (°):", getattr(riel, 'latitud', latitud_cord))
-        self.longitud = self.create_entry(col1_frame, 2, 0, "Longitud (°):", getattr(riel, 'longitud', longitud_cord))
-        self.altitud = self.create_entry(col1_frame, 3, 0, "Altitud (m):", getattr(riel, 'altitud', altitud_cord))
-        self.fecha = self.create_entry(col1_frame, 4, 0, "Fecha (YYYY-MM-DD):", fecha.strftime('%Y-%m-%d') if isinstance(fecha, datetime) else fecha)
+        # CORRECCIÓN: Pasar clave única para widgets de esta pestaña
+        self.latitud = self.create_entry(col1_frame, "input", "latitud", "Latitud (°):", getattr(riel, 'latitud', latitud_cord), 1, 0)
+        self.longitud = self.create_entry(col1_frame, "input", "longitud", "Longitud (°):", getattr(riel, 'longitud', longitud_cord), 2, 0)
+        self.altitud = self.create_entry(col1_frame, "input", "altitud", "Altitud (m):", getattr(riel, 'altitud', altitud_cord), 3, 0)
+        self.fecha = self.create_entry(col1_frame, "input", "fecha", "Fecha (YYYY-MM-DD):", fecha.strftime('%Y-%m-%d') if isinstance(fecha, datetime) else fecha, 4, 0)
+
+        # Launch Rail (Col 1)
         self.create_section(col1_frame, "Riel de Lanzamiento:", 5, 0)
-        self.longitud_riel = self.create_entry(col1_frame, 6, 0, "Longitud (m):", getattr(riel, 'longitud', 5.0))
-        self.angulo_riel = self.create_entry(col1_frame, 7, 0, "Ángulo Elevación (°):", np.rad2deg(getattr(riel, 'angulo', np.deg2rad(85))))
+        self.longitud_riel = self.create_entry(col1_frame, "input", "longitud_riel", "Longitud (m):", getattr(riel, 'longitud', 5.0), 6, 0)
+        self.angulo_riel = self.create_entry(col1_frame, "input", "angulo_riel", "Ángulo Elevación (°):", np.rad2deg(getattr(riel, 'angulo', np.deg2rad(85))), 7, 0)
+
+        # Wind (Col 2)
         self.create_section(col2_frame, "Viento (Modelo Simple):", 0, 0)
-        self.vel_base_viento = self.create_entry(col2_frame, 1, 0, "Velocidad Base (m/s):", getattr(viento_actual, 'vel_base', 0))
-        self.vel_mean_viento = self.create_entry(col2_frame, 2, 0, "Velocidad Media (m/s):", getattr(viento_actual, 'vel_mean', 5))
-        self.vel_var_viento = self.create_entry(col2_frame, 3, 0, "Variación Velocidad:", getattr(viento_actual, 'vel_var', 2))
-        self.var_ang_viento = self.create_entry(col2_frame, 4, 0, "Variación Ángulo (°):", getattr(viento_actual, 'var_ang', 10))
+        self.vel_base_viento = self.create_entry(col2_frame, "input", "vel_base_viento", "Velocidad Base (m/s):", getattr(viento_actual, 'vel_base', 0), 1, 0)
+        self.vel_mean_viento = self.create_entry(col2_frame, "input", "vel_mean_viento", "Velocidad Media (m/s):", getattr(viento_actual, 'vel_mean', 5), 2, 0)
+        self.vel_var_viento = self.create_entry(col2_frame, "input", "vel_var_viento", "Variación Velocidad:", getattr(viento_actual, 'vel_var', 2), 3, 0)
+        self.var_ang_viento = self.create_entry(col2_frame, "input", "var_ang_viento", "Variación Ángulo (°):", getattr(viento_actual, 'var_ang', 10), 4, 0)
+
+        # Simulation (Col 2)
         self.create_section(col2_frame, "Simulación:", 5, 0)
-        self.t_max = self.create_entry(col2_frame, 6, 0, "Tiempo Máximo (s):", 800)
-        self.dt = self.create_entry(col2_frame, 7, 0, "Paso de Tiempo (s):", 0.01)
-        integrator_options = []; default_integrator = ""
+        self.t_max = self.create_entry(col2_frame, "input", "t_max", "Tiempo Máximo (s):", 800, 6, 0)
+        self.dt = self.create_entry(col2_frame, "input", "dt", "Paso de Tiempo (s):", 0.01, 7, 0)
+
+        # Integrator Selection (Col 2)
+        integrator_options = []
+        default_integrator = ""
         if CUSTOM_INTEGRATORS_AVAILABLE: integrator_options.extend(['Euler', 'RungeKutta4']); default_integrator = 'RungeKutta4'
         if SCIPY_AVAILABLE: scipy_methods = ['RK45', 'RK23', 'DOP853', 'Radau', 'BDF', 'LSODA']; integrator_options.extend(scipy_methods);
         if not default_integrator and SCIPY_AVAILABLE: default_integrator = 'RK45'
         if not integrator_options: integrator_options = ["N/A"]; default_integrator = "N/A"
-        self.integrator_method_combo = self.create_combobox(col2_frame, 8, 0, "Método Integración:", integrator_options, default_integrator, textvariable=self.selected_integrator)
+        # CORRECCIÓN: Pasar clave única para widgets de esta pestaña
+        self.integrator_method_combo = self.create_combobox(col2_frame, "input", "integrator_method", "Método Integración:", integrator_options, default_integrator, 8, 0)
+        # No es necesario guardar en component_widgets si ya tenemos la variable self.integrator_method_combo
+        # self.component_widgets["input_integrator_method"] = self.integrator_method_combo
+        self.integrator_method_combo.configure(textvariable=self.selected_integrator) # Asociar variable
         if not SCIPY_AVAILABLE and not CUSTOM_INTEGRATORS_AVAILABLE: self.integrator_method_combo.config(state=tk.DISABLED)
-        self.btn_simular = ttk.Button(col3_frame, text="Iniciar Simulación", command=self.run_simulation); self.btn_simular.pack(side=tk.LEFT, padx=5, pady=10)
+
+        # Buttons and Progress (Bottom Frame)
+        # CORRECCIÓN: Aplicar estilo 'Sim.TButton' al botón de simular
+        self.btn_simular = ttk.Button(col3_frame, text="Iniciar Simulación", command=self.run_simulation, style='Sim.TButton')
+        self.btn_simular.pack(side=tk.LEFT, padx=5, pady=10)
         if not SCIPY_AVAILABLE and not CUSTOM_INTEGRATORS_AVAILABLE: self.btn_simular.config(state=tk.DISABLED)
+
         self.btn_save_input = ttk.Button(col3_frame, text="Guardar Parámetros", command=lambda: self.save_tab_data("input")); self.btn_save_input.pack(side=tk.LEFT, padx=5, pady=10)
         self.btn_load_input = ttk.Button(col3_frame, text="Cargar Parámetros", command=lambda: self.load_tab_data("input")); self.btn_load_input.pack(side=tk.LEFT, padx=5, pady=10)
         self.progress = ttk.Progressbar(col3_frame, orient="horizontal", length=300, mode="determinate", style='Horizontal.TProgressbar'); self.progress.pack(side=tk.LEFT, padx=10, pady=10, fill=tk.X, expand=True)
@@ -867,7 +950,7 @@ class SimuladorCohetesAvanzado:
     def create_wind_tab(self): self.wind_frame = self.create_results_tab("wind", "Viento Relativo")
     def create_summary_tab(self): self.summary_frame = self.create_results_tab("summary", "Resumen"); self.summary_text_widget = tk.Text(self.summary_frame, wrap="word", height=20, width=80, font=('Courier New', 10), relief=tk.FLAT, bg=self.style.lookup('TFrame', 'background'), fg='white', state=tk.DISABLED)
 
-    # --- Simulation Logic (Ajustado para verificar rutas y tablas CSV y corregir print) ---
+    # --- Simulation Logic (Corregido 'accangs' y verificación CSV) ---
     def run_simulation(self):
         """Runs the flight simulation using the selected integration method."""
         self.simulation_done = False
@@ -1129,47 +1212,32 @@ class SimuladorCohetesAvanzado:
             messagebox.showerror("Error Guardar", f"No se pudo guardar el archivo de resumen:\n{e}")
         # No finally block needed here unless there's cleanup to do regardless of success/failure
 
-    # --- Save/Load Configuration Data (Refactored Validation) ---
+    # --- Save/Load Configuration Data (Actualizado para componentes individuales) ---
     def save_tab_data(self, tab_name):
         """Saves configuration data from Rocket or Input tab to JSON."""
         data = {}
         if tab_name == "rocket":
             try:
-                # Collect data from rocket tab widgets
-                data = {
-                    "version": 1.1, "description": "Definición cohete",
-                    "nose_length": self.nose_length.get(),"nose_diameter": self.nose_diameter.get(),"nose_mass": self.nose_mass.get(),"nose_geometry": self.nose_geometry.get(),
-                    "body_length": self.body_length.get(),"body_diameter": self.body_diameter.get(),"body_thickness": self.body_thickness.get(),"body_mass": self.body_mass.get(),
-                    "fin_count": self.fin_count.get(),"fin_span": self.fin_span.get(),"fin_root_chord": self.fin_root_chord.get(),"fin_tip_chord": self.fin_tip_chord.get(),"fin_sweep": self.fin_sweep.get(),"fin_mass": self.fin_mass.get(),
-                    "boattail_length": self.boattail_length.get(),"boattail_front_diameter": self.boattail_front_diameter.get(),"boattail_rear_diameter": self.boattail_rear_diameter.get(),"boattail_mass": self.boattail_mass.get(),
-                    "motor_mass": self.motor_mass.get(),"motor_length": self.motor_length.get(),"motor_diameter": self.motor_diameter.get()
-                }
+                data = { "version": 1.2, "description": "Definición detallada cohete (Xitle)"}
+                # Iterar sobre los widgets guardados para componentes
+                for key, widget in self.component_widgets.items():
+                    # Solo guardar widgets que pertenecen a las pestañas de cohete
+                    if key.startswith(("nariz_", "coples_", "tubo_recup_", "transfer_", "tanquevacio_",
+                                       "valvulas_", "cc_", "aletas_", "boattail_")):
+                        data[key] = widget.get()
 
-                # --- Refactored Validation ---
-                required_numeric = ["nose_length", "nose_diameter", "nose_mass",
-                                   "body_length", "body_diameter", "body_thickness", "body_mass",
-                                   "fin_count", "fin_span", "fin_root_chord", "fin_tip_chord", "fin_sweep", "fin_mass",
-                                   "boattail_length", "boattail_front_diameter", "boattail_rear_diameter", "boattail_mass",
-                                   "motor_mass", "motor_length", "motor_diameter"]
-
-                for key in required_numeric:
-                    value_str = data.get(key) # Get value safely
-                    if not value_str:
-                        raise ValueError(f"Campo '{key}' está vacío.")
-                    try:
-                        if 'count' in key:
-                            int(value_str) # Try int conversion
-                        else:
-                            float(value_str) # Try float conversion
-                    except ValueError:
-                        # Raise a more specific error if conversion fails
-                        raise ValueError(f"Valor inválido para '{key}': '{value_str}' no es un número válido.")
-
-                # Check nose_geometry separately
-                if not data.get("nose_geometry"):
-                    raise ValueError("Campo 'nose_geometry' está vacío.")
-                # --- End of Refactored Validation ---
-
+                # Validación básica (solo si los campos no están vacíos)
+                for key, value in data.items():
+                    if key not in ["version", "description", "nariz_geometria"]:
+                        if not value: raise ValueError(f"Campo '{key}' está vacío.")
+                        # Intentar conversión básica, pero no fallar si no es número (ej. geometria)
+                        try:
+                            if 'count' in key or 'numf' in key: int(value)
+                            elif key != "nariz_geometria": float(value)
+                        except ValueError:
+                             # Permitir no numéricos como geometria
+                             if key != "nariz_geometria":
+                                 raise ValueError(f"Valor inválido para '{key}': '{value}'")
             except ValueError as e:
                  messagebox.showerror("Error Validación", f"Datos cohete: {e}"); return
             except Exception as e:
@@ -1216,17 +1284,370 @@ class SimuladorCohetesAvanzado:
             # Read JSON data
             with open(file_path, 'r', encoding='utf-8') as f: data = json.load(f)
             if tab_name == "rocket":
+                # Populate widgets based on saved keys
+                for key, widget in self.component_widgets.items():
+                    # Solo cargar widgets que pertenecen a las pestañas de cohete
+                    if key.startswith(("nariz_", "coples_", "tubo_recup_", "transfer_", "tanquevacio_",
+                                       "valvulas_", "cc_", "aletas_", "boattail_")):
+                        if key in data:
+                            value = str(data[key])
+                            if isinstance(widget, ttk.Entry):
+                                widget.delete(0, tk.END); widget.insert(0, value)
+                            elif isinstance(widget, ttk.Combobox):
+                                if value in widget['values']: widget.set(value)
+                                else: print(f"Advertencia: Valor '{value}' para '{key}' no es opción válida."); widget.set(widget['values'][0])
+                        else:
+                            print(f"Advertencia: Clave '{key}' no encontrada en JSON cargado.")
+                self.update_rocket_from_gui() # Actualizar objeto cohete con datos cargados
+            elif tab_name == "input":
                 # Map JSON keys to GUI widgets
-                mapping = { "nose_length": self.nose_length, "nose_diameter": self.nose_diameter, "nose_mass": self.nose_mass, "nose_geometry": self.nose_geometry, "body_length": self.body_length, "body_diameter": self.body_diameter, "body_thickness": self.body_thickness, "body_mass": self.body_mass, "fin_count": self.fin_count, "fin_span": self.fin_span, "fin_root_chord": self.fin_root_chord, "fin_tip_chord": self.fin_tip_chord, "fin_sweep": self.fin_sweep, "fin_mass": self.fin_mass, "boattail_length": self.boattail_length, "boattail_front_diameter": self.boattail_front_diameter, "boattail_rear_diameter": self.boattail_rear_diameter, "boattail_mass": self.boattail_mass, "motor_mass": self.motor_mass, "motor_length": self.motor_length, "motor_diameter": self.motor_diameter }
+                mapping = { "latitud": self.latitud, "longitud": self.longitud, "altitud": self.altitud, "fecha": self.fecha, "longitud_riel": self.longitud_riel, "angulo_riel": self.angulo_riel, "vel_base_viento": self.vel_base_viento, "vel_mean_viento": self.vel_mean_viento, "vel_var_viento": self.vel_var_viento, "var_ang_viento": self.var_ang_viento, "t_max": self.t_max, "dt": self.dt, "integrator_method": self.integrator_method_combo }
                 # Populate widgets
                 for key, widget in mapping.items():
-                    if key in data: value = str(data[key]);
-                    if isinstance(widget, ttk.Entry): widget.delete(0, tk.END); widget.insert(0, value)
-                    elif isinstance(widget, ttk.Combobox):
-                        if value in widget['values']: widget.set(value)
-                        else: print(f"Advertencia: Valor '{value}' para '{key}' no es opción válida."); widget.set(widget['values'][0])
-                    else: print(f"Advertencia: Clave '{key}' no encontrada en JSON.")
-                self.update_rocket_from_gui()
+                     if key in data: value = str(data[key]);
+                     if isinstance(widget, ttk.Entry): widget.delete(0, tk.END); widget.insert(0, value)
+                     elif isinstance(widget, ttk.Combobox):
+                         if value in widget['values']: widget.set(value)
+                         else: print(f"Advertencia: Método integrador '{value}' no es opción válida."); widget.set(widget['values'][0])
+                     else: print(f"Advertencia: Clave '{key}' no encontrada en JSON.")
+                self.update_simulation_parameters()
+            messagebox.showinfo("Éxito", f"Configuración '{tab_name}' cargada desde:\n{file_path}")
+        except FileNotFoundError: messagebox.showerror("Error", f"Archivo no encontrado: {file_path}")
+        except json.JSONDecodeError: messagebox.showerror("Error", f"JSON inválido: {file_path}")
+        except Exception as e: messagebox.showerror("Error Cargar", f"No se pudo cargar/procesar JSON:\n{e}\n{traceback.format_exc()}")
+
+    # --- Save Simulation Results CSV (Sin cambios) ---
+    def save_simulation_results(self):
+        if self.simulation_data is None: print("No hay datos de simulación para guardar."); return
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S"); default_filename = f"simulacion_resultados_{self.selected_integrator.get()}_{timestamp}.csv"
+        file_path = filedialog.asksaveasfilename(title="Guardar Resultados Completos", initialfile=default_filename, defaultextension=".csv", filetypes=[("CSV files", "*.csv"), ("All files", "*.*")])
+        if not file_path: return
+        try: self.simulation_data.to_csv(file_path, index=False, encoding='utf-8'); messagebox.showinfo("Éxito", f"Resultados guardados en:\n{file_path}")
+        except Exception as e: messagebox.showerror("Error Guardar", f"No se pudo guardar CSV:\n{e}")
+
+    # --- Nueva Pestaña: Visualización Cohete ---
+    def create_visualization_tab(self):
+        """Crea la pestaña para visualizar el cohete."""
+        self.vis_frame = ttk.Frame(self.notebook, padding="10")
+        self.notebook.add(self.vis_frame, text="Visualización Cohete")
+
+        # Frame para el botón y el canvas
+        vis_content_frame = ttk.Frame(self.vis_frame)
+        vis_content_frame.pack(expand=True, fill="both", pady=(0, 5)) # Padding inferior para botones
+
+        # Botón para generar la visualización
+        btn_visualize = ttk.Button(vis_content_frame, text="Generar Visualización", command=self.visualize_rocket)
+        btn_visualize.pack(pady=10)
+        if not VISUALIZATION_AVAILABLE:
+            btn_visualize.config(state=tk.DISABLED)
+            ttk.Label(vis_content_frame, text="Función 'dibujar_cohete2' no encontrada.", foreground="orange").pack()
+
+        # Canvas para la gráfica del cohete
+        self.fig_vis, self.ax_vis = plt.subplots(figsize=(10, 4))
+        self.canvas_vis = FigureCanvasTkAgg(self.fig_vis, master=vis_content_frame)
+        self.canvas_widget_vis = self.canvas_vis.get_tk_widget()
+        self.canvas_widget_vis.pack(fill=tk.BOTH, expand=True, pady=5)
+        self.ax_vis.set_title("Visualización del Vehículo")
+        self.ax_vis.set_xlabel("Longitud (m)")
+        self.ax_vis.set_ylabel("Eje transversal (m)")
+        self.ax_vis.set_aspect('equal', adjustable='box')
+        self.ax_vis.grid(True, linestyle='--', alpha=0.7)
+        self.fig_vis.tight_layout()
+        self.canvas_vis.draw() # Dibuja el canvas vacío inicialmente
+
+        # --- Botones Guardar/Cargar Definición ---
+        vis_button_frame = ttk.Frame(self.vis_frame)
+        vis_button_frame.pack(side="bottom", fill="x", pady=5)
+
+        btn_save_rocket_vis = ttk.Button(vis_button_frame, text="Guardar Definición", command=lambda: self.save_tab_data("rocket"))
+        btn_save_rocket_vis.pack(side=tk.LEFT, padx=5)
+        btn_load_rocket_vis = ttk.Button(vis_button_frame, text="Cargar Definición", command=lambda: self.load_tab_data("rocket"))
+        btn_load_rocket_vis.pack(side=tk.LEFT, padx=5)
+
+    def visualize_rocket(self):
+        """Genera la visualización del cohete basado en los componentes actuales."""
+        if not VISUALIZATION_AVAILABLE:
+            messagebox.showwarning("Visualización no disponible", "La función 'dibujar_cohete2' no se encontró.")
+            return
+        if self.rocket is None or not hasattr(self.rocket, 'componentes') or not self.rocket.componentes:
+            messagebox.showwarning("Sin Cohete", "No hay un cohete definido o componentes para visualizar.")
+            return
+
+        print("Generando visualización del cohete...")
+        self.ax_vis.clear() # Limpiar gráfica anterior
+
+        try:
+            # Extraer datos necesarios del objeto self.rocket
+            # Usar getattr con defaults por si algún componente falta
+            nariz = self.rocket.componentes.get("Nariz")
+            aletas = self.rocket.componentes.get("Aletas")
+            boattail = self.rocket.componentes.get("Boattail")
+
+            # Calcular longitud total del fuselaje (suma de longitudes de cilindros)
+            cilindros_keys = ["Coples", "Tubo recup", "Transfer", "Tanquevacio", "Valvulas", "Cc"]
+            long_fuselaje_total = 0
+            for key in cilindros_keys:
+                comp = self.rocket.componentes.get(key)
+                if comp:
+                    long_fuselaje_total += getattr(comp, 'long', 0)
+
+            long_nariz = getattr(nariz, 'long', 0)
+            diam_ext = getattr(self.rocket, 'd_ext', 0.152) # Usar el diámetro de referencia
+            root_aletas = getattr(aletas, 'C_r', 0)
+            tip_aletas = getattr(aletas, 'C_t', 0)
+            fin_height = getattr(aletas, 'span', getattr(aletas, 'semispan', 0) * 2) # span o 2*semispan
+            long_boat = getattr(boattail, 'long', 0)
+            rear_boat = getattr(boattail, 'dR', diam_ext) # Default al diámetro externo si no hay boattail
+
+            # Calcular CG/CP total (ya deberían estar calculados en self.rocket)
+            cg_total_z = self.rocket.CG[2] if self.rocket.CG is not None else 0
+            cp_total_z = self.rocket.CP[2] if self.rocket.CP is not None else 0
+
+            # Listas de CGs/CPs de componentes (todos los componentes)
+            CG_list = []
+            CP_list = []
+            # Iterar sobre TODOS los componentes en el orden en que están en el cohete (asumido por __init__)
+            component_order_keys = ["Nariz", "Coples", "Tubo recup", "Transfer", "Tanquevacio", "Valvulas", "Cc", "Aletas", "Boattail"]
+            for key in component_order_keys:
+                 comp = self.rocket.componentes.get(key)
+                 if comp:
+                      # La posición del CG/CP en la gráfica es relativa al inicio del cohete
+                      pos_CG = getattr(comp, 'posicion', np.zeros(3))[2] + getattr(comp, 'CG', np.zeros(3))[2]
+                      pos_CP = getattr(comp, 'posicion', np.zeros(3))[2] + getattr(comp, 'CP', np.zeros(3))[2]
+                      CG_list.append(pos_CG)
+                      CP_list.append(pos_CP)
+
+            y_scatter = np.zeros(len(CG_list)) # Array Y para scatter
+
+            # Llamar a la función de dibujo
+            dibujar_cohete2(self.ax_vis, angle=0, x_cm=cg_total_z, y_cm=0,
+                            body_l=long_fuselaje_total, body_w=diam_ext,
+                            nose_l=long_nariz, fin_tip=tip_aletas, fin_root=root_aletas,
+                            fin_h=fin_height, boattail_length=long_boat, boat_rear=rear_boat)
+
+            # Dibujar puntos de CG/CP
+            self.ax_vis.scatter(CG_list, y_scatter, color='darkorange', s=50, alpha=0.8, marker="P", label="CGs componentes")
+            self.ax_vis.scatter(CP_list, y_scatter, color='yellowgreen', s=50, alpha=0.8, marker="X", label="CPs componentes")
+            self.ax_vis.scatter(cg_total_z, 0, color='red', marker="P", s=150, label="CG total")
+            self.ax_vis.scatter(cp_total_z, 0, color='dodgerblue', marker="X", s=150, label="CP total")
+
+            # Estética del gráfico
+            self.ax_vis.set_aspect("equal")
+            self.ax_vis.set_title("Visualización del Vehículo", fontsize=12, weight='bold')
+            self.ax_vis.set_xlabel("Longitud (m)")
+            self.ax_vis.set_ylabel("Eje transversal (m)")
+            self.ax_vis.set_ylim(-0.5, 0.5) # Limitar eje y para mejor visualización
+            self.ax_vis.legend(loc="best", fontsize=8)
+            self.ax_vis.grid(True, linestyle='--', alpha=0.7)
+            self.fig_vis.tight_layout()
+            self.canvas_vis.draw() # Redibujar el canvas
+
+        except ImportError:
+             messagebox.showerror("Error", "No se pudo importar 'dibujar_cohete2'. Verifica la ruta.")
+        except AttributeError as e:
+             messagebox.showerror("Error Atributo", f"Falta un atributo necesario en el cohete o sus componentes para la visualización: {e}")
+             print(traceback.format_exc())
+        except Exception as e:
+            messagebox.showerror("Error Visualización", f"Ocurrió un error al generar la visualización:\n{e}")
+            print(traceback.format_exc())
+
+
+    # --- Update Plots (Sin cambios) ---
+    def update_plots(self):
+        if self.simulation_data is None: print("No hay datos para graficar."); return
+        tiempos = self.simulation_data['Tiempo (s)']
+        self.plot_trajectory(tiempos, self.simulation_data[['X (m)', 'Y (m)', 'Z (m)']].values)
+        self.plot_position_velocity(tiempos, self.simulation_data['Z (m)'], self.simulation_data['Velocidad (m/s)'])
+        self.plot_forces(tiempos, self.simulation_data['Empuje (N)'], self.simulation_data['Arrastre (N)'], self.simulation_data['Normal (N)'])
+        self.plot_angles(tiempos, self.simulation_data['Theta (rad)'], self.simulation_data['Gamma (rad)'], self.simulation_data['Alpha (rad)'])
+        self.plot_stability(tiempos, self.simulation_data['CP (m)'], self.simulation_data['CG (m)'], self.simulation_data['Estabilidad (cal)'])
+        self.plot_wind(tiempos, self.simulation_data['Viento Mag (m/s)'], self.simulation_data['Viento Dir (rad)'])
+
+    def _plot_on_tab(self, frame, plot_func, *args, **kwargs):
+        for widget in frame.winfo_children(): widget.destroy()
+        try: fig, ax = plt.subplots(figsize=(8, 6)); plot_func(ax, *args, **kwargs); ax.grid(True); fig.tight_layout(); canvas = FigureCanvasTkAgg(fig, master=frame); canvas.draw(); canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e: messagebox.showerror("Error Graficación", f"No se pudo generar gráfica: {e}\n{traceback.format_exc()}"); ttk.Label(frame, text=f"Error al graficar:\n{e}", foreground="red").pack(expand=True)
+
+    def plot_trajectory(self, tiempos, posiciones):
+        frame = self.trajectory_frame;
+        for widget in frame.winfo_children(): widget.destroy()
+        try:
+            fig = plt.figure(figsize=(8, 6)); ax = fig.add_subplot(111, projection='3d'); ax.plot(posiciones[:, 0], posiciones[:, 1], posiciones[:, 2], label='Trayectoria')
+            if len(posiciones) > 0: idx_apogeo = np.argmax(posiciones[:, 2]); ax.scatter(posiciones[idx_apogeo, 0], posiciones[idx_apogeo, 1], posiciones[idx_apogeo, 2], color='red', s=50, label=f'Apogeo ({posiciones[idx_apogeo, 2]:.0f} m)'); max_range = np.max(np.abs(posiciones)) * 1.1 if np.max(np.abs(posiciones)) > 0 else 10; ax.set_xlim(-max_range, max_range); ax.set_ylim(-max_range, max_range); ax.set_zlim(0, max(10, posiciones[idx_apogeo, 2] * 1.1))
+            ax.set_xlabel('X (m)'); ax.set_ylabel('Y (m)'); ax.set_zlabel('Altitud (Z) (m)'); ax.set_title('Trayectoria 3D del Cohete'); ax.legend(); ax.grid(True); fig.tight_layout(); canvas = FigureCanvasTkAgg(fig, master=frame); canvas.draw(); canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        except Exception as e: messagebox.showerror("Error Graficando Trayectoria", f"Error: {e}\n{traceback.format_exc()}"); ttk.Label(frame, text=f"Error graficando trayectoria:\n{e}", foreground="red").pack(expand=True)
+
+    def plot_position_velocity(self, tiempos, altitudes, velocidades_mag):
+        def _draw(ax): ax2 = ax.twinx(); l1, = ax.plot(tiempos, altitudes, color='blue', label='Altitud'); ax.set_xlabel('Tiempo (s)'); ax.set_ylabel('Altitud (m)', color='blue'); ax.tick_params(axis='y', labelcolor='blue'); l2, = ax2.plot(tiempos, velocidades_mag, color='red', label='Velocidad'); ax2.set_ylabel('Velocidad (m/s)', color='red'); ax2.tick_params(axis='y', labelcolor='red'); ax.set_title('Altitud y Velocidad vs Tiempo'); ax.legend([l1, l2], [l.get_label() for l in [l1, l2]])
+        self._plot_on_tab(self.position_frame, _draw)
+
+    def plot_forces(self, tiempos, Tmags, Dmags, Nmags):
+        def _draw(ax): ax.plot(tiempos, Tmags, label='Empuje (T)'); ax.plot(tiempos, Dmags, label='Arrastre (D)'); ax.plot(tiempos, Nmags, label='Normal (N)'); ax.set_xlabel('Tiempo (s)'); ax.set_ylabel('Fuerza (N)'); ax.set_title('Magnitud de Fuerzas vs Tiempo'); ax.legend(); ax.set_yscale('log'); ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+        self._plot_on_tab(self.forces_frame, _draw)
+
+    def plot_angles(self, tiempos, thetas, Gammas, Alphas):
+        def _draw(ax): ax.plot(tiempos, np.rad2deg(thetas), label='Pitch (Theta)'); ax.plot(tiempos, np.rad2deg(Gammas), label='Trayectoria (Gamma)'); ax.plot(tiempos, np.rad2deg(Alphas), label='Ataque (Alpha)'); ax.set_xlabel('Tiempo (s)'); ax.set_ylabel('Ángulo (grados)'); ax.set_title('Ángulos de Vuelo vs Tiempo'); ax.legend()
+        self._plot_on_tab(self.angles_frame, _draw)
+
+    def plot_stability(self, tiempos, CPs, CGs, stability):
+        def _draw(ax): ax2 = ax.twinx(); l1, = ax.plot(tiempos, CPs, color='cyan', label='CP'); l2, = ax.plot(tiempos, CGs, color='magenta', label='CG'); ax.set_xlabel('Tiempo (s)'); ax.set_ylabel('Posición Longitudinal (m)', color='black'); ax.tick_params(axis='y', labelcolor='black'); l3, = ax2.plot(tiempos, stability, color='orange', linestyle='--', label='Margen Estático'); ax2.set_ylabel('Margen Estático (calibres)', color='orange'); ax2.tick_params(axis='y', labelcolor='orange'); l4 = ax2.axhline(1.0, color='gray', linestyle=':', linewidth=1, label='Estabilidad Mín (1 cal)'); ax.set_title('Estabilidad Longitudinal vs Tiempo'); ax.legend([l1, l2, l3, l4], [l.get_label() for l in [l1, l2, l3, l4]], loc='best')
+        self._plot_on_tab(self.stability_frame, _draw)
+
+    def plot_wind(self, tiempos, viento_mags, viento_dirs):
+        def _draw(ax): ax2 = ax.twinx(); l1, = ax.plot(tiempos, viento_mags, color='green', label='Magnitud Viento Rel'); ax.set_xlabel('Tiempo (s)'); ax.set_ylabel('Velocidad (m/s)', color='green'); ax.tick_params(axis='y', labelcolor='green'); viento_dirs_deg = (np.rad2deg(viento_dirs) + 180) % 360 - 180; l2, = ax2.plot(tiempos, viento_dirs_deg, color='purple', linestyle=':', label='Dirección Viento Rel'); ax2.set_ylabel('Dirección (grados)', color='purple'); ax2.tick_params(axis='y', labelcolor='purple'); ax2.set_ylim(-180, 180); ax.set_title('Viento Relativo vs Tiempo'); ax.legend([l1, l2], [l.get_label() for l in [l1, l2]])
+        self._plot_on_tab(self.wind_frame, _draw)
+
+    # --- Summary Tab ---
+    def update_summary_tab(self):
+        """Updates the summary tab with data from self.simulation_summary."""
+        for widget in self.summary_frame.winfo_children(): widget.destroy() # Clear frame
+        if self.simulation_summary is None: self.show_no_simulation_message(self.summary_frame); return
+
+        # Recreate the text widget to display summary
+        self.summary_text_widget = tk.Text(self.summary_frame, wrap="word", height=25, width=80,
+                                           font=('Courier New', 10), relief=tk.SOLID, borderwidth=1,
+                                           bg='#2E2E2E', fg='white', state=tk.NORMAL) # Enable to insert
+        self.summary_text_widget.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+
+        summary_str = "--- Resumen de la Simulación ---\n\n"
+        # Put integrator method and dt first if they exist
+        if 'Método Integración' in self.simulation_summary:
+             summary_str += f"{'Método Integración':<35}: {self.simulation_summary['Método Integración']:>15}\n"
+        if 'Paso de Tiempo (s)' in self.simulation_summary:
+             summary_str += f"{'Paso de Tiempo (s)':<35}: {self.simulation_summary['Paso de Tiempo (s)']:>15}\n"
+        summary_str += "-"*52 + "\n" # Separator
+
+        # Add the rest of the summary items
+        for key, value in self.simulation_summary.items():
+            if key not in ['Método Integración', 'Paso de Tiempo (s)']: # Avoid duplicates
+                if isinstance(value, float): summary_str += f"{key:<35}: {value:>15.2f}\n"
+                elif isinstance(value, str): summary_str += f"{key:<35}: {value:>15}\n"
+                else: summary_str += f"{key:<35}: {str(value):>15}\n"
+
+        self.summary_text_widget.insert(tk.END, summary_str)
+        self.summary_text_widget.config(state=tk.DISABLED) # Disable editing
+
+        # Button to save summary
+        save_summary_btn = ttk.Button(self.summary_frame, text="Guardar Resumen (.txt)",
+                                      command=self.save_summary_to_file)
+        save_summary_btn.pack(pady=5)
+
+    # --- Save Summary (Corrected try-except block) ---
+    def save_summary_to_file(self):
+        """Saves the content of the summary tab to a text file."""
+        if not hasattr(self, 'summary_text_widget') or self.simulation_summary is None:
+            messagebox.showwarning("Sin Datos", "No hay resumen de simulación para guardar.")
+            return
+
+        file_path = filedialog.asksaveasfilename(
+            title="Guardar Resumen",
+            defaultextension=".txt",
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
+        )
+        if not file_path:
+            return # User cancelled
+
+        # --- Corrected try-except block ---
+        try:
+            # Get text content from the Text widget
+            summary_str = self.summary_text_widget.get("1.0", tk.END)
+            # Write the content to the selected file
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(summary_str)
+            # Show success message
+            messagebox.showinfo("Éxito", f"Resumen guardado en:\n{file_path}")
+        except Exception as e:
+            # Show error message if saving fails
+            messagebox.showerror("Error Guardar", f"No se pudo guardar el archivo de resumen:\n{e}")
+        # No finally block needed here unless there's cleanup to do regardless of success/failure
+
+    # --- Save/Load Configuration Data (Actualizado para componentes individuales) ---
+    def save_tab_data(self, tab_name):
+        """Saves configuration data from Rocket or Input tab to JSON."""
+        data = {}
+        if tab_name == "rocket":
+            try:
+                data = { "version": 1.2, "description": "Definición detallada cohete (Xitle)"}
+                # Iterar sobre los widgets guardados para componentes
+                for key, widget in self.component_widgets.items():
+                    # Solo guardar widgets que pertenecen a las pestañas de cohete
+                    if key.startswith(("nariz_", "coples_", "tubo_recup_", "transfer_", "tanquevacio_",
+                                       "valvulas_", "cc_", "aletas_", "boattail_")):
+                        data[key] = widget.get()
+
+                # Validación básica (solo si los campos no están vacíos)
+                for key, value in data.items():
+                    if key not in ["version", "description", "nariz_geometria"]:
+                        if not value: raise ValueError(f"Campo '{key}' está vacío.")
+                        # Intentar conversión básica, pero no fallar si no es número (ej. geometria)
+                        try:
+                            if 'count' in key or 'numf' in key: int(value)
+                            elif key != "nariz_geometria": float(value)
+                        except ValueError:
+                             # Permitir no numéricos como geometria
+                             if key != "nariz_geometria":
+                                 raise ValueError(f"Valor inválido para '{key}': '{value}'")
+            except ValueError as e:
+                 messagebox.showerror("Error Validación", f"Datos cohete: {e}"); return
+            except Exception as e:
+                 messagebox.showerror("Error", f"Error recopilando datos cohete: {e}"); return
+
+        elif tab_name == "input":
+            try:
+                # Collect data from input tab widgets
+                data = {
+                    "version": 1.1, "description": "Parámetros simulación",
+                    "latitud": self.latitud.get(),"longitud": self.longitud.get(),"altitud": self.altitud.get(),"fecha": self.fecha.get(),
+                    "longitud_riel": self.longitud_riel.get(),"angulo_riel": self.angulo_riel.get(),
+                    "vel_base_viento": self.vel_base_viento.get(),"vel_mean_viento": self.vel_mean_viento.get(),"vel_var_viento": self.vel_var_viento.get(),"var_ang_viento": self.var_ang_viento.get(),
+                    "t_max": self.t_max.get(),"dt": self.dt.get(),
+                    "integrator_method": self.selected_integrator.get() # Save integrator
+                }
+                # Basic validation
+                for key, value in data.items():
+                     if key not in ["version", "description", "fecha", "integrator_method"]:
+                          if not value: raise ValueError(f"Campo '{key}' vacío.")
+                          float(value) # Try float conversion
+                     if key == 'fecha': datetime.strptime(value, '%Y-%m-%d') # Validate date format
+                     if key == 'integrator_method' and value == 'N/A': raise ValueError("Método integrador no válido.")
+            except ValueError as e: messagebox.showerror("Error Validación", f"Parámetros simulación: {e}"); return
+            except Exception as e: messagebox.showerror("Error", f"Error recopilando parámetros: {e}"); return
+        else:
+            messagebox.showerror("Error Interno", f"Pestaña no reconocida para guardar: {tab_name}"); return
+
+        # Ask user for save location
+        file_path = filedialog.asksaveasfilename(title=f"Guardar Configuración {tab_name.capitalize()}", defaultextension=".json", filetypes=[("JSON files", "*.json"), ("All files", "*.*")])
+        if file_path:
+            try:
+                # Write data to JSON file
+                with open(file_path, 'w', encoding='utf-8') as f: json.dump(data, f, indent=4)
+                messagebox.showinfo("Éxito", f"Configuración '{tab_name}' guardada en:\n{file_path}")
+            except Exception as e: messagebox.showerror("Error Guardar", f"No se pudo guardar JSON:\n{e}")
+
+    def load_tab_data(self, tab_name):
+        """Loads configuration data from a JSON file into the corresponding tab."""
+        # Ask user for file location
+        file_path = filedialog.askopenfilename(title=f"Cargar Configuración {tab_name.capitalize()}", filetypes=[("JSON files", "*.json"), ("All files", "*.*")])
+        if not file_path: return # User cancelled
+        try:
+            # Read JSON data
+            with open(file_path, 'r', encoding='utf-8') as f: data = json.load(f)
+            if tab_name == "rocket":
+                # Populate widgets based on saved keys
+                for key, widget in self.component_widgets.items():
+                    # Solo cargar widgets que pertenecen a las pestañas de cohete
+                    if key.startswith(("nariz_", "coples_", "tubo_recup_", "transfer_", "tanquevacio_",
+                                       "valvulas_", "cc_", "aletas_", "boattail_")):
+                        if key in data:
+                            value = str(data[key])
+                            if isinstance(widget, ttk.Entry):
+                                widget.delete(0, tk.END); widget.insert(0, value)
+                            elif isinstance(widget, ttk.Combobox):
+                                if value in widget['values']: widget.set(value)
+                                else: print(f"Advertencia: Valor '{value}' para '{key}' no es opción válida."); widget.set(widget['values'][0])
+                        else:
+                            print(f"Advertencia: Clave '{key}' no encontrada en JSON cargado.")
+                self.update_rocket_from_gui() # Actualizar objeto cohete con datos cargados
             elif tab_name == "input":
                 # Map JSON keys to GUI widgets
                 mapping = { "latitud": self.latitud, "longitud": self.longitud, "altitud": self.altitud, "fecha": self.fecha, "longitud_riel": self.longitud_riel, "angulo_riel": self.angulo_riel, "vel_base_viento": self.vel_base_viento, "vel_mean_viento": self.vel_mean_viento, "vel_var_viento": self.vel_var_viento, "var_ang_viento": self.var_ang_viento, "t_max": self.t_max, "dt": self.dt, "integrator_method": self.integrator_method_combo }
