@@ -25,8 +25,6 @@ class RungeKutta4:
         new_state = state + dt * (k1 + 2*k2 + 2*k3 + k4) / 6
         return new_state, dt
     
-    '''
-
 # 3. Runge-Kutta 2
 class RungeKutta2:
     def __init__(self, fun_derivs):
@@ -37,7 +35,8 @@ class RungeKutta2:
         k2 = self.fun_derivadas(t + dt, state + k1 * dt)
         new_state = state + dt * (k1 + k2) / 2
         return new_state, dt
-        
+    
+
 # 4. Método de Runge-Kutt-Fehlberg 45
 class RKF45:
     def __init__(self, fun_derivs):
@@ -79,6 +78,7 @@ class RKF45:
                 dt = dt_nuevo
 
         return zkp, dt
+    
 
 #############################################
 #Metodo de Euler adaptivo
@@ -139,7 +139,7 @@ class DormanPrince853:
             # Si el error es demasiado grande, reducir el tamaño del paso y repetir
             dt_new = self.S * dt * (self.tol / error) ** 0.5
             return state, dt_new
-'''
+
 
 
 if __name__ == '__main__':

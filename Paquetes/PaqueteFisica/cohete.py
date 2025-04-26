@@ -71,8 +71,24 @@ class Cohete:
       #self.parachute_active1 = True
 
     # Calcular el área transversal efectiva del cohete (según fuselaje)
+    # Método calc_A corregido en Paquetes/PaqueteFisica/cohete.py
     def calc_A(self):
-      self.A = pi * self.componentes['coples'].rad_ext**2
+        # Intentar obtener el componente 'Fuselaje' que viene de la GUI
+        fuselaje_comp = self.componentes.get('Fuselaje')
+        if fuselaje_comp and hasattr(fuselaje_comp, 'rad_ext'):
+            self.A = math.pi * fuselaje_comp.rad_ext**2
+            print(f"Área calculada usando 'Fuselaje': {self.A}") # Mensaje de depuración
+        # Si no existe 'Fuselaje', intentar con 'coples' (por si se usa en otro lado)
+        elif 'coples' in self.componentes and hasattr(self.componentes['coples'], 'rad_ext'):
+            print("Advertencia: Usando 'coples' para calcular área.") # Mensaje de depuración
+            self.A = math.pi * self.componentes['coples'].rad_ext**2
+        # Fallback usando d_ext si está definido en el cohete
+        elif self.d_ext is not None:
+            print("Advertencia: Usando 'self.d_ext' para calcular área.") # Mensaje de depuración
+            self.A = math.pi * (self.d_ext / 2)**2
+        else:
+            print("Error Crítico: No se pudo calcular el área del cohete. Componente 'Fuselaje' o 'coples' con 'rad_ext' no encontrado, y self.d_ext no está definido.")
+            self.A = 0 # O lanzar una excepción: raise ValueError("No se puede calcular el área del cohete")
 
     # Calcula la masa total del cohete sumando las masas de sus componentes
     def calc_masa(self):

@@ -9,7 +9,7 @@ class Componente:
         self.masa = masa
         self.posicion = posicion # Se refiere a la posicion de la parte frontal del component en el sistema de coordenadas del cohete
         self.CG = None
-        self.CP = None
+        self.CP = np.zeros(3)  # Centro de presion en coordenadas locales
         self.Ix = 0     # Momento de inercia en torno a un eje "horizontal" (perpendicular al eje longitudinal) que pasa por el CG del componente
 
 #Subclase para la nariz

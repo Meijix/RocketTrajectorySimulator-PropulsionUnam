@@ -23,6 +23,7 @@ from Paquetes.PaqueteFisica.riel import Torrelanzamiento
 from Paquetes.PaqueteFisica.atmosfera import atmosfera
 from Paquetes.PaqueteFisica.componentes import Componente, Cono, Cilindro, Aletas, Boattail
 from Paquetes.PaqueteFisica.cohete import Cohete
+from Paquetes.PaqueteEDOs.integradores import *
 
 class SimuladorCohetesAvanzado:
     def __init__(self, master):
