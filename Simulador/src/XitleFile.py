@@ -4,6 +4,8 @@
 import sys
 import os
 import numpy as np
+
+#import pandas as pd
 # Agregar la ruta del directorio que contiene los paquetes al sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -11,6 +13,7 @@ from Paquetes.PaqueteFisica.componentes import Cono, Cilindro, Boattail, Aletas
 from Paquetes.PaqueteFisica.cohete import Cohete, Parachute
 
 from Simulador.src import condiciones_init as c_init
+from Paquetes.utils.funciones import obtener_path_archivo
 #import condiciones_init as c_init
 
 #Dimensiones principales del cohete
@@ -45,14 +48,12 @@ oxidante = Cilindro("Oxidante", 12.0, np.array([0.0, 0.0, transfer.bottom[2]]), 
 grano = Cilindro("Grano", 4.0 , np.array([0.0, 0.0, valvulas.bottom[2]]), 0.505 , 0.158, 0.334)
 
 # Tablas de Cd, empuje y masa
-#tabla_Cd_fpath = '../Archivos/cdmachXitle.csv'
-tabla_Cd_fpath = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Archivos\cdmachXitle.csv'
 
-#tabla_empuje_fpath = '../Archivos/MegaPunisherBien.csv'
-tabla_empuje_fpath = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Archivos\MegaPunisherBien.csv'
+# Tablas de Cd, empuje y masa
+tabla_Cd_fpath = obtener_path_archivo('Archivos', 'cdmachXitle.csv')
+tabla_empuje_fpath = obtener_path_archivo('Archivos', 'CurvasEmpuje', 'pruebaestaica28mayo2024.csv')
+tabla_masa_fpath = obtener_path_archivo('Archivos', 'CurvasEmpuje', 'MegaPunisherFatMasadot.csv')
 
-#tabla_masa_fpath = '../Archivos/MegaPunisherFatMasadot.csv'
-tabla_masa_fpath = r"C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Archivos\MegaPunisherFatMasadot.csv"
 #Lista de componentes y creación del vehículo completo
 #Debe ser un diccionario con un nombre corto para cada componente
 componentes = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': tubo_recup, 'Transferidor de carga': transfer, 'Aviónica': avionica, 'Carga Útil': CU, 'drogue': drogue,

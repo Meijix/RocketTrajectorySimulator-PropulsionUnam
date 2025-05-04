@@ -17,13 +17,13 @@ from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson, muestr
 
 ###############################################
 # Leer los datos de la simulación desde el archivo CSV
-datos_simulacion = pd.read_csv(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloParacaidas-RungeKutta4\datos.csv')
+datos_simulacion = pd.read_csv(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-RungeKutta4-100\datos.csv')
 (tiempos, posiciones, velocidades, thetas, omegas, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) = extraer_datoscsv(datos_simulacion)
 
 
 #########################################
 # Leer los datos de la simulación desde el archivo JSON
-with open(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloParacaidas-RungeKutta4\datos.json', 'r', encoding= 'utf-8') as f:
+with open(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-RungeKutta4-100\datos.json', 'r', encoding= 'utf-8') as f:
     datos = json.load(f)
 # Extraer los datos del json
 (_, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto,

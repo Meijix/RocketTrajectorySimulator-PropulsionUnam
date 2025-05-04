@@ -240,3 +240,11 @@ def guardar_animacion(animation, nombre_archivo, formato='mp4', fps=30):
         raise ValueError("Formato no soportado. Use 'mp4' o 'gif'.")
 
     print("Animación guardada con éxito")
+
+import os
+# Función para obtener la ruta del archivo
+
+def obtener_path_archivo(*subrutas):
+    ruta_base = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+    ruta_final = os.path.join(ruta_base, *subrutas)
+    return ruta_final

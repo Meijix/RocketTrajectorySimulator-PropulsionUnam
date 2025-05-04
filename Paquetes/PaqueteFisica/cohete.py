@@ -38,6 +38,8 @@ class Cohete:
         self.Ix = None
         self.A = None
 
+        self.CdTable = None
+        self.motorThrustTable = None
 
         self.calc_A()
         self.calc_masa()
@@ -46,6 +48,11 @@ class Cohete:
         self.calc_CN()
 
         self.longtotal = self.componentes["Boattail"].bottom[2]
+
+        print("Cd path:", tabla_Cd_fpath)
+        print("Empuje path:", tabla_empuje_fpath)
+        print("Masa path:", tabla_masa_fpath)
+        # Cargar las tablas de empuje y masa del motor
 
         self.cargar_tablas_motor(tabla_empuje_fpath, tabla_masa_fpath)
         self.cargar_tabla_Cd(tabla_Cd_fpath)

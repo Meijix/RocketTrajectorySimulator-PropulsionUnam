@@ -111,9 +111,17 @@ class Vuelo:
         # input()
         return Dvec, Nvec
 
-    def accangular(self, theta, Dvec, Nvec, Gvec):
+    def accangular(self, theta, Dvec, Nvec, Gvec, Tvec, state):
         # Calcular brazo de momentos
         # r es un vector que apunta del CG al CP, en coords de cuerpo del cohete,
+        grav = Gvec[2] # gravedad en z
+        m= self.vehiculo.masa
+        vel=state[3:6]
+        omega=state[7] #velocidad angular
+
+        # Calcular psi correctamente
+        v_rel = vel - self.viento.vector
+        psi = np.arctan2(v_rel[2], v_rel[0])
         # donde la nariz es el origen y el eje Z apunta hacia la cola
         palanca_b = self.vehiculo.CP - self.vehiculo.CG
         s = np.sin(theta)
@@ -127,7 +135,20 @@ class Vuelo:
         tau_D = np.cross(palanca, Dvec)
 
         tau_N = np.cross(palanca, Nvec)
-        tau_tot = tau_D + tau_N
+
+        v = np.linalg.norm(vel)
+        ax = (Tvec[0] + Dvec[0] + Nvec[0]) / m
+        ay = (Tvec[2] + Dvec[2] + Nvec[2] - grav) / m
+        psi_dot = (vel[0] * ay - vel[2] * ax) / (vel[0]**2 + vel[2]**2)
+
+        #alpha = theta - psi
+        alpha_dot = omega - psi_dot
+
+        k_amort = 0.7
+        # Calcular la amortiguación angular
+        M_amort = -k_amort * alpha_dot
+
+        tau_tot = tau_D + tau_N  + np.array([0, M_amort, 0]) 
         #torcas.append((tau_D, tau_N))
         #torcas.append((tau_tot))
         #palancas.append(palanca)
@@ -162,6 +183,8 @@ class Vuelo:
         # Fuerzas aerodinámica: Arrastre y fuerza normal
         #print("Vectores de arrastre y normal",Dvec, Nvec)
         v_rel = vel - v_viento
+        # Calcular psi (dirección de trayectoria)
+        psi = np.arctan2(v_rel[2], v_rel[0])
         Dvec, Nvec = self.calc_aero(pos, v_rel, theta)
 
         #Calcular las componentes del empuje
@@ -185,7 +208,7 @@ class Vuelo:
             #Velocidad angular
             velang = omega
             # aceleracion angular
-            _, accang, _ = self.accangular(theta, Dvec, Nvec, Gvec)
+            _, accang, _ = self.accangular(theta, Dvec, Nvec, Gvec, Tvec, state)
 
         # PRUEBA: apagar parte angular
         # omega = 0
@@ -310,7 +333,7 @@ class Vuelo:
                 accel = Gvec + Dvec/self.vehiculo.masa + Nvec/self.vehiculo.masa + Tvec/self.vehiculo.masa
                 accels.append(accel)
 
-                palanca, accang, torca = self.accangular(theta, Dvec, Nvec, Gvec)
+                palanca, accang, torca = self.accangular(theta, Dvec, Nvec, Gvec, Tvec, estado)
                 palancas.append(palanca)
                 accangs.append(accang)
                 torcas.append(torca)
@@ -389,7 +412,7 @@ class Vuelo:
                 accel = Gvec + Dvec/self.vehiculo.masa + Nvec/self.vehiculo.masa + Tvec/self.vehiculo.masa
                 accels.append(accel)
 
-                palanca, accang, torca = self.accangular(theta, Dvec, Nvec, Gvec)
+                palanca, accang, torca = self.accangular(theta, Dvec, Nvec, Gvec, Tvec, state)
                 palancas.append(palanca)
                 accangs.append(accang)
                 torcas.append(torca)

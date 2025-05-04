@@ -1,4 +1,5 @@
 ####ESTA ANIMACION NO HA SIDO COMPLETADA
+#NO SE MUESTRA EL COHETE GIRANDO EN LA TRAYECTORIA
 
 import numpy as np
 import pandas as pd
@@ -15,11 +16,18 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson, muestra_tiempos
 from Paquetes.utils.dibujar_cohete2 import dibujar_cohete2  # Función para dibujar el cohete
 
-# Leer datos de simulación
-datos_simulacion = pd.read_csv(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\src\datos_simulacion.csv')
-(tiempos, posiciones, _, thetas, omegas, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, Gammas, _, _, _) = extraer_datoscsv(datos_simulacion)
 
-with open('datos_simulacion.json', 'r', encoding='utf-8') as f:
+ruta=r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-RungeKutta4-100\datos.csv'
+# Leer datos de simulación
+datos_simulacion = pd.read_csv(ruta)
+(tiempos, posiciones, _, thetas, omegas, CPs, CGs, _,
+            _, _, _, _, _, _,
+            _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
+            accels, _, accangs, Gammas, Alphas, torcas, _, _) = extraer_datoscsv(datos_simulacion)
+
+
+ruta_json=r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-RungeKutta4-100\datos.json'
+with open(ruta_json, 'r', encoding='utf-8') as f:
     datos = json.load(f)
 (_, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto, max_altitude, _, _, _) = extraer_datosjson(datos)
 
@@ -92,7 +100,7 @@ def update(frame):
 
     # Añadir el dibujo del cohete en la trayectoria
     theta_deg = np.degrees(thetas[frame])
-    dibujar_cohete2(ax=ax2d, angle=theta_deg, x_cm=0, y_cm=z[frame], long=200)
+    dibujar_cohete2(ax=ax2d, angle=theta_deg, x_cm=0, y_cm=z[frame])
 
     # Etiquetas y puntos clave en el gráfico 2D
     ax2d.set_title('Altura vs Tiempo')
@@ -107,7 +115,7 @@ def update(frame):
     return ax3d, ax2d
 
 # Crear la animación
-frames = np.arange(0, len(t), 10)  # Intervalos de frames
+frames = np.arange(0, len(t), 30)  # Intervalos de frames
 animation = FuncAnimation(fig, update, frames=frames, interval=100, repeat=False)
 
 plt.show()
