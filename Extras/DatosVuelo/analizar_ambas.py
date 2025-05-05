@@ -1,12 +1,19 @@
+import matplotlib.pyplot as plt
 import pandas as pd
 
 # Load the three uploaded files
 file1_path = r"C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\DatosVuelo\ASYB.csv"
 file2_path = r"C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\DatosVuelo\FTW.csv"
-
+file3_path = r"C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-100\datos.csv"
 # Load CSV files
+print("Ruta1:", file1_path)
+print("Ruta2:", file2_path)
+print("Ruta3:", file3_path)
+print("Cargando archivos CSV...")
+
 df_telemetry = pd.read_csv(file1_path)
 df_gps = pd.read_csv(file2_path)
+df_vuelo = pd.read_csv(file3_path)
 
 # Display basic info to understand the structure of the data
 df_telemetry_info = df_telemetry.info()
@@ -23,10 +30,9 @@ print(df_gps_info)
 print(df_gps_head)
 
 
-import matplotlib.pyplot as plt
-
 # Convert time to seconds (assuming it's in milliseconds in df_telemetry)
 df_telemetry['time_s'] = (df_telemetry['time'] - df_telemetry['time'].min()) / 1000
+
 
 # Plot altitude vs time
 plt.figure(figsize=(10, 5))

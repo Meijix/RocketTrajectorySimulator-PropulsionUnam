@@ -75,7 +75,7 @@ class Vuelo:
         #Calcular las componentes del empuje
         #La direccion del empuje es longitudinal hacia la nariz
         zbhat = np.array((np.cos(theta), 0, np.sin(theta)))
-        Tmag = self.vehiculo.calc_empuje_magn(t)#*0.7 #factor de eficiencia
+        Tmag = self.vehiculo.calc_empuje_magn(t)*1.1 #factor de eficiencia
         Tvec = Tmag * zbhat
         return Tvec
 
@@ -139,16 +139,18 @@ class Vuelo:
         v = np.linalg.norm(vel)
         ax = (Tvec[0] + Dvec[0] + Nvec[0]) / m
         ay = (Tvec[2] + Dvec[2] + Nvec[2] - grav) / m
-        psi_dot = (vel[0] * ay - vel[2] * ax) / (vel[0]**2 + vel[2]**2)
+        
+        # Calcular la velocidad angular (psi_dot) usando la fórmula de la
+        #psi_dot = (vel[0] * ay - vel[2] * ax) / (vel[0]**2 + vel[2]**2)
 
         #alpha = theta - psi
-        alpha_dot = omega - psi_dot
+        #alpha_dot = omega - psi_dot
 
-        k_amort = 0.7
+        #k_amort = 0.7
         # Calcular la amortiguación angular
-        M_amort = -k_amort * alpha_dot
+        #M_amort = -k_amort * alpha_dot
 
-        tau_tot = tau_D + tau_N  + np.array([0, M_amort, 0]) 
+        tau_tot = tau_D + tau_N  #+ np.array([0, M_amort, 0]) 
         #torcas.append((tau_D, tau_N))
         #torcas.append((tau_tot))
         #palancas.append(palanca)
@@ -248,10 +250,8 @@ class Vuelo:
             # Selección del integrador
             integradores = {
                 'Euler': Euler(self.fun_derivs),
-                'RungeKutta2': RungeKutta2(self.fun_derivs),
                 'RungeKutta4': RungeKutta4(self.fun_derivs),
-                'RKF45': RKF45(self.fun_derivs),
-                'AdaptiveEuler': AdaptiveEuler(self.fun_derivs),
+                
             }
             Integracion = integradores[integrador]
 
@@ -412,7 +412,7 @@ class Vuelo:
                 accel = Gvec + Dvec/self.vehiculo.masa + Nvec/self.vehiculo.masa + Tvec/self.vehiculo.masa
                 accels.append(accel)
 
-                palanca, accang, torca = self.accangular(theta, Dvec, Nvec, Gvec, Tvec, state)
+                palanca, accang, torca = self.accangular(theta, Dvec, Nvec, Gvec, Tvec, estado)
                 palancas.append(palanca)
                 accangs.append(accang)
                 torcas.append(torca)

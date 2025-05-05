@@ -66,7 +66,8 @@ max_speed = max(np.linalg.norm(velocidades, axis=1))
 #print("Máxima velocidad:", max_speed, "m/s")
 #print("Equivalente a:",max_speed/340, "Mach")
 #########################################
-eficiencia = 100
+#Se debe cambiar la eficiencia en vuelo.py
+eficiencia = 110
 guardar_datos_csv(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, wind_xs, wind_ys, wind_zs, Tmags, Dmags, Nmags, Txs, Tys, Tzs, Dxs, Dys, Dzs, Nxs, Nys, Nzs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs, TipoVuelo, c_init.integrador_actual,eficiencia)
 ########################################
 guardar_datos_json(cohete_actual,vuelo1, max_altitude, max_speed, accels, accangs, TipoVuelo, c_init.integrador_actual, eficiencia)

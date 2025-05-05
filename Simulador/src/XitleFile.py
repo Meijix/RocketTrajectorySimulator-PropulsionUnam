@@ -48,11 +48,33 @@ oxidante = Cilindro("Oxidante", 12.0, np.array([0.0, 0.0, transfer.bottom[2]]), 
 grano = Cilindro("Grano", 4.0 , np.array([0.0, 0.0, valvulas.bottom[2]]), 0.505 , 0.158, 0.334)
 
 # Tablas de Cd, empuje y masa
+#tabla_Cd_fpath = '../Archivos/cdmachXitle.csv'
+#tabla_Cd_fpath = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Archivos\DatosVuelo\cdmachXitle.csv'
+#tabla_Cd_fpath = r"C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-ROCKET-PU\Archivos\DatosVuelo\cdmachXitle.csv"
+
+#tabla_empuje_fpath = '../Archivos/MegaPunisherBien.csv'
+#tabla_empuje_fpath = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Archivos\CurvasEmpuje\MegaPunisherBien.csv'
+
+#tabla_masa_fpath = '../Archivos/MegaPunisherFatMasadot.csv'
+#tabla_masa_fpath = r"C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Archivos\CurvasEmpuje\MegaPunisherFatMasadot.csv"
+
+# Obtener el path base (la carpeta 3DOF-Rocket-PU donde corres todo)
+#ruta_base = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+
 
 # Tablas de Cd, empuje y masa
 tabla_Cd_fpath = obtener_path_archivo('Archivos', 'cdmachXitle.csv')
 tabla_empuje_fpath = obtener_path_archivo('Archivos', 'CurvasEmpuje', 'pruebaestaica28mayo2024.csv')
+
 tabla_masa_fpath = obtener_path_archivo('Archivos', 'CurvasEmpuje', 'MegaPunisherFatMasadot.csv')
+# Tabla de Cd
+#tabla_Cd_fpath = os.path.join(ruta_base, 'Archivos', 'DatosVuelo', 'cdmachXitle.csv')
+#print("Ruta tabla Cd:", tabla_Cd_fpath)
+# Tabla de empuje
+#tabla_empuje_fpath = os.path.join(ruta_base, 'Archivos', 'CurvasEmpuje', 'MegaPunisherBien.csv')
+
+# Tabla de masa
+#tabla_masa_fpath = os.path.join(ruta_base, 'Archivos', 'CurvasEmpuje', 'MegaPunisherFatMasadot.csv')
 
 #Lista de componentes y creación del vehículo completo
 #Debe ser un diccionario con un nombre corto para cada componente
@@ -66,7 +88,7 @@ componentes_externos = {'Nariz': nariz ,'coples': coples,'Tubo recuperación': t
 Xitle = Cohete("Xitle", "hibrido", componentes, componentes_externos, tabla_Cd_fpath, tabla_empuje_fpath, tabla_masa_fpath, c_init.riel)
 Xitle.d_ext=diam_ext
 #longitud del fuselaje
-Xitle.long_fuselaje = coples.long + tubo_recup.long + transfer.long + tanquevacio.long + valvulas.long + CC.long 
+Xitle.long_fuselaje = coples.long + tubo_recup.long + transfer.long + tanquevacio.long + valvulas.long + CC.long +nariz.long + boattail.long 
 print("Longitud del fuselaje",Xitle.long_fuselaje)
 #Agregar paracaidas
 #Drogue
@@ -97,5 +119,6 @@ if __name__ == "__main__":
     print("Paracaidas activo", Xitle.parachute_active1)
     print("Cd Paracaidas", Xitle.parachute1.cd)
     print("area Paracaidas", Xitle.parachute1.Area_trans)
+
 
 

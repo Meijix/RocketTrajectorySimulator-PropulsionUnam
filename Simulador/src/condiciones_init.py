@@ -22,7 +22,14 @@ fecha = "2024-11-06" #año-mes-dia
 #viento
 #viento_actual = Viento( 10, 2, 0, 0)
 #Sin viento
-viento_actual = Viento( 0, 2, 0, 0)
+#viento_actual = Viento( 2, 0.2, 0, 0)
+viento_actual = Viento(
+    vel_base=2,       # Viento medio 4 m/s
+    vel_mean=0,     # Pequeñas ráfagas ~0.8 m/s adicionales
+    vel_var=0,      # Variación de ráfaga de ±0.1 m/s
+    ang_base=0,       # Suponiendo viento de izquierda a derecha
+    var_ang=10        # Variaciones de dirección ±10°
+)
 viento_actual.actualizar_viento3D()
 #print(viento_actual.vector)
 
