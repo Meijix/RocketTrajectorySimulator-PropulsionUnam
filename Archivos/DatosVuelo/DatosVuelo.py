@@ -64,6 +64,14 @@ alt_sim = pd_simulado['z']
 #t_sim1 = pd_simulado1['t'] + 7
 #alt_sim1 = pd_simulado1['z']
 
+#Imprimir altitud maxima, tiempo de apogeo y tiempo de impacto
+print("Altitud Maxima Experimental:",alt_ftw.max(),"m")
+print("Altitud Maxima Simulada:",alt_sim.max(),"m")
+print("Tiempo de Apogeo Experimental:",t_ftw[alt_ftw.idxmax()],"s")
+print("Tiempo de Apogeo Simulado:",t_sim[alt_sim.idxmax()],"s")
+print("Tiempo de Impacto Experimental:",t_ftw.iloc[-1],"s")
+print("Tiempo de Impacto Simulado:",t_sim.iloc[-1],"s")
+
 #############Velocidades####################
 horizontalv=pd_experimental['HORZV']
 horizontalv=horizontalv[:len(t_ftw)]/3.6 #Convertir a m/s
@@ -72,6 +80,12 @@ verticalv=verticalv[:len(t_ftw)]/3.6 #Convertir a m/s
 
 horizontalv_sim = pd_simulado['vx']
 verticalv_sim = pd_simulado['vz']
+
+##Imprimir velocidad horizontal y vertical maxima
+print("Velocidad Horizontal Maxima Experimental:",horizontalv.max(),"m/s")
+print("Velocidad Vertical Maxima Experimental:",verticalv.max(),"m/s")
+print("Velocidad Horizontal Maxima Simulada:",horizontalv_sim.max(),"m/s")
+print("Velocidad Vertical Maxima Simulada:",verticalv_sim.max(),"m/s")
 
 ############Aceleraciones####################
 ax=pd_experimental['ax']
@@ -141,3 +155,18 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 
+###Errores relativos de altitud y velocidad
+
+erro_altitud = (alt_sim.max() - alt_ftw.max()) / alt_ftw.max() * 100
+erro_velmaxvert = (verticalv_sim.max() - verticalv.max()) / verticalv.max() * 100
+erro_velocidad = (np.sqrt(horizontalv_sim**2 + verticalv_sim**2) - np.sqrt(horizontalv**2 + verticalv[:len(horizontalv_sim)]**2)) / np.sqrt(horizontalv**2 + verticalv[:len(horizontalv_sim)]**2) * 100
+
+#Errores de tiempo de apogeo y tiempo de impacto
+erro_t_apogeo = (t_sim[alt_sim.idxmax()] - t_ftw[alt_ftw.idxmax()]) / t_ftw[alt_ftw.idxmax()] * 100
+erro_t_impacto = (t_sim.iloc[-1] - t_ftw.iloc[-1]) / t_ftw.iloc[-1] * 100
+
+print("Error relativo de altitud:", erro_altitud, "%")
+print("Error relativo de velocidad vertical maxima:", erro_velmaxvert, "%")
+print("Error relativo de velocidad:", erro_velocidad.max(), "%")
+print("Error relativo de tiempo de apogeo:", erro_t_apogeo, "%")
+print("Error relativo de tiempo de impacto:", erro_t_impacto, "%")
