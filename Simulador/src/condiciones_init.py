@@ -24,11 +24,11 @@ fecha = "2024-11-06" #año-mes-dia
 #Sin viento
 #viento_actual = Viento( 2, 0.2, 0, 0)
 viento_actual = Viento(
-    vel_base=0,       # Viento medio 4 m/s
-    vel_mean=0,     # Pequeñas ráfagas ~0.8 m/s adicionales
-    vel_var=0,      # Variación de ráfaga de ±0.1 m/s
-    ang_base=0,       # Suponiendo viento de izquierda a derecha
-    var_ang=0        # Variaciones de dirección ±10°
+    vel_base=5,       # Viento medio 4 m/s
+    vel_mean=3,     # Pequeñas ráfagas ~0.8 m/s adicionales
+    vel_var=2,      # Variación de ráfaga de ±0.1 m/s
+    ang_base=230,       # Suponiendo viento de izquierda a derecha
+    var_ang=10.0        # Variaciones de dirección ±10°
 )
 viento_actual.actualizar_viento3D()
 #print(viento_actual.vector)
@@ -48,8 +48,8 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 #Parametros de la simulacion
 dt = 0.01 #0.1 #[s]
 t_max = 400 #[s]
-dt_out =  0.01
-#integrador_actual = 'RungeKutta4'
+dt_out =  0.001
+integrador_actual = 'RungeKutta4'
 #integrador_actual = 'Euler'
 #integrador_actual = 'RK45'
 integrador_actual = 'DOP853'

@@ -19,7 +19,7 @@ from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson, muestr
 # Leer los datos de la simulación desde el archivo CSV
 #ruta = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-RungeKutta4-100\datos.csv'
 
-ruta = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-110\datos.csv'
+ruta = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-0\datos.csv'
 
 datos_simulacion = pd.read_csv(ruta)
 (tiempos, posiciones, velocidades, thetas, omegas, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) = extraer_datoscsv(datos_simulacion)
@@ -27,7 +27,7 @@ datos_simulacion = pd.read_csv(ruta)
 
 #########################################
 # Leer los datos de la simulación desde el archivo JSON
-with open(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-110\datos.json', 'r', encoding= 'utf-8') as f:
+with open(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-0\datos.json', 'r', encoding= 'utf-8') as f:
     datos = json.load(f)
 # Extraer los datos del json
 (_, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto,
@@ -154,8 +154,8 @@ if frames[-1] > len(t):
 #print(frames)
 
 animation = FuncAnimation(fig, update, frames=frames, interval=100, repeat=False)
-#plt.show()
-guardar_animacion(animation, 'cohete_trayectoria.mp4', formato='mp4', fps=30)
+plt.show()
+#guardar_animacion(animation, 'cohete_trayectoria.mp4', formato='mp4', fps=30)
 #animation.save("TrayectoriaAnimada.gif")
 #animation.save("Trayectoria-pelicula.mp4", fps)
 #print("Mp4 Guardado")

@@ -27,10 +27,10 @@ cohete_actual.parachute_active1 = False
 ######################################
 #####Agregar paracaidas
 Mainchute = Parachute(1.2, 0.802) #Crear paracaidas principal
-#print(Xitle.parachute_active1)
+print(Xitle.parachute_active1)
 cohete_actual.agregar_paracaidas(Mainchute)
-#print(Xitle.parachute_active1)
-#print(Xitle.parachute_added)
+print("Paracaidas activado:",Xitle.parachute_active1)
+print("Paracaidas agregado:", Xitle.parachute_added)
 #########################################3
 
 inicio = time.time()

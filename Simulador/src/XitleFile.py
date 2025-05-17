@@ -120,5 +120,6 @@ if __name__ == "__main__":
     print("Cd Paracaidas", Xitle.parachute1.cd)
     print("area Paracaidas", Xitle.parachute1.Area_trans)
 
-
+    #Informacion del motor
+    
 

@@ -11,11 +11,14 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from Paquetes.PaqueteFisica.vuelo import Vuelo
 from Simulador.src import condiciones_init as c_init
 from Simulador.src.XitleFile import Xitle
+from Simulador.src.XitleFileMod import XitleMod 
 from Paquetes.utils.funciones import guardar_datos_csv, guardar_datos_json
 
 
 TipoVuelo = 'VueloLibre'
 cohete_actual = Xitle
+#vehiculo inestable
+#cohete_actual = XitleMod
 
 #quitar el paracaidas
 cohete_actual.parachute_added = False
@@ -67,7 +70,7 @@ max_speed = max(np.linalg.norm(velocidades, axis=1))
 #print("Equivalente a:",max_speed/340, "Mach")
 #########################################
 #Se debe cambiar la eficiencia en vuelo.py
-eficiencia = 100
+eficiencia = 0
 guardar_datos_csv(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, wind_xs, wind_ys, wind_zs, Tmags, Dmags, Nmags, Txs, Tys, Tzs, Dxs, Dys, Dzs, Nxs, Nys, Nzs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs, TipoVuelo, c_init.integrador_actual,eficiencia)
 ########################################
 guardar_datos_json(cohete_actual,vuelo1, max_altitude, max_speed, accels, accangs, TipoVuelo, c_init.integrador_actual, eficiencia)

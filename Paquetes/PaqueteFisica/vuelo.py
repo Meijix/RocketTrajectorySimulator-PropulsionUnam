@@ -95,6 +95,7 @@ class Vuelo:
             alpha = self.calc_alpha(v_rel, theta)
         
         Dmag, Nmag, Cd, mach = self.calc_arrastre_normal(pos, v_rel, alpha)
+        Dmag = Dmag*0.9
         #print(Cd,mach)
         #print(Dmag,"mag arrastre")
         #Fuerza normal

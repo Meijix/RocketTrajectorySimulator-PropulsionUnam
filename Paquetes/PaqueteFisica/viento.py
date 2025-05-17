@@ -23,7 +23,7 @@ class Viento:
     def random_values(self):
         self.magnitud_rafaga = np.random.normal(self.vel_mean, self.vel_var)
         self.direccion_rafaga = np.random.normal(self.dir_base, self.var_ang)
-        self.giro_rafaga = np.random.uniform(0, 180)
+        self.giro_rafaga = np.random.uniform(-20, 20)  # viento oscilante en elevación # Inclinacion aleatoria entre 0 y 30 grados principalmente horizontal
 
     def actualizar_viento3D(self):
         self.random_values()
@@ -106,7 +106,7 @@ class Rafaga1Coseno(Rafaga):
 if __name__ == "__main__":
 
     # Crear viento moderado-ligero
-    viento = Viento(vel_base=4.0, vel_mean=1.0, vel_var=0.2, ang_base=0.0, var_ang=10.0)
+    viento = Viento(vel_base=4.0, vel_mean=1.0, vel_var=0.2, ang_base=230.0, var_ang=2.0)
 
     # Simular durante 120 segundos a 1 Hz
     tiempos = np.arange(0, 120, 1)

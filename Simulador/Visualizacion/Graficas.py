@@ -13,12 +13,13 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 #Importar paquetes propios de carpeta superior Paquetes
 from Paquetes.utils.angulos import nice_angle, normalize_angle
 from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson, muestra_tiempos
+from Paquetes.utils.dibujar_cohete2 import *
 from Simulador.src.condiciones_init import *
 
 #Elegir que vuelo se va a graficar
-archivo_csv = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-110\datos.csv'
+archivo_csv = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-0\datos.csv'
 #########################
-archivo_json = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-110\datos.json'
+archivo_json = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-0\datos.json'
 
 
 ###############################################
@@ -45,21 +46,21 @@ inicio = time.time()
 print("Graficando...")
 ############################################
 #GRAFICAS DE LOS DATOS DE LA SIMULACION
-""" 
+
 #VIENTO
 #Magnitudes en el tiempo
 plt.figure(figsize=(8, 6))
-plt.plot(tiempos, viento_vuelo_mags)
-plt.scatter(tiempos, viento_vuelo_mags)
+plt.plot(tiempos, viento_vuelo_mags, color='navajowhite', alpha=0.5)
+plt.scatter(tiempos, viento_vuelo_mags, color ='orange')
 plt.xlabel('Tiempo (s)')
 plt.ylabel('Magnitud del viento (m/s)')
 plt.title('Magnitud del viento en el tiempo')
-muestra_tiempos(tiempos, plt)
+muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
 #plt.show()
 
 #Histograma de las magnitudes
 plt.figure(figsize=(8, 6))
-plt.hist(viento_vuelo_mags, bins=20)
+plt.hist(viento_vuelo_mags, bins=20, color='orange', alpha=0.7)
 plt.xlabel('Magnitud del viento (m/s)')
 plt.ylabel('Frecuencia')
 plt.title('Histograma de la magnitud del viento')
@@ -67,31 +68,31 @@ plt.title('Histograma de la magnitud del viento')
 
 #Direcciones en el tiempo
 plt.figure(figsize=(8, 6))
-plt.plot(tiempos, viento_vuelo_dirs)
-plt.scatter(tiempos, viento_vuelo_dirs)
+plt.plot(tiempos, viento_vuelo_dirs, color='lightblue', alpha=0.5)
+plt.scatter(tiempos, viento_vuelo_dirs, color ='darkblue')
 plt.xlabel('Tiempo (s)')
 plt.ylabel('Dirección del viento (grados)')
 plt.title('Dirección del viento en el tiempo')
-muestra_tiempos(tiempos, plt)
+muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
 #plt.show()
 
 #Histograma de las direcciones
 plt.figure(figsize=(8, 6))
-plt.hist(viento_vuelo_dirs, bins=20)
+plt.hist(viento_vuelo_dirs, bins=20, color='darkblue', alpha=0.7)
 plt.xlabel('Dirección del viento (grados)')
 plt.ylabel('Frecuencia')
 plt.title('Histograma de la dirección del viento')
 #plt.show() 
 
 #Rosa de los vientos
-#plt.figure(figsize=(8, 6))
-#ax = plt.subplot(111, polar=True)
-#ax.set_theta_zero_location("N")
-#ax.set_theta_direction(-1)
-#bars = ax.bar(np.deg2rad(viento_vuelo_dirs), viento_vuelo_mags, width=0.5, bottom=0.0)
-#plt.title('Rosa de los vientos')
-#ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
-#plt.show()
+plt.figure(figsize=(8, 6))
+ax = plt.subplot(111, polar=True)
+ax.set_theta_zero_location("N")
+ax.set_theta_direction(-1)
+bars = ax.bar(np.deg2rad(viento_vuelo_dirs), viento_vuelo_mags, width=0.5, bottom=0.0)
+plt.title('Rosa de los vientos')
+ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
+plt.show()
 
 #Vectores viento en el tiempo
 #Falta corregir esta grafica
@@ -107,6 +108,7 @@ ax.set_ylabel('z (m)')
 ax.set_title('Vector de viento')
 plt.show()
 
+""" 
 ###########################
 #####GRAFICAS DEL COHETE
 ############################
@@ -122,22 +124,42 @@ x = 10
 x = x * 100
 
 for i in range(0, len(tiempos), x):
-    dibujar_cohete(posiciones[i, 0], posiciones[i, 2], np.rad2deg(thetas[i]), 200, plt)  # Ajusta longitud y altura según sea necesario
+    dibujar_cohete2(posiciones[i, 0], posiciones[i, 2], np.rad2deg(thetas[i]), 200, plt)  # Ajusta longitud y altura según sea necesario
     #dibujar_cohete(posiciones[i, 0], posiciones[i, 2], thetas[i], 500)
 
 plt.show()
+""" 
 
+# GRAFICA 1. Posiciones
 # GRAFICA 1. Posiciones
 plt.figure(figsize=(10, 6))
 plt.title("Posición en el tiempo")
 plt.xlabel("Tiempo (s)")
 plt.ylabel("Posición (m)")
-plt.plot(tiempos[:], posiciones[:, 0], label="X")
-plt.plot(tiempos[:], posiciones[:, 1], label="Y")
-plt.plot(tiempos[:], posiciones[:, 2], label="Z")
-muestra_tiempos(tiempos, plt)
+
+# Calcular máximos
+max_x_idx = np.argmax(posiciones[:, 0])
+max_y_idx = np.argmax(posiciones[:, 1])
+max_z_idx = np.argmax(posiciones[:, 2])
+
+plt.plot(tiempos, posiciones[:, 0], label="X", color='green')
+plt.plot(tiempos, posiciones[:, 1], label="Y", color='blue')
+plt.plot(tiempos, posiciones[:, 2], label="Z", color='darkred')
+
+# Marcadores de máximos
+plt.scatter(tiempos[max_x_idx], posiciones[max_x_idx, 0], color='green', marker='x', s=100)
+plt.scatter(tiempos[max_y_idx], posiciones[max_y_idx, 1], color='blue', marker='x', s=100)
+plt.scatter(tiempo_apogeo, max_altitude, color='red', marker='x', s=100, label='Apogeo')
+
+# Etiquetas de texto
+plt.text(tiempos[max_x_idx], posiciones[max_x_idx, 0] + 10, f'Máx X: {posiciones[max_x_idx,0]:.2f}', color='green')
+plt.text(tiempos[max_y_idx], posiciones[max_y_idx, 1] + 10, f'Máx Y: {posiciones[max_y_idx,1]:.2f}', color='blue')
+plt.text(tiempo_apogeo, max_altitude + 10, f'Apogeo (Z): {max_altitude:.2f}', color='red')
+
+muestra_tiempos(tiempo_salida_riel, t_MECO, tiempo_apogeo, tiempo_impacto, plt)
 plt.legend()
 plt.grid(True)
+
 
 
 # plt.show()
@@ -149,7 +171,8 @@ plt.xlabel("Tiempo (s)")
 plt.ylabel("Ángulo (grados)")
 plt.plot(tiempos[:], nice_angle(thetas), label="Theta")
 plt.plot(tiempos[:], nice_angle(omegas), label="Omega", alpha=0.5)
-muestra_tiempos(tiempos, plt)
+muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
+#muestra_tiempos(tiempos, plt)
 plt.axhline(riel.angulo, ls="--", color="lightgray")
 plt.axhline(-90, ls="--", color="lightgray")
 plt.legend()
@@ -163,7 +186,8 @@ plt.title("Fuerzas en el tiempo")
 plt.plot(tiempos[:], Tmags, label= "Empuje")
 plt.plot(tiempos[:], Nmags,label="Normal")
 plt.plot(tiempos[:], Dmags, label= "Arrastre")
-muestra_tiempos(tiempos, plt)
+muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
+#muestra_tiempos(tiempos, plt)
 if tiempo_apogeo is not None:
     plt.xlim(0,tiempo_apogeo+10)
 plt.legend()
@@ -179,11 +203,12 @@ plt.plot(tiempos[:], CPs[:],label="CP")
 plt.title("Posición axial del CG y del CP")
 plt.xlabel("Tiempo (s)")
 plt.ylabel("Posición axial (m)")
-muestra_tiempos(tiempos, plt)
+muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
+#muestra_tiempos(tiempos, plt)
 plt.legend()
 
 plt.subplot(1, 2, 2)
-plt.plot(tiempos[:], estabilidad[:], color="C2",label="estabilidad")
+#plt.plot(tiempos[:], estabilidad[:], color="C2",label="estabilidad")
 plt.title("Estabilidad (calibres)")
 #plt.xlim(0,tiempo_apogeo+10)
 plt.legend()
@@ -192,19 +217,37 @@ plt.legend()
 
 
 # plt.show()
-"""
+
+# GRAFICA 2. Velocidades
 # GRAFICA 2. Velocidades
 plt.figure(figsize=(10, 6))
 plt.title("Velocidad en el tiempo")
 plt.xlabel("Tiempo (s)")
 plt.ylabel("Velocidad (m/s)")
-plt.plot(tiempos[:], velocidades[:, 0], label="Vx", color='tomato')
-plt.plot(tiempos[:], velocidades[:, 1], label="Vy", color='royalblue')
-plt.plot(tiempos[:], velocidades[:, 2], label="Vz", color='green')
-# plt.plot(tiempos[1:], np.linalg.norm(velocidades[:, :]), label="Total", color="black")
-muestra_tiempos(tiempo_salida_riel,t_MECO, tiempo_apogeo, tiempo_impacto, plt)
+
+# Cálculo de máximos por componente
+max_vx_idx = np.argmax(velocidades[:, 0])
+max_vy_idx = np.argmax(velocidades[:, 1])
+max_vz_idx = np.argmax(velocidades[:, 2])
+
+plt.plot(tiempos, velocidades[:, 0], label="Vx", color='tomato')
+plt.plot(tiempos, velocidades[:, 1], label="Vy", color='royalblue')
+plt.plot(tiempos, velocidades[:, 2], label="Vz", color='green')
+
+# Marcadores de máximos
+plt.scatter(tiempos[max_vx_idx], velocidades[max_vx_idx, 0], color='tomato', marker='x', s=100)
+plt.scatter(tiempos[max_vy_idx], velocidades[max_vy_idx, 1], color='royalblue', marker='x', s=100)
+plt.scatter(tiempos[max_vz_idx], velocidades[max_vz_idx, 2], color='green', marker='x', s=100)
+
+# Etiquetas
+plt.text(tiempos[max_vx_idx], velocidades[max_vx_idx, 0] + 5, f'Máx Vx: {velocidades[max_vx_idx,0]:.2f}', color='tomato')
+plt.text(tiempos[max_vy_idx], velocidades[max_vy_idx, 1] + 5, f'Máx Vy: {velocidades[max_vy_idx,1]:.2f}', color='royalblue')
+plt.text(tiempos[max_vz_idx], velocidades[max_vz_idx, 2] + 5, f'Máx Vz: {velocidades[max_vz_idx,2]:.2f}', color='green')
+
+muestra_tiempos(tiempo_salida_riel, t_MECO, tiempo_apogeo, tiempo_impacto, plt)
 plt.legend()
 plt.grid(True)
+
 
 
 # GRAFICA 5. Componentes de las fuerzas
@@ -321,7 +364,7 @@ axs[2].set_ylabel("Altura (m)")
 plt.tight_layout()
 plt.show()
 
-
+#"""
 
 ##################
 fin = time.time()
