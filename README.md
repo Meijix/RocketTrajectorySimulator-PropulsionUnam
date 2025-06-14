@@ -24,7 +24,7 @@ El desarrollo y la validación de este simulador constituyen el núcleo de la te
 
 ## ✨ Características Principales
 
--   **Motor de Simulación 6-DOF:** Modela con precisión la traslación (x, y, z) y la rotación (pitch, yaw, roll) del cohete, considerándolo como un cuerpo rígido.
+-   **Motor de Simulación 3-DOF:** Modela con precisión la traslación (x, y, z) y la rotación pitch del cohete, considerándolo como un cuerpo rígido.
 -   **Interfaz Gráfica Intuitiva:** Desarrollada con `CustomTkinter`, permite definir todos los aspectos del cohete y la simulación sin necesidad de escribir código.
 -   **Definición Modular de Cohetes:** Permite construir un cohete a partir de componentes detallados (ojiva, cuerpo, aletas, motor, tanques, sistemas internos, etc.), especificando sus masas, dimensiones y posiciones.
 -   **Métodos Numéricos Avanzados:** Incluye una suite de integradores de Ecuaciones Diferenciales Ordinarias (EDOs) de alto orden y con control de paso adaptativo, como **DOP853 (Dormand-Prince)**, RK45, BDF y LSODA.
@@ -104,7 +104,6 @@ Para poner en marcha el simulador, sigue estos pasos:
 
 3.  **Actualizar y Validar:**
     -   Haz clic en el botón **"🔄 Actualizar Cohete"**.
-    -   Ve a la pestaña **"🛰️ Visualización"** para ver un esquema del cohete.
     -   Ve a la pestaña **"⚖️ Estabilidad"** para verificar que el margen estático sea positivo (idealmente entre 1 y 2 calibres).
 
 4.  **Correr la Simulación:**
@@ -148,9 +147,9 @@ Este proyecto es el resultado de mi trabajo de tesis para obtener el título de 
 
 -   **Autora Principal:** Natalia Edith Mejia Bautista
 -   **Asesores de Tesis:** Dra. Ursula X. Iturrarán Viveros, Dr. Juan Claudio Toledo Roy
--   **Portafolio:** [Enlace a tu perfil de LinkedIn o GitHub]
 
-Un agradecimiento especial al equipo **Propulsión UNAM** por su invaluable apoyo, por proporcionar los datos experimentales y por ser la principal fuente de inspiración y validación para este proyecto.
+
+Un colaboración con el equipo **Propulsión UNAM** por proporcionar los datos experimentales y por ser la principal fuente de inspiración y validación para este proyecto.
 
 ---
 
@@ -162,7 +161,6 @@ Este proyecto se distribuye bajo la **Licencia MIT**. Eres libre de usar, modifi
 
 ## 📈 Posibles Mejoras (Roadmap)
 
--   [ ] Implementar un modelo 3D renderizado del cohete en la interfaz.
 -   [ ] Añadir soporte para cohetes multietapa.
 -   [ ] Integrar un módulo de simulación de Monte Carlo para análisis de dispersión.
 -   [ ] Desarrollar modelos aerodinámicos más avanzados para motores sólidos y sistemas de control activo (TVC).
