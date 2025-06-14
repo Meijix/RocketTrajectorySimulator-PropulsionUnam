@@ -64,219 +64,570 @@ def placeholder_run_simulation(params, progress_callback, status_callback):
     except Exception as e:
         raise e
 
+class ColorPalette:
+    # Fondo y estructura
+    BG_MAIN = "#050253"       # Azul marino profundo (fondo principal)
+    BG_FRAME = "#CDDDFF"      # Azul grisáceo oscuro (frames y secciones)
+    BG_ENTRY = "#E2EAF4"   
+    BUTTON_RED = "#ef4444" 
+    BUTTON_GREEN = "#10b981"   # Azul muy claro / gris azulado (campos de entrada)
+    ACCENT_CYAN = "#15D0FF"  # Cyan para títulos
+    ACCENT_BLUE= "#0069C0"  # Azul para títulos
+    ACCENT_VIOLET = "#8b5cf6"  # Violeta para títulos
+
+    TEXT_PRIMARY = "#FFFFFF"  # Blanco para texto principal
+    TEXT_SECONDARY = "#E2EAF4"  # Gris claro para texto secundario
+    TEXT_ENTRY = "#050253"
+
+
+
 class RocketTab(customtkinter.CTkScrollableFrame):
     """Tab for defining all physical components of the rocket based on Xitle configuration."""
+    
     def __init__(self, master):
         super().__init__(master)
+        
+        # Configurar color de fondo oscuro
+        self.configure(fg_color=ColorPalette.BG_MAIN)
         self.grid_columnconfigure(0, weight=1)
         self.widgets = {}
 
         # --- Main Sections ---
-        self.external_components_frame = self.create_main_section_frame("Componentes Externos")
-        self.internal_components_frame = self.create_main_section_frame("Componentes Internos")
-        self.combustible_frame = self.create_main_section_frame("Combustibles")
+        self.external_components_frame = self.create_main_section_frame("Componentes Externos", 0)
+        self.internal_components_frame = self.create_main_section_frame("Componentes Internos", 1)
+        self.combustible_frame = self.create_main_section_frame("Propelentes", 2)
         
+        # Configurar columnas para cada sección
         self.external_components_frame.grid_columnconfigure((0, 1, 2), weight=1, uniform="col_ext")
         self.internal_components_frame.grid_columnconfigure((0, 1, 2), weight=1, uniform="col_int")
         self.combustible_frame.grid_columnconfigure((0, 1, 2), weight=1, uniform="col_comb")
 
         # --- Populate External Components ---
-        self.create_nariz_frame(self.external_components_frame, column=0); self.create_coples_frame(self.external_components_frame, column=0)
-        self.create_tubo_recuperacion_frame(self.external_components_frame, column=0); self.create_transferidor_frame(self.external_components_frame, column=1)
-        self.create_tanque_vacio_frame(self.external_components_frame, column=1); self.create_valvulas_frame(self.external_components_frame, column=1)
-        self.create_camara_combustion_frame(self.external_components_frame, column=2); self.create_boattail_frame(self.external_components_frame, column=2)
-        self.create_aletas_frame(self.external_components_frame, column=2); self.create_avionica_frame(self.internal_components_frame, column=0)
-        self.create_carga_util_frame(self.internal_components_frame, column=0); self.create_drogue_frame(self.internal_components_frame, column=1)
-        self.create_main_chute_frame(self.internal_components_frame, column=1); self.create_motor_frame(self.internal_components_frame, column=0)
-        self.create_oxidante_frame(self.combustible_frame, column=0); self.create_grano_frame(self.combustible_frame, column=1)
-
-    def create_labeled_widget(self, master, w_type, name, label_text, default_value, row, values=None):
-        label = customtkinter.CTkLabel(master, text=label_text); label.grid(row=row, column=0, padx=10, pady=(5,0), sticky="w")
-        if w_type == "entry": widget = customtkinter.CTkEntry(master, placeholder_text=str(default_value)); widget.insert(0, str(default_value))
-        elif w_type == "option": widget = customtkinter.CTkOptionMenu(master, values=values); widget.set(default_value)
-        widget.grid(row=row, column=1, padx=10, pady=(5,0), sticky="ew"); self.widgets[name] = widget
-
-    def create_main_section_frame(self, title):
-        frame = customtkinter.CTkFrame(self); frame.grid(column=0, padx=10, pady=10, sticky="ew")
-        frame_title = customtkinter.CTkLabel(frame, text=title, font=customtkinter.CTkFont(size=16, weight="bold"))
-        frame_title.grid(row=0, column=0, columnspan=3, pady=(10,5), padx=10, sticky="w"); return frame
-
-    def create_sub_frame(self, master, title, column):
-        current_row = sum(1 for w in master.winfo_children() if isinstance(w, customtkinter.CTkFrame) and w.grid_info().get('column') == str(column))
-        frame = customtkinter.CTkFrame(master); frame.grid(row=current_row + 1, column=column, padx=10, pady=10, sticky="new")
-        frame.grid_columnconfigure(1, weight=1)
-        frame_title = customtkinter.CTkLabel(frame, text=title, font=customtkinter.CTkFont(size=14, weight="bold"))
-        frame_title.grid(row=0, column=0, columnspan=2, pady=(10, 5), padx=10, sticky="w"); return frame
-
-    def create_nariz_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Nariz (Cono)", column)
-        self.create_labeled_widget(frame, "entry", "nose_len", "Longitud (m):", 0.8, 1); self.create_labeled_widget(frame, "entry", "nose_mass", "Masa (kg):", 0.81, 2)
-        self.create_labeled_widget(frame, "entry", "nose_pos_z", "Posición Z (m):", 4.3, 3); self.create_labeled_widget(frame, "entry", "nose_diam", "Diámetro (m):", 0.152, 4)
-        self.create_labeled_widget(frame, "option", "nose_shape", "Geometría:", "ogiva", 5, ["ogiva", "Cónico", "Elíptico"])
-
-    def create_coples_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Coples", column)
-        self.create_labeled_widget(frame, "entry", "coples_len", "Longitud (m):", 1.5, 1); self.create_labeled_widget(frame, "entry", "coples_mass", "Masa (kg):", 0.176, 2)
-        self.create_labeled_widget(frame, "entry", "coples_pos_z", "Posición Z (m):", 3.5, 3); self.create_labeled_widget(frame, "entry", "coples_diam_ext", "Diámetro Ext (m):", 0.152, 4)
-        self.create_labeled_widget(frame, "entry", "coples_diam_int", "Diámetro Int (m):", 0.149, 5)
-
-    def create_tubo_recuperacion_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Tubo Recuperación", column)
-        self.create_labeled_widget(frame, "entry", "tubo_recup_len", "Longitud (m):", 2.3, 1); self.create_labeled_widget(frame, "entry", "tubo_recup_mass", "Masa (kg):", 0.92, 2)
-        self.create_labeled_widget(frame, "entry", "tubo_recup_pos_z", "Posición Z (m):", 2.0, 3); self.create_labeled_widget(frame, "entry", "tubo_recup_diam_ext", "Diámetro Ext (m):", 0.152, 4)
-        self.create_labeled_widget(frame, "entry", "tubo_recup_diam_int", "Diámetro Int (m):", 0.149, 5)
-
-    def create_transferidor_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Transferidor", column)
-        self.create_labeled_widget(frame, "entry", "transfer_len", "Longitud (m):", 1.0, 1); self.create_labeled_widget(frame, "entry", "transfer_mass", "Masa (kg):", 0.25, 2)
-        self.create_labeled_widget(frame, "entry", "transfer_pos_z", "Posición Z (m):", 1.7, 3); self.create_labeled_widget(frame, "entry", "transfer_diam_ext", "Diámetro Ext (m):", 0.152, 4)
-        self.create_labeled_widget(frame, "entry", "transfer_diam_int", "Diámetro Int (m):", 0.149, 5)
-
-    def create_tanque_vacio_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Tanque Vacío", column)
-        self.create_labeled_widget(frame, "entry", "tanque_vacio_len", "Longitud (m):", 8.7, 1); self.create_labeled_widget(frame, "entry", "tanque_vacio_mass", "Masa (kg):", 1.25, 2)
-        self.create_labeled_widget(frame, "entry", "tanque_vacio_pos_z", "Posición Z (m):", 1.2, 3); self.create_labeled_widget(frame, "entry", "tanque_vacio_diam_ext", "Diámetro Ext (m):", 0.152, 4)
-        self.create_labeled_widget(frame, "entry", "tanque_vacio_diam_int", "Diámetro Int (m):", 0.149, 5)
-
-    def create_valvulas_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Válvulas", column)
-        self.create_labeled_widget(frame, "entry", "valvulas_len", "Longitud (m):", 2.4, 1); self.create_labeled_widget(frame, "entry", "valvulas_mass", "Masa (kg):", 0.167, 2)
-        self.create_labeled_widget(frame, "entry", "valvulas_pos_z", "Posición Z (m):", 0.8, 3); self.create_labeled_widget(frame, "entry", "valvulas_diam_ext", "Diámetro Ext (m):", 0.152, 4)
-        self.create_labeled_widget(frame, "entry", "valvulas_diam_int", "Diámetro Int (m):", 0.149, 5)
-
-    def create_camara_combustion_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Cámara de Combustión", column)
-        self.create_labeled_widget(frame, "entry", "cc_len", "Longitud (m):", 4.3, 1); self.create_labeled_widget(frame, "entry", "cc_mass", "Masa (kg):", 0.573, 2)
-        self.create_labeled_widget(frame, "entry", "cc_pos_z", "Posición Z (m):", 0.4, 3); self.create_labeled_widget(frame, "entry", "cc_diam_ext", "Diámetro Ext (m):", 0.152, 4)
-        self.create_labeled_widget(frame, "entry", "cc_diam_int", "Diámetro Int (m):", 0.102, 5)
-
-    def create_boattail_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Boattail", column)
-        self.create_labeled_widget(frame, "entry", "bt_len", "Longitud (m):", 0.12, 1); self.create_labeled_widget(frame, "entry", "bt_mass", "Masa (kg):", 0.251, 2)
-        self.create_labeled_widget(frame, "entry", "bt_pos_z", "Posición Z (m):", 0.0, 3); self.create_labeled_widget(frame, "entry", "bt_diam_front", "Diámetro Frontal (m):", 0.152, 4)
-        self.create_labeled_widget(frame, "entry", "bt_diam_rear", "Diámetro Trasero (m):", 0.132, 5); self.create_labeled_widget(frame, "entry", "bt_espesor", "Espesor (m):", 0.003, 6)
-
-    def create_aletas_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Aletas", column)
-        self.create_labeled_widget(frame, "entry", "fin_num", "Número:", 4, 1); self.create_labeled_widget(frame, "entry", "fin_mass", "Masa Total (kg):", 1.1, 2)
-        self.create_labeled_widget(frame, "entry", "fin_pos_z", "Posición Z (m):", 0.2, 3); self.create_labeled_widget(frame, "entry", "fin_span", "Envergadura (m):", 0.11, 4)
-        self.create_labeled_widget(frame, "entry", "fin_root_chord", "Cuerda Raíz (m):", 0.3, 5); self.create_labeled_widget(frame, "entry", "fin_tip_chord", "Cuerda Punta (m):", 0.1, 6)
-        self.create_labeled_widget(frame, "entry", "fin_sweep", "Ángulo de barrido (grados):", 25, 7)
-
-    def create_avionica_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Aviónica", column)
-        self.create_labeled_widget(frame, "entry", "avionics_mass", "Masa (kg):", 0.21, 1); self.create_labeled_widget(frame, "entry", "avionics_pos_z", "Posición Z (m):", 0.20, 2)
+        # Primera fila
+        self.create_nariz_frame(self.external_components_frame, row=1, column=0)
+        self.create_coples_frame(self.external_components_frame, row=1, column=1)
+        self.create_tubo_recuperacion_frame(self.external_components_frame, row=1, column=2)
         
-    def create_carga_util_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Carga Útil", column)
-        self.create_labeled_widget(frame, "entry", "cu_mass", "Masa (kg):", 0.3, 1); self.create_labeled_widget(frame, "entry", "cu_pos_z", "Posición Z (m):", 0.50, 2)
+        # Segunda fila
+        self.create_transferidor_frame(self.external_components_frame, row=2, column=0)
+        self.create_tanque_vacio_frame(self.external_components_frame, row=2, column=1)
+        self.create_valvulas_frame(self.external_components_frame, row=2, column=2)
+        
+        # Tercera fila
+        self.create_camara_combustion_frame(self.external_components_frame, row=3, column=0)
+        self.create_boattail_frame(self.external_components_frame, row=3, column=1)
+        self.create_aletas_frame(self.external_components_frame, row=3, column=2)
+        
+        # --- Populate Internal Components ---
+        # Primera fila
+        self.create_avionica_frame(self.internal_components_frame, row=1, column=0)
+        self.create_carga_util_frame(self.internal_components_frame, row=1, column=1)
+        self.create_motor_frame(self.internal_components_frame, row=1, column=2)
+        
+        # Segunda fila
+        self.create_drogue_frame(self.internal_components_frame, row=2, column=0)
+        self.create_main_chute_frame(self.internal_components_frame, row=2, column=1)
+        
+        # --- Populate Propellants ---
+        self.create_oxidante_frame(self.combustible_frame, row=1, column=0)
+        self.create_grano_frame(self.combustible_frame, row=1, column=1)
 
-    def create_drogue_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Drogue", column)
-        self.create_labeled_widget(frame, "entry", "drogue_mass", "Masa (kg):", 0.17, 1); self.create_labeled_widget(frame, "entry", "drogue_pos_z", "Posición Z (m):", 1.0, 2)
-        self.create_labeled_widget(frame, "entry", "drogue_chute_diam", "Diámetro Paracaídas (m):", 0.8, 3); self.create_labeled_widget(frame, "entry", "drogue_cd", "Cd Paracaídas:", 0.7, 4)
+    def create_labeled_widget(self, master, w_type, name, label_text, default_value, row, 
+                            values=None, unit="", tooltip=None):
+        """Crear widget con etiqueta y unidad opcional"""
+        
+        # Crear frame contenedor
+        container = customtkinter.CTkFrame(master, fg_color="transparent")
+        container.grid(row=row, column=0, columnspan=2, padx=8, pady=3, sticky="ew")
+        container.grid_columnconfigure(1, weight=1)
+        
+        # Crear label con unidad si se proporciona
+        label_full = f"{label_text} {unit}:" if unit else f"{label_text}:"
+        label = customtkinter.CTkLabel(
+            container, 
+            text=label_full,
+            text_color=ColorPalette.TEXT_PRIMARY,
+            font=customtkinter.CTkFont(size=12),
+            anchor="w",
+            width=140
+        )
+        label.grid(row=0, column=0, padx=(5, 5), sticky="w")
+        
+        # Crear widget según tipo
+        if w_type == "entry":
+            widget = customtkinter.CTkEntry(
+                container,
+                fg_color=ColorPalette.BG_ENTRY,
+                text_color=ColorPalette.TEXT_ENTRY,
+                border_width=0,
+                corner_radius=6,
+                height=28,
+                font=customtkinter.CTkFont(size=12)
+            )
+            widget.insert(0, str(default_value))
+        elif w_type == "option":
+            widget = customtkinter.CTkOptionMenu(
+                container,
+                values=values,
+                fg_color=ColorPalette.BG_ENTRY,
+                text_color=ColorPalette.TEXT_ENTRY,
+                button_color=ColorPalette.BG_ENTRY,
+                button_hover_color=ColorPalette.TEXT_SECONDARY,
+                dropdown_fg_color=ColorPalette.BG_ENTRY,
+                dropdown_text_color=ColorPalette.TEXT_ENTRY,
+                dropdown_hover_color=ColorPalette.TEXT_SECONDARY,
+                corner_radius=6,
+                height=28,
+                font=customtkinter.CTkFont(size=12)
+            )
+            widget.set(default_value)
+        
+        widget.grid(row=0, column=1, padx=(0, 5), sticky="ew")
+        self.widgets[name] = widget
+        
+        # Agregar tooltip si se proporciona
+        if tooltip:
+            self.create_tooltip(widget, tooltip)
+        
+        return widget
 
-    def create_main_chute_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Main (Paracaídas)", column)
-        self.create_labeled_widget(frame, "entry", "main_mass", "Masa (kg):", 0.30, 1); self.create_labeled_widget(frame, "entry", "main_pos_z", "Posición Z (m):", 1.4, 2)
-        self.create_labeled_widget(frame, "entry", "main_chute_diam", "Diámetro Paracaídas (m):", 2.0, 3); self.create_labeled_widget(frame, "entry", "main_cd", "Cd Paracaídas:", 1.8, 4)
-        self.create_labeled_widget(frame, "entry", "main_deploy_alt", "Alt. Despliegue (m):", 450, 5)
+    def create_main_section_frame(self, title, section_row):
+        """Crear frame principal de sección con estilo mejorado"""
+        frame = customtkinter.CTkFrame(
+            self,
+            fg_color=ColorPalette.BG_FRAME,
+            corner_radius=10,
+            border_width=0
+        )
+        frame.grid(row=section_row, column=0, padx=15, pady=10, sticky="ew")
+        
+        # Título de la sección con icono o color distintivo
+        colors = [ColorPalette.ACCENT_BLUE, ColorPalette.ACCENT_BLUE, ColorPalette.ACCENT_BLUE,]
+        title_color = colors[section_row % len(colors)]
+        
+        frame_title = customtkinter.CTkLabel(
+            frame,
+            text=f"▶ {title}",
+            font=customtkinter.CTkFont(size=18, weight="bold"),
+            text_color=title_color
+        )
+        frame_title.grid(row=0, column=0, columnspan=3, pady=(15, 10), padx=20, sticky="w")
+        
+        return frame
 
-    def create_motor_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Motor (Masa)", column)
-        self.create_labeled_widget(frame, "entry", "motor_mass_inert", "Masa Inerte (kg):", 3.2, 1); self.create_labeled_widget(frame, "entry", "motor_pos_z", "Posición (m):", 0.45, 2)
-    
-    def create_oxidante_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Oxidante (NOX)", column)
-        self.create_labeled_widget(frame, "entry", "oxidante_mass", "Masa (kg):", 12.0, 1)
+    def create_sub_frame(self, master, title, row, column):
+        """Crear sub-frame para componente con estilo consistente"""
+        frame = customtkinter.CTkFrame(
+            master,
+            fg_color=ColorPalette.BG_MAIN,
+            corner_radius=8
+        )
+        frame.grid(row=row, column=column, padx=8, pady=8, sticky="nsew")
+        frame.grid_columnconfigure(0, weight=1)
+        
+        # Título del componente
+        frame_title = customtkinter.CTkLabel(
+            frame,
+            text=title,
+            font=customtkinter.CTkFont(size=14, weight="bold"),
+            text_color=ColorPalette.TEXT_PRIMARY
+        )
+        frame_title.grid(row=0, column=0, columnspan=2, pady=(10, 5), padx=10, sticky="w")
+        
+        return frame
 
-    def create_grano_frame(self, master, column):
-        frame = self.create_sub_frame(master, "Grano (Combustible Sólido)", column)
-        self.create_labeled_widget(frame, "entry", "grano_mass", "Masa (kg):", 4.0, 1)
+    def create_nariz_frame(self, master, row, column):
+        """Nariz (Cono)"""
+        frame = self.create_sub_frame(master, "🚀 Nariz (Cono)", row, column)
+        self.create_labeled_widget(frame, "entry", "nose_len", "Longitud", 0.81, 1, unit="m")
+        self.create_labeled_widget(frame, "entry", "nose_mass", "Masa", 0.81, 2, unit="kg")
+        self.create_labeled_widget(frame, "entry", "nose_pos_z", "Posición Z", 4.3, 3, unit="m")
+        self.create_labeled_widget(frame, "entry", "nose_diam", "Diámetro", 0.152, 4, unit="m")
+        self.create_labeled_widget(frame, "option", "nose_shape", "Geometría", "ogiva", 5, 
+                                 values=["ogiva", "Cónico", "Elíptico", "Parabólico"])
+
+    def create_coples_frame(self, master, row, column):
+        """Coples"""
+        frame = self.create_sub_frame(master, "🔗 Coples", row, column)
+        self.create_labeled_widget(frame, "entry", "coples_len", "Longitud", 0.15, 1, unit="m")
+        self.create_labeled_widget(frame, "entry", "coples_mass", "Masa", 0.176, 2, unit="kg")
+        self.create_labeled_widget(frame, "entry", "coples_pos_z", "Posición Z", 3.5, 3, unit="m")
+        self.create_labeled_widget(frame, "entry", "coples_diam_ext", "Diámetro Ext", 0.152, 4, unit="m")
+        self.create_labeled_widget(frame, "entry", "coples_diam_int", "Diámetro Int", 0.149, 5, unit="m")
+
+    def create_tubo_recuperacion_frame(self, master, row, column):
+        """Tubo de Recuperación"""
+        frame = self.create_sub_frame(master, "📦 Tubo Recuperación", row, column)
+        self.create_labeled_widget(frame, "entry", "tubo_recup_len", "Longitud", 0.3, 1, unit="m")
+        self.create_labeled_widget(frame, "entry", "tubo_recup_mass", "Masa", 0.92, 2, unit="kg")
+        self.create_labeled_widget(frame, "entry", "tubo_recup_pos_z", "Posición Z", 2.75, 3, unit="m")
+        self.create_labeled_widget(frame, "entry", "tubo_recup_diam_ext", "Diámetro Ext", 0.152, 4, unit="m")
+        self.create_labeled_widget(frame, "entry", "tubo_recup_diam_int", "Diámetro Int", 0.149, 5, unit="m")
+
+    def create_transferidor_frame(self, master, row, column):
+        """Transferidor"""
+        frame = self.create_sub_frame(master, "⚡ Transferidor", row, column)
+        self.create_labeled_widget(frame, "entry", "transfer_len", "Longitud", 0.10, 1, unit="m")
+        self.create_labeled_widget(frame, "entry", "transfer_mass", "Masa", 0.25, 2, unit="kg")
+        self.create_labeled_widget(frame, "entry", "transfer_pos_z", "Posición Z", 2.6, 3, unit="m")
+        self.create_labeled_widget(frame, "entry", "transfer_diam_ext", "Diámetro Ext", 0.152, 4, unit="m")
+        self.create_labeled_widget(frame, "entry", "transfer_diam_int", "Diámetro Int", 0.149, 5, unit="m")
+
+    def create_tanque_vacio_frame(self, master, row, column):
+        """Tanque de Oxidante"""
+        frame = self.create_sub_frame(master, "🛢️ Tanque Oxidante", row, column)
+        self.create_labeled_widget(frame, "entry", "tanque_vacio_len", "Longitud", 0.87, 1, unit="m")
+        self.create_labeled_widget(frame, "entry", "tanque_vacio_mass", "Masa", 1.25, 2, unit="kg")
+        self.create_labeled_widget(frame, "entry", "tanque_vacio_pos_z", "Posición Z", 1.2, 3, unit="m")
+        self.create_labeled_widget(frame, "entry", "tanque_vacio_diam_ext", "Diámetro Ext", 0.152, 4, unit="m")
+        self.create_labeled_widget(frame, "entry", "tanque_vacio_diam_int", "Diámetro Int", 0.149, 5, unit="m")
+
+    def create_valvulas_frame(self, master, row, column):
+        """Sistema de Válvulas"""
+        frame = self.create_sub_frame(master, "🔧 Válvulas", row, column)
+        self.create_labeled_widget(frame, "entry", "valvulas_len", "Longitud", 0.24, 1, unit="m")
+        self.create_labeled_widget(frame, "entry", "valvulas_mass", "Masa", 0.167, 2, unit="kg")
+        self.create_labeled_widget(frame, "entry", "valvulas_pos_z", "Posición Z", 0.8, 3, unit="m")
+        self.create_labeled_widget(frame, "entry", "valvulas_diam_ext", "Diámetro Ext", 0.152, 4, unit="m")
+        self.create_labeled_widget(frame, "entry", "valvulas_diam_int", "Diámetro Int", 0.149, 5, unit="m")
+
+    def create_camara_combustion_frame(self, master, row, column):
+        """Cámara de Combustión"""
+        frame = self.create_sub_frame(master, "🔥 Cámara Combustión", row, column)
+        self.create_labeled_widget(frame, "entry", "cc_len", "Longitud", 0.43, 1, unit="m")
+        self.create_labeled_widget(frame, "entry", "cc_mass", "Masa", 0.573, 2, unit="kg")
+        self.create_labeled_widget(frame, "entry", "cc_pos_z", "Posición Z", 0.4, 3, unit="m")
+        self.create_labeled_widget(frame, "entry", "cc_diam_ext", "Diámetro Ext", 0.152, 4, unit="m")
+        self.create_labeled_widget(frame, "entry", "cc_diam_int", "Diámetro Int", 0.102, 5, unit="m")
+
+    def create_boattail_frame(self, master, row, column):
+        """Boattail (Tobera)"""
+        frame = self.create_sub_frame(master, "🔻 Boattail/Tobera", row, column)
+        self.create_labeled_widget(frame, "entry", "bt_len", "Longitud", 0.12, 1, unit="m")
+        self.create_labeled_widget(frame, "entry", "bt_mass", "Masa", 0.251, 2, unit="kg")
+        self.create_labeled_widget(frame, "entry", "bt_pos_z", "Posición Z", 0.06, 3, unit="m")
+        self.create_labeled_widget(frame, "entry", "bt_diam_front", "Diám. Frontal", 0.152, 4, unit="m")
+        self.create_labeled_widget(frame, "entry", "bt_diam_rear", "Diám. Trasero", 0.132, 5, unit="m")
+        self.create_labeled_widget(frame, "entry", "bt_espesor", "Espesor", 0.003, 6, unit="m")
+
+    def create_aletas_frame(self, master, row, column):
+        """Aletas"""
+        frame = self.create_sub_frame(master, "🦅 Aletas", row, column)
+        self.create_labeled_widget(frame, "entry", "fin_num", "Número", 4, 1, unit="")
+        self.create_labeled_widget(frame, "entry", "fin_mass", "Masa Total", 1.1, 2, unit="kg")
+        self.create_labeled_widget(frame, "entry", "fin_pos_z", "Posición Z", 0.2, 3, unit="m")
+        self.create_labeled_widget(frame, "entry", "fin_span", "Envergadura", 0.11, 4, unit="m")
+        self.create_labeled_widget(frame, "entry", "fin_root_chord", "Cuerda Raíz", 0.3, 5, unit="m")
+        self.create_labeled_widget(frame, "entry", "fin_tip_chord", "Cuerda Punta", 0.1, 6, unit="m")
+        self.create_labeled_widget(frame, "entry", "fin_sweep", "Ángulo barrido", 25, 7, unit="°")
+
+    def create_avionica_frame(self, master, row, column):
+        """Aviónica"""
+        frame = self.create_sub_frame(master, "📡 Aviónica", row, column)
+        self.create_labeled_widget(frame, "entry", "avionics_mass", "Masa", 0.21, 1, unit="kg")
+        self.create_labeled_widget(frame, "entry", "avionics_pos_z", "Posición Z", 3.2, 2, unit="m")
+        
+    def create_carga_util_frame(self, master, row, column):
+        """Carga Útil"""
+        frame = self.create_sub_frame(master, "📦 Carga Útil", row, column)
+        self.create_labeled_widget(frame, "entry", "cu_mass", "Masa", 0.3, 1, unit="kg")
+        self.create_labeled_widget(frame, "entry", "cu_pos_z", "Posición Z", 4.0, 2, unit="m")
+
+    def create_motor_frame(self, master, row, column):
+        """Motor"""
+        frame = self.create_sub_frame(master, "⚙️ Motor", row, column)
+        self.create_labeled_widget(frame, "entry", "motor_mass_inert", "Masa Inerte", 3.2, 1, unit="kg")
+        self.create_labeled_widget(frame, "entry", "motor_pos_z", "Posición Z", 0.45, 2, unit="m")
+
+    def create_drogue_frame(self, master, row, column):
+        """Paracaídas Drogue"""
+        frame = self.create_sub_frame(master, "🪂 Drogue", row, column)
+        self.create_labeled_widget(frame, "entry", "drogue_mass", "Masa", 0.17, 1, unit="kg")
+        self.create_labeled_widget(frame, "entry", "drogue_pos_z", "Posición Z", 2.9, 2, unit="m")
+        self.create_labeled_widget(frame, "entry", "drogue_chute_diam", "Diám. Paracaídas", 0.8, 3, unit="m")
+        self.create_labeled_widget(frame, "entry", "drogue_cd", "Coef. Arrastre", 0.7, 4, unit="")
+        self.create_labeled_widget(frame, "entry", "drogue_deploy_alt", "Alt. Despliegue", 100, 5, unit="m", 
+                                 tooltip="Altitud sobre el apogeo para desplegar")
+
+    def create_main_chute_frame(self, master, row, column):
+        """Paracaídas Principal"""
+        frame = self.create_sub_frame(master, "🪂 Main (Principal)", row, column)
+        self.create_labeled_widget(frame, "entry", "main_mass", "Masa", 0.30, 1, unit="kg")
+        self.create_labeled_widget(frame, "entry", "main_pos_z", "Posición Z", 2.9, 2, unit="m")
+        self.create_labeled_widget(frame, "entry", "main_chute_diam", "Diám. Paracaídas", 2.0, 3, unit="m")
+        self.create_labeled_widget(frame, "entry", "main_cd", "Coef. Arrastre", 1.8, 4, unit="")
+        self.create_labeled_widget(frame, "entry", "main_deploy_alt", "Alt. Despliegue", 450, 5, unit="m",
+                                 tooltip="Altitud AGL para desplegar el paracaídas principal")
+
+    def create_oxidante_frame(self, master, row, column):
+        """Oxidante"""
+        frame = self.create_sub_frame(master, "💧 Oxidante (N₂O)", row, column)
+        self.create_labeled_widget(frame, "entry", "oxidante_mass", "Masa", 12.0, 1, unit="kg")
+        self.create_labeled_widget(frame, "entry", "oxidante_density", "Densidad", 1220, 2, unit="kg/m³")
+        self.create_labeled_widget(frame, "entry", "oxidante_temp", "Temperatura", 20, 3, unit="°C")
+
+    def create_grano_frame(self, master, row, column):
+        """Combustible Sólido"""
+        frame = self.create_sub_frame(master, "🔥 Grano (Combustible)", row, column)
+        self.create_labeled_widget(frame, "entry", "grano_mass", "Masa", 4.88, 1, unit="kg")
+        self.create_labeled_widget(frame, "entry", "grano_length", "Longitud", 0.35, 2, unit="m")
+        self.create_labeled_widget(frame, "entry", "grano_outer_diam", "Diám. Exterior", 0.098, 3, unit="m")
+        self.create_labeled_widget(frame, "entry", "grano_inner_diam", "Diám. Interior", 0.030, 4, unit="m")
+        self.create_labeled_widget(frame, "option", "grano_config", "Configuración", "BATES", 5,
+                                 values=["BATES", "Estrella", "Finocyl", "Moonburner"])
+
+    def create_tooltip(self, widget, text):
+        """Crear tooltip para un widget (placeholder para implementación futura)"""
+        # Por ahora, solo un placeholder
+        pass
 
     def get_params(self):
-        params = {}
-        try:
-            for name, widget in self.widgets.items():
-                val = widget.get();
-                try: params[name] = float(val) if '.' in val or 'e' in val.lower() else int(val)
-                except (ValueError, TypeError): params[name] = val
-            return params
-        except Exception as e: print(f"Error al obtener parámetros: {e}"); return None
-    
-class SimulationEnvironmentTab(customtkinter.CTkScrollableFrame):
-    def __init__(self, master):
-        super().__init__(master)
-        self.grid_columnconfigure((0, 1), weight=1, uniform="col")
-        self.widgets = {}
-        self.create_launch_site_frame(column=0); self.create_wind_frame(column=0)
-        self.create_rail_frame(column=1); self.create_simulation_frame(column=1)
-        self.create_motor_performance_frame(column=1)
-    
-    def create_labeled_widget(self, master, w_type, name, label_text, default_value, row, values=None):
-        label = customtkinter.CTkLabel(master, text=label_text); label.grid(row=row, column=0, padx=10, pady=5, sticky="w")
-        if w_type == "entry": widget = customtkinter.CTkEntry(master, placeholder_text=str(default_value)); widget.insert(0, str(default_value))
-        elif w_type == "option": widget = customtkinter.CTkOptionMenu(master, values=values); widget.set(default_value)
-        elif w_type == "switch": widget = customtkinter.CTkSwitch(master, text=label_text); label.grid_forget()
-        widget.grid(row=row, column=1, padx=10, pady=5, sticky="ew"); self.widgets[name] = widget
-
-    def create_frame(self, title, column):
-        current_row = sum(1 for w in self.winfo_children() if isinstance(w, customtkinter.CTkFrame) and w.grid_info().get('column') == str(column))
-        frame = customtkinter.CTkFrame(self); frame.grid(row=current_row, column=column, padx=10, pady=10, sticky="new")
-        frame.grid_columnconfigure(1, weight=1)
-        title = customtkinter.CTkLabel(frame, text=title, font=customtkinter.CTkFont(size=14, weight="bold"))
-        title.grid(row=0, column=0, columnspan=2, pady=(10, 5), padx=10, sticky="w"); return frame
-
-    def create_launch_site_frame(self, column):
-        frame = self.create_frame("Parámetros del Sitio de Lanzamiento", column)
-        self.create_labeled_widget(frame, "entry", "launch_lat", "Latitud:", 19.5, 1); self.create_labeled_widget(frame, "entry", "launch_lon", "Longitud:", -98.8, 2)
-        self.create_labeled_widget(frame, "entry", "launch_alt", "Altitud (m):", 1400, 3); self.create_labeled_widget(frame, "entry", "launch_date", "Fecha (YYYY-MM-DD):", "2024-11-06", 4)
-        map_frame = customtkinter.CTkFrame(frame); map_frame.grid(row=5, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
-        map_frame.grid_columnconfigure(0, weight=1); map_frame.grid_rowconfigure(0, weight=1)
-        self.map_widget = TkinterMapView(map_frame, width=300, height=200, corner_radius=10); self.map_widget.pack(fill="both", expand=True)
-        self.map_widget.set_position(19.5, -98.8); self.map_widget.set_marker(19.5, -98.8)
-        update_map_button = customtkinter.CTkButton(frame, text="Actualizar Mapa", command=self.update_map); update_map_button.grid(row=6, column=0, columnspan=2, padx=10, pady=(0,10))
-
-    def update_map(self):
-        try: lat = float(self.widgets['launch_lat'].get()); lon = float(self.widgets['launch_lon'].get()); self.map_widget.set_position(lat, lon, marker=True); self.map_widget.set_zoom(12)
-        except ValueError: messagebox.showerror("Error de Coordenadas", "Latitud y longitud deben ser valores numéricos.")
-
-    def create_rail_frame(self, column):
-        frame = self.create_frame("Parámetros del Riel de Lanzamiento", column)
-        self.create_labeled_widget(frame, "entry", "rail_len", "Longitud (m):", 6.0, 1); self.create_labeled_widget(frame, "entry", "rail_angle", "Ángulo (grados):", 85.0, 2)
-
-    def create_wind_frame(self, column):
-        frame = self.create_frame("Parámetros del Viento", column)
-        self.create_labeled_widget(frame, "entry", "wind_base_speed", "Velocidad base (m/s):", 5, 1); self.create_labeled_widget(frame, "entry", "wind_mean_speed", "Velocidad media (m/s):", 3, 2)
-        self.create_labeled_widget(frame, "entry", "wind_speed_var", "Variación de velocidad:", 2, 3); self.create_labeled_widget(frame, "entry", "wind_angle_var", "Variación de ángulo (grados):", 10.0, 4)
-
-    def create_simulation_frame(self, column):
-        frame = self.create_frame("Parámetros de Simulación", column)
-        self.create_labeled_widget(frame, "entry", "sim_max_time", "Tiempo máximo (s):", 800, 1); self.create_labeled_widget(frame, "entry", "sim_time_step", "Paso de tiempo (s):", 0.01, 2)
-        self.create_labeled_widget(frame, "option", "integrator", "Integrador:", "DOP853", 3, ["DOP853", "RK45", "RK23", "Euler"])
-        self.create_labeled_widget(frame, "switch", "use_parachutes", "Simular con Paracaídas", True, 4)
-
-    def create_motor_performance_frame(self, column):
-        frame = self.create_frame("Motor (Rendimiento)", column)
-        self.create_labeled_widget(frame, "entry", "propellant_mass", "Masa de Propelente (kg):", 4.88, 1)
-        script_dir = os.path.dirname(__file__); thrust_curves_path = os.path.join(script_dir, "..", "..", "Archivos", "CurvasEmpuje")
-        try:
-            thrust_files = [f for f in os.listdir(thrust_curves_path) if f.endswith(('.csv', '.eng'))] if os.path.isdir(thrust_curves_path) else []
-            if not thrust_files: thrust_files = ["No se encontraron archivos"]
-        except FileNotFoundError: thrust_files = ["Directorio no encontrado"]
-        self.create_labeled_widget(frame, "option", "thrust_curve", "Curva de Empuje:", thrust_files[0] if "No" not in thrust_files[0] else "", 2, thrust_files)
-
-    def get_params(self):
+        """Obtener todos los parámetros del cohete"""
         params = {}
         try:
             for name, widget in self.widgets.items():
                 val = widget.get()
-                if isinstance(widget, customtkinter.CTkSwitch): params[name] = bool(val)
-                else:
-                    try: params[name] = float(val) if '.' in val else int(val)
-                    except (ValueError, TypeError): params[name] = val
+                try:
+                    # Intentar convertir a número
+                    params[name] = float(val) if '.' in val or 'e' in val.lower() else int(val)
+                except (ValueError, TypeError):
+                    # Si no es número, guardar como string
+                    params[name] = val
             return params
-        except Exception: return None
+        except Exception as e:
+            print(f"Error al obtener parámetros: {e}")
+            return None
+
+    def validate_params(self):
+        """Validar que los parámetros sean coherentes"""
+        params = self.get_params()
+        if not params:
+            return False, "Error al obtener parámetros"
+        
+        # Validaciones básicas
+        validations = [
+            (params.get('nose_len', 0) > 0, "La longitud de la nariz debe ser mayor a 0"),
+            (params.get('fin_num', 0) >= 3, "El número de aletas debe ser al menos 3"),
+            (params.get('oxidante_mass', 0) > 0, "La masa de oxidante debe ser mayor a 0"),
+            (params.get('grano_mass', 0) > 0, "La masa de combustible debe ser mayor a 0"),
+        ]
+        
+        for valid, message in validations:
+            if not valid:
+                return False, message
+        
+        return True, "Parámetros válidos"
+
+    def reset_to_defaults(self):
+        """Resetear todos los valores a los defaults del Xitle"""
+        # Implementar si es necesario
+        pass
+
+class SimulationEnvironmentTab(customtkinter.CTkScrollableFrame):
+    def __init__(self, master):
+        super().__init__(master)
+        
+        # Configurar color de fondo oscuro
+        self.configure(fg_color=ColorPalette.BG_FRAME)
+        
+        # Configurar grid para 3 columnas donde la tercera es más pequeña para el mapa
+        self.grid_columnconfigure(0, weight=1, uniform="col")
+        self.grid_columnconfigure(1, weight=1, uniform="col")
+        self.grid_columnconfigure(2, weight=1)
+        self.widgets = {}
+        
+        # Crear frames según la imagen
+        self.create_launch_site_frame(row=0, column=0)
+        self.create_wind_frame(row=0, column=1)
+        self.create_rail_frame(row=1, column=0)
+        self.create_simulation_frame(row=1, column=1)
+        self.create_map_frame(row=0, column=2, rowspan=2)
+        
+
+
+    def create_map_frame(self, row, column, rowspan):
+        """Frame con mapa del sitio de lanzamiento"""
+        frame = self.create_frame("Mapa: Sitio del lanzamiento", row, column, rowspan)
+        
+        # Crear el widget del mapa
+        map_container = customtkinter.CTkFrame(frame, fg_color=ColorPalette.BG_FRAME, corner_radius=10)
+        map_container.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        frame.grid_rowconfigure(1, weight=1)
+        frame.grid_columnconfigure(0, weight=1)
+        
+        self.map_widget = TkinterMapView(
+            map_container, 
+            width=400, 
+            height=350,
+            corner_radius=10
+        )
+        self.map_widget.pack(fill="both", expand=True, padx=5, pady=5)
+        
+        # Establecer posición inicial basada en los valores por defecto
+        self.update_map_position()
+    
+    def update_map_position(self):
+        """Actualizar la posición del mapa basándose en las coordenadas actuales"""
+        try:
+            lat = float(self.widgets['launch_lat'].get()) if 'launch_lat' in self.widgets else 19.5
+            lon = float(self.widgets['launch_lon'].get()) if 'launch_lon' in self.widgets else -98
+            
+            self.map_widget.set_position(lat, lon)
+            self.map_widget.delete_all_marker()
+            self.map_widget.set_marker(lat, lon, text="Sitio de Lanzamiento")
+            self.map_widget.set_zoom(12)
+        except (ValueError, KeyError):
+            pass
+    
+    def create_labeled_widget(self, master, w_type, name, label_text, default_value, row, 
+                            values=None, width=150, label_width=150):
+        """Crear widget con etiqueta al lado izquierdo"""
+        
+        # Crear frame contenedor para label y widget
+        container = customtkinter.CTkFrame(master, fg_color="transparent")
+        container.grid(row=row, column=0, columnspan=2, padx=5, pady=3, sticky="ew")
+        container.grid_columnconfigure(1, weight=1)
+        
+        # Crear label
+        label = customtkinter.CTkLabel(
+            container, 
+            text=label_text, 
+            width=label_width,
+            anchor="w",
+            text_color="white"
+        )
+        label.grid(row=0, column=0, padx=(10, 5), sticky="w")
+        
+        # Crear widget según tipo
+        if w_type == "entry":
+            widget = customtkinter.CTkEntry(
+                container, 
+                width=width,
+                fg_color="white",
+                text_color="black",
+                border_width=1
+            )
+            widget.insert(0, str(default_value))
+            
+            # Si es un campo de coordenadas, agregar callback para actualizar mapa
+            if name in ['launch_lat', 'launch_lon']:
+                widget.bind('<KeyRelease>', lambda e: self.on_coordinate_change())
+                
+        elif w_type == "option":
+            widget = customtkinter.CTkOptionMenu(
+                container, 
+                values=values,
+                width=width,
+                fg_color="white",
+                text_color="black",
+                button_color="white",
+                button_hover_color="#e0e0e0"
+            )
+            widget.set(default_value)
+        elif w_type == "switch":
+            widget = customtkinter.CTkSwitch(
+                container, 
+                text="",
+                fg_color="gray",
+                progress_color=ColorPalette.ACCENT_CYAN,
+            )
+            if default_value:
+                widget.select()
+        
+        widget.grid(row=0, column=1, padx=(0, 10), sticky="w")
+        self.widgets[name] = widget
+        
+        return widget
+    
+    def on_coordinate_change(self):
+        """Callback para cuando cambian las coordenadas"""
+        if hasattr(self, 'map_widget'):
+            self.update_map_position()
+
+    def create_frame(self, title, row, column, rowspan=1, colspan=1):
+        """Crear frame con título y estilo consistente"""
+        frame = customtkinter.CTkFrame(
+            self, 
+            fg_color=ColorPalette.BG_MAIN,
+            corner_radius=10,
+            border_width=1,
+            border_color=ColorPalette.ACCENT_CYAN
+        )
+        frame.grid(row=row, column=column, rowspan=rowspan, columnspan=colspan, 
+                  padx=10, pady=10, sticky="nsew")
+        
+        # Título del frame
+        title_label = customtkinter.CTkLabel(
+            frame, 
+            text=title, 
+            font=customtkinter.CTkFont(size=16, weight="bold"),
+            text_color="#00b4d8"
+        )
+        title_label.grid(row=0, column=0, columnspan=2, pady=(10, 10), padx=10, sticky="w")
+        
+        return frame
+
+    def create_launch_site_frame(self, row, column):
+        """Frame de Sitio de Lanzamiento"""
+        frame = self.create_frame("Sitio de Lanzamiento:", row, column)
+        
+        self.create_labeled_widget(frame, "entry", "launch_lat", "Latitud (°):", "19.5", 1)
+        self.create_labeled_widget(frame, "entry", "launch_lon", "Longitud (°):", "-98", 2)
+        self.create_labeled_widget(frame, "entry", "launch_alt", "Altitud (m):", "20", 3)
+        self.create_labeled_widget(frame, "entry", "launch_date", "Fecha (YYYY-MM-DD):", "2024-11-06", 4)
+
+    def create_wind_frame(self, row, column):
+        """Frame de Viento (Modelo Simple)"""
+        frame = self.create_frame("Viento (Modelo Simple):", row, column)
+        
+        self.create_labeled_widget(frame, "entry", "wind_base_speed", "Velocidad Base (m/s):", "5", 1)
+        self.create_labeled_widget(frame, "entry", "wind_mean_speed", "Velocidad Media (m/s):", "3", 2)
+        self.create_labeled_widget(frame, "entry", "wind_speed_var", "Variación Velocidad:", "2", 3)
+        self.create_labeled_widget(frame, "entry", "wind_angle_var", "Variación Ángulo (°):", "10.0", 4)
+
+    def create_rail_frame(self, row, column):
+        """Frame de Riel de Lanzamiento"""
+        frame = self.create_frame("Riel de Lanzamiento:", row, column)
+        
+        self.create_labeled_widget(frame, "entry", "rail_len", "Longitud (m):", "10", 1)
+        self.create_labeled_widget(frame, "entry", "rail_angle", "Ángulo Elevación (°):", "4984.73281763816", 2)
+
+    def create_simulation_frame(self, row, column):
+        """Frame de Simulación"""
+        frame = self.create_frame("Simulación:", row, column)
+        
+        self.create_labeled_widget(frame, "entry", "sim_max_time", "Tiempo Máximo (s):", "800", 1)
+        self.create_labeled_widget(frame, "entry", "sim_time_step", "Paso de Tiempo (s):", "0.01", 2)
+        self.create_labeled_widget(frame, "option", "integrator", "Método Integración:", "DOP853", 3, 
+                                 ["DOP853", "RK45", "RK23", "Euler"])
+
+    def create_motor_performance_frame(self, row, column, rowspan):
+        """Frame con mapa del sitio de lanzamiento"""
+        frame = self.create_frame("Listo para simular", row, column, rowspan)
+        
+        # Crear el widget del mapa
+        map_container = customtkinter.CTkFrame(frame, fg_color="#0f172a")
+        map_container.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        frame.grid_rowconfigure(1, weight=1)
+        frame.grid_columnconfigure(0, weight=1)
+        
+        self.map_widget = TkinterMapView(
+            map_container, 
+            width=400, 
+            height=350,
+            corner_radius=10
+        )
+        self.map_widget.pack(fill="both", expand=True, padx=5, pady=5)
+        
+        # Establecer posición inicial y marcador
+        lat = float(self.widgets['launch_lat'].get() if 'launch_lat' in self.widgets else 19.5)
+        lon = float(self.widgets['launch_lon'].get() if 'launch_lon' in self.widgets else -98)
+        
+        self.map_widget.set_position(lat, lon)
+        self.map_widget.set_marker(lat, lon, text="Sitio de Lanzamiento")
+        self.map_widget.set_zoom(12)
+
+    
 
 class DataTablesTab(customtkinter.CTkFrame):
     def __init__(self, master):
@@ -399,7 +750,7 @@ class StabilityTab(customtkinter.CTkFrame):
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
-        self.title("Simulador de Trayectoria de Cohetes - Propulsion UNAM v3.3"); self.geometry("1400x900")
+        self.title("Simulador de Trayectoria de Cohetes -NEMB"); self.geometry("1400x900")
         self.grid_columnconfigure(0, weight=1); self.grid_rowconfigure(0, weight=1)
         customtkinter.set_appearance_mode("Light"); customtkinter.set_default_color_theme("blue")
         self.main_frame = customtkinter.CTkFrame(self, fg_color="transparent"); self.main_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
@@ -408,10 +759,10 @@ class App(customtkinter.CTk):
         self.left_frame.grid_rowconfigure(0, weight=1); self.left_frame.grid_columnconfigure(0, weight=1)
         self.right_frame = customtkinter.CTkFrame(self.main_frame); self.right_frame.grid_rowconfigure(1, weight=1); self.right_frame.grid_columnconfigure(0, weight=1)
         self.tab_view = customtkinter.CTkTabview(self.left_frame, command=self._on_tab_change); self.tab_view.grid(row=0, column=0, sticky="nsew")
-        self.tab_view.add("Cohete"); self.tab_view.add("Tablas de Datos"); self.tab_view.add("Simulación y Entorno"); self.tab_view.add("Análisis (CG-CP)"); self.tab_view.add("Resultados")
+        self.tab_view.add("Cohete"); self.tab_view.add("Tablas de Datos"); self.tab_view.add("Simulación"); self.tab_view.add("Análisis (CG-CP)"); self.tab_view.add("Resultados")
         self.rocket_tab = RocketTab(self.tab_view.tab("Cohete")); self.rocket_tab.pack(expand=True, fill="both")
         self.data_tables_tab = DataTablesTab(self.tab_view.tab("Tablas de Datos")); self.data_tables_tab.pack(expand=True, fill="both")
-        self.sim_env_tab = SimulationEnvironmentTab(self.tab_view.tab("Simulación y Entorno")); self.sim_env_tab.pack(expand=True, fill="both")
+        self.sim_env_tab = SimulationEnvironmentTab(self.tab_view.tab("Simulación")); self.sim_env_tab.pack(expand=True, fill="both")
         self.stability_tab = StabilityTab(self.tab_view.tab("Análisis (CG-CP)")); self.stability_tab.pack(expand=True, fill="both")
         self.results_tab = ResultsTab(self.tab_view.tab("Resultados")); self.results_tab.pack(expand=True, fill="both")
         self.vis_label = customtkinter.CTkLabel(self.right_frame, text="Visualización del Cohete", font=customtkinter.CTkFont(size=16, weight="bold")); self.vis_label.grid(row=0, column=0, padx=10, pady=10)
@@ -422,7 +773,7 @@ class App(customtkinter.CTk):
         self.simulation_thread = None; self._on_tab_change(); self.after(100, self.draw_rocket)
 
     def _on_tab_change(self):
-        if self.tab_view.get() == "Cohete": self.main_frame.grid_columnconfigure(0, weight=2); self.main_frame.grid_columnconfigure(1, weight=1, minsize=300); self.right_frame.grid(row=0, column=1, padx=(10,0), sticky="nsew")
+        if self.tab_view.get() == "Cohete": self.main_frame.grid_columnconfigure(0, weight=2); self.main_frame.grid_columnconfigure(1, weight=1, minsize=10); self.right_frame.grid(row=0, column=1, padx=(2,0), sticky="nsew")
         else: self.right_frame.grid_remove(); self.main_frame.grid_columnconfigure(0, weight=1); self.main_frame.grid_columnconfigure(1, weight=0)
 
     def create_control_widgets(self):
