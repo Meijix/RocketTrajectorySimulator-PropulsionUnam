@@ -67,13 +67,14 @@ def placeholder_run_simulation(params, progress_callback, status_callback):
 class ColorPalette:
     # Fondo y estructura
     BG_MAIN = "#050253"       # Azul marino profundo (fondo principal)
-    BG_FRAME = "#CDDDFF"      # Azul grisáceo oscuro (frames y secciones)
+    BG_FRAME = "#233969"      # Azul grisáceo oscuro (frames y secciones)
     BG_ENTRY = "#E2EAF4"   
     BUTTON_RED = "#ef4444" 
-    BUTTON_GREEN = "#10b981"   # Azul muy claro / gris azulado (campos de entrada)
+    BUTTON_GREEN = "#00792C"   # Azul muy claro / gris azulado (campos de entrada)
     ACCENT_CYAN = "#15D0FF"  # Cyan para títulos
-    ACCENT_BLUE= "#0069C0"  # Azul para títulos
-    ACCENT_VIOLET = "#8b5cf6"  # Violeta para títulos
+    ACCENT_BLUE= "#0211B7"  # Azul para títulos
+    ACCENT_VIOLET = "#5A00C0"  # Violeta para títulos
+    ACCENT_Orange = "#C66907"  # Naranja para títulos
 
     TEXT_PRIMARY = "#FFFFFF"  # Blanco para texto principal
     TEXT_SECONDARY = "#E2EAF4"  # Gris claro para texto secundario
@@ -88,7 +89,7 @@ class RocketTab(customtkinter.CTkScrollableFrame):
         super().__init__(master)
         
         # Configurar color de fondo oscuro
-        self.configure(fg_color=ColorPalette.BG_MAIN)
+        #self.configure(fg_color=ColorPalette.BG_MAIN)
         self.grid_columnconfigure(0, weight=1)
         self.widgets = {}
 
@@ -202,7 +203,7 @@ class RocketTab(customtkinter.CTkScrollableFrame):
         frame.grid(row=section_row, column=0, padx=15, pady=10, sticky="ew")
         
         # Título de la sección con icono o color distintivo
-        colors = [ColorPalette.ACCENT_BLUE, ColorPalette.ACCENT_BLUE, ColorPalette.ACCENT_BLUE,]
+        colors = [ColorPalette.ACCENT_CYAN, ColorPalette.ACCENT_CYAN, ColorPalette.ACCENT_CYAN,]
         title_color = colors[section_row % len(colors)]
         
         frame_title = customtkinter.CTkLabel(
@@ -550,8 +551,7 @@ class SimulationEnvironmentTab(customtkinter.CTkScrollableFrame):
             self, 
             fg_color=ColorPalette.BG_MAIN,
             corner_radius=10,
-            border_width=1,
-            border_color=ColorPalette.ACCENT_CYAN
+            border_width=0
         )
         frame.grid(row=row, column=column, rowspan=rowspan, columnspan=colspan, 
                   padx=10, pady=10, sticky="nsew")
@@ -560,8 +560,8 @@ class SimulationEnvironmentTab(customtkinter.CTkScrollableFrame):
         title_label = customtkinter.CTkLabel(
             frame, 
             text=title, 
-            font=customtkinter.CTkFont(size=16, weight="bold"),
-            text_color="#00b4d8"
+            font=customtkinter.CTkFont(size=20, weight="bold"),
+            text_color= ColorPalette.ACCENT_CYAN,
         )
         title_label.grid(row=0, column=0, columnspan=2, pady=(10, 10), padx=10, sticky="w")
         
@@ -632,6 +632,7 @@ class SimulationEnvironmentTab(customtkinter.CTkScrollableFrame):
 class DataTablesTab(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
+        self.configure(fg_color=ColorPalette.BG_FRAME)
         self.grid_columnconfigure(0, weight=1); self.grid_rowconfigure(2, weight=1)
         self.dataframes = {"thrust": None, "drag": None, "mass": None}
         self.filepaths = {"thrust": "No cargado", "drag": "No cargado", "mass": "No cargado"}
@@ -642,11 +643,13 @@ class DataTablesTab(customtkinter.CTkFrame):
         self.create_importers(); self.show_placeholder_message()
 
     def create_importers(self):
-        btn1=customtkinter.CTkButton(self.top_frame,text="Importar Empuje (T vs t)",command=lambda:self.load_csv("thrust"));self.lbl1=customtkinter.CTkLabel(self.mid_frame,text="Empuje: No cargado");btn2=customtkinter.CTkButton(self.mid_frame,text="Visualizar Empuje",command=lambda:self.visualize_data("thrust"))
+        
+        btn1=customtkinter.CTkButton(self.top_frame,text="Importar Empuje (T vs t)",command=lambda:self.load_csv("thrust"), fg_color=ColorPalette.ACCENT_Orange);self.lbl1=customtkinter.CTkLabel(self.mid_frame,text="Empuje: No cargado");
+        btn2=customtkinter.CTkButton(self.mid_frame,text="Visualizar Empuje",command=lambda:self.visualize_data("thrust"), fg_color=ColorPalette.ACCENT_BLUE)
         btn1.grid(row=0,column=0,padx=5,pady=5,sticky="ew");self.lbl1.grid(row=0,column=0,padx=5,pady=5);btn2.grid(row=1,column=0,padx=5,pady=5)
-        btn3=customtkinter.CTkButton(self.top_frame,text="Importar Arrastre (Cd vs Mach)",command=lambda:self.load_csv("drag"));self.lbl2=customtkinter.CTkLabel(self.mid_frame,text="Cd_vs_mach: No cargado");btn4=customtkinter.CTkButton(self.mid_frame,text="Visualizar Arrastre",command=lambda:self.visualize_data("drag"))
+        btn3=customtkinter.CTkButton(self.top_frame,text="Importar Arrastre (Cd vs Mach)",command=lambda:self.load_csv("drag"),fg_color=ColorPalette.ACCENT_Orange);self.lbl2=customtkinter.CTkLabel(self.mid_frame,text="Cd_vs_mach: No cargado");btn4=customtkinter.CTkButton(self.mid_frame,text="Visualizar Arrastre",command=lambda:self.visualize_data("drag"),fg_color=ColorPalette.ACCENT_BLUE)
         btn3.grid(row=0,column=1,padx=5,pady=5,sticky="ew");self.lbl2.grid(row=0,column=1,padx=5,pady=5);btn4.grid(row=1,column=1,padx=5,pady=5)
-        btn5=customtkinter.CTkButton(self.top_frame,text="Importar Masa (M vs t)",command=lambda:self.load_csv("mass"));self.lbl3=customtkinter.CTkLabel(self.mid_frame,text="Masa: No cargado");btn6=customtkinter.CTkButton(self.mid_frame,text="Visualizar Masa",command=lambda:self.visualize_data("mass"))
+        btn5=customtkinter.CTkButton(self.top_frame,text="Importar Masa (M vs t)",command=lambda:self.load_csv("mass"),fg_color=ColorPalette.ACCENT_Orange);self.lbl3=customtkinter.CTkLabel(self.mid_frame,text="Masa: No cargado");btn6=customtkinter.CTkButton(self.mid_frame,text="Visualizar Masa",command=lambda:self.visualize_data("mass"), fg_color=ColorPalette.ACCENT_BLUE)
         btn5.grid(row=0,column=2,padx=5,pady=5,sticky="ew");self.lbl3.grid(row=0,column=2,padx=5,pady=5);btn6.grid(row=1,column=2,padx=5,pady=5)
 
     def load_csv(self, data_type, filepath=None):
@@ -676,53 +679,123 @@ class DataTablesTab(customtkinter.CTkFrame):
         self.canvas=FigureCanvasTkAgg(fig,master=self.plot_frame);self.canvas.draw();self.canvas.get_tk_widget().pack(fill="both",expand=True)
 
 class ResultsTab(customtkinter.CTkFrame):
-    def __init__(self, master):
-        super().__init__(master)
-        self.grid_columnconfigure(0, weight=1); self.grid_rowconfigure(0, weight=1)
-        self.plot_frame=customtkinter.CTkFrame(self); self.plot_frame.grid(row=0,column=0,sticky="nsew",padx=10,pady=10)
-        self.plot_frame.grid_columnconfigure(0,weight=1); self.plot_frame.grid_rowconfigure(0,weight=1)
-        self.summary_frame=customtkinter.CTkFrame(self,height=100); self.summary_frame.grid(row=1,column=0,sticky="ew",padx=10,pady=(0,10))
-        self.summary_frame.grid_columnconfigure((0,1,2),weight=1); self.canvas,self.toolbar=None,None
-        self.create_summary_widgets(); self.show_placeholder_message()
+    """Pestaña para mostrar los resultados de la simulación."""
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+        
+        # --- Contenedor para las gráficas ---
+        self.plot_frame=customtkinter.CTkFrame(self)
+        self.plot_frame.grid(row=0,column=0,sticky="nsew",padx=10,pady=10)
+        self.plot_frame.grid_columnconfigure(0,weight=1)
+        self.plot_frame.grid_rowconfigure(0,weight=1)
+        
+        # --- Contenedor para el resumen ---
+        self.summary_frame=customtkinter.CTkFrame(self,height=100)
+        self.summary_frame.grid(row=1,column=0,sticky="ew",padx=10,pady=(0,10))
+        self.summary_frame.grid_columnconfigure((0,1,2),weight=1)
+        
+        # Variables para matplotlib
+        self.canvas = None
+        self.toolbar = None
+        
+        self.create_summary_widgets()
+        self.show_placeholder_message()
 
     def create_summary_widgets(self):
-        self.apogee_label=customtkinter.CTkLabel(self.summary_frame,text="Apogeo: -- m",font=customtkinter.CTkFont(size=14,weight="bold")); self.apogee_label.grid(row=0,column=0,pady=10)
-        self.max_vel_label=customtkinter.CTkLabel(self.summary_frame,text="Vel. Máxima: -- m/s",font=customtkinter.CTkFont(size=14,weight="bold")); self.max_vel_label.grid(row=0,column=1,pady=10)
-        self.landing_dist_label=customtkinter.CTkLabel(self.summary_frame,text="Dist. Aterrizaje: -- m",font=customtkinter.CTkFont(size=14,weight="bold")); self.landing_dist_label.grid(row=0,column=2,pady=10)
+        """Crea las etiquetas para los datos clave de la simulación."""
+        font_style = customtkinter.CTkFont(size=14, weight="bold")
+        self.apogee_label=customtkinter.CTkLabel(self.summary_frame, text="Apogeo: -- m", font=font_style)
+        self.apogee_label.grid(row=0,column=0,pady=10)
+        
+        self.max_vel_label=customtkinter.CTkLabel(self.summary_frame, text="Vel. Máxima: -- m/s", font=font_style)
+        self.max_vel_label.grid(row=0,column=1,pady=10)
+        
+        self.landing_dist_label=customtkinter.CTkLabel(self.summary_frame, text="Dist. Aterrizaje: -- m", font=font_style)
+        self.landing_dist_label.grid(row=0,column=2,pady=10)
 
     def show_placeholder_message(self):
-        if self.canvas:self.canvas.get_tk_widget().destroy()
-        if self.toolbar:self.toolbar.destroy()
-        for w in self.plot_frame.winfo_children():w.destroy()
-        customtkinter.CTkLabel(self.plot_frame,text="Los resultados de la simulación se mostrarán aquí.",font=customtkinter.CTkFont(size=16)).grid(row=0,column=0,sticky="nsew")
+        """Limpia el canvas y muestra un mensaje inicial."""
+        if self.canvas:
+            self.canvas.get_tk_widget().destroy()
+            self.canvas = None
+        if self.toolbar:
+            self.toolbar.destroy()
+            self.toolbar = None
+            
+        # Limpiar cualquier widget residual en el frame
+        for widget in self.plot_frame.winfo_children():
+            widget.destroy()
 
-    def display_results(self, results):
-        self.show_placeholder_message()
-        self.apogee_label.configure(text=f"Apogeo: {results['apogee']:.2f} m"); self.max_vel_label.configure(text=f"Vel. Máxima: {results['max_velocity']:.2f} m/s")
-        self.landing_dist_label.configure(text=f"Dist. Aterrizaje: {results['landing_distance']:.2f} m")
-        fig=Figure(figsize=(8,6),dpi=100);ax1=fig.add_subplot(211);ax1.plot(results['time'],results['altitude'],color='#0078D7');ax1.set_title("Altitud vs. Tiempo")
-        ax1.set(xlabel="Tiempo (s)",ylabel="Altitud (m)");ax1.grid(True,linestyle='--',alpha=0.6)
-        ax2=fig.add_subplot(212);ax2.plot(results['time'],results['velocity'],color='#D9534F');ax2.set_title("Velocidad vs. Tiempo")
-        ax2.set(xlabel="Tiempo (s)",ylabel="Velocidad (m/s)");ax2.grid(True,linestyle='--',alpha=0.6);fig.tight_layout(pad=3.0)
-        self.canvas=FigureCanvasTkAgg(fig,master=self.plot_frame);self.canvas.draw();canvas_widget=self.canvas.get_tk_widget();canvas_widget.grid(row=0,column=0,sticky="nsew")
-        self.toolbar=NavigationToolbar2Tk(self.canvas,self.plot_frame,pack_toolbar=False); self.toolbar.update();self.toolbar.grid(row=1,column=0,sticky="ew")
+        # Mostrar mensaje
+        placeholder_label = customtkinter.CTkLabel(self.plot_frame, text="Los resultados de la simulación se mostrarán aquí.", font=customtkinter.CTkFont(size=16))
+        placeholder_label.grid(row=0, column=0, sticky="nsew")
 
+    def display_results(self, df):
+        """Calcula estadísticas, actualiza etiquetas y muestra todas las gráficas."""
+        self.show_placeholder_message() # Limpiar el área antes de dibujar
+
+        if df is None or df.empty:
+            messagebox.showinfo("Resultados", "La simulación no produjo un DataFrame para graficar.")
+            return
+
+        try:
+            # 1. Calcular estadísticas y actualizar etiquetas de resumen
+            apogee = df['z'].max()
+            velocidad_total = np.sqrt(df['vx']**2 + df['vy']**2 + df['vz']**2)
+            max_velocity = velocidad_total.max()
+            # Distancia desde el origen (0,0) al punto de aterrizaje (x,y final)
+            landing_distance = np.sqrt(df['x'].iloc[-1]**2 + df['y'].iloc[-1]**2)
+            
+            self.apogee_label.configure(text=f"Apogeo: {apogee:.2f} m")
+            self.max_vel_label.configure(text=f"Vel. Máxima: {max_velocity:.2f} m/s")
+            self.landing_dist_label.configure(text=f"Dist. Aterrizaje: {landing_distance:.2f} m")
+
+            # 2. Crear la figura y las gráficas
+            mplstyle.use('seaborn-v0_8-darkgrid')
+            fig = Figure(figsize=(8, 6), dpi=100)
+            fig.set_facecolor("#2B2B2B")
+
+            Plotting.plot_altitude(fig.add_subplot(2, 3, 1), df)
+            Plotting.plot_velocity(fig.add_subplot(2, 3, 2), df)
+            Plotting.plot_acceleration(fig.add_subplot(2, 3, 3), df)
+            Plotting.plot_mach(fig.add_subplot(2, 3, 4), df)
+            Plotting.plot_alpha(fig.add_subplot(2, 3, 5), df)
+            Plotting.plot_trajectory_3d(fig, df)
+
+            fig.tight_layout(pad=2.0)
+            
+            # 3. Dibujar el canvas y la barra de herramientas en el plot_frame
+            self.canvas = FigureCanvasTkAgg(fig, master=self.plot_frame)
+            self.canvas.draw()
+            canvas_widget = self.canvas.get_tk_widget()
+            canvas_widget.grid(row=0, column=0, sticky="nsew")
+
+            self.toolbar = NavigationToolbar2Tk(self.canvas, self.plot_frame, pack_toolbar=False)
+            self.toolbar.update()
+            self.toolbar.grid(row=1, column=0, sticky="ew")
+
+        except Exception as e:
+            messagebox.showerror("Error al Graficar", f"Ocurrió un error al generar las gráficas:\n{e}")
+            self.show_placeholder_message()
 class StabilityTab(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
+        self.configure(fg_color=ColorPalette.BG_FRAME)
         self.grid_columnconfigure(0, weight=1); self.grid_rowconfigure(1, weight=1)
         control_frame = customtkinter.CTkFrame(self); control_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
         self.calc_button = customtkinter.CTkButton(control_frame, text="Calcular CG y CP", command=self.calculate_stability); self.calc_button.pack(side="left", padx=10, pady=10)
         self.table_frame = customtkinter.CTkFrame(self); self.table_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
         self.table_frame.grid_columnconfigure(0, weight=1); self.table_frame.grid_rowconfigure(0, weight=1); self.create_table()
         summary_frame = customtkinter.CTkFrame(self); summary_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew"); summary_frame.grid_columnconfigure((0, 1, 2), weight=1)
-        self.cg_total_label = customtkinter.CTkLabel(summary_frame, text="CG Total: -- m", font=customtkinter.CTkFont(size=14, weight="bold")); self.cg_total_label.grid(row=0, column=0, padx=10, pady=10)
-        self.cp_total_label = customtkinter.CTkLabel(summary_frame, text="CP Total: -- m", font=customtkinter.CTkFont(size=14, weight="bold")); self.cp_total_label.grid(row=0, column=1, padx=10, pady=10)
-        self.margin_label = customtkinter.CTkLabel(summary_frame, text="Margen Estático: -- cal", font=customtkinter.CTkFont(size=14, weight="bold")); self.margin_label.grid(row=0, column=2, padx=10, pady=10)
+        self.cg_total_label = customtkinter.CTkLabel(summary_frame, text="CG Total: -- m", font=customtkinter.CTkFont(size=20, weight="bold")); self.cg_total_label.grid(row=0, column=0, padx=10, pady=10)
+        self.cp_total_label = customtkinter.CTkLabel(summary_frame, text="CP Total: -- m", font=customtkinter.CTkFont(size=20, weight="bold")); self.cp_total_label.grid(row=0, column=1, padx=10, pady=10)
+        self.margin_label = customtkinter.CTkLabel(summary_frame, text="Margen Estático: -- cal", font=customtkinter.CTkFont(size=20, weight="bold")); self.margin_label.grid(row=0, column=2, padx=10, pady=10)
 
     def create_table(self):
         style = ttk.Style(self); style.theme_use("default")
-        style.configure("Treeview", background="#F0F0F0", foreground="black", rowheight=25, fieldbackground="#F0F0F0")
+        style.configure("Treeview", background="#9BB6FF", foreground="black", rowheight=25, fieldbackground="#F0F0F0")
         style.map("Treeview", background=[('selected', '#347083')]); style.configure("Treeview.Heading", background="#D3D3D3", font=('Calibri', 10,'bold'))
         self.tree = ttk.Treeview(self.table_frame, columns=("Masa", "CG", "CP"), show="headings")
         self.tree.heading("Masa", text="Masa (kg)"); self.tree.heading("CG", text="Centro de Gravedad (m)"); self.tree.heading("CP", text="Centro de Presión (m)")
@@ -750,9 +823,10 @@ class StabilityTab(customtkinter.CTkFrame):
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
+        self.configure(fg_color=ColorPalette.BG_FRAME)
         self.title("Simulador de Trayectoria de Cohetes -NEMB"); self.geometry("1400x900")
         self.grid_columnconfigure(0, weight=1); self.grid_rowconfigure(0, weight=1)
-        customtkinter.set_appearance_mode("Light"); customtkinter.set_default_color_theme("blue")
+        customtkinter.set_appearance_mode("Dark"); customtkinter.set_default_color_theme("dark-blue")
         self.main_frame = customtkinter.CTkFrame(self, fg_color="transparent"); self.main_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
         self.main_frame.grid_rowconfigure(0, weight=1)
         self.left_frame = customtkinter.CTkFrame(self.main_frame); self.left_frame.grid(row=0, column=0, sticky="nsew")
@@ -778,8 +852,8 @@ class App(customtkinter.CTk):
 
     def create_control_widgets(self):
         button_frame = customtkinter.CTkFrame(self.control_frame); button_frame.grid(row=0, column=0, padx=10, pady=10, sticky="w")
-        self.run_button = customtkinter.CTkButton(button_frame, text="Ejecutar Simulación", command=self.run_simulation); self.run_button.pack(side="left", padx=5)
-        customtkinter.CTkButton(button_frame, text="Actualizar Cohete", command=self.draw_rocket).pack(side="left", padx=5)
+        self.run_button = customtkinter.CTkButton(button_frame, text="Ejecutar Simulación",fg_color=ColorPalette.BUTTON_GREEN ,command=self.run_simulation); self.run_button.pack(side="left", padx=5)
+        customtkinter.CTkButton(button_frame, text="Actualizar Cohete", fg_color=ColorPalette.ACCENT_VIOLET ,command=self.draw_rocket).pack(side="left", padx=5)
         customtkinter.CTkButton(button_frame, text="Guardar Datos", command=self.save_configuration).pack(side="left", padx=5)
         customtkinter.CTkButton(button_frame, text="Cargar Datos", command=self.load_configuration).pack(side="left", padx=5)
         status_frame = customtkinter.CTkFrame(self.control_frame); status_frame.grid(row=0, column=1, padx=10, pady=10, sticky="ew"); status_frame.grid_columnconfigure(0, weight=1)
@@ -815,7 +889,7 @@ class App(customtkinter.CTk):
         for widget in self.vis_canvas_frame.winfo_children(): widget.destroy()
         fig = Figure(figsize=(5, 8), dpi=100); ax = fig.add_subplot(111); ax.set_aspect('equal', adjustable='box')
         components = [
-            {'name':'coples','len_key':'coples_len','pos_key':'coples_pos_z','diam_key':'coples_diam_ext','color':'#B0C4DE'},
+            {'name':'coples','len_key':'coples_len','pos_key':'coples_pos_z','diam_key':'coples_diam_ext','color':"#FFFFFF"},
             {'name':'tubo_recuperacion','len_key':'tubo_recup_len','pos_key':'tubo_recup_pos_z','diam_key':'tubo_recup_diam_ext','color':'#ADD8E6'},
             {'name':'transferidor','len_key':'transfer_len','pos_key':'transfer_pos_z','diam_key':'transfer_diam_ext','color':'#87CEEB'},
             {'name':'tanque_vacio','len_key':'tanque_vacio_len','pos_key':'tanque_vacio_pos_z','diam_key':'tanque_vacio_diam_ext','color':'#6495ED'},
