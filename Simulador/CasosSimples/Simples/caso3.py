@@ -17,11 +17,11 @@ g = 9.81
 x0, y0 = 0, 0
 #v = 50 # m/s magnitud de la velocidad inicial
 #v0x, v0y = v* np.cos(np.pi/4), v * np.sin(np.pi/4)
-v0x, v0y = 50, 50
+v0x, v0y = 1000, 1000
 estado0 = [x0, y0, v0x, v0y]
 
 t_max = 30
-k = 0.1
+k = 0.05
 m = 1
 dt_vals = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
 metodos_adaptativos = ['RK45', 'BDF', 'LSODA', 'DOP853']

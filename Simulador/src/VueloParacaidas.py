@@ -77,3 +77,10 @@ print("Guardando datos...")
 guardar_datos_csv(tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, masavuelo, viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, wind_xs, wind_ys, wind_zs, Tmags, Dmags, Nmags, Txs, Tys, Tzs, Dxs, Dys, Dzs, Nxs, Nys, Nzs, accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs, TipoVuelo, c_init.integrador_actual)
 ########################################
 guardar_datos_json(cohete_actual,vuelo_paracaidas, max_altitude, max_speed, accels, accangs, TipoVuelo, c_init.integrador_actual)
+
+'''
+print ("Tiempos:", tiempos)
+print("pasos de tiempo:")
+for i in range(len(tiempos)-1):
+    print(tiempos[i+1]-tiempos[i])
+'''
