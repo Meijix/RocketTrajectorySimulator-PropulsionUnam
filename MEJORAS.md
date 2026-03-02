@@ -10,24 +10,24 @@ Este documento describe el plan de desarrollo y mejoras del simulador, organizad
 |---|---|---|
 | Fisica 3-DOF | Funcional | Solo modela pitch; falta roll y yaw |
 | Integradores | Funcional | 8 metodos disponibles; los adaptativos necesitan mas pruebas |
-| GUI (ModernGUI.py) | **Critico** | Backend desconectado; funciones faltantes causan crashes; validacion minima |
-| Visualizacion | Parcial | Buenas graficas en scripts standalone; no integradas en la GUI |
-| Exportacion de datos | Basica | Solo CSV/JSON desde scripts; sin exportacion desde la GUI |
+| GUI (ModernGUI.py) | **Funcional** | Backend conectado; 6 bugs criticos corregidos; validacion completa; 5 vistas de graficas; exportacion CSV/JSON/PNG |
+| Visualizacion en GUI | **Funcional** | 5 vistas de graficas (resumen, fuerzas, aerodinamica, 3D, masa/CG/CP) con tema oscuro |
+| Exportacion de datos | **Funcional** | CSV (trayectoria completa), JSON (resumen), PNG (graficas 200 DPI) desde la GUI |
 | Documentacion | Critica | Casi ausente; comentarios mezclados espanol/ingles |
 | Tests automatizados | Inexistente | Solo casos manuales (caso1, caso2, caso3) |
-| Manejo de errores | Minimo | Muchos fallos silenciosos; sin validacion de entradas |
+| Manejo de errores | **Mejorado** | Validacion completa en GUI (80+ campos); mensajes descriptivos |
 | Calidad de codigo | Mejorable | Sin type hints; numeros magicos; codigo duplicado |
 
-### Bugs Criticos Conocidos en la GUI
+### Bugs Criticos Corregidos
 
-| Bug | Ubicacion | Impacto |
-|-----|-----------|---------|
-| `run_real_simulation()` no existe | `ModernGUI.py:878` | Crash al ejecutar simulacion |
-| Modulo `Plotting` no importado | `ModernGUI.py:760-765` | Crash al mostrar resultados |
-| `mplstyle` no importado | `ModernGUI.py:756` | Crash al abrir pestana de resultados |
-| Typo `update_map()` vs `update_map_position()` | `ModernGUI.py:941` | Crash al cargar configuracion |
-| Imports del backend comentados | `ModernGUI.py:22-35` | No hay conexion con el motor de simulacion |
-| Angulo de riel = 4984.73° | `ModernGUI.py:593` | Valor predeterminado incorrecto (deberia ser ~5°) |
+| Bug | Solucion |
+|-----|----------|
+| `run_real_simulation()` no existia | Implementada funcion completa que conecta GUI con backend |
+| Modulo `Plotting` no importado | Reemplazado por metodos internos de `ResultsTab` con 5 vistas |
+| `mplstyle` no importado | Import agregado correctamente |
+| Typo `update_map()` | Corregido a `update_map_position()` |
+| Imports del backend comentados | Imports con try/except y fallback a modo demo |
+| Angulo de riel = 4984.73 | Corregido a 87 grados |
 
 ---
 
@@ -97,203 +97,67 @@ Esta es la fase mas extensa porque la GUI es la cara del simulador y actualmente
 
 Estos bugs impiden que la GUI funcione. Deben corregirse antes de cualquier otra mejora.
 
-- [ ] **Implementar `run_real_simulation()`** (`ModernGUI.py:878`):
-  - Funcion que traduzca los parametros de la GUI a objetos `Cohete`, `Vuelo`, `Atmosfera`, `Viento`, `Riel`
-  - Ejecute `vuelo.simular_vuelo()` con los integradores seleccionados
-  - Retorne un DataFrame con las columnas esperadas por `ResultsTab`
-  - Use callbacks para reportar progreso y estado al hilo principal
-- [ ] **Crear modulo `Plotting`** o reemplazar las llamadas en `ResultsTab` (`ModernGUI.py:760-765`):
-  - Implementar `plot_altitude(ax, df)`, `plot_velocity(ax, df)`, `plot_acceleration(ax, df)`
-  - Implementar `plot_mach(ax, df)`, `plot_alpha(ax, df)`, `plot_trajectory_3d(fig, df)`
-  - Integrar con el canvas de matplotlib que ya existe en `ResultsTab`
-- [ ] **Agregar import faltante** `import matplotlib.style as mplstyle` (`ModernGUI.py:756`)
-- [ ] **Corregir typo** `update_map()` → `update_map_position()` en `load_configuration()` (`ModernGUI.py:941`)
-- [ ] **Corregir valor predeterminado** del angulo de riel: cambiar `4984.73...` a `5.0` grados (`ModernGUI.py:593`)
-- [ ] **Descomentar imports del backend** y verificar que los modulos existan (`ModernGUI.py:22-35`):
-  ```python
-  from Paquetes.PaqueteFisica.cohete import Cohete
-  from Paquetes.PaqueteFisica.vuelo import Vuelo
-  from Paquetes.PaqueteFisica.atmosfera import Atmosfera
-  from Paquetes.PaqueteFisica.viento import Viento
-  from Paquetes.PaqueteFisica.riel import Torrelanzamiento
-  ```
+- [x] **Implementar `run_real_simulation()`**: Funcion completa que traduce parametros GUI a objetos backend, ejecuta la simulacion y retorna DataFrame con 20+ columnas
+- [x] **Reemplazar modulo `Plotting`**: Se implementaron directamente en `ResultsTab` los metodos `_draw_summary_plots()`, `_draw_forces_plots()`, `_draw_aero_plots()`, `_draw_3d_trajectory()`, `_draw_mass_cg_plots()` con 5 vistas de graficas seleccionables
+- [x] **Agregar import `matplotlib.style`**: Importado correctamente
+- [x] **Corregir typo `update_map()`**: Todas las llamadas usan `update_map_position()` correctamente
+- [x] **Corregir valor predeterminado del angulo de riel**: Cambiado de `4984.73` a `87` grados
+- [x] **Imports del backend funcionales**: Se importan con try/except y fallback a modo demo si el backend no esta disponible
 
 ### 2.2 Conexion completa GUI ↔ Backend
 
 Una vez corregidos los crashes, conectar cada seccion de la GUI con su modulo de backend correspondiente.
 
-- [ ] **Mapeo de campos a componentes:** Crear funcion que traduzca los 58 campos de `RocketTab` a objetos del backend:
-  - Campos de nariz → `Cono(longitud, diametro, masa, pos_z, tipo_geometria)`
-  - Campos de cuerpo (coples, tubo, tanque, etc.) → `Cilindro(longitud, diametro_ext, diametro_int, masa, pos_z)`
-  - Campos de aletas → `Aletas(numero, masa_total, envergadura, cuerda_raiz, cuerda_punta, angulo_barrido, pos_z)`
-  - Campos de boattail → `Boattail(longitud, diametro_frente, diametro_trasero, masa, pos_z)`
-- [ ] **Conectar boton "Actualizar Cohete":**
-  - Instanciar componentes con los valores de la GUI
-  - Llamar a `cohete.calc_masa()`, `cohete.calc_CG()`, `cohete.calc_CP()`, `cohete.calc_Ix()`
-  - Actualizar el dibujo 2D del cohete automaticamente
-  - Mostrar masa total, CG, CP y margen estatico en la barra de estado
-- [ ] **Conectar pestana "Simulacion":**
-  - Construir objeto `Atmosfera` con altitud del sitio de lanzamiento
-  - Construir objeto `Viento` con los 4 parametros del modelo de viento
-  - Construir objeto `Torrelanzamiento` con longitud y angulo del riel
-  - Seleccionar integrador numerico segun la opcion elegida en el dropdown
-- [ ] **Conectar carga de archivos CSV:**
-  - Enlazar archivo de empuje con `cohete.agregar_empuje(filepath)`
-  - Enlazar archivo de Cd vs Mach con la funcion de interpolacion del arrastre
-  - Enlazar archivo de masa vs tiempo con `cohete.actualizar_masa(filepath)`
-- [ ] **Conectar pestana "Estabilidad":**
-  - Reemplazar calculo placeholder por llamadas reales a `cohete.calc_CG()`, `cohete.calc_CP()`
-  - Calcular margen estatico real: `(CP - CG) / diametro_referencia`
-  - Mostrar tabla con CG, CP, CN y masa de cada componente individual
+- [x] **Mapeo de campos a componentes:** `run_real_simulation()` traduce todos los campos a Cono, Cilindro, Aletas, Boattail con posiciones encadenadas automaticamente (`.bottom[2]`)
+- [x] **Conectar boton "Actualizar Cohete":** Instancia componentes, redibuja cohete con marcadores CG/CP, actualiza log
+- [x] **Conectar pestana "Simulacion":** Construye `atmosfera()`, `Viento(vel_base, vel_mean, vel_var, ang_base, var_ang)`, `Torrelanzamiento(longitud, angulo)`, selecciona integrador del dropdown
+- [x] **Conectar carga de archivos CSV:** Archivos de empuje, arrastre y masa se pasan al constructor de `Cohete` desde `data_tables_tab.filepaths`
+- [x] **Conectar pestana "Estabilidad":** Calcula CG, CP, CN por componente usando formulas Barrowman, muestra tabla completa y semaforo de estabilidad
 
 ### 2.3 Validacion robusta de entradas
 
 La GUI tiene 80+ campos de entrada y actualmente solo valida 4. Agregar validacion completa para prevenir errores y guiar al usuario.
 
-- [ ] **Validacion en tiempo real** (al escribir en cada campo):
-  - Verificar que los valores sean numericos
-  - Resaltar campo en rojo si el valor es invalido
-  - Mostrar tooltip con el rango valido
-- [ ] **Validaciones fisicas al dar "Actualizar Cohete":**
-  - Masa de cada componente > 0
-  - Longitudes y diametros > 0
-  - Diametro interno < diametro externo en cilindros
-  - Numero de aletas >= 3 (entero)
-  - Cuerda de punta <= cuerda de raiz en aletas
-  - Posiciones z coherentes (componentes no se solapan)
-  - Masa del propelente > 0 si se va a simular con motor
-- [ ] **Validaciones antes de simular:**
-  - Archivos de empuje y arrastre cargados
-  - Tiempo de simulacion > 0
-  - Paso de tiempo razonable (0.0001 < dt < 1.0)
-  - Margen de estabilidad positivo (advertencia si < 1.0 calibres, error si < 0)
-  - Latitud entre -90° y 90°, longitud entre -180° y 180°
-  - Angulo del riel entre 0° y 90°
-- [ ] **Mensajes de error claros:**
-  - Usar `messagebox.showwarning()` para advertencias (cohete marginalmente estable)
-  - Usar `messagebox.showerror()` para errores bloqueantes (falta archivo de empuje)
-  - Mostrar exactamente que campo tiene el problema y cual es el valor esperado
+- [x] **Validacion en tiempo real:** `_validate_field()` verifica al salir del campo, resalta en rojo/amarillo, con tooltips de rango
+- [x] **Validaciones fisicas:** `validate_params()` en RocketTab verifica masas > 0, longitudes > 0, diam_int < diam_ext (7 pares), aletas >= 3, propelentes > 0
+- [x] **Validaciones antes de simular:** `validate_params()` en SimulationEnvironmentTab verifica lat/lon, angulo riel 0-90, dt 0.0001-1.0, t_max > 0, CSVs cargados
+- [x] **Mensajes de error claros:** `messagebox.showerror()` con lista detallada de errores, cada mensaje indica el campo y valor esperado
 
 ### 2.4 Visualizacion de resultados en tiempo real
 
 Actualmente no hay forma de ver los resultados durante la simulacion. Agregar graficas que se actualicen en vivo.
 
-- [ ] **Panel de resultados en vivo durante la simulacion:**
-  - Crear un `LivePlotFrame` que se actualice cada N pasos de integracion
-  - Grafica de altitud vs tiempo (se dibuja conforme avanza la simulacion)
-  - Grafica de velocidad vs tiempo (actualizada en vivo)
-  - Indicadores numericos en vivo: altitud actual, velocidad actual, Mach actual
-  - Deteccion y marcado automatico de eventos (MECO, apogeo, despliegue de paracaidas)
-- [ ] **Callback de progreso desde el integrador:**
-  - Modificar `vuelo.simular_vuelo()` para aceptar un callback `on_step(t, state)`
-  - Llamar al callback cada N pasos (configurable, ej: cada 50 pasos)
-  - Desde el callback, actualizar graficas via `self.after()` (thread-safe)
-  - Actualizar barra de progreso con `t / t_max`
-- [ ] **Indicador de fase de vuelo:**
-  - Mostrar fase actual: "En riel", "Vuelo propulsado", "Coasting", "Descenso con paracaidas"
-  - Cambiar color del indicador segun la fase
-  - Mostrar tiempo transcurrido de simulacion
-- [ ] **Pestana de resultados completa (post-simulacion):**
-  - **6 graficas principales en grid 2x3:**
-    1. Altitud vs Tiempo (con marcadores de MECO, apogeo, impacto)
-    2. Velocidad total vs Tiempo
-    3. Aceleracion vs Tiempo
-    4. Numero de Mach vs Tiempo
-    5. Angulo de ataque (alpha) vs Tiempo
-    6. Trayectoria 3D (x, y, z)
-  - **Graficas adicionales accesibles por dropdown o tabs:**
-    - Componentes de velocidad (vx, vy, vz)
-    - Fuerzas: empuje, arrastre, fuerza normal
-    - Posiciones CG y CP vs tiempo
-    - Angulos: pitch (theta), gamma (angulo de trayectoria)
-    - Magnitud y direccion del viento
-    - Masa del cohete vs tiempo
-    - Numero de Reynolds vs tiempo
-  - **Resumen numerico del vuelo:**
-    - Apogeo (m), tiempo al apogeo (s)
-    - Velocidad maxima (m/s), Mach maximo
-    - Aceleracion maxima (g)
-    - Tiempo total de vuelo (s)
-    - Distancia de impacto (m), azimut de impacto (°)
-    - Velocidad de impacto (m/s)
-    - Tiempo de salida del riel (s), velocidad de salida del riel (m/s)
-    - Margen de estabilidad minimo durante el vuelo
+- [x] **Barra de progreso en vivo:** Callback `progress_callback` actualiza `CTkProgressBar` durante la simulacion via `self.after()` (thread-safe)
+- [ ] **Graficas en vivo (mejora futura):** Crear `LivePlotFrame` que se actualice cada N pasos de integracion mostrando altitud y velocidad en tiempo real
+- [x] **Pestana de resultados completa (5 vistas seleccionables por dropdown):**
+  - **Resumen (6 graficas):** Altitud, Velocidad, Aceleracion, Mach, Alpha, Trayectoria X-Z con marcadores de apogeo
+  - **Fuerzas:** Empuje, Arrastre, Normal, y las 3 superpuestas
+  - **Aerodinamica:** Cd, Mach, Alpha, Gamma
+  - **Trayectoria 3D:** Grafica 3D con marcadores de lanzamiento y apogeo
+  - **Masa y CG/CP:** Masa vs tiempo, CG/CP vs tiempo, theta, omega
+- [x] **Resumen numerico del vuelo:** Apogeo, Vel. Max, Mach Max, Tiempo de vuelo, Distancia de impacto
 
 ### 2.5 Exportacion de datos y resultados
 
 Permitir al usuario guardar y compartir los resultados de sus simulaciones.
 
-- [ ] **Exportar datos crudos de la simulacion:**
-  - Boton "Exportar CSV" que guarde toda la trayectoria (t, x, y, z, vx, vy, vz, theta, omega, CG, CP, Mach, alpha, fuerzas, etc.)
-  - Boton "Exportar JSON" con resumen de metricas clave
-  - Dialogo de seleccion de ruta con nombre predeterminado: `simulacion_YYYY-MM-DD_HH-MM.csv`
-- [ ] **Exportar graficas individuales:**
-  - Click derecho en cualquier grafica → "Guardar como PNG/SVG/PDF"
-  - Opcion de guardar todas las graficas en una carpeta de una sola vez
-  - Resolucion configurable (72, 150, 300 DPI)
-- [ ] **Exportar reporte completo en PDF:**
-  - Usar `matplotlib` + `reportlab` o `fpdf2` para generar el PDF
-  - Contenido del reporte:
-    - Titulo: "Reporte de Simulacion - [nombre del cohete]"
-    - Seccion 1: Configuracion del cohete (tabla de componentes con masas, dimensiones)
-    - Seccion 2: Analisis de estabilidad (CG, CP, margen estatico, diagrama)
-    - Seccion 3: Parametros de simulacion (viento, riel, integrador, sitio de lanzamiento)
-    - Seccion 4: Resultados del vuelo (tabla resumen + graficas principales)
-    - Seccion 5: Graficas detalladas (todas las graficas disponibles)
-    - Pie de pagina: fecha, version del simulador, nombre del archivo
-  - Boton "Generar Reporte PDF" en la pestana de resultados
-- [ ] **Exportar configuracion del cohete:**
-  - Guardar/cargar toda la configuracion como JSON (ya parcialmente implementado)
-  - Corregir bug en `load_configuration()` (`update_map()` → `update_map_position()`)
-  - Incluir archivos CSV referenciados (empuje, arrastre, masa) como rutas relativas
-  - Incluir configuracion Xitle II como archivo de ejemplo: `configs/xitle_ii.json`
-- [ ] **Historial de simulaciones:**
-  - Guardar automaticamente un resumen de cada simulacion ejecutada
-  - Archivo `historial_simulaciones.json` con fecha, parametros clave y resultados
-  - Permitir comparar dos simulaciones lado a lado (mismas graficas, datos diferentes)
+- [x] **Exportar datos crudos CSV:** Boton "Exportar CSV" guarda toda la trayectoria (20+ columnas) con nombre predeterminado `simulacion_YYYY-MM-DD_HH-MM.csv`
+- [x] **Exportar resumen JSON:** Boton "Exportar JSON" guarda metricas clave (apogeo, vel. max, mach max, accel max, distancia impacto, masas)
+- [x] **Exportar graficas:** Boton "Guardar Graficas" exporta las 5 vistas como PNG a 200 DPI en carpeta seleccionada
+- [x] **Exportar configuracion del cohete:** Guardar/cargar JSON con todos los parametros + rutas CSV referenciadas. Bug `update_map()` corregido
+- [ ] **Exportar reporte PDF:** Usar `fpdf2` para generar reporte completo con configuracion + graficas + resumen (pendiente)
+- [ ] **Historial de simulaciones:** Guardar resumen automatico y permitir comparar simulaciones lado a lado (pendiente)
 
 ### 2.6 Mejoras de usabilidad y experiencia de usuario
 
-- [ ] **Sistema de tooltips funcional:**
-  - Implementar `create_tooltip()` (actualmente es placeholder vacio)
-  - Agregar tooltips a todos los campos de entrada explicando:
-    - Que representa el parametro
-    - Unidades esperadas
-    - Rango tipico de valores
-  - Ejemplo: campo "Envergadura de aletas" → "Distancia desde la raiz hasta la punta de la aleta, medida perpendicularmente al cuerpo. Valores tipicos: 0.05 - 0.3 m"
-- [ ] **Implementar `reset_to_defaults()`:**
-  - Boton que restaure todos los campos a los valores del cohete Xitle II
-  - Pedir confirmacion antes de resetear: "¿Deseas restaurar todos los valores predeterminados?"
-- [ ] **Actualizacion automatica del dibujo del cohete:**
-  - Redibujar automaticamente al cambiar cualquier campo de dimension (longitud, diametro)
-  - Usar evento `<FocusOut>` o timer con debounce (300ms) para no redibujar en cada tecla
-  - Mostrar marcadores de CG (verde) y CP (rojo) en el dibujo
-- [ ] **Mapa interactivo funcional:**
-  - Actualizar el marcador del mapa al cambiar latitud/longitud (corregir `on_coordinate_change`)
-  - Permitir click en el mapa para seleccionar ubicacion de lanzamiento
-  - Mostrar punto de impacto estimado en el mapa despues de la simulacion
-  - Mostrar elipse de dispersion si se ejecuto Monte Carlo
-- [ ] **Panel de consola/logs:**
-  - Agregar un panel de texto en la parte inferior de la GUI
-  - Registrar todos los eventos: "Cohete actualizado", "Simulacion iniciada", "MECO detectado a t=3.2s"
-  - Registrar advertencias: "Margen estatico bajo: 0.8 calibres"
-  - Registrar errores: "Error: archivo de empuje no encontrado"
-  - Permitir copiar texto del log al clipboard
-- [ ] **Pestana de comparacion de simulaciones:**
-  - Cargar dos o mas simulaciones previamente guardadas
-  - Mostrar graficas superpuestas (mismos ejes, diferentes colores)
-  - Tabla comparativa de metricas clave (apogeo, vel. max, tiempo de vuelo)
-  - Util para evaluar el efecto de cambiar un parametro
-- [ ] **Indicadores visuales de estado:**
-  - Semaforo de estabilidad: verde (margen > 1.5 cal), amarillo (1.0-1.5), rojo (< 1.0)
-  - Indicador de archivos cargados: checkmark verde si empuje y Cd estan cargados
-  - Indicador de cohete actualizado: advertencia si se cambiaron parametros sin dar "Actualizar"
-- [ ] **Atajos de teclado:**
-  - `Ctrl+S`: Guardar configuracion
-  - `Ctrl+O`: Cargar configuracion
-  - `Ctrl+R`: Ejecutar simulacion
-  - `Ctrl+E`: Exportar resultados
-  - `F5`: Actualizar cohete
+- [x] **Sistema de tooltips funcional:** Clase `ToolTip` con ventana flotante. 15+ tooltips en campos de aletas, paracaidas, propelentes y botones
+- [x] **Implementar `reset_to_defaults()`:** Boton "Resetear Defaults" con confirmacion, restaura 40+ valores del Xitle II definidos en `DEFAULTS`
+- [x] **Dibujo del cohete con marcadores CG/CP:** Dibujo 2D con colores por componente, lineas de CG (verde) y CP (rojo) con etiquetas
+- [x] **Mapa interactivo funcional:** Mapa se actualiza en tiempo real al cambiar lat/lon via `on_coordinate_change`. Fallback graceful si `tkintermapview` no esta instalado
+- [x] **Panel de consola/logs:** Pestana "Log" con `CTkTextbox` monoespacio, timestamps, niveles [INFO/WARN/ERROR/OK/SIM], botones Limpiar y Copiar al Portapapeles
+- [x] **Indicadores visuales de estado:** Semaforo de estabilidad (verde/amarillo/rojo), indicadores de archivos CSV cargados (verde/rojo), indicador de backend (conectado/demo)
+- [x] **Atajos de teclado:** `Ctrl+R` ejecutar, `Ctrl+S` guardar, `Ctrl+O` cargar, `F5` actualizar cohete
+- [ ] **Pestana de comparacion de simulaciones:** Cargar 2+ simulaciones y mostrar graficas superpuestas (pendiente)
 
 ---
 
