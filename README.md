@@ -340,7 +340,7 @@ El desarrollo futuro del simulador está organizado en **7 fases incrementales**
 | Fase | Nombre | Prioridad | Estado |
 |------|--------|-----------|--------|
 | 1 | Consolidación y Calidad (tests, validación, limpieza) | Crítica | Pendiente |
-| 2 | Conexión GUI-Backend completa | Alta | Pendiente |
+| 2 | GUI completa: corrección de bugs, resultados en tiempo real, exportación | Crítica | Pendiente |
 | 3 | Modelo de 6 Grados de Libertad (6-DOF) | Alta | Pendiente |
 | 4 | Simulación de Monte Carlo | Media | Pendiente |
 | 5 | Cohetes multietapa y recuperación realista | Media | Pendiente |
