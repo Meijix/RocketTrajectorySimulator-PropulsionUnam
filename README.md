@@ -6,7 +6,7 @@
 ![UNAM](https://img.shields.io/badge/UNAM-Propulsi%C3%B3n-gold)
 
 <p align="center">
-  <img src="https://www.propulsion-unam.com/images/logo-propulsion-blanco.png" alt="Logo Propulsión UNAM" width="300"/>
+  <img src="docs/images/logo-propulsion.svg" alt="Logo Propulsión UNAM" width="400"/>
 </p>
 
 **Rocket-Sim UNAM** es un simulador numérico avanzado para la dinámica de vuelo de cohetes suborbitales, con un motor de **3 Grados de Libertad (3-DOF)** y una interfaz gráfica moderna. Este proyecto nació como parte de la tesis de licenciatura en Matemáticas de Natalia Edith Mejia Bautista y fue desarrollado en colaboración con el equipo **Propulsión UNAM** de la Facultad de Ingeniería de la UNAM.
@@ -71,22 +71,24 @@ El desarrollo y la validación de este simulador constituyen el núcleo de la te
 
 <table>
   <tr>
-    <td><img src="https://i.imgur.com/r0V5VfN.png" alt="Pestaña de Definición del Cohete" width="400"/></td>
-    <td><img src="https://i.imgur.com/yB2f9Lq.png" alt="Análisis de Estabilidad" width="400"/></td>
+    <td><img src="docs/images/definicion-cohete.svg" alt="Pestaña de Definición del Cohete" width="400"/></td>
+    <td><img src="docs/images/analisis-estabilidad.svg" alt="Análisis de Estabilidad" width="400"/></td>
   </tr>
   <tr>
     <td align="center"><em>Definición modular y detallada del cohete.</em></td>
     <td align="center"><em>Cálculo en tiempo real de CG, CP y margen estático.</em></td>
   </tr>
   <tr>
-    <td><img src="https://i.imgur.com/o7b8sJj.png" alt="Resultados de la Simulación" width="400"/></td>
-    <td><img src="https://i.imgur.com/gK9x2cE.png" alt="Animación de Vuelo" width="400"/></td>
+    <td><img src="docs/images/resultados-simulacion.svg" alt="Resultados de la Simulación" width="400"/></td>
+    <td><img src="docs/images/animacion-vuelo.svg" alt="Animación de Vuelo" width="400"/></td>
   </tr>
   <tr>
     <td align="center"><em>Gráficas completas de los resultados del vuelo.</em></td>
     <td align="center"><em>Animación 3D de la trayectoria y orientación.</em></td>
   </tr>
 </table>
+
+> **Nota:** Las imágenes actuales son diagramas ilustrativos. Para reemplazarlas con capturas reales del simulador, coloca archivos PNG en la carpeta `docs/images/` y actualiza las rutas en este README.
 
 ---
 
@@ -245,6 +247,8 @@ RocketTrajectorySimulator-PropulsionUnam/
 │   ├── DatosMotor/                   # Herramientas para datos de motores
 │   ├── Visual/                       # Prototipos de visualización 3D
 │   └── NoImplementadoAun/            # Módulos en desarrollo (6-DOF, estructural)
+├── docs/
+│   └── images/                       # Imágenes del README y documentación
 ├── requirements.txt                  # Dependencias del proyecto
 ├── Tesis_UNAM_NataliaMejBau_COMPLETAFINAL.pdf  # Tesis de licenciatura
 └── README.md
