@@ -906,21 +906,21 @@ En estos casos, LSODA (que alterna entre stiff y non-stiff) es una buena opción
 
 ## 10. Mapeo detallado: cambios por archivo
 
-### 10.1 `vuelo.py` — CAMBIOS MAYORES
+### 10.1 `vuelo.py` — CLASE NUEVA `Vuelo6DOF` (la clase `Vuelo` se mantiene intacta)
 
 | Sección | Cambio | Prioridad |
 |---------|--------|-----------|
-| `__init__` | Agregar modo `'6dof'` vs `'3dof'` | Alta |
-| `fun_derivs` | Nuevo `fun_derivs_6dof()` con 13 estados | **Crítica** |
-| `calc_empuje` | Empuje en marco cuerpo via cuaternión | Alta |
-| `calc_aero` | Nuevo `calc_fuerzas_aero_6dof()` con α, β en 3D | **Crítica** |
-| `calc_arrastre_normal` | Refactorizar para fuerzas en cuerpo | Alta |
-| `accangular` | Reemplazar con `calc_momentos_6dof()` | **Crítica** |
-| `calc_alpha` | Nuevo `calc_aero_angles()` con α, β, α_total | Alta |
-| `simular_vuelo` | Normalización de q post-step, 13 estados | Alta |
-| Output | Agregar roll, yaw, q-rates a salida | Media |
+| Nueva clase | `Vuelo6DOF(Vuelo)` hereda de Vuelo | **Crítica** |
+| `fun_derivs_6dof` | Nuevo método con 13 estados | **Crítica** |
+| `calc_empuje_6dof` | Empuje en marco cuerpo via cuaternión | Alta |
+| `calc_fuerzas_aero_body` | Nuevo: fuerzas con α, β en 3D | **Crítica** |
+| `calc_momentos_body` | Nuevo: momentos pitch/yaw/roll | **Crítica** |
+| `calc_aero_angles` | Nuevo: α, β, α_total en 3D | Alta |
+| `simular_vuelo_6dof` | Nuevo: loop con normalización de q, 13 estados | Alta |
+| Output | Agregar roll, yaw, euler angles, q-rates | Media |
 
-**Líneas afectadas estimadas:** ~70% del archivo (300+ líneas de 430)
+**La clase `Vuelo` original NO se modifica** — compatibilidad total con 3-DOF.
+**Líneas nuevas estimadas:** ~300 líneas en nueva clase
 
 ### 10.2 `cohete.py` — CAMBIOS MODERADOS
 
@@ -1100,7 +1100,7 @@ def calc_inertia_tensor(self):
 
 ### Fase 3: Motor de vuelo 6-DOF (vuelo.py)
 
-Crear nueva clase `Vuelo6DOF` que herede de `Vuelo`:
+**IMPORTANTE:** La clase `Vuelo` actual se mantiene intacta. Se crea `Vuelo6DOF` como clase nueva que hereda de `Vuelo`, reutilizando `calc_arrastre_normal`, `simular_vuelo` (loop/eventos), etc., y sobreescribiendo solo lo necesario:
 
 ```python
 class Vuelo6DOF(Vuelo):
@@ -1221,25 +1221,38 @@ class Vuelo6DOF(Vuelo):
 
 **condiciones_init.py:**
 ```python
-# Modo de simulación
-modo_6dof = True
+from Paquetes.utils.funciones import euler_to_quaternion
+
+# ============ SELECTOR DE MODO ============
+modo_simulacion = '6dof'  # '3dof' o '6dof'
 
 # Ángulos del riel
 angulo_riel = 87     # grados desde horizontal
 azimut_riel = 0      # grados desde Norte (0=N, 90=E, 180=S, 270=W)
 
-# Estado inicial 6-DOF
-if modo_6dof:
+# Estado inicial según modo seleccionado
+if modo_simulacion == '6dof':
     q_init = euler_to_quaternion(0, np.deg2rad(angulo_riel), np.deg2rad(azimut_riel))
     estado = np.array([
-        x0, y0, z0,      # posición
-        vx0, vy0, vz0,    # velocidad
-        *q_init,           # cuaternión
-        0, 0, 0            # velocidades angulares
+        x0, y0, z0,        # posición
+        vx0, vy0, vz0,     # velocidad
+        *q_init,            # cuaternión [q0, q1, q2, q3]
+        0, 0, 0             # velocidades angulares [p, q, r]
     ])
 else:
-    # Estado 3-DOF (compatible con código actual)
+    # Estado 3-DOF (código actual sin cambios)
     estado = np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
+```
+
+**Selección de clase de vuelo:**
+```python
+# En el script principal o GUI:
+if modo_simulacion == '6dof':
+    vuelo = Vuelo6DOF(cohete, atmosfera, viento)
+    result = vuelo.simular_vuelo_6dof(estado, t_max, dt, dt_out, integrador)
+else:
+    vuelo = Vuelo(cohete, atmosfera, viento)
+    result = vuelo.simular_vuelo(estado, t_max, dt, dt_out, integrador)
 ```
 
 ### Fase 5: Integración numérica (integradores.py)
@@ -1378,9 +1391,30 @@ Simular el Xitle II en OpenRocket o RocketPy y comparar:
 8. GUI               → Selector y gráficas (depende de 4)
 ```
 
-### Compatibilidad con 3-DOF
+### Compatibilidad dual 3-DOF / 6-DOF (REQUISITO)
 
-El simulador debe **mantener ambos modos** (3-DOF y 6-DOF) mediante un flag de configuración. Esto permite:
-- Comparar resultados para validación
-- Simulaciones rápidas con 3-DOF cuando no se necesita la complejidad completa
-- Regresión contra el código existente probado
+El simulador **debe mantener ambos modos** seleccionables por el usuario. El código 3-DOF actual NO se reemplaza; el 6-DOF se agrega como opción paralela.
+
+**Arquitectura:**
+```
+Vuelo (clase base — 3-DOF actual, intocada)
+  └── Vuelo6DOF (hereda de Vuelo, agrega 6-DOF)
+```
+
+**Selección en código:**
+```python
+# condiciones_init.py
+modo_simulacion = '6dof'  # '3dof' o '6dof'
+```
+
+**Selección en GUI:**
+```
+[SimulationEnvironmentTab]
+  └── CTkOptionMenu: "Modo de simulación"  →  ["3-DOF (rápido)", "6-DOF (completo)"]
+```
+
+**Razones:**
+- El 3-DOF es ~5-7x más rápido (útil para barridos paramétricos)
+- Permite validar el 6-DOF contra el 3-DOF existente y probado
+- Mantiene compatibilidad total con simulaciones y resultados anteriores
+- Siguiendo el patrón de RocketPy que también ofrece ambos modos
