@@ -28,7 +28,7 @@
 - [Créditos y Autoría](#créditos-y-autoría)
 - [Cómo Contribuir](#cómo-contribuir)
 - [Licencia](#licencia)
-- [Posibles Mejoras (Roadmap)](#posibles-mejoras-roadmap)
+- [Roadmap](#roadmap)
 
 ---
 
@@ -249,6 +249,7 @@ RocketTrajectorySimulator-PropulsionUnam/
 │   └── NoImplementadoAun/            # Módulos en desarrollo (6-DOF, estructural)
 ├── docs/
 │   └── images/                       # Imágenes del README y documentación
+├── MEJORAS.md                        # Plan de mejoras por fases
 ├── requirements.txt                  # Dependencias del proyecto
 ├── Tesis_UNAM_NataliaMejBau_COMPLETAFINAL.pdf  # Tesis de licenciatura
 └── README.md
@@ -332,12 +333,18 @@ Este proyecto se distribuye bajo la **Licencia MIT**. Eres libre de usar, modifi
 
 ---
 
-## Posibles Mejoras (Roadmap)
+## Roadmap
 
-- [ ] Ampliar a modelo de **6 Grados de Libertad** (6-DOF) con ángulos de Euler completos.
-- [ ] Añadir soporte para **cohetes multietapa**.
-- [ ] Integrar un módulo de **simulación de Monte Carlo** para análisis de dispersión.
-- [ ] Desarrollar modelos aerodinámicos más avanzados para motores sólidos y **sistemas de control activo (TVC)**.
-- [ ] Agregar **cálculos estructurales** (cargas, esfuerzos, flameo).
-- [ ] Empaquetar el simulador como una **aplicación ejecutable** independiente.
-- [ ] Implementar **exportación de reportes** en PDF con los resultados de la simulación.
+El desarrollo futuro del simulador está organizado en **7 fases incrementales**:
+
+| Fase | Nombre | Prioridad | Estado |
+|------|--------|-----------|--------|
+| 1 | Consolidación y Calidad (tests, validación, limpieza) | Crítica | Pendiente |
+| 2 | Conexión GUI-Backend completa | Alta | Pendiente |
+| 3 | Modelo de 6 Grados de Libertad (6-DOF) | Alta | Pendiente |
+| 4 | Simulación de Monte Carlo | Media | Pendiente |
+| 5 | Cohetes multietapa y recuperación realista | Media | Pendiente |
+| 6 | Modelos avanzados (aerodinámica, atmósfera, viento) | Baja | Pendiente |
+| 7 | Empaquetado, documentación y distribución | Baja | Pendiente |
+
+> **[Consulta el plan detallado de mejoras (MEJORAS.md)](./MEJORAS.md)** para ver las tareas específicas de cada fase, dependencias y referencias técnicas.
