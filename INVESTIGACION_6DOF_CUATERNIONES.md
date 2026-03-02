@@ -3,25 +3,26 @@
 ## Simulador de Trayectoria de Cohetes — Propulsión UNAM
 
 **Fecha:** 2026-03-02
-**Objetivo:** Documentar toda la teoría, ecuaciones y plan de implementación para convertir el simulador actual de 3-DOF a 6-DOF completo usando cuaterniones.
+**Objetivo:** Documentar mejoras para el modelo 3-DOF actual, y toda la teoría, ecuaciones y plan de implementación para agregar el modo 6-DOF con cuaterniones.
 
 ---
 
 ## Índice
 
 1. [Estado actual del simulador (3-DOF)](#1-estado-actual-del-simulador-3-dof)
-2. [Teoría de cuaterniones](#2-teoría-de-cuaterniones)
-3. [Ecuaciones de movimiento 6-DOF](#3-ecuaciones-de-movimiento-6-dof)
-4. [Tensor de inercia 3×3](#4-tensor-de-inercia-3×3)
-5. [Aerodinámica en 6-DOF](#5-aerodinámica-en-6-dof)
-6. [Coeficientes de amortiguamiento](#6-coeficientes-de-amortiguamiento)
-7. [Marcos de referencia y convenciones](#7-marcos-de-referencia-y-convenciones)
-8. [Fenómenos físicos adicionales en 6-DOF](#8-fenómenos-físicos-adicionales-en-6-dof)
-9. [Integración numérica con cuaterniones](#9-integración-numérica-con-cuaterniones)
-10. [Mapeo detallado: cambios por archivo](#10-mapeo-detallado-cambios-por-archivo)
-11. [Plan de implementación](#11-plan-de-implementación)
-12. [Validación y pruebas](#12-validación-y-pruebas)
-13. [Referencias](#13-referencias)
+2. [**Mejoras para el modelo 3-DOF**](#2-mejoras-para-el-modelo-3-dof)
+3. [Teoría de cuaterniones](#3-teoría-de-cuaterniones)
+4. [Ecuaciones de movimiento 6-DOF](#4-ecuaciones-de-movimiento-6-dof)
+5. [Tensor de inercia 3×3](#5-tensor-de-inercia-3×3)
+6. [Aerodinámica en 6-DOF](#6-aerodinámica-en-6-dof)
+7. [Coeficientes de amortiguamiento](#7-coeficientes-de-amortiguamiento)
+8. [Marcos de referencia y convenciones](#8-marcos-de-referencia-y-convenciones)
+9. [Fenómenos físicos adicionales en 6-DOF](#9-fenómenos-físicos-adicionales-en-6-dof)
+10. [Integración numérica con cuaterniones](#10-integración-numérica-con-cuaterniones)
+11. [Mapeo detallado: cambios por archivo](#11-mapeo-detallado-cambios-por-archivo)
+12. [Plan de implementación](#12-plan-de-implementación)
+13. [Validación y pruebas](#13-validación-y-pruebas)
+14. [Referencias](#14-referencias)
 
 ---
 
@@ -77,7 +78,478 @@ Donde `τ_y = -(palanca × D + palanca × N)_y` con `palanca = R(θ) · (CP - CG
 
 ---
 
-## 2. Teoría de cuaterniones
+## 2. Mejoras para el modelo 3-DOF
+
+El modelo 3-DOF actual es funcional pero tiene varios problemas de precisión física, bugs, y oportunidades de mejora que deben corregirse **independientemente** de la implementación 6-DOF. Estas mejoras benefician tanto al modo 3-DOF como al 6-DOF.
+
+### 2.1 Bugs y errores en el código actual
+
+#### Bug 1: Factor de eficiencia hardcodeado en empuje (`vuelo.py:78`)
+
+```python
+# ACTUAL (hardcodeado):
+Tmag = self.vehiculo.calc_empuje_magn(t) * 1.1  # factor de eficiencia
+
+# CORRECCIÓN: parametrizar
+Tmag = self.vehiculo.calc_empuje_magn(t) * self.vehiculo.eficiencia_empuje
+```
+
+**Problema:** El factor 1.1 (10% extra) está hardcodeado. No hay forma de cambiarlo sin editar el código fuente. Debería ser un parámetro configurable del cohete o del motor.
+
+#### Bug 2: Factor de eficiencia hardcodeado en drag (`vuelo.py:98`)
+
+```python
+# ACTUAL (hardcodeado):
+Dmag = Dmag * 0.9  # ¿por qué 0.9?
+
+# CORRECCIÓN: parametrizar o eliminar
+Dmag = Dmag * self.vehiculo.factor_correccion_Cd  # o simplemente Dmag sin factor
+```
+
+**Problema:** El factor 0.9 reduce arbitrariamente el drag un 10%. Si los datos del Cd ya son correctos, este factor introduce error. Si se necesita ajuste, debe ser un parámetro configurable.
+
+#### Bug 3: Fuerza normal usa `sin(α)` en lugar de `α` linealmente (`vuelo.py:54`)
+
+```python
+# ACTUAL:
+f_normal = (0.5 * rho * vel_mag**2) * A * abs(np.sin(alpha)) * CNalpha
+
+# CORRECTO para α pequeño (teoría lineal):
+f_normal = (0.5 * rho * vel_mag**2) * A * alpha * CNalpha
+
+# CORRECTO para α grande (no lineal):
+f_normal = (0.5 * rho * vel_mag**2) * A * np.sin(2*alpha)/2 * CNalpha
+```
+
+**Problema:** La teoría de Barrowman define CNα como coeficiente de fuerza normal **por radián**. Para ángulos pequeños, `F_N = q·A·CNα·α`. Usar `sin(α)` en vez de `α` introduce una no-linealidad incorrecta para α < 15°, y tampoco es correcta para α grande (donde se necesita `sin(2α)/2` o modelos no lineales).
+
+#### Bug 4: Dirección de la fuerza normal (`vuelo.py:106`)
+
+```python
+# ACTUAL:
+Nhat = -np.sign(alpha) * np.array((v_rel_hat[2], v_rel_hat[1], -v_rel_hat[0]))
+```
+
+**Problema:** La fuerza normal debería ser **perpendicular a la velocidad relativa y en el plano que contiene el eje del cohete**, no una rotación ad-hoc del vector velocidad. La formulación actual solo funciona aproximadamente en el plano XZ y da resultados incorrectos con componentes de viento en Y.
+
+**Corrección:**
+```python
+# Vector eje del cuerpo
+body_axis = np.array([np.cos(theta), 0, np.sin(theta)])
+# Componente de v_rel perpendicular al eje del cuerpo
+v_perp = v_rel - np.dot(v_rel, body_axis) * body_axis
+v_perp_norm = np.linalg.norm(v_perp)
+if v_perp_norm > 1e-10:
+    Nhat = -v_perp / v_perp_norm
+else:
+    Nhat = np.zeros(3)
+```
+
+#### Bug 5: Falta `RungeKutta2` en el diccionario de integradores (`vuelo.py:252-256`)
+
+```python
+# ACTUAL:
+integradores = {
+    'Euler': Euler(self.fun_derivs),
+    'RungeKutta4': RungeKutta4(self.fun_derivs),
+}
+
+# CORRECCIÓN: agregar los que faltan
+integradores = {
+    'Euler': Euler(self.fun_derivs),
+    'RungeKutta2': RungeKutta2(self.fun_derivs),
+    'RungeKutta4': RungeKutta4(self.fun_derivs),
+}
+```
+
+**Problema:** `RungeKutta2` está en la lista `propios_integ` pero no en el diccionario `integradores`, causando KeyError si se selecciona.
+
+#### Bug 6: `iteracion_final` sin inicializar (`vuelo.py:423`)
+
+```python
+# ACTUAL (si el cohete nunca impacta, error):
+tiempos = tiempos[:iteracion_final]  # NameError si no hubo impacto
+
+# CORRECCIÓN:
+iteracion_final = len(tiempos)  # valor por defecto antes del loop
+```
+
+#### Bug 7: Masa del paracaídas no se modela como drag en la dirección correcta
+
+```python
+# ACTUAL: se suma f_paracaidas al f_arrastre total
+f_arrastre = f_arrastre + f_paracaidas
+```
+
+**Problema:** Después del apogeo, el cohete cae de cola primero. La fuerza de arrastre del cuerpo sigue oponiéndose a la velocidad, pero el paracaídas siempre abre con drag hacia arriba. Sumar las magnitudes es correcto **solo si el cohete mantiene su orientación de vuelo**. Si θ diverge mucho (tumble), el drag del cuerpo y del paracaídas deberían tratarse por separado.
+
+### 2.2 Mejoras físicas para el 3-DOF
+
+#### Mejora 1: Amortiguamiento angular de cabeceo
+
+**Estado actual:** El código tiene amortiguamiento **comentado** (vuelo.py:150-152):
+```python
+#k_amort = 0.7
+#M_amort = -k_amort * alpha_dot
+```
+
+**Problema:** Sin amortiguamiento, el cohete oscila indefinidamente en pitch, lo cual es no-físico. Todo cohete real tiene amortiguamiento aerodinámico.
+
+**Solución propuesta:**
+```python
+def accangular_mejorado(self, theta, Dvec, Nvec, Gvec, Tvec, state):
+    # ... (cálculo existente de torcas) ...
+
+    # Amortiguamiento aerodinámico de cabeceo
+    v_rel = vel - self.viento.vector
+    V = np.linalg.norm(v_rel)
+    if V > 1e-6:
+        _, rho, _, _ = self.atmosfera.calc_propiedades(pos[2])
+        q_dyn = 0.5 * rho * V**2
+        d_ref = self.vehiculo.d_ref
+        Cmq = self.vehiculo.Cmq  # coef. de amortiguamiento (negativo)
+        M_damping = q_dyn * self.vehiculo.A * d_ref * Cmq * omega * d_ref / (2 * V)
+    else:
+        M_damping = 0.0
+
+    Torca = -tau_tot[1] + M_damping
+    accang = Torca / self.vehiculo.Ix
+    return palanca, accang, Torca
+```
+
+**Estimación de Cmq:**
+```python
+# En cohete.py:
+def calc_Cmq(self):
+    """Coef. de amortiguamiento de cabeceo (Barrowman simplificado)."""
+    margen = (self.CP[2] - self.CG[2])
+    self.Cmq = -2.0 * self.CN * (margen / self.d_ref)**2
+```
+
+Valores típicos: Cmq ∈ [-10, -100] para cohetes bien diseñados.
+
+#### Mejora 2: Cd dependiente del ángulo de ataque
+
+**Estado actual:** `Cd = f(Mach)` solamente.
+
+**Realidad:** El drag aumenta significativamente con el ángulo de ataque:
+
+```
+Cd_total = Cd_0(Mach) + Cd_α(Mach) · α²
+```
+
+Donde `Cd_α` es el coeficiente de drag inducido por ángulo de ataque (crossflow drag).
+
+**Solución propuesta:**
+```python
+def calc_Cd_total(self, mach, alpha):
+    Cd0 = self.calc_Cd(mach)  # drag a α=0 (tabla existente)
+    # Crossflow drag coefficient (empírico para cilindros)
+    Cd_crossflow = 1.2  # coef. de drag de cilindro en flujo cruzado
+    A_plan = self.longtotal * self.d_ref  # área planiforme aproximada
+    Cd_alpha = Cd_crossflow * (A_plan / self.A) * np.sin(alpha)**2
+    return Cd0 + Cd_alpha
+```
+
+#### Mejora 3: Variación de CN con Mach (CN compresible)
+
+**Estado actual:** `CN` es constante (solo depende de la geometría). Para el Xitle CN ≈ 2 + CN_aletas.
+
+**Realidad:** CN varía con el número de Mach, especialmente cerca de Mach 1:
+
+```
+CN(Mach) = CN_incompresible / β_Prandtl-Glauert
+β = √(1 - M²)    para M < 1
+β = √(M² - 1)    para M > 1
+```
+
+**Solución propuesta:**
+```python
+def calc_CN_compresible(self, mach):
+    CN0 = self.CN  # valor incompresible
+    if mach < 0.8:
+        beta = np.sqrt(1 - mach**2)
+        return CN0 / beta
+    elif mach < 1.2:
+        # Región transónica: interpolación suave
+        return CN0 * (1 + 0.5 * mach)  # aproximación empírica
+    else:
+        beta = np.sqrt(mach**2 - 1)
+        return CN0 / beta
+```
+
+#### Mejora 4: Jet damping durante la fase de motor
+
+**Estado actual:** No hay jet damping.
+
+**Realidad:** Cuando el motor está activo, la salida de masa produce un efecto estabilizador significativo:
+
+```
+M_jet = -ṁ · (x_nozzle - x_CG)² · ω
+```
+
+**Solución propuesta:**
+```python
+# En vuelo.py, dentro de accangular:
+if t < self.vehiculo.t_MECO:
+    # Tasa de gasto másico (derivada numérica de la masa)
+    dm_dt = self.vehiculo.calc_mass_flow_rate(t)
+    x_nozzle = self.vehiculo.longtotal  # posición de la tobera
+    x_cg = self.vehiculo.CG[2]
+    lever = x_nozzle - x_cg
+    M_jet_damping = -dm_dt * lever**2 * omega
+    Torca += M_jet_damping
+```
+
+#### Mejora 5: Modelo de viento con perfil de altitud
+
+**Estado actual:** El viento es uniforme en altitud (solo varía aleatoriamente en tiempo).
+
+**Realidad:** La velocidad del viento aumenta con la altitud según un perfil potencial:
+
+```
+V_wind(h) = V_wind_ref · (h / h_ref)^α_wind
+```
+
+Donde `α_wind ≈ 0.143` (terreno abierto) y `h_ref = 10 m` (altura de medición estándar).
+
+**Solución propuesta (`viento.py`):**
+```python
+def actualizar_viento3D(self, altitud=0):
+    self.random_values()
+
+    # Perfil de viento con altitud (power law)
+    h_ref = 10.0  # metros (altura de estación meteorológica)
+    alpha_wind = 0.143  # exponente para terreno abierto
+    factor_altitud = (max(altitud, 0.1) / h_ref) ** alpha_wind
+
+    # Vector base escalado por altitud
+    vel_base_h = self.vel_base * factor_altitud
+    base = vel_base_h * np.array([...])
+    # ... (resto igual)
+```
+
+#### Mejora 6: Eventos de paracaídas configurables
+
+**Estado actual:** Un solo paracaídas, se activa automáticamente en el apogeo.
+
+**Mejora:** Sistema de múltiples paracaídas con eventos configurables:
+
+```python
+class EventoRecuperacion:
+    def __init__(self, parachute, condicion, retardo=0):
+        self.parachute = parachute
+        self.condicion = condicion  # 'apogeo', 'altitud', 'tiempo', 'velocidad'
+        self.valor = None           # ej: altitud=500m, tiempo=30s
+        self.retardo = retardo      # retardo post-evento (s)
+        self.activado = False
+        self.tiempo_activacion = None
+
+# Uso:
+drogue = EventoRecuperacion(Parachute(0.8, 0.7), 'apogeo', retardo=1.0)
+main = EventoRecuperacion(Parachute(2.2, 3.5), 'altitud', retardo=0)
+main.valor = 300  # metros
+cohete.eventos_recuperacion = [drogue, main]
+```
+
+#### Mejora 7: Recálculo de CP y CN en vuelo
+
+**Estado actual:** CP y CN se recalculan solo cuando la masa cambia (vía `actualizar_masa`).
+
+**Mejora:** CP y CN deberían depender del Mach:
+- A Mach > 0.8, los coeficientes cambian significativamente
+- El cono de compresión cambia la distribución de presión
+
+```python
+def actualizar_aerodinamica(self, mach):
+    """Actualiza CP y CN según el número de Mach actual."""
+    self.CN_actual = self.calc_CN_compresible(mach)
+    # Si se tienen tablas de CP vs Mach:
+    # self.CP_actual = self.calc_CP_compresible(mach)
+```
+
+### 2.3 Mejoras de robustez y rendimiento
+
+#### Mejora 8: Protección contra altitudes negativas en la atmósfera
+
+**Estado actual (`atmosfera.py:46-59`):** Si `altura_z < 0`, la función `altitud_geopot` da un valor negativo y `determinar_capa` funciona pero los cálculos de ρ y T pueden dar valores no físicos.
+
+```python
+def calc_propiedades(self, altura_z):
+    # Protección: clampear altitud a >= 0
+    altura_z = max(altura_z, 0.0)
+    # ... resto del cálculo
+```
+
+#### Mejora 9: Caché de propiedades atmosféricas
+
+Actualmente `calc_propiedades()` se llama múltiples veces por paso (en `calc_arrastre_normal`, en `calc_aero`, en el logging). Cachear el resultado:
+
+```python
+def calc_propiedades_cached(self, altura_z):
+    """Retorna propiedades atmosféricas, usando caché si la altitud no cambió."""
+    if hasattr(self, '_cache_h') and abs(altura_z - self._cache_h) < 0.01:
+        return self._cache_result
+    result = self.calc_propiedades(altura_z)
+    self._cache_h = altura_z
+    self._cache_result = result
+    return result
+```
+
+#### Mejora 10: Detección de eventos con interpolación
+
+**Estado actual:** El apogeo se detecta como `altitud < ultima_altitud`, lo cual da el apogeo con resolución `dt`. El impacto se detecta como `z < 0`.
+
+**Mejora:** Usar interpolación lineal para precisión sub-paso:
+
+```python
+# Detección de apogeo precisa
+if self.tiempo_apogeo is None and altitud > 5 and altitud < ultima_altitud:
+    # Interpolación lineal entre pasos
+    frac = ultima_altitud / (ultima_altitud - altitud)
+    self.tiempo_apogeo = t - dt * frac
+    self.apogeo = ultima_altitud  # valor máximo real
+
+# Detección de impacto precisa
+if estado[2] < 0 and t > 1:
+    frac = ultimo_z / (ultimo_z - estado[2])
+    self.tiempo_impacto = t - dt * frac
+```
+
+#### Mejora 11: Validación de datos de entrada (tablas CSV)
+
+**Estado actual:** No hay validación de las tablas de empuje, Cd y masa.
+
+```python
+def cargar_tablas_motor(self, tabla_empuje_fpath, tabla_masa_fpath):
+    self.motorThrustTable = pd.read_csv(tabla_empuje_fpath)
+
+    # VALIDACIÓN:
+    assert 'time' in self.motorThrustTable.columns, "Tabla de empuje debe tener columna 'time'"
+    assert 'thrust' in self.motorThrustTable.columns, "Tabla de empuje debe tener columna 'thrust'"
+    assert len(self.motorThrustTable) >= 2, "Tabla de empuje debe tener al menos 2 puntos"
+    assert self.motorThrustTable['time'].is_monotonic_increasing, "Tiempos deben ser crecientes"
+    assert (self.motorThrustTable['thrust'] >= 0).all(), "Empuje no puede ser negativo"
+    # ...
+```
+
+### 2.4 Mejoras de salida y post-procesamiento
+
+#### Mejora 12: Cálculo de presión dinámica máxima (Max-Q)
+
+```python
+# En el loop de simulación, agregar:
+q_dyn = 0.5 * rho * vel_mag**2
+q_dyns.append(q_dyn)
+
+# Post-procesamiento:
+max_q = max(q_dyns)
+t_max_q = tiempos[q_dyns.index(max_q)]
+```
+
+#### Mejora 13: Cálculo de número de Reynolds
+
+```python
+Re = rho * V * self.vehiculo.longtotal / mu_air
+# Donde mu_air ≈ 1.789e-5 Pa·s (viscosidad dinámica del aire)
+```
+
+Útil para determinar si el flujo es laminar o turbulento.
+
+#### Mejora 14: Energía cinética y potencial en vuelo
+
+```python
+E_cinetica = 0.5 * masa * vel_mag**2
+E_potencial = masa * g * altitud
+E_total = E_cinetica + E_potencial
+```
+
+Útil para verificar conservación de energía y para análisis de seguridad (energía de impacto).
+
+#### Mejora 15: Estabilidad dinámica (frecuencia natural y amortiguamiento)
+
+Con los coeficientes de amortiguamiento calculados, se puede reportar en cada instante:
+
+```python
+# Frecuencia natural de oscilación de pitch
+omega_n = np.sqrt(q_dyn * A * CN_alpha * margen_estatico / Ix)
+
+# Razón de amortiguamiento
+zeta = -Cmq * q_dyn * A * d_ref**2 / (4 * V * Ix * omega_n)
+```
+
+Valores de `zeta`:
+- `> 1.0`: sobre-amortiguado (lento pero estable)
+- `0.05 - 0.3`: rango óptimo para cohetes
+- `< 0.01`: sub-amortiguado (oscilaciones grandes)
+- `< 0`: inestable dinámicamente
+
+### 2.5 Resumen de mejoras 3-DOF por prioridad
+
+| # | Mejora | Prioridad | Archivo | Esfuerzo |
+|---|--------|-----------|---------|----------|
+| B1 | Parametrizar factor empuje 1.1 | **Crítica** | vuelo.py, cohete.py | 5 min |
+| B2 | Parametrizar/eliminar factor drag 0.9 | **Crítica** | vuelo.py | 5 min |
+| B3 | Corregir fuerza normal: usar α en vez de sin(α) | **Crítica** | vuelo.py | 10 min |
+| B4 | Corregir dirección de fuerza normal en 3D | **Alta** | vuelo.py | 20 min |
+| B5 | Agregar RungeKutta2 al dict de integradores | **Alta** | vuelo.py | 2 min |
+| B6 | Inicializar `iteracion_final` | **Alta** | vuelo.py | 2 min |
+| M1 | Amortiguamiento angular Cmq | **Alta** | vuelo.py, cohete.py | 1 hr |
+| M2 | Cd dependiente de α (crossflow drag) | **Media** | cohete.py | 30 min |
+| M3 | CN compresible (Prandtl-Glauert) | **Media** | cohete.py | 30 min |
+| M4 | Jet damping durante motor | **Media** | vuelo.py | 30 min |
+| M5 | Perfil de viento con altitud | **Media** | viento.py | 30 min |
+| M6 | Eventos de paracaídas configurables | **Media** | vuelo.py, cohete.py | 2 hr |
+| M7 | CP/CN dependiente de Mach | **Baja** | cohete.py | 1 hr |
+| R8 | Protección altitudes negativas | **Alta** | atmosfera.py | 5 min |
+| R9 | Caché de propiedades atmosféricas | **Baja** | atmosfera.py | 15 min |
+| R10 | Detección de eventos con interpolación | **Media** | vuelo.py | 30 min |
+| R11 | Validación de tablas CSV | **Alta** | cohete.py | 30 min |
+| S12 | Max-Q en salida | **Media** | vuelo.py | 10 min |
+| S13 | Número de Reynolds | **Baja** | vuelo.py | 10 min |
+| S14 | Energía cinética/potencial | **Media** | vuelo.py | 10 min |
+| S15 | Frecuencia y amortiguamiento dinámico | **Baja** | post-proc | 30 min |
+
+### 2.6 Orden de implementación recomendado (3-DOF)
+
+```
+Fase A (bugfixes críticos, ~30 min):
+  B1 → Parametrizar factor empuje
+  B2 → Parametrizar factor drag
+  B3 → Corregir fuerza normal
+  B5 → Agregar RK2 al dict
+  B6 → Inicializar iteracion_final
+  R8 → Protección altitudes negativas
+
+Fase B (mejoras físicas esenciales, ~2 hr):
+  M1 → Amortiguamiento angular Cmq
+  B4 → Corregir dirección fuerza normal
+  R11 → Validación de tablas CSV
+
+Fase C (mejoras de precisión, ~2 hr):
+  M2 → Cd dependiente de α
+  M3 → CN compresible
+  M4 → Jet damping
+  M5 → Perfil de viento con altitud
+
+Fase D (mejoras funcionales, ~3 hr):
+  M6 → Eventos de paracaídas configurables
+  R10 → Detección de eventos interpolada
+  S12 → Max-Q
+  S14 → Energía cinética/potencial
+
+Fase E (refinamientos, ~2 hr):
+  M7 → CP/CN vs Mach
+  R9 → Caché atmosférico
+  S13 → Reynolds
+  S15 → Estabilidad dinámica
+```
+
+**Total estimado:** ~9-10 horas de implementación para todas las mejoras 3-DOF.
+
+---
+
+## 3. Teoría de cuaterniones
 
 ### 2.1 Definición
 
@@ -200,7 +672,7 @@ def euler_to_quaternion(phi, theta, psi):
 
 ---
 
-## 3. Ecuaciones de movimiento 6-DOF
+## 4. Ecuaciones de movimiento 6-DOF
 
 ### 3.1 Vector de estado completo (13 variables)
 
@@ -364,7 +836,7 @@ def fun_derivs_6dof(t, state):
 
 ---
 
-## 4. Tensor de inercia 3×3
+## 5. Tensor de inercia 3×3
 
 ### 4.1 Definición general
 
@@ -461,7 +933,7 @@ def actualizar_inercia(self, t):
 
 ---
 
-## 5. Aerodinámica en 6-DOF
+## 6. Aerodinámica en 6-DOF
 
 ### 5.1 Velocidad relativa al viento en marco cuerpo
 
@@ -591,7 +1063,7 @@ def calc_Cma(self):
 
 ---
 
-## 6. Coeficientes de amortiguamiento
+## 7. Coeficientes de amortiguamiento
 
 ### 6.1 Amortiguamiento de cabeceo C_mq
 
@@ -656,7 +1128,7 @@ Este efecto es significativo durante la fase de motor encendido y se puede inclu
 
 ---
 
-## 7. Marcos de referencia y convenciones
+## 8. Marcos de referencia y convenciones
 
 ### 7.1 Marco terrestre (ENU — East-North-Up)
 
@@ -741,7 +1213,7 @@ state_0 = np.array([
 
 ---
 
-## 8. Fenómenos físicos adicionales en 6-DOF
+## 9. Fenómenos físicos adicionales en 6-DOF
 
 ### 8.1 Weathercocking (efecto veleta)
 
@@ -797,7 +1269,7 @@ Donde `Ω_tierra = [0, Ω·cos(lat), Ω·sin(lat)]` en marco NED con Ω = 7.2921
 
 **Para el Xitle II (~5-15 km altitud):** Estos efectos son del orden de 0.1% y pueden ignorarse en primera aproximación, pero es fácil incluirlos.
 
-### 8.6 Enfoque de RocketPy: ángulo de ataque local por superficie
+### 9.6 Enfoque de RocketPy: ángulo de ataque local por superficie
 
 RocketPy calcula las fuerzas aerodinámicas **por superficie** en lugar de usar coeficientes bulk. Cada superficie experimenta su propia velocidad local que incluye el efecto de la rotación:
 
@@ -811,7 +1283,7 @@ Donde `r_i` es el vector del CG a la i-ésima superficie. Esto produce **amortig
 
 **Para nuestra implementación:** Como primera versión, usaremos coeficientes bulk (C_mq, C_lp, C_nr) que son más simples. La mejora a ángulo de ataque local por superficie se puede implementar como refinamiento futuro.
 
-### 8.7 Amortiguamiento de cabeceo de OpenRocket
+### 9.7 Amortiguamiento de cabeceo de OpenRocket
 
 **Contribución del cuerpo:**
 ```
@@ -825,7 +1297,7 @@ C_damp_fin = 0.6 · N · A_fin · ξ³ / (A_ref · d) · (ω² / V²)
 
 Donde `ξ` es la distancia del CG a las aletas, N = número de aletas (máx. 4 para cálculo).
 
-### 8.8 Momento de roll por aletas inclinadas (canted fins)
+### 9.8 Momento de roll por aletas inclinadas (canted fins)
 
 De Barrowman ecuación (3-31):
 ```
@@ -846,7 +1318,7 @@ Con la integral evaluada para geometría trapezoidal:
 
 ---
 
-## 9. Integración numérica con cuaterniones
+## 10. Integración numérica con cuaterniones
 
 ### 9.1 Normalización del cuaternión
 
@@ -904,7 +1376,7 @@ En estos casos, LSODA (que alterna entre stiff y non-stiff) es una buena opción
 
 ---
 
-## 10. Mapeo detallado: cambios por archivo
+## 11. Mapeo detallado: cambios por archivo
 
 ### 10.1 `vuelo.py` — CLASE NUEVA `Vuelo6DOF` (la clase `Vuelo` se mantiene intacta)
 
@@ -985,7 +1457,7 @@ En estos casos, LSODA (que alterna entre stiff y non-stiff) es una buena opción
 
 ---
 
-## 11. Plan de implementación
+## 12. Plan de implementación
 
 ### Fase 1: Infraestructura matemática (funciones.py)
 
@@ -1274,7 +1746,7 @@ class RungeKutta4_Quat(RungeKutta4):
 
 ---
 
-## 12. Validación y pruebas
+## 13. Validación y pruebas
 
 ### 12.1 Prueba unitaria: cuaterniones
 
@@ -1332,7 +1804,7 @@ Simular el Xitle II en OpenRocket o RocketPy y comparar:
 
 ---
 
-## 13. Referencias
+## 14. Referencias
 
 ### Libros y tesis
 1. **Niskanen, S.** "OpenRocket — Development of an Open Source Model Rocket Simulator" (Tesis de maestría, 2013). Base teórica para Barrowman extendido y amortiguamiento. [PDF](https://openrocket.sourceforge.net/thesis.pdf)
@@ -1358,13 +1830,31 @@ Simular el Xitle II en OpenRocket o RocketPy y comparar:
 
 ## Resumen ejecutivo
 
-### Cambio clave: de 8 a 13 estados
+### Dos líneas de mejora independientes
+
 ```
-3-DOF: [x, y, z, vx, vy, vz, θ, ω]           → 8 variables
-6-DOF: [x, y, z, vx, vy, vz, q0,q1,q2,q3, p,q,r] → 13 variables
+MEJORAS 3-DOF (Sección 2):  Bugs + física + robustez → ~20 mejoras, ~10 hrs
+NUEVO MODO 6-DOF (Secciones 3-13): Cuaterniones, tensor 3×3, 3 ejes → ~705 líneas nuevas
 ```
 
-### Esfuerzo estimado por módulo
+### Cambio clave 6-DOF: de 8 a 13 estados
+```
+3-DOF: [x, y, z, vx, vy, vz, θ, ω]                → 8 variables
+6-DOF: [x, y, z, vx, vy, vz, q0, q1, q2, q3, p, q, r] → 13 variables
+```
+
+### Esfuerzo estimado: mejoras 3-DOF
+
+| Fase | Descripción | Tiempo |
+|------|-------------|--------|
+| A | Bugfixes críticos (B1-B6, R8) | ~30 min |
+| B | Amortiguamiento + dirección fuerza normal + validación CSV | ~2 hr |
+| C | Cd(α), CN(Mach), jet damping, viento con altitud | ~2 hr |
+| D | Paracaídas configurable, eventos interpolados, Max-Q, energía | ~3 hr |
+| E | Refinamientos (CP vs Mach, caché, Reynolds, estabilidad dinámica) | ~2 hr |
+| **Total 3-DOF** | | **~9-10 hr** |
+
+### Esfuerzo estimado: modo 6-DOF
 
 | Módulo | Complejidad | Líneas nuevas/modificadas |
 |--------|------------|--------------------------|
@@ -1376,19 +1866,30 @@ Simular el Xitle II en OpenRocket o RocketPy y comparar:
 | integradores.py | Baja | ~20 modificadas |
 | GUI (visualización) | Media | ~100 modificadas |
 | Tests de validación | Media | ~150 nuevas |
-| **TOTAL** | | **~705 líneas** |
+| **Total 6-DOF** | | **~705 líneas** |
 
-### Orden de implementación recomendado
+### Orden de implementación recomendado (global)
 
 ```
-1. funciones.py      → Utilidades de cuaterniones (sin dependencias)
-2. componentes.py    → Ix_roll por componente (depende de 1)
-3. cohete.py         → Tensor de inercia + coeficientes (depende de 2)
-4. vuelo.py          → Motor 6-DOF (depende de 1, 3)
-5. condiciones_init  → Estado inicial 6-DOF (depende de 1)
-6. integradores.py   → Normalización post-step (depende de 4)
-7. Validación        → Tests unitarios y de regresión (depende de todo)
-8. GUI               → Selector y gráficas (depende de 4)
+═══ FASE I: MEJORAS 3-DOF (primero, benefician a ambos modos) ═══
+1. Bugfixes críticos       → B1-B6, R8 (empuje, drag, fuerza normal, RK2, etc.)
+2. Amortiguamiento Cmq     → M1 (física esencial que falta)
+3. Dirección fuerza normal  → B4 (corrección vectorial)
+4. Validación CSV          → R11 (robustez)
+5. Cd(α), CN(Mach)         → M2, M3 (precisión aerodinámica)
+6. Jet damping, viento(h)  → M4, M5 (física adicional)
+7. Paracaídas multi-evento → M6 (funcionalidad)
+8. Salidas adicionales     → S12, S14 (Max-Q, energía)
+
+═══ FASE II: NUEVO MODO 6-DOF (sobre el 3-DOF mejorado) ═══
+9.  funciones.py           → Utilidades de cuaterniones
+10. componentes.py         → Ix_roll por componente
+11. cohete.py              → Tensor de inercia + coeficientes de estabilidad
+12. vuelo.py               → Clase Vuelo6DOF (hereda de Vuelo)
+13. condiciones_init       → Estado inicial 13 variables
+14. integradores.py        → Normalización post-step
+15. Validación             → Tests unitarios + regresión 3-DOF vs 6-DOF
+16. GUI                    → Selector de modo + gráficas 6-DOF
 ```
 
 ### Compatibilidad dual 3-DOF / 6-DOF (REQUISITO)
