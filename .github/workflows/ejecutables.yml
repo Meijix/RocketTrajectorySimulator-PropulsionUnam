@@ -1,0 +1,65 @@
+# Construye el ejecutable de PropulsionGUI para macOS, Windows y Linux.
+#
+# Se lanza a mano desde la pestaña Actions o al publicar una etiqueta v* (por ejemplo v1.0).
+# Con una etiqueta, los tres archivos se adjuntan además a la versión (Release) de GitHub.
+name: Ejecutables
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  construir:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - sistema: macos-latest
+            archivo: PropulsionGUI-macOS.zip
+          - sistema: windows-latest
+            archivo: PropulsionGUI-Windows.zip
+          - sistema: ubuntu-latest
+            archivo: PropulsionGUI-Linux.tar.gz
+    runs-on: ${{ matrix.sistema }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt pyinstaller
+      - name: Construir
+        run: pyinstaller empaquetado/PropulsionGUI.spec
+
+      - name: Probar y empaquetar (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          dist/PropulsionGUI.app/Contents/MacOS/PropulsionGUI --autoprueba
+          cd dist && ditto -c -k --keepParent PropulsionGUI.app ../${{ matrix.archivo }}
+      - name: Probar y empaquetar (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath dist\PropulsionGUI\PropulsionGUI.exe -ArgumentList "--autoprueba" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { exit $p.ExitCode }
+          Compress-Archive -Path dist\PropulsionGUI -DestinationPath ${{ matrix.archivo }}
+      - name: Probar y empaquetar (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update && sudo apt-get install -y xvfb
+          xvfb-run -a dist/PropulsionGUI/PropulsionGUI --autoprueba
+          tar -czf ${{ matrix.archivo }} -C dist PropulsionGUI
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.archivo }}
+          path: ${{ matrix.archivo }}
+      - name: Adjuntar a la versión
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.archivo }}
