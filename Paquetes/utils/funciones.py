@@ -183,8 +183,8 @@ def guardar_datos_json(cohete_actual,vuelo1, max_altitude, max_speed, accels, ac
         'tiempo_impacto': vuelo1.tiempo_impacto,
         'max_altitude': max_altitude,
         'max_speed': max_speed,
-        'max_acceleration_linear': np.max(accels),
-        'max_acceleration_angular': np.max(accangs)
+        'max_acceleration_linear': float(np.max(np.linalg.norm(np.asarray(accels), axis=1))),   # magnitud maxima
+        'max_acceleration_angular': float(np.max(np.abs(accangs)))
         #'velocidad de impacto': velocidades[-1]
     }
 
