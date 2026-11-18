@@ -150,9 +150,6 @@ class Cohete:
         # print(comp.nombre, comp.CN)
         self.CN += comp.CN
 
-    def cargar_tabla_Cd(self, tabla_Cd_fpath):
-      self.CdTable = pd.read_csv(tabla_Cd_fpath)
-
     #Se debe hacer general para agregar cualquier curva de motor 
     #desde la simulacion
     def cargar_tablas_motor(self, tabla_empuje_fpath, tabla_masa_fpath):
@@ -166,31 +163,60 @@ class Cohete:
       self.motorMassTable['oxi'] = self.motorMassTable['Oxidizer Mass (kg)']
       self.motorMassTable['grano'] = self.motorMassTable['Fuel Mass (kg)']
 
+      # Tablas como arreglos de numpy (se interpolan en cada evaluacion de las derivadas)
+      self._t_empuje = self.motorThrustTable['time'].to_numpy(dtype=float)
+      self._empuje = self.motorThrustTable['thrust'].to_numpy(dtype=float)
+      self._t_masa = self.motorMassTable['time'].to_numpy(dtype=float)
+      self._masa_oxi = self.motorMassTable['oxi'].to_numpy(dtype=float)
+      self._masa_grano = self.motorMassTable['grano'].to_numpy(dtype=float)
+
       # Calcular el área de la curva empuje vs tiempo utilizando la regla del trapecio
-      #Vamos a probar otro tipo de integracion para mejorarlo?
       # np.trapz se eliminó en NumPy 2.0 (ahora np.trapezoid); se soportan ambas versiones
       trapecio = getattr(np, 'trapezoid', None) or np.trapz
-      self.I_total = trapecio(y=self.motorThrustTable['thrust'], x=self.motorThrustTable['time'])
+      self.I_total = trapecio(y=self._empuje, x=self._t_empuje)
+
+      # Coherencia entre las dos tablas. El propelente debe consumirse mientras hay empuje.
+      # Si la tabla de masa dura otra cosa que la curva de empuje (por ejemplo, viene de una
+      # simulacion del motor y el empuje de una prueba estatica), su escala de tiempo no
+      # sirve: en ese caso se conservan las masas inicial y final de la tabla, pero el
+      # propelente se consume en proporcion al impulso entregado, m(t) = m0 - dm * I(t)/I_total
+      # (equivale a suponer un impulso especifico constante).
+      self.masa_segun_impulso = abs(self._t_masa[-1] - self.t_MECO) > 0.05 * self.t_MECO
+      if self.masa_segun_impulso:
+        tramos = 0.5 * (self._empuje[1:] + self._empuje[:-1]) * np.diff(self._t_empuje)
+        self._fraccion_impulso = np.concatenate(([0.0], np.cumsum(tramos))) / self.I_total
+        print(f"Aviso: la tabla de masa del motor dura {self._t_masa[-1]:.2f} s y la curva de empuje {self.t_MECO:.2f} s. "
+              "El propelente se consumira en proporcion al impulso entregado.")
+
+    def cargar_tabla_Cd(self, tabla_Cd_fpath):
+      self.CdTable = pd.read_csv(tabla_Cd_fpath)
+      self._mach = self.CdTable['mach'].to_numpy(dtype=float)
+      self._cd = self.CdTable['cd'].to_numpy(dtype=float)
 
     def calc_Cd(self, mach):
-      return np.interp(mach, self.CdTable['mach'], self.CdTable['cd'])
+      return np.interp(mach, self._mach, self._cd)
 
     def calc_empuje_magn(self, t):
       if t > self.t_MECO:
         return 0
       else:
         # Realizar interpolación
-        return np.interp(t, self.motorThrustTable['time'], self.motorThrustTable['thrust'])
+        return np.interp(t, self._t_empuje, self._empuje)
 
     def actualizar_masas_motor(self, t):
-      p = len(self.motorMassTable['time'])
-      if t > self.t_MECO:
-        #Actualizar la masa del componente
-        self.componentes['oxidante'].masa = self.motorMassTable['oxi'][p-1]
-        self.componentes['grano'].masa = self.motorMassTable['grano'][p-1]
+      oxidante, grano = self.componentes['oxidante'], self.componentes['grano']
+      if self.masa_segun_impulso:
+        # Fraccion del impulso total entregada hasta t (0 al encender, 1 al apagarse)
+        f = np.interp(t, self._t_empuje, self._fraccion_impulso)
+        oxidante.masa = self._masa_oxi[0] + f * (self._masa_oxi[-1] - self._masa_oxi[0])
+        grano.masa = self._masa_grano[0] + f * (self._masa_grano[-1] - self._masa_grano[0])
       else:
-        self.componentes['oxidante'].masa = np.interp(t, self.motorMassTable['time'], self.motorMassTable['oxi'])
-        self.componentes['grano'].masa = np.interp(t, self.motorMassTable['time'], self.motorMassTable['grano'])
+        # np.interp mantiene el ultimo valor de la tabla despues del final
+        oxidante.masa = np.interp(t, self._t_masa, self._masa_oxi)
+        grano.masa = np.interp(t, self._t_masa, self._masa_grano)
+      # El momento de inercia propio de cada componente depende de su masa
+      oxidante.calc_Ix()
+      grano.calc_Ix()
 
     def actualizar_masa(self, t):
       # Actualizar masa de motor
