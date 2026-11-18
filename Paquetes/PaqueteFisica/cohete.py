@@ -312,32 +312,43 @@ class Parachute:
     """Paracaidas: coeficiente de arrastre, area y modelo de inflado.
 
     El paracaidas no se abre de golpe. Su area de arrastre crece desde cero hasta Cd*A
-    durante un tiempo de llenado
-        t_llenado = k_llenado * D / v
-    donde D es el diametro del paracaidas y v la velocidad respecto al aire en el momento
-    de abrirse (formula del tiempo de llenado de Knacke, "Parachute Recovery Systems Design
-    Manual"; k_llenado vale alrededor de 8 para paracaidas circulares planos). Durante el
-    llenado,
-        Cd*A(t) = Cd*A * (tiempo transcurrido / t_llenado) ** exponente
-    Con exponente = 2 el area crece como el cuadrado del tiempo, es decir, el diametro
-    inflado crece a ritmo constante. k_llenado = 0 da la apertura instantanea.
+    durante un tiempo de llenado. Los valores por defecto son los de un paracaidas circular
+    plano de tela maciza (el tipo habitual en cohetes de este tamano):
+
+      Tiempo de llenado (relacion empirica de Knacke, "Parachute Recovery Systems Design
+      Manual", para circulares planos macizos):
+          t_llenado = 8 * D / v ** 0.9        con D en pies y v en pies por segundo
+      D es el diametro nominal del paracaidas y v la velocidad respecto al aire al abrirse.
+      La formula no es adimensional, asi que aqui se convierten D y v a esas unidades.
+
+      Crecimiento del area (Ludtke, para paracaidas de tela maciza):
+          Cd*A(t) = Cd*A * (tiempo transcurrido / t_llenado) ** 6
+      El area casi no crece al principio y se abre de golpe al final del llenado.
+
+    Otros tipos de paracaidas tienen otras constantes: k_llenado mayor (se llenan mas
+    despacio) y exponentes de area menores, entre 1/2 y 2. Con exponente_velocidad = 1 la
+    formula es t = k * D / v, valida en cualquier sistema de unidades. k_llenado = 0 da la
+    apertura instantanea.
     """
     T_LLENADO_MAX = 3.0   # [s] tope del tiempo de llenado (si se abre casi sin velocidad)
+    PIE = 0.3048          # [m]
 
-    def __init__(self, cd, area_trans, k_llenado=8.0, exponente=2.0):
+    def __init__(self, cd, area_trans, k_llenado=8.0, exponente=6.0, exponente_velocidad=0.9):
         self.cd = cd
         self.Area_trans = area_trans
-        self.k_llenado = k_llenado
-        self.exponente = exponente
-        self.diametro = math.sqrt(4.0 * area_trans / math.pi)
+        self.k_llenado = k_llenado                      # constante de llenado
+        self.exponente = exponente                      # exponente del crecimiento del area
+        self.exponente_velocidad = exponente_velocidad  # exponente de la velocidad en el tiempo de llenado
+        self.diametro = math.sqrt(4.0 * area_trans / math.pi)   # diametro nominal [m]
 
     def tiempo_llenado(self, velocidad):
-        """Tiempo que tarda en inflarse si se abre a la velocidad dada [s]."""
+        """Tiempo que tarda en inflarse si se abre a la velocidad dada [m/s]. Devuelve segundos."""
         if self.k_llenado <= 0:
             return 0.0
         if velocidad <= 0:
             return self.T_LLENADO_MAX
-        return min(self.k_llenado * self.diametro / velocidad, self.T_LLENADO_MAX)
+        t = self.k_llenado * (self.diametro / self.PIE) / (velocidad / self.PIE) ** self.exponente_velocidad
+        return min(t, self.T_LLENADO_MAX)
 
     def area_arrastre(self, transcurrido, t_llenado):
         """Cd*A [m2] cuando ha pasado `transcurrido` segundos desde que empezo a abrirse."""

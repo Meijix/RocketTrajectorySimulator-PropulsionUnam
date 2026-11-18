@@ -459,13 +459,19 @@ def test_grano_con_diametros_imposibles():
 # ---------------------------------------------------------------- inflado de los paracaídas
 def test_tiempo_de_llenado():
     from Paquetes.PaqueteFisica.cohete import Parachute
-    paracaidas = Parachute(2.0, 1.8)                              # por defecto k = 8, exponente 2
+    paracaidas = Parachute(2.0, 1.8)                              # por defecto: circular plano macizo
     diametro = np.sqrt(4 * 1.8 / np.pi)
     assert paracaidas.diametro == pytest.approx(diametro)
-    assert paracaidas.tiempo_llenado(34.0) == pytest.approx(8 * diametro / 34.0)
-    assert paracaidas.tiempo_llenado(68.0) == pytest.approx(paracaidas.tiempo_llenado(34.0) / 2)   # más rápido, se llena antes
+    assert (paracaidas.k_llenado, paracaidas.exponente, paracaidas.exponente_velocidad) == (8.0, 6.0, 0.9)
+    # t = 8 D / v^0.9 con D en pies y v en pies por segundo
+    pie = 0.3048
+    assert paracaidas.tiempo_llenado(34.0) == pytest.approx(8 * (diametro / pie) / (34.0 / pie) ** 0.9)
+    assert paracaidas.tiempo_llenado(34.0) == pytest.approx(0.571, abs=0.005)
+    assert paracaidas.tiempo_llenado(68.0) < paracaidas.tiempo_llenado(34.0)       # más rápido, se llena antes
     assert paracaidas.tiempo_llenado(0.0) == Parachute.T_LLENADO_MAX
     assert Parachute(2.0, 1.8, k_llenado=0).tiempo_llenado(34.0) == 0.0
+    # Con exponente de velocidad 1 la fórmula no depende de las unidades: t = k D / v
+    assert Parachute(2.0, 1.8, exponente_velocidad=1.0).tiempo_llenado(34.0) == pytest.approx(8 * diametro / 34.0)
 
 
 def test_area_de_arrastre_durante_el_llenado():
@@ -473,12 +479,13 @@ def test_area_de_arrastre_durante_el_llenado():
     paracaidas, completo = Parachute(2.0, 1.8), 2.0 * 1.8
     assert paracaidas.area_arrastre(-0.1, 0.4) == 0.0
     assert paracaidas.area_arrastre(0.0, 0.4) == 0.0
-    assert paracaidas.area_arrastre(0.2, 0.4) == pytest.approx(completo / 4)      # a la mitad del llenado, (1/2)²
+    assert paracaidas.area_arrastre(0.2, 0.4) == pytest.approx(completo / 64)     # a la mitad del llenado, (1/2)^6
     assert paracaidas.area_arrastre(0.4, 0.4) == pytest.approx(completo)
     assert paracaidas.area_arrastre(5.0, 0.4) == pytest.approx(completo)
     assert paracaidas.area_arrastre(0.0, 0.0) == pytest.approx(completo)          # apertura instantánea
     areas = [paracaidas.area_arrastre(t, 0.4) for t in np.linspace(0, 0.5, 30)]
     assert areas == sorted(areas)
+    assert Parachute(2.0, 1.8, exponente=2).area_arrastre(0.2, 0.4) == pytest.approx(completo / 4)
 
 
 @pytest.fixture(scope="module")
@@ -489,10 +496,11 @@ def dos_etapas_instantaneo():
 def test_el_inflado_reduce_la_carga_de_apertura(vuelo_dos_etapas, dos_etapas_instantaneo):
     con_inflado, instantaneo = vuelo_dos_etapas[1], dos_etapas_instantaneo[1]
     assert instantaneo["llenado_principal"] == 0.0
-    # Tiempo de llenado del principal: k·D/v con la velocidad a la que bajaba con el drogue
-    assert con_inflado["llenado_principal"] == pytest.approx(8 * 1.514 / con_inflado["vel_antes_principal"], rel=0.03)
-    assert 0.2 < con_inflado["llenado_principal"] < 0.6
-    assert con_inflado["fuerza_apertura_principal"] < 0.8 * instantaneo["fuerza_apertura_principal"]
+    # Tiempo de llenado del principal: 8·D/v^0.9 (en pies) con la velocidad a la que bajaba con el drogue
+    pie = 0.3048
+    assert con_inflado["llenado_principal"] == pytest.approx(8 * (1.514 / pie) / (con_inflado["vel_antes_principal"] / pie) ** 0.9, rel=0.03)
+    assert 0.4 < con_inflado["llenado_principal"] < 0.8
+    assert con_inflado["fuerza_apertura_principal"] < 0.9 * instantaneo["fuerza_apertura_principal"]
     assert con_inflado["g_apertura_principal"] > 1.0              # aun así frena más que la gravedad
 
 
