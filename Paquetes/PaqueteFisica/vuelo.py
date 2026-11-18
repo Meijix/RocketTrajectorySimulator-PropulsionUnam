@@ -174,6 +174,24 @@ class Vuelo:
         #angaccels.append(accang)
         return palanca, accang, Torca
 
+    def en_riel(self, pos):
+        """El cohete sigue en el riel mientras no ha recorrido su longitud."""
+        return np.linalg.norm(pos) <= self.vehiculo.riel.longitud
+
+    def restringir_al_riel(self, pos, vel, theta, accel):
+        """Aceleracion de un cohete guiado por el riel.
+
+        El riel absorbe las fuerzas perpendiculares a su eje (la componente lateral del peso,
+        el viento), asi que solo queda la componente de la aceleracion a lo largo del eje. La
+        base del riel sostiene al cohete: mientras el empuje no vence al peso, no se mueve.
+        """
+        eje = np.array((np.cos(theta), 0.0, np.sin(theta)))
+        a_eje = float(np.dot(accel, eje))
+        en_la_base = np.dot(pos, eje) <= 0 and np.dot(vel, eje) <= 0
+        if en_la_base and a_eje < 0:
+            a_eje = 0.0
+        return a_eje * eje
+
     def fun_derivs(self, t, state):
         # state, posicion y velocidad son estados intermedios
         #no necsariamente los del cohete
@@ -217,20 +235,14 @@ class Vuelo:
         accel = Gvec + Dvec/self.vehiculo.masa + Nvec/self.vehiculo.masa + Tvec/self.vehiculo.masa
 
         # Parte angular
-        r = np.linalg.norm(pos)
-        #esto esta bien?
-        if r <= self.vehiculo.riel.longitud:
+        if self.en_riel(pos):
+            # En el riel el cohete no gira y solo puede deslizarse a lo largo de su eje
             omega = 0
             accang = 0
+            accel = self.restringir_al_riel(pos, vel, theta, accel)
         else:
-            #Velocidad angular
-            velang = omega
             # aceleracion angular
             _, accang, _ = self.accangular(theta, Dvec, Nvec, Gvec, Tvec, state)
-
-        # PRUEBA: apagar parte angular
-        # omega = 0
-        # accang= 0
 
         derivs = np.concatenate((vel, accel, [omega], [accang]))
         #print(derivs)
@@ -440,9 +452,11 @@ class Vuelo:
             Gvec = np.array([0, 0, -grav])
 
             accel = Gvec + Dvec/self.vehiculo.masa + Nvec/self.vehiculo.masa + Tvec/self.vehiculo.masa
-            accels.append(accel)
-
             palanca, accang, torca = self.accangular(theta, Dvec, Nvec, Gvec, Tvec, estado)
+            if self.en_riel(pos):
+                accel = self.restringir_al_riel(pos, vel, theta, accel)
+                accang = 0.0
+            accels.append(accel)
             palancas.append(palanca)
             accangs.append(accang)
             torcas.append(torca)
