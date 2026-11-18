@@ -10,6 +10,7 @@ Mi tesis completa está en el repositorio: [Tesis_UNAM_NataliaMejBau_COMPLETAFIN
 - Integra el vuelo desde el riel hasta el impacto con empuje tomado de una curva medida, arrastre con Cd en función del Mach, fuerza normal, gravedad variable con la altura y viento con ráfagas.
 - Usa la altitud del sitio y la temperatura, presión y viento del día del lanzamiento.
 - Da las coordenadas donde cae el cohete y las muestra en un mapa real junto con el sitio de lanzamiento.
+- Calcula las cargas estructurales del ascenso (fuerza axial, cortante y momento flector) y comprueba el pandeo del fuselaje y el flameo de las aletas.
 - Simula la recuperación: vuelo libre, un drogue en el apogeo, o dos etapas (drogue en el apogeo y paracaídas principal a baja altura).
 - Deja elegir el integrador: Euler, RK2, RK4 y Runge-Kutta-Fehlberg, que programé yo, o los de SciPy (RK23, RK45, DOP853, LSODA, BDF).
 - Tiene una interfaz gráfica para cambiar el cohete y las condiciones de lanzamiento sin tocar el código, y scripts para graficar, animar y comparar contra los datos del vuelo real.
@@ -33,6 +34,45 @@ Mi tesis completa está en el repositorio: [Tesis_UNAM_NataliaMejBau_COMPLETAFIN
 </p>
 
 Las tres figuras las dibuja el programa (son las que aparecen dentro de la interfaz, guardadas a archivo); no son capturas de la ventana.
+
+### Interfaz con el estilo de Propulsión UNAM
+
+Hay una segunda interfaz, `PropulsionGUI`, con los colores del equipo: fondo negro, texto blanco y amarillo para la acción principal. Hace lo mismo que la anterior y responde mientras se escribe.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/images/propulsion-pestana-cohete.png" alt="Pestaña Cohete de PropulsionGUI" width="440"/></td>
+    <td align="center"><img src="docs/images/propulsion-pestana-tablas.png" alt="Pestaña Tablas de Datos de PropulsionGUI" width="440"/></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Cohete.</b> Lista de piezas, esquema que se puede tocar y campos de la pieza elegida, con su material.</td>
+    <td align="center"><b>Tablas de Datos.</b> Curva de empuje de la prueba estática.</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/images/propulsion-pestana-simulacion.png" alt="Pestaña Simulación de PropulsionGUI" width="440"/></td>
+    <td align="center"><img src="docs/images/propulsion-pestana-analisis.png" alt="Pestaña Análisis (CG-CP) de PropulsionGUI" width="440"/></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Simulación.</b> Sitio, brújula del riel y del viento, y parámetros de la corrida.</td>
+    <td align="center"><b>Análisis (CG-CP).</b> Tabla por componente y margen estático.</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/images/propulsion-pestana-resultados.png" alt="Pestaña Resultados de PropulsionGUI" width="440"/></td>
+    <td align="center"><img src="docs/images/propulsion-pestana-mapa.png" alt="Pestaña Mapa de PropulsionGUI" width="440"/></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Resultados.</b> Cifras del vuelo y seis gráficas con el cursor de tiempo en el apogeo.</td>
+    <td align="center"><b>Mapa.</b> Trayectoria simulada y trayectoria GPS real.</td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2"><img src="docs/images/propulsion-pestana-cargas.png" alt="Pestaña Cargas de PropulsionGUI" width="440"/></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2"><b>Cargas.</b> Compresión, cortante y momento flector a lo largo del cohete, con el pandeo del fuselaje y el flameo de las aletas.</td>
+  </tr>
+</table>
+
+Son capturas de la ventana con el Xitle II, después de simular un vuelo libre con DOP853.
 
 ## Instalación
 
@@ -76,6 +116,32 @@ Dos avisos:
 - El mapa necesita conexión a internet. Sin ella, la trayectoria se dibuja sobre un fondo en blanco y las coordenadas se muestran igual.
 - En la pestaña "Simulación" hay además un mapa pequeño del sitio que solo funciona con Tk 8. Con Tk 9 la librería de ese mapa cierra el programa, así que en su lugar se muestran las coordenadas. La pestaña "Mapa" funciona con cualquier versión.
 
+### Interfaz gráfica con el estilo de Propulsión UNAM
+
+```bash
+python -m Simulador.GUI.PropulsionGUI
+```
+
+Tiene las mismas siete pestañas y usa el mismo motor de simulación. También abre con el Xitle II cargado. Arriba están las pestañas y abajo, siempre a la vista, el botón amarillo "Ejecutar Simulación", "Guardar Datos", "Cargar Datos" y el estado de la corrida.
+
+1. **Cohete.** A la izquierda está la lista de piezas, en tres grupos: externas, internas y propelentes. Al elegir una, sus campos aparecen a la derecha. También se puede elegir tocándola en el dibujo. Al cambiar un valor, el dibujo, el centro de gravedad, el centro de presión y el margen estático se recalculan solos, sin oprimir ningún botón. La masa se puede mover además con un control deslizante. "Restablecer valores del Xitle II" regresa todas las piezas a sus valores originales.
+2. **Tablas de Datos.** Una tarjeta por tabla (empuje, arrastre y masa del motor) con el archivo en uso. "Importar CSV" carga otro archivo y "Visualizar" lo grafica. Si la tabla de masa dura distinto que la curva de empuje, lo avisa debajo de la gráfica.
+3. **Simulación.** Los datos del sitio con un mapa de los alrededores, una brújula que muestra hacia dónde apunta el riel y de dónde viene el viento, y los parámetros de la integración. El azimut, la elevación y la temperatura se pueden escribir o mover con el control deslizante. El viento se elige entre el perfil del día del vuelo y uno constante, y la recuperación entre vuelo libre, drogue, o drogue y principal. Abajo a la derecha hay una lista que dice si todo está listo para simular o qué dato hay que corregir.
+4. **Análisis (CG-CP).** La tabla por componente y, a un lado, masa, CG, CP y margen estático. Un selector cambia entre el cohete al despegue y sin propelente, y una barra muestra en qué zona cae el margen: inestable, marginal o estable.
+5. **Resultados.** Las cifras del vuelo en tarjetas y seis gráficas. El control "Recorre el vuelo" mueve un punto por las seis gráficas a la vez y muestra el tiempo, la altura, la velocidad y el Mach de ese instante. La barra bajo las gráficas sirve para acercar, desplazar y guardar la imagen. "Exportar CSV" guarda la trayectoria.
+6. **Mapa.** El mapa de la zona con el sitio, el apogeo, el impacto y, si el lanzamiento es desde el sitio del vuelo real, la trayectoria GPS. Dos interruptores muestran u ocultan la trayectoria simulada y la real. A la derecha están las coordenadas, "Copiar coordenadas de impacto" y "Abrir mapa interactivo".
+7. **Cargas.** La compresión, el cortante y el momento flector a lo largo del cohete, con el viento simulado y con la ráfaga de diseño. Arriba, en tarjetas, la compresión y el momento máximos, el margen de pandeo del fuselaje, la velocidad de flameo de las aletas y la carga de apertura del paracaídas; el pandeo y el flameo salen en verde si cumplen y en rojo si no. Usa el material de cada tramo y el espesor de las aletas elegidos en "Cohete". "Exportar CSV" guarda las cargas.
+
+Si un campo queda con un valor que no sirve (por ejemplo, vacío mientras se escribe), el aviso aparece en la barra de abajo y los cálculos se retoman en cuanto el valor es válido.
+
+Las configuraciones guardadas sirven en las dos interfaces, porque el archivo JSON es el mismo.
+
+Diferencias con `ModernGUI`:
+
+- El mapa del sitio en la pestaña "Simulación" funciona también con Tk 9.
+- No hay botón "Actualizar Cohete", porque el esquema se actualiza solo.
+- La letra es Lexend si está instalada en el sistema; si no, usa otra parecida.
+
 ### Sin interfaz
 
 ```bash
@@ -109,7 +175,9 @@ Las fuerzas son:
 - **Amortiguamiento del cabeceo.** Dos momentos que se oponen al giro: el aerodinámico, proporcional a la velocidad del aire y a la suma de CN·d² de nariz, aletas y boattail (d es la distancia de cada uno al centro de gravedad), y el del chorro del motor, proporcional al flujo de masa y al cuadrado de la distancia de la tobera al centro de gravedad.
 - **Viento.** Horizontal, con ráfagas. Puede ser constante o un perfil que cambia con la altura. Cada segundo se sortean una ráfaga, que se suma a la rapidez base, y una pequeña desviación de la dirección, y se interpola entre sorteos. Las ráfagas tienen además una componente vertical pequeña, de media cero. Con una semilla, el viento se repite igual en cada corrida.
 
-La recuperación puede ser en dos etapas. El drogue se abre en el apogeo y el paracaídas principal al bajar por una altura dada sobre el sitio (450 m por defecto); el drogue sigue abierto. Si el apogeo queda por debajo de esa altura, el principal se abre en el apogeo. La apertura es instantánea: no se modela el inflado. Para el Xitle II, con el drogue baja a unos 34 m/s y con el principal aterriza a 12 m/s, a los 250 s del despegue.
+La recuperación puede ser en dos etapas. El drogue se abre en el apogeo y el paracaídas principal al bajar por una altura dada sobre el sitio (450 m por defecto); el drogue sigue abierto. Si el apogeo queda por debajo de esa altura, el principal se abre en el apogeo. Para el Xitle II, con el drogue baja a unos 34 m/s y con el principal aterriza a 12 m/s, a los 250 s del despegue.
+
+Los paracaídas no se abren de golpe. El área de arrastre de cada uno crece desde cero durante un tiempo de llenado. Los valores por defecto son los de un paracaídas circular plano de tela maciza: el tiempo de llenado es `t = 8·D/v^0.9` (relación empírica de Knacke, con el diámetro `D` en pies y la velocidad `v` al abrirse en pies por segundo; el programa hace la conversión) y el área crece como `(tiempo/t)^6` (Ludtke), es decir, casi nada al principio y de golpe al final. La constante de llenado se puede cambiar en la interfaz; con 0 la apertura es instantánea. El principal del Xitle II tarda 0.58 s en llenarse y su carga de apertura es de unos 1680 N (5.4 g); con apertura instantánea saldrían 2240 N (7.2 g). El punto y el tiempo de caída casi no cambian. La interfaz muestra esa carga en los resultados.
 
 Mientras el cohete está en el riel no gira y solo puede deslizarse a lo largo de su eje: el riel absorbe las fuerzas laterales y lo sostiene hasta que el empuje vence al peso.
 
@@ -182,6 +250,43 @@ Simula el mismo vuelo con los nueve métodos y los compara con una solución de 
 
 Los tiempos dependen de la máquina; las evaluaciones de f no.
 
+## Cargas estructurales
+
+`Paquetes/PaqueteFisica/cargas.py` calcula, con la trayectoria ya simulada, lo que soporta cada sección del cohete durante el ascenso: la fuerza axial (compresión), el cortante y el momento flector.
+
+```bash
+python -m Simulador.Resultados.cargas_estructurales
+```
+
+El script guarda la tabla y la figura en `Simulador/Resultados/OutputFiles/CargasEstructurales/`. En las dos interfaces están en la pestaña "Cargas", con un botón para exportarlas.
+
+El cohete se trata como una viga libre. En cada instante se reparten sobre ella las fuerzas del simulador, se obtienen las aceleraciones que producen y, con las fuerzas de inercia, las cargas internas en cada corte. Dónde actúa cada fuerza es una hipótesis:
+
+- El empuje entra por el extremo trasero del fuselaje.
+- El arrastre actúa en la punta de la nariz. Es el reparto más desfavorable para la compresión de los tramos delanteros.
+- La fuerza normal se reparte entre nariz, aletas y boattail según su coeficiente, cada una en su centro de presión.
+- La masa de cada componente se reparte a lo largo de su longitud.
+- En el riel solo hay carga axial: las fuerzas laterales las absorbe el riel.
+
+Con el viento del vuelo simulado el ángulo de ataque es muy pequeño y casi no hay flexión. Por eso se calcula además un caso con una ráfaga lateral de diseño (9 m/s por defecto, se puede cambiar): la ráfaga llega de golpe en cada instante del ascenso, sin que el cohete alcance a girar. Para el Xitle II:
+
+| Carga máxima | Viento simulado | Con ráfaga de 9 m/s |
+| --- | --- | --- |
+| Compresión | 2338 N, junto a la cola, a los 2.4 s (empuje máximo) | igual |
+| Cortante | 13 N | 126 N |
+| Momento flector | 9 N·m | 82 N·m, a 2.8 m de la punta, a los 10.4 s (Mach 1) |
+
+El análisis es cuasiestático: en cada instante de la trayectoria se equilibran las fuerzas aplicadas con las de inercia del cohete como cuerpo rígido. No incluye vibraciones ni la deformación elástica del fuselaje. La carga de apertura de los paracaídas se obtiene aparte, de la simulación del descenso.
+
+### Pandeo del fuselaje y flameo de las aletas
+
+Con esas cargas, `Paquetes/PaqueteFisica/resistencia.py` comprueba el fuselaje y las aletas. El material de cada tramo del fuselaje y el material y el espesor de las aletas se eligen en la pestaña "Cohete" de las dos interfaces. Por defecto son los del Xitle II: fuselaje de fibra de carbono, coples de aluminio 6061-T6 y aletas de tejido de carbono 0/90 de 3 mm. Las propiedades de cada material y el factor de seguridad (1.5) están en `Archivos/estructura_xitle.json`, con sus fuentes; ahí se pueden corregir o añadir materiales. El resultado se da como margen: `resistencia / (factor × carga) − 1`; si es positivo, cumple.
+
+- **Fuselaje.** Cada tramo cilíndrico se comprueba a compresión y flexión combinadas contra el pandeo de pared delgada (fórmula clásica con el factor de reducción por imperfecciones de NASA SP-8007) y contra la resistencia a compresión del material. Para el Xitle II las cargas de vuelo quedan muy lejos del pandeo: el tramo más cargado es el tanque, con margen de +67, y un tubo de 1.5 mm de pared pandearía con unos 390 kN de compresión, frente a los 2.3 kN del vuelo.
+- **Aletas.** Se compara la velocidad del cohete con la velocidad de flameo de NACA TN 4197 a lo largo del ascenso. Las aletas del Xitle II (tejido 0/90, módulo de cortante de 5 GPa, 3 mm) flamearían a 265 m/s y el cohete llega a 342 m/s: no cumplen, y harían falta 4.7 mm. Con capas a ±45° (unos 18 GPa) el flameo sube a 503 m/s y bastan 3 mm.
+
+Las propiedades de la fibra de carbono son valores de catálogo: hay que sustituirlos por los del laminado real. El espesor de pared del fuselaje sale de los diámetros de `XitleFile.py`, que dan 1.5 mm. La fórmula de flameo es una estimación para aletas delgadas en régimen subsónico; cerca de Mach 1 es solo orientativa.
+
 ## Comparación con el vuelo real
 
 El Xitle II voló el 22 de junio de 2024 en Spaceport America. Hay tres registros: la trayectoria GPS del rastreador Featherweight, la altura de la telemetría ASYB y la curva de altura contra tiempo. El cohete bajó sin paracaídas: el último punto GPS lo muestra a 399 m de altura cayendo a 273 m/s.
@@ -228,7 +333,8 @@ Paquetes/
   PaqueteEDOs/       integradores propios y catálogo de todos los métodos
   utils/             lectura y guardado de datos, dibujo del cohete
 Simulador/
-  GUI/               ModernGUI.py (interfaz) y backend.py (conexión con el simulador)
+  GUI/               ModernGUI.py y PropulsionGUI.py (interfaces), backend.py (conexión con el simulador)
+    propulsion/      módulos de PropulsionGUI: tema, controles, pestañas y ventana
   src/               definición del Xitle II, condiciones iniciales y scripts de vuelo
   Visualizacion/     gráficas y animaciones
   Resultados/        resultados guardados y comparación con el vuelo real
@@ -242,12 +348,12 @@ docs/                documentación del código, sección por sección
 
 La documentación de cada sección del código está en [docs/](./docs/README.md) (en inglés).
 
-`Simulador/GUI/GUI.py` es la interfaz anterior. Se conserva como referencia, pero la que se mantiene es `ModernGUI.py`.
+`Simulador/GUI/GUI.py` es la interfaz anterior. Se conserva como referencia; las que se mantienen son `ModernGUI.py` y `PropulsionGUI.py`, que comparten `backend.py`.
 
 ## Limitaciones conocidas
 
 - El modelo es plano: no hay alabeo ni guiñada. El viento cruzado desplaza al cohete de lado por arrastre, pero no lo hace girar hacia el viento.
-- Los paracaídas se abren de golpe (no se modela el inflado), así que la sacudida de apertura está sobreestimada.
+- El inflado de los paracaídas es un modelo sencillo (área que crece en un tiempo de llenado), con las constantes de un paracaídas circular plano. No incluye la masa de aire que arrastra el paracaídas ni la elasticidad de las líneas, así que la carga de apertura es una estimación.
 - El apogeo simulado del Xitle II queda 7 % por encima del medido (ver la comparación con el vuelo real).
 - La fuerza normal se aplica perpendicular a la velocidad relativa, no al eje del cohete. Para ángulos de ataque pequeños es equivalente.
 - El centro de presión y los coeficientes de fuerza normal son los de Barrowman, válidos en régimen subsónico y ángulos pequeños; se usan sin corrección hasta Mach 1.
@@ -260,7 +366,7 @@ La documentación de cada sección del código está en [docs/](./docs/README.md
 
 - Pasar a seis grados de libertad.
 - Análisis de dispersión por Monte Carlo.
-- Cálculos estructurales.
+- Comprobación del resto de la estructura: uniones atornilladas, herrajes de recuperación y tanque a presión.
 
 ## Créditos
 
