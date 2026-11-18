@@ -10,7 +10,12 @@ import sys
 
 # Agregar la ruta del directorio que contiene los paquetes al sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..','..')))
-from Paquetes.PaqueteEDOs.integradores import Euler, RungeKutta4
+from Paquetes.PaqueteEDOs.metodos import ADAPTATIVOS, FIJOS, resolver, tabla_comparacion
+from Paquetes.utils.figuras import guardar_figuras_al_mostrar
+
+# Carpeta de este caso: ahí se guardan las figuras (al mostrarlas) y la tabla de resultados
+CARPETA = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'caso3')
+guardar_figuras_al_mostrar(os.path.join(CARPETA, 'figuras'))
 
 # Constantes y configuración
 g = 9.81
@@ -24,8 +29,12 @@ t_max = 30
 k = 0.05
 m = 1
 dt_vals = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
-metodos_adaptativos = ['RK45', 'BDF', 'LSODA', 'DOP853']
-metodos_fijos = [(Euler, "Euler"), (RungeKutta4, "RK4")]
+# Todos los métodos del catálogo (Paquetes/PaqueteEDOs/metodos.py):
+#   adaptativos: RKF45 (Fehlberg, propio), RK23, RK45 (Dormand-Prince 5(4)), DOP853, BDF, LSODA
+#   de paso fijo: Euler, RK2 (Heun), RK4
+metodos_adaptativos = list(ADAPTATIVOS)
+metodos_fijos = list(FIJOS)
+corridas = {}   # nombre de la corrida -> Solucion (pasos, evaluaciones de f, tiempo de cómputo)
 
 
 # Funciones base
@@ -81,7 +90,8 @@ resultados = []
 dt_evolucion = []  # Lista para almacenar la evolución del paso de tiempo
 
 for metodo in metodos_adaptativos:
-    sol = solve_ivp(fun_derivada, [0, t_max], estado0, method=metodo, events=evento_impacto)
+    sol = resolver(metodo, fun_derivada, [0, t_max], estado0, events=evento_impacto)
+    corridas[f"{metodo}_auto"] = sol
 
     for t, x, y, vx, vy in zip(sol.t, sol.y[0], sol.y[1], sol.y[2], sol.y[3]):
         x_a, y_a, vx_a, vy_a = sol_analitica(t, estado0)
@@ -145,28 +155,22 @@ plt.show()
 for metodo in metodos_adaptativos:
     for dt in dt_vals:
         nombre_metodo = f"{metodo}_dt={dt:.3f}"
-        sol = solve_ivp(fun_derivada, [0, t_max], [x0, y0, v0x, v0y], method=metodo, max_step=dt, events=evento_impacto)
+        sol = resolver(metodo, fun_derivada, [0, t_max], [x0, y0, v0x, v0y], dt=dt, events=evento_impacto)
+        corridas[nombre_metodo] = sol
         for t, x, y, vx, vy in zip(sol.t, sol.y[0], sol.y[1], sol.y[2], sol.y[3]):
             estado_a = sol_analitica(t, estado0)
             x_a, y_a, vx_a, vy_a = estado_a
             resultados.append([nombre_metodo, dt, t, x, y, vx, vy, x_a, y_a, vx_a, vy_a])
 
-# 3. Euler y RK4
-for clase, nombre in metodos_fijos:
+# 3. Métodos de paso fijo: Euler, RK2 y RK4
+for nombre in metodos_fijos:
     for dt in dt_vals:
         nombre_metodo = f"{nombre}_dt={dt:.3f}"
-        integ = clase(fun_derivada)
-        estado = np.array([x0, y0, v0x, v0y])
-        t = 0
-        while t < t_max:
-            nuevo_estado, _ = integ.step(t, estado, dt)
-            t += dt
-            if nuevo_estado[1] < 0:
-                break
-            estado = nuevo_estado
-            x, y, vx, vy = estado
-            estado_a = sol_analitica(t, estado0)
-            x_a, y_a, vx_a, vy_a = estado_a
+        sol = resolver(nombre, fun_derivada, [0, t_max], [x0, y0, v0x, v0y], dt=dt, events=evento_impacto)
+        corridas[nombre_metodo] = sol
+        # Se omite el punto inicial (error cero); el último punto es el anterior al impacto
+        for t, x, y, vx, vy in zip(sol.t[1:], sol.y[0][1:], sol.y[1][1:], sol.y[2][1:], sol.y[3][1:]):
+            x_a, y_a, vx_a, vy_a = sol_analitica(t, estado0)
             resultados.append([nombre_metodo, dt, t, x, y, vx, vy, x_a, y_a, vx_a, vy_a])
 
 # Convertir a estructura numpy
@@ -282,7 +286,7 @@ df_err = pd.DataFrame(errores, columns=["Método", "Pasos", "error_x", "error_y"
 # 3. L2 en posición vs dt (líneas por método con marcadores; cruz para métodos auto)
 plt.figure()
 base_metodos = {}
-colors = ['red', 'blue', 'green', 'orange', 'purple', 'brown', 'teal', 'magenta']
+colors = ['red', 'blue', 'green', 'orange', 'purple', 'brown', 'teal', 'magenta', 'black', 'olive']
 color_idx = 0
 
 # Agrupar métodos por base (Euler, RK4, etc.)
@@ -332,7 +336,7 @@ plt.show()
 # 5. Eficiencia numérica: Error L2 en posición vs número de pasos (color por método base, estrella para auto, línea identidad)
 plt.figure(figsize=(10, 6))
 base_metodos = {}
-colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray']
+colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
 color_map = {}
 
 for metodo in df_err["Método"]:
@@ -415,7 +419,7 @@ plt.show()
 
 
 
-# Gráfica 13: Error L2 vs tiempo de cómputo (simulado)
+# Gráfica 13: Error L2 vs tiempo de cómputo
 from time import perf_counter
 tiempos = []
 for metodo in df["Método"].unique():
@@ -423,7 +427,8 @@ for metodo in df["Método"].unique():
     t0 = perf_counter()
     e_l2 = np.sqrt(np.mean((sub["x_num"] - sub["x_analitica"])**2 + (sub["y_num"] - sub["y_analitica"])**2))
     t1 = perf_counter()
-    tiempos.append([metodo, t1 - t0, e_l2])
+    # Tiempo real de la integración (medido al resolver), no el de calcular el error
+    tiempos.append([metodo, corridas[metodo].tiempo, e_l2])
 df_tiempos = pd.DataFrame(tiempos, columns=["Método", "tiempo", "error_L2"])
 
 # 13. Error L2 vs tiempo computacional (color por método base, estrella para auto, etiquetas dt=..., leyenda por método)
@@ -615,3 +620,12 @@ fig.legend(legend_handles.values(), legend_handles.keys(),
 fig.suptitle("Evolución del error absoluto en posición por método", fontsize=16)
 plt.tight_layout(rect=[0, 0.04, 1, 0.95])
 plt.show()
+
+
+# ================== TABLA DE RESULTADOS =====================
+# Una fila por método y modo de paso, con todos los métodos del catálogo
+tabla = tabla_comparacion(df_err, corridas, "L2_pos", "L2_vel")
+ruta_tabla = os.path.join(CARPETA, "tabla_metodos.csv")
+tabla.to_csv(ruta_tabla, index=False)
+print(tabla.to_string(index=False, float_format=lambda v: f"{v:.4g}"))
+print(f"Tabla guardada en: {ruta_tabla}")
