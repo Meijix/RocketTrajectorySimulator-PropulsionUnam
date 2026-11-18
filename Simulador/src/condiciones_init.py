@@ -10,31 +10,36 @@ from Paquetes.PaqueteFisica.riel import Torrelanzamiento
 from Paquetes.PaqueteFisica.atmosfera import atmosfera
 from Paquetes.PaqueteFisica.viento import Viento
 
+from Simulador.src.dia_de_vuelo import cargar_condiciones, crear_atmosfera, crear_viento
+
+# Sitio y condiciones del vuelo real del Xitle II (Spaceport America, 22 de junio de 2024).
+# Los valores y sus fuentes están en Archivos/DatosVuelo/condiciones_2024-06-22.json
+condiciones = cargar_condiciones()
+
 #riel inicial
-riel = Torrelanzamiento(10, 87)
+# Angulo de elevacion de 84 grados: es el que reproduce la trayectoria GPS del vuelo real
+# (con 87 grados el cohete caeria a 2.5 km del sitio; el real cayo a unos 4.6 km)
+riel = Torrelanzamiento(10, 84)
+azimut_riel = condiciones['lanzamiento']['azimut_riel_grados']  # rumbo hacia el que se inclina el riel (grados desde el norte)
 #lugar de lanzamiento
-latitud_cord = 19.5
-longitud_cord = -98.8
-altitud_cord = 20
-#Indicar fecha actual
-fecha = "2024-11-06" #año-mes-dia
+latitud_cord = condiciones['sitio']['latitud']
+longitud_cord = condiciones['sitio']['longitud']
+altitud_cord = condiciones['sitio']['altitud_m']   # metros sobre el nivel del mar
+#Fecha del lanzamiento
+fecha = condiciones['lanzamiento']['fecha'] #año-mes-dia
 
-#viento
-#viento_actual = Viento( 10, 2, 0, 0)
-#Sin viento
-#viento_actual = Viento( 2, 0.2, 0, 0)
-viento_actual = Viento(
-    vel_base=5,       # Viento medio 4 m/s
-    vel_mean=3,     # Pequeñas ráfagas ~0.8 m/s adicionales
-    vel_var=2,      # Variación de ráfaga de ±0.1 m/s
-    ang_base=230,       # Suponiendo viento de izquierda a derecha
-    var_ang=10.0        # Variaciones de dirección ±10°
-)
+#viento del dia: perfil con la altura mas rafagas
+# Semilla de las rafagas: resultados reproducibles (None = aleatorio en cada corrida)
+viento_actual = crear_viento(condiciones, azimut_riel, semilla=2024)
+# Para un viento constante (sin perfil), por ejemplo 5 m/s de frente con rafagas:
+#viento_actual = Viento(vel_base=5, vel_mean=3, vel_var=2, ang_base=180, var_ang=10.0, semilla=2024)
+# (ang_base: direccion horizontal hacia la que sopla, desde el eje x: 0 = de cola, 180 = de frente, 90/270 = cruzado)
 viento_actual.actualizar_viento3D()
-#print(viento_actual.vector)
 
-#atmosfera
-atmosfera_actual = atmosfera()
+#atmosfera del dia: ISA ajustada a la altitud del sitio, la temperatura y la presion
+atmosfera_actual = crear_atmosfera(condiciones)
+#Atmosfera estandar al nivel del mar:
+#atmosfera_actual = atmosfera()
 
 # Estado inicial
 x0, y0, z0 = 0, 0, 0
@@ -48,7 +53,7 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 #Parametros de la simulacion
 dt = 0.01 #0.1 #[s]
 t_max = 400 #[s]
-dt_out =  0.001
+dt_out = dt  # intervalo de guardado; debe ser multiplo de dt (si es menor, limita el paso de los integradores propios)
 integrador_actual = 'RungeKutta4'
 #integrador_actual = 'Euler'
 #integrador_actual = 'RK45'
