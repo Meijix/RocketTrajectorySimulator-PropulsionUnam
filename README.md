@@ -1,6 +1,6 @@
 # Simulador de vuelo de cohetes (3-DOF) — Propulsión UNAM
 
-Simulador de la trayectoria de un cohete suborbital. Resuelve el movimiento en el plano de vuelo: traslación más el ángulo de cabeceo. Lo escribí como parte de mi tesis de licenciatura en Matemáticas (Facultad de Ciencias, UNAM), *Simulación Numérica de la Dinámica de un Cohete Híbrido*, trabajando con el equipo Propulsión UNAM de la Facultad de Ingeniería. El cohete de referencia es el Xitle II, un cohete híbrido con óxido nitroso como oxidante que el equipo voló en 2024.
+Simulador de la trayectoria de un cohete suborbital. Resuelve tres grados de libertad en el plano de vuelo (avance, altura y ángulo de cabeceo) y, además, la deriva lateral que produce el viento cruzado. Lo escribí como parte de mi tesis de licenciatura en Matemáticas (Facultad de Ciencias, UNAM), *Simulación Numérica de la Dinámica de un Cohete Híbrido*, trabajando con el equipo Propulsión UNAM de la Facultad de Ingeniería. El cohete de referencia es el Xitle II, un cohete híbrido con óxido nitroso como oxidante que el equipo voló en 2024.
 
 Mi tesis completa está en el repositorio: [Tesis_UNAM_NataliaMejBau_COMPLETAFINAL.pdf](./Tesis_UNAM_NataliaMejBau_COMPLETAFINAL.pdf).
 
@@ -10,7 +10,7 @@ Mi tesis completa está en el repositorio: [Tesis_UNAM_NataliaMejBau_COMPLETAFIN
 - Integra el vuelo desde el riel hasta el impacto con empuje tomado de una curva medida, arrastre con Cd en función del Mach, fuerza normal, gravedad variable con la altura y viento con ráfagas.
 - Usa la altitud del sitio y la temperatura, presión y viento del día del lanzamiento.
 - Da las coordenadas donde cae el cohete y las muestra en un mapa real junto con el sitio de lanzamiento.
-- Permite desplegar un paracaídas en el apogeo.
+- Simula la recuperación: vuelo libre, un drogue en el apogeo, o dos etapas (drogue en el apogeo y paracaídas principal a baja altura).
 - Deja elegir el integrador: Euler, RK2, RK4 y Runge-Kutta-Fehlberg, que programé yo, o los de SciPy (RK23, RK45, DOP853, LSODA, BDF).
 - Tiene una interfaz gráfica para cambiar el cohete y las condiciones de lanzamiento sin tocar el código, y scripts para graficar, animar y comparar contra los datos del vuelo real.
 
@@ -62,7 +62,7 @@ La ventana abre con los datos del Xitle II ya cargados, así que se puede simula
 
 1. **Cohete.** Dimensiones, masas y posiciones de cada componente. La posición Z se mide desde la punta de la nariz hasta el frente de la pieza. "Actualizar Cohete" redibuja el esquema con el CG y el CP.
 2. **Tablas de Datos.** Curva de empuje, Cd contra Mach y masa del motor. Se pueden importar otros CSV, con las mismas columnas que los de `Archivos/`.
-3. **Simulación.** Sitio de lanzamiento (coordenadas y altitud), atmósfera del día, viento, riel (longitud, elevación y azimut), paso de tiempo, integrador y si el vuelo lleva paracaídas.
+3. **Simulación.** Sitio de lanzamiento (coordenadas y altitud), atmósfera del día, viento, riel (longitud, elevación y azimut), paso de tiempo, integrador y modo de recuperación (vuelo libre, drogue, o drogue y principal).
 4. **Análisis (CG-CP).** Tabla por componente y margen estático al despegue y con los tanques vacíos.
 5. **Resultados.** Tras "Ejecutar Simulación" aparecen el resumen del vuelo, con las coordenadas donde cae el cohete, y las gráficas. "Exportar CSV" guarda la trayectoria, con latitud y longitud de cada punto.
 6. **Mapa.** Mapa real de la zona (OpenStreetMap) con el sitio de lanzamiento, la trayectoria sobre el terreno, el apogeo y el punto de impacto con sus coordenadas. "Abrir mapa interactivo" lo abre en el navegador, donde se puede acercar y mover. Si el lanzamiento es desde el sitio del vuelo real, se dibuja también la trayectoria GPS medida.
@@ -71,17 +71,16 @@ La ventana abre con los datos del Xitle II ya cargados, así que se puede simula
 
 Por defecto el sitio, la atmósfera y el viento son los del vuelo real del Xitle II (Spaceport America, 22 de junio de 2024). Para otro lanzamiento basta cambiar las coordenadas, la altitud y el azimut, y elegir el viento constante.
 
-Tres avisos:
+Dos avisos:
 
 - El mapa necesita conexión a internet. Sin ella, la trayectoria se dibuja sobre un fondo en blanco y las coordenadas se muestran igual.
 - En la pestaña "Simulación" hay además un mapa pequeño del sitio que solo funciona con Tk 8. Con Tk 9 la librería de ese mapa cierra el programa, así que en su lugar se muestran las coordenadas. La pestaña "Mapa" funciona con cualquier versión.
-- De los dos paracaídas del formulario solo se simula el drogue, que se abre en el apogeo. El principal cuenta como masa.
 
 ### Sin interfaz
 
 ```bash
 python -m Simulador.src.VueloLibre        # sin paracaídas
-python -m Simulador.src.VueloParacaidas   # con paracaídas
+python -m Simulador.src.VueloParacaidas   # con drogue y paracaídas principal
 ```
 
 El cohete se define en `Simulador/src/XitleFile.py` y las condiciones (riel, viento, paso, integrador) en `Simulador/src/condiciones_init.py`. Los resultados se guardan en `Simulador/Resultados/OutputFiles/` como CSV y JSON.
@@ -99,15 +98,22 @@ Tardan medio minuto. Comparan la atmósfera con la ISA, los integradores con sol
 
 ## El modelo
 
-El estado del cohete es posición, velocidad, ángulo de cabeceo y velocidad angular. Las fuerzas son:
+El cohete es un cuerpo rígido con tres grados de libertad en el plano vertical que contiene al riel: avance (x), altura (z) y cabeceo (θ). El estado lleva también la posición lateral (y), que solo cambia por el arrastre cuando hay viento cruzado: el cohete se desplaza de lado, pero no gira fuera del plano. No hay alabeo ni guiñada.
+
+Las fuerzas son:
 
 - **Empuje.** Interpolado de la curva del motor, a lo largo del eje del cohete.
-- **Arrastre.** Con el Cd interpolado de una tabla contra el número de Mach. El paracaídas, cuando está abierto, suma su propio arrastre.
+- **Arrastre.** Con el Cd interpolado de una tabla contra el número de Mach. Cada paracaídas abierto suma su propio arrastre.
 - **Fuerza normal.** Proporcional al seno del ángulo de ataque. Aplicada en el centro de presión, es la que endereza al cohete.
 - **Gravedad.** Disminuye con la altura.
+- **Amortiguamiento del cabeceo.** Dos momentos que se oponen al giro: el aerodinámico, proporcional a la velocidad del aire y a la suma de CN·d² de nariz, aletas y boattail (d es la distancia de cada uno al centro de gravedad), y el del chorro del motor, proporcional al flujo de masa y al cuadrado de la distancia de la tobera al centro de gravedad.
 - **Viento.** Horizontal, con ráfagas. Puede ser constante o un perfil que cambia con la altura. Cada segundo se sortean una ráfaga, que se suma a la rapidez base, y una pequeña desviación de la dirección, y se interpola entre sorteos. Las ráfagas tienen además una componente vertical pequeña, de media cero. Con una semilla, el viento se repite igual en cada corrida.
 
-Mientras el cohete está en el riel no gira.
+La recuperación puede ser en dos etapas. El drogue se abre en el apogeo y el paracaídas principal al bajar por una altura dada sobre el sitio (450 m por defecto); el drogue sigue abierto. Si el apogeo queda por debajo de esa altura, el principal se abre en el apogeo. La apertura es instantánea: no se modela el inflado. Para el Xitle II, con el drogue baja a unos 34 m/s y con el principal aterriza a 12 m/s, a los 250 s del despegue.
+
+Mientras el cohete está en el riel no gira y solo puede deslizarse a lo largo de su eje: el riel absorbe las fuerzas laterales y lo sostiene hasta que el empuje vence al peso.
+
+La masa de propelente baja en proporción al impulso entregado por el motor, entre las masas inicial y final de la tabla del motor. Se hace así porque la tabla de masa del Xitle II viene de una simulación del motor que dura 10 s, y la curva de empuje es de una prueba estática que dura 21.6 s; si las dos tablas duraran lo mismo, se usaría la de masa tal cual. El oxidante que queda ocupa la parte trasera del tanque: la columna de líquido se acorta en proporción a su masa y su fondo no se mueve, así que su centro baja hacia la cola y su momento de inercia propio disminuye más rápido que su masa. El grano de combustible se quema desde su canal central: el diámetro exterior y la longitud no cambian y el canal se ensancha según la masa que queda. El centro de gravedad y el momento de inercia del cohete se recalculan con todo eso en cada instante.
 
 ### Sitio, atmósfera y viento del día
 
@@ -122,7 +128,7 @@ Para el vuelo real del Xitle II los valores están en `Archivos/DatosVuelo/condi
 | Sitio | 32.94753° N, 106.91019° O, 1395 m s. n. m. (Spaceport America) | primer punto GPS del rastreador |
 | Fecha y hora | 22 de junio de 2024, hacia las 12:20 hora local | registro GPS y nombre del archivo |
 | Azimut del lanzamiento | 220° | rumbo de la trayectoria GPS |
-| Elevación del riel | 84° | la que reproduce la trayectoria GPS |
+| Elevación del riel | 83° | la que reproduce la trayectoria GPS (no hay registro del ángulo) |
 | Temperatura en superficie | 28 a 31 °C (ISA + 20 °C en toda la columna) | reanálisis ERA5 y archivo de pronósticos |
 | Presión en el sitio | 868.5 hPa | ídem |
 | Viento en superficie | 1 a 2 m/s del oeste-noroeste, ráfagas de 2 a 5 m/s | ídem |
@@ -150,7 +156,7 @@ Los cuatro primeros los programé para la tesis y están en `Paquetes/PaqueteEDO
 
 Ojo con los nombres: el `RK45` de SciPy no es Runge-Kutta-Fehlberg sino Dormand-Prince 5(4). Los dos son pares de orden 4 y 5, pero con coeficientes distintos. El Fehlberg es `RKF45`.
 
-En los métodos de paso fijo el paso configurado es el que se usa siempre. En los adaptativos es el paso máximo. La integración se detiene al tocar el suelo.
+En los métodos de paso fijo el paso configurado es el que se usa siempre. En los adaptativos es el paso máximo. La integración se detiene al tocar el suelo, o al llegar al tiempo máximo (1000 s por defecto) si no hay impacto antes.
 
 La lista de métodos, con sus nombres, está en un solo lugar (`Paquetes/PaqueteEDOs/metodos.py`) y de ahí la toman el simulador, la interfaz y todas las comparaciones.
 
@@ -164,15 +170,15 @@ Simula el mismo vuelo con los nueve métodos y los compara con una solución de 
 
 | Método | Apogeo | Diferencia de apogeo con la referencia | Evaluaciones de f | Tiempo de cómputo |
 | --- | --- | --- | --- | --- |
-| Euler | 7416 m | −0.59 m | 8 466 | 3.0 s |
-| RK2 | 7417 m | 0.39 m | 16 932 | 4.4 s |
-| RK4 | 7417 m | 0.09 m | 33 864 | 7.3 s |
-| RKF45 | 7417 m | 0.04 m | 51 108 | 10.5 s |
-| RK23 | 7417 m | −0.05 m | 25 418 | 6.2 s |
-| RK45 | 7417 m | −0.08 m | 50 798 | 10.5 s |
-| DOP853 | 7417 m | −0.02 m | 101 600 | 18.7 s |
-| BDF | 7417 m | −0.10 m | 17 241 | 5.3 s |
-| LSODA | 7417 m | −0.10 m | 12 382 | 3.9 s |
+| Euler | 7068 m | 0.93 m | 8 311 | 1.9 s |
+| RK2 | 7067 m | −0.13 m | 16 620 | 2.7 s |
+| RK4 | 7067 m | 0.04 m | 33 240 | 4.8 s |
+| RKF45 | 7067 m | 0.01 m | 50 352 | 6.9 s |
+| RK23 | 7067 m | −0.18 m | 24 968 | 3.9 s |
+| RK45 | 7067 m | −0.18 m | 49 880 | 6.5 s |
+| DOP853 | 7067 m | 0.12 m | 99 812 | 11.9 s |
+| BDF | 7067 m | −0.25 m | 16 918 | 3.5 s |
+| LSODA | 7067 m | −0.12 m | 12 280 | 2.3 s |
 
 Los tiempos dependen de la máquina; las evaluaciones de f no.
 
@@ -184,16 +190,16 @@ La simulación usa el sitio, la atmósfera y el viento de ese día (vuelo libre,
 
 | | Vuelo real | Simulación |
 | --- | --- | --- |
-| Apogeo sobre el sitio | 6573 m (GPS), 6569 m (curva de altura) | 7417 m |
-| Tiempo al apogeo | unos 40 s | 42.2 s |
-| Distancia horizontal en el apogeo | 2532 m | 2660 m |
+| Apogeo sobre el sitio | 6573 m (GPS), 6569 m (curva de altura) | 7067 m |
+| Tiempo al apogeo | unos 40 s | 41.7 s |
+| Distancia horizontal en el apogeo | 2532 m | 2533 m |
 | Rumbo de la trayectoria | 220° | 221° |
-| Punto de caída | último GPS en 32.91602°, −106.94135°, a 4553 m del sitio | 32.91453°, −106.94387°, a 4831 m |
-| Velocidad de caída | 273 m/s a 399 m de altura | 287 m/s en el impacto |
+| Punto de caída | último GPS en 32.91602°, −106.94135°, a 4553 m del sitio | 32.91599°, −106.94232°, a 4614 m |
+| Velocidad de caída | 273 m/s a 399 m de altura | 283 m/s en el impacto |
 
-La trayectoria sobre el terreno coincide bien: el impacto simulado queda a 288 m del último punto GPS, que todavía estaba en el aire. El apogeo, en cambio, sale 12.9 % por encima del medido.
+La trayectoria sobre el terreno coincide bien: el impacto simulado queda a 90 m del último punto GPS, que todavía estaba en el aire. La elevación del riel se ajustó para eso, así que no es una predicción independiente. El apogeo sale 7.5 % por encima del medido.
 
-Esa diferencia no viene de la atmósfera ni del integrador. Para igualar el apogeo medido haría falta bajar el empuje un 11 % o subir el arrastre un 49 %, así que lo que hay que revisar es la curva de empuje (es de una prueba estática, no del vuelo), la masa del cohete o la tabla de Cd. Como referencia, OpenRocket da 5955 m.
+Esa diferencia no viene de la atmósfera ni del integrador. Para igualar el apogeo medido haría falta bajar el empuje un 5 % o subir el arrastre un 25 %, así que lo que hay que revisar es la curva de empuje (es de una prueba estática, no del vuelo), la masa del cohete o la tabla de Cd. Como referencia, OpenRocket da 5955 m.
 
 Los datos del vuelo están en `Archivos/` y la discusión completa en el capítulo 5 de la tesis. Las cifras de la tesis las obtuve con una versión anterior del código, que suponía atmósfera al nivel del mar, y no coinciden con las de esta tabla.
 
@@ -231,22 +237,28 @@ Simulador/
 Archivos/            curvas de empuje, tabla de Cd y datos del vuelo real
 Extras/              scripts sueltos de análisis y prototipos
 tests/               pruebas automáticas
+docs/                documentación del código, sección por sección
 ```
+
+La documentación de cada sección del código está en [docs/](./docs/README.md) (en inglés).
 
 `Simulador/GUI/GUI.py` es la interfaz anterior. Se conserva como referencia, pero la que se mantiene es `ModernGUI.py`.
 
 ## Limitaciones conocidas
 
 - El modelo es plano: no hay alabeo ni guiñada. El viento cruzado desplaza al cohete de lado por arrastre, pero no lo hace girar hacia el viento.
-- Solo se simula un paracaídas, abierto en el apogeo.
-- El apogeo simulado del Xitle II queda 13 % por encima del medido (ver la comparación con el vuelo real).
+- Los paracaídas se abren de golpe (no se modela el inflado), así que la sacudida de apertura está sobreestimada.
+- El apogeo simulado del Xitle II queda 7 % por encima del medido (ver la comparación con el vuelo real).
+- La fuerza normal se aplica perpendicular a la velocidad relativa, no al eje del cohete. Para ángulos de ataque pequeños es equivalente.
+- El centro de presión y los coeficientes de fuerza normal son los de Barrowman, válidos en régimen subsónico y ángulos pequeños; se usan sin corrección hasta Mach 1.
+- El empuje es el de la prueba estática, sin corregir por la menor presión ambiente en altura.
+- El oxidante se supone siempre asentado en el fondo del tanque, también después del quemado, cuando el cohete desacelera. Para entonces queda menos de 1 kg.
 - La atmósfera del día se describe con un solo ajuste de temperatura para toda la columna; no usa un sondeo completo.
 - Algunos scripts de `Extras/` y `Simulador/VarParams/` los dejé a medias y no corren tal cual.
 
 ## Pendientes
 
 - Pasar a seis grados de libertad.
-- Dos etapas de recuperación (drogue y principal).
 - Análisis de dispersión por Monte Carlo.
 - Cálculos estructurales.
 
