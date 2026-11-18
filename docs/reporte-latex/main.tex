@@ -1,0 +1,78 @@
+% Reporte de diseño del Xitle II.
+% Compilar con ./compilar.sh (usa lualatex). El texto está en contenido.tex, que se genera
+% con pandoc a partir de ../reporte-xitle2.md para que las dos versiones digan lo mismo.
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage{fontspec}
+\usepackage[spanish,es-nodecimaldot,es-tabla]{babel}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{longtable,booktabs,array,calc}
+\usepackage{float}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{newunicodechar}
+\usepackage[hidelinks]{hyperref}
+
+% Caracteres que la fuente no trae
+\newunicodechar{₂}{\textsubscript{2}}
+\newunicodechar{α}{\ensuremath{\alpha}}
+\newunicodechar{θ}{\ensuremath{\theta}}
+\newunicodechar{Δ}{\ensuremath{\Delta}}
+\newunicodechar{−}{\ensuremath{-}}
+
+% Lo que necesita el texto generado por pandoc
+\newcounter{none}   % para las tablas sin título
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{%
+  \sbox\pandoc@box{#1}%
+  \ifdim\wd\pandoc@box>\linewidth\resizebox{\linewidth}{!}{\usebox\pandoc@box}\else\usebox\pandoc@box\fi}
+\@ifundefined{KV@Gin@alt}{\define@key{Gin}{alt}{}}{}
+\makeatother
+\floatplacement{figure}{H}
+\setlength{\LTcapwidth}{\linewidth}
+\renewcommand{\arraystretch}{1.15}
+\emergencystretch=3em   % deja partir las líneas con rutas de archivo largas
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\setlist{topsep=2pt,itemsep=2pt}
+
+\definecolor{acento}{HTML}{1F4FD8}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Reporte de diseño del Xitle II}
+\fancyhead[R]{\small Propulsión UNAM}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+
+\begin{document}
+
+\begin{titlepage}
+  \centering
+  \vspace*{3cm}
+  {\Large Propulsión UNAM\par}
+  \vspace{1.2cm}
+  {\Huge\bfseries Reporte de diseño del Xitle II\par}
+  \vspace{0.6cm}
+  {\Large Números del simulador de vuelo, interpretación física\\ y comparación con el vuelo del 22 de junio de 2024\par}
+  \vspace{1.5cm}
+  \includegraphics[width=0.85\linewidth]{figuras/propulsion-pestana-cohete.png}\par
+  \vfill
+  {\large Natalia Edith Mejia Bautista\par}
+  \vspace{0.3cm}
+  {\large Facultad de Ciencias, UNAM\par}
+  \vspace{0.3cm}
+  {\large Noviembre de 2026\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\input{contenido.tex}
+
+\end{document}
