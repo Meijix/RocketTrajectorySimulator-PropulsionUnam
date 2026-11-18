@@ -103,11 +103,15 @@ class Aletas(Componente): #Incluye el arreglo de aletas completo
         self.bottom = self.posicion + self.C_r
 
         self.X_R = X_R            #[m] Distancia del inicio de las aletas al Tip-chord
-        self.mid_sweep = mid_sweep
-        self.mid_chord_span = self.span / np.cos(self.mid_sweep)
-        self.tip_le = self.C_r / 2 + self.span * np.tan(self.mid_sweep) - self.C_t / 2  # tip leading edge
-        self.leading_sweep = np.arctan(self.tip_le / self.span)
+        # La forma de la aleta queda definida por C_r, C_t, la envergadura y X_R (cuanto se
+        # retrasa el borde de ataque en la punta). El barrido se deduce de X_R, que es lo que
+        # usa tambien el centro de presion; el argumento mid_sweep se conserva solo por
+        # compatibilidad y ya no se usa (antes daba una segunda geometria, distinta, para la masa).
+        self.tip_le = self.X_R                                   # retraso del borde de ataque en la punta
+        self.leading_sweep = np.arctan(self.tip_le / self.span)  # barrido del borde de ataque
         self.gamma = self.leading_sweep
+        self.mid_sweep = np.arctan((self.X_R + self.C_t / 2 - self.C_r / 2) / self.span)   # barrido de la linea media
+        self.mid_chord_span = self.span / np.cos(self.mid_sweep)
 
         self.CG = None
         self.CP = None
@@ -120,7 +124,8 @@ class Aletas(Componente): #Incluye el arreglo de aletas completo
     def calc_CG(self):
 
       self.CG = np.array((0.0, 0.0, 0.0))
-      self.CG[2]=(self.C_r**2 + self.C_r * self.C_t + self.C_t**2 + (3 * (self.C_r + self.C_t) * self.rad_fus + (self.C_r + 2 * self.C_t) * self.span) * np.tan(self.gamma)) / (3 * (self.C_r + self.C_t))
+      # Centroide de un trapecio, medido desde el borde de ataque en la raiz
+      self.CG[2] = (self.C_r**2 + self.C_r * self.C_t + self.C_t**2 + (self.C_r + 2 * self.C_t) * self.X_R) / (3 * (self.C_r + self.C_t))
 
     def calc_CP(self):
       theta = np.arctan(1/self.semispan*(self.X_R+ 0.5*(self.C_t-self.C_r)))
@@ -172,4 +177,5 @@ class Boattail(Componente):
       self.CN = (2/self.dF**2)*(self.dR**2-self.dF**2)
 
     def calc_Ix(self):
-      self.Ix = self.masa * (0.5 * (self.radF**2 + self.radR**2))
+      # Cascaron delgado, eje transversal por su centro: como un cilindro delgado con el radio cuadratico medio
+      self.Ix = self.masa * ((self.radF**2 + self.radR**2) / 4 + self.long**2 / 12)
