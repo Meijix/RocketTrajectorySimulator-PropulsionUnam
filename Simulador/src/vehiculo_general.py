@@ -134,7 +134,8 @@ CU = Cilindro("CU", CU_masa, np.array([0.0, 0.0, CU_posicion]), CU_longitud, CU_
 drogue = Cilindro("Drogue", drogue_masa, np.array([0.0, 0.0, drogue_posicion]), drogue_longitud, drogue_diam_ext, 0)
 main = Cilindro("Main", main_masa, np.array([0.0, 0.0, main_posicion]), main_longitud, main_diam_ext, 0)
 
-aletas= Aletas("Aletas", aletas_masa, np.array([0.0, 0.0, CC.bottom[2]]), diam_ext, aletas_n, aletas_longitud, aletas_cuerda, aletas_altura, aletas_base, aletas_angulo)
+# Las aletas van sobre la cámara de combustión: la raíz termina donde empieza el boattail
+aletas= Aletas("Aletas", aletas_masa, np.array([0.0, 0.0, CC.bottom[2] - aletas_cuerda]), diam_ext, aletas_n, aletas_longitud, aletas_cuerda, aletas_altura, aletas_base, aletas_angulo)
 
 #Combustibles del cohete
 oxidante = Cilindro("Oxidante", oxidante_masa, np.array([0.0, 0.0, transfer.bottom[2]]), oxidante_longitud, oxidante_diam_ext, 0)

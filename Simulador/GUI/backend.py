@@ -63,7 +63,7 @@ PARAMS_XITLE = {
     "valvulas_len": 0.167, "valvulas_mass": 2.4, "valvulas_pos_z": 3.406, "valvulas_diam_ext": 0.152, "valvulas_diam_int": 0.149,
     "cc_len": 0.573, "cc_mass": 4.3, "cc_pos_z": 3.573, "cc_diam_ext": 0.152, "cc_diam_int": 0.102,
     "bt_len": 0.12, "bt_mass": 0.251, "bt_pos_z": 4.146, "bt_diam_front": 0.152, "bt_diam_rear": 0.132, "bt_espesor": 0.003,
-    "fin_num": 4, "fin_mass": 1.1, "fin_pos_z": 4.146, "fin_span": 0.11, "fin_root_chord": 0.3, "fin_tip_chord": 0.1,
+    "fin_num": 4, "fin_mass": 1.1, "fin_pos_z": 3.846, "fin_span": 0.11, "fin_root_chord": 0.3, "fin_tip_chord": 0.1,
     "fin_xr": 0.2, "fin_sweep": 25, "fin_thickness": 0.003, "fin_material": CARBONO,   # aletas: tejido 0/90 de 3 mm
     # --- Componentes internos ---
     "avionics_mass": 1.8, "avionics_pos_z": 0.20, "avionics_len": 0.21,

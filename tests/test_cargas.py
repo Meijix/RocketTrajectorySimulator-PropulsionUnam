@@ -83,9 +83,20 @@ def test_la_distribucion_de_masa_respeta_masa_y_centro_de_gravedad(cohete, t):
     assert (dm * (centros - s_cg) ** 2).sum() == pytest.approx(cohete.Ix, rel=0.02)
 
 
-def test_la_viga_llega_hasta_donde_llegan_las_aletas(cohete):
-    assert cargas.longitud_viga(cohete) == pytest.approx(4.146 + 0.3)
-    assert cargas.longitud_viga(cohete) > cohete.longtotal
+def test_la_viga_llega_hasta_el_final_del_cohete(cohete):
+    # En el Xitle II las aletas terminan donde empieza el boattail, así que la viga acaba en el boattail
+    assert cohete.componentes["Aletas"].bottom[2] == pytest.approx(4.146)
+    assert cargas.longitud_viga(cohete) == pytest.approx(cohete.longtotal) == pytest.approx(4.266)
+
+
+def test_la_viga_se_alarga_si_las_aletas_sobresalen(cohete):
+    aletas = cohete.componentes["Aletas"]
+    original = aletas.posicion.copy()
+    try:
+        aletas.posicion = original + [0.0, 0.0, 0.3]      # raíz 0.3 m más atrás: sobresale del boattail
+        assert cargas.longitud_viga(cohete) > cohete.longtotal
+    finally:
+        aletas.posicion = original
 
 
 # ---------------------------------------------------------------- el vuelo

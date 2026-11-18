@@ -41,7 +41,9 @@ avionica = Cilindro("Aviónica", 1.8, np.array([0.0, 0.0, 0.20]), 0.21, 0.14, 0)
 CU = Cilindro("CU", 4.3, np.array([0.0, 0.0, 0.50]), 0.3, 0.14, 0)
 drogue = Cilindro("Drogue", 0.6, np.array([0.0, 0.0, 1.0]), 0.17, 0.14, 0)
 main = Cilindro("Main", 1.7, np.array([0.0, 0.0, 1.4]), 0.30, 0.14, 0)
-aletas= Aletas("Aletas", 1.1, np.array([0.0, 0.0, CC.bottom[2]]), diam_ext, 4, 0.11, 0.3, 0.1, 0.2, np.deg2rad(25))  # barrido de 25 grados (Aletas espera radianes)
+# Las aletas van sobre la cámara de combustión: la raíz termina donde empieza el boattail
+cuerda_raiz = 0.3
+aletas= Aletas("Aletas", 1.1, np.array([0.0, 0.0, CC.bottom[2] - cuerda_raiz]), diam_ext, 4, 0.11, cuerda_raiz, 0.1, 0.2, np.deg2rad(25))  # barrido de 25 grados (Aletas espera radianes)
 
 #Combustibles del cohete
 oxidante = Cilindro("Oxidante", 12.0, np.array([0.0, 0.0, transfer.bottom[2]]), 1.33, 0.1461, 0)
