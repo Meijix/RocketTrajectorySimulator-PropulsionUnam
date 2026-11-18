@@ -175,6 +175,24 @@ class Cohete:
       trapecio = getattr(np, 'trapezoid', None) or np.trapz
       self.I_total = trapecio(y=self._empuje, x=self._t_empuje)
 
+      # Geometria del oxidante con el tanque lleno. Al consumirse, el liquido que queda ocupa
+      # la parte trasera del tanque (el empuje lo asienta contra el fondo): la columna se
+      # acorta desde arriba y su fondo no se mueve.
+      oxidante = self.componentes['oxidante']
+      self._oxi_long_llena = float(oxidante.long)
+      self._oxi_fondo = float(oxidante.posicion[2] + oxidante.long)
+
+      # Geometria del grano de combustible sin quemar. El grano es un cilindro hueco que se
+      # quema desde su canal central: el radio exterior y la longitud no cambian y el canal se
+      # ensancha. Con densidad constante, la masa es proporcional a (r_ext^2 - r_int^2).
+      grano = self.componentes['grano']
+      self._grano_r_ext = float(grano.rad_ext)
+      self._grano_r_int0 = float(grano.rad_int)
+      self.grano_con_regresion = 0 <= self._grano_r_int0 < self._grano_r_ext
+      if not self.grano_con_regresion:
+        print(f"Aviso: el grano tiene diametro interior ({grano.diam_int} m) mayor o igual que el exterior "
+              f"({grano.diam_ext} m). No se modelara el ensanchamiento de su canal.")
+
       # Coherencia entre las dos tablas. El propelente debe consumirse mientras hay empuje.
       # Si la tabla de masa dura otra cosa que la curva de empuje (por ejemplo, viene de una
       # simulacion del motor y el empuje de una prueba estatica), su escala de tiempo no
@@ -214,7 +232,21 @@ class Cohete:
         # np.interp mantiene el ultimo valor de la tabla despues del final
         oxidante.masa = np.interp(t, self._t_masa, self._masa_oxi)
         grano.masa = np.interp(t, self._t_masa, self._masa_grano)
-      # El momento de inercia propio de cada componente depende de su masa
+      # Columna de oxidante: su longitud es proporcional a la masa que queda. Con ella cambian
+      # su centro de gravedad (baja hacia el fondo del tanque) y su momento de inercia propio.
+      masa_llena = self._masa_oxi[0]
+      fraccion = min(max(oxidante.masa / masa_llena, 0.0), 1.0) if masa_llena > 0 else 0.0
+      oxidante.long = self._oxi_long_llena * fraccion
+      oxidante.posicion = np.array((0.0, 0.0, self._oxi_fondo - oxidante.long))
+      oxidante.bottom = oxidante.posicion + oxidante.long
+      oxidante.calc_CG()
+      # Grano: el canal se ensancha a medida que se quema,
+      #   r_int^2 = r_ext^2 - (r_ext^2 - r_int0^2) * masa / masa_inicial
+      if self.grano_con_regresion and self._masa_grano[0] > 0:
+        queda = min(max(grano.masa / self._masa_grano[0], 0.0), 1.0)
+        grano.rad_int = math.sqrt(self._grano_r_ext**2 - (self._grano_r_ext**2 - self._grano_r_int0**2) * queda)
+        grano.diam_int = 2 * grano.rad_int
+      # El momento de inercia propio de cada componente depende de su masa y de su forma
       oxidante.calc_Ix()
       grano.calc_Ix()
 
