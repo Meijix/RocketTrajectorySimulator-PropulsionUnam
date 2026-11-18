@@ -159,6 +159,16 @@ The Simulación tab is a scrollable frame because it has the most fields. The ot
 
 `App.simular` checks that the three tables exist, validates the parameters and submits `backend.ejecutar_simulacion` to a separate process. The window checks every 200 ms whether the process has finished and stays responsive in the meantime. When it finishes, the Resultados and Mapa tabs receive the DataFrame and the summary, and the Cargas tab receives the summary.
 
+### Standalone executable
+
+[empaquetado/PropulsionGUI.spec](../empaquetado/PropulsionGUI.spec) is the PyInstaller recipe. It bundles the interface, the Python runtime and the six data files the interface reads at startup, placed at the same relative paths as in the repository. The modules find them through `RAIZ`, which inside the bundle resolves to the folder PyInstaller unpacks.
+
+The build is a folder and not a single file. The simulation starts a new process on every run, and a single-file build would unpack itself each time.
+
+[PropulsionGUI.py](../Simulador/GUI/PropulsionGUI.py) calls `multiprocessing.freeze_support()` before anything else. Without that call the simulation process of a frozen program would open a second window. The same file accepts `--autoprueba`, which opens the window, runs one flight, prints the apogee and exits with code 0 on success.
+
+PyInstaller builds only for the system it runs on. The workflow in `.github/workflows/ejecutables.yml` builds on macOS, Windows and Linux, runs the self test on each, and attaches the three archives to the GitHub release when a version tag is pushed.
+
 ### Fonts
 
 The interface looks for Lexend and falls back to Avenir Next, Helvetica Neue or Segoe UI. Numbers use JetBrains Mono, Menlo, Consolas or DejaVu Sans Mono. It picks the first family installed on the system.

@@ -79,6 +79,38 @@ Son capturas de la ventana con el Xitle II, después de simular un vuelo libre c
   Una gráfica ampliada con doble clic: el empuje, con el valor que hay bajo el cursor.
 </p>
 
+## Ejecutable, sin instalar Python
+
+`PropulsionGUI` se puede usar como un programa normal, sin Python ni terminal. Hay un ejecutable para cada sistema, porque el de uno no sirve en otro.
+
+| Sistema | Archivo | Cómo abrirlo |
+| --- | --- | --- |
+| macOS | `PropulsionGUI-macOS.zip` | Descomprimir y abrir `PropulsionGUI.app` |
+| Windows | `PropulsionGUI-Windows.zip` | Descomprimir la carpeta y abrir `PropulsionGUI.exe` |
+| Linux | `PropulsionGUI-Linux.tar.gz` | Descomprimir la carpeta y abrir `PropulsionGUI` |
+
+Los tres archivos se publican en la sección [Releases](https://github.com/Meijix/RocketTrajectorySimulator-PropulsionUnam/releases) del repositorio cada vez que se sube una etiqueta de versión (por ejemplo `v1.0`). Los construye GitHub con el flujo `.github/workflows/ejecutables.yml`, que también se puede lanzar a mano desde la pestaña Actions.
+
+El programa trae adentro los datos del Xitle II, así que abre listo para simular. En Windows y Linux el ejecutable tiene que quedarse dentro de su carpeta, junto a los archivos que lo acompañan.
+
+Los ejecutables no están firmados, y el sistema avisa la primera vez:
+
+- **macOS.** Clic derecho sobre la aplicación y "Abrir", y luego "Abrir" otra vez en el aviso. En versiones recientes hay que autorizarla en Ajustes del Sistema, Privacidad y seguridad.
+- **Windows.** En el aviso de SmartScreen, "Más información" y "Ejecutar de todas formas".
+- **Linux.** Si no abre, darle permiso de ejecución con `chmod +x PropulsionGUI`.
+
+La primera vez tarda más en abrir, porque matplotlib prepara su lista de fuentes.
+
+Para construir el ejecutable del sistema en el que se está trabajando:
+
+```bash
+pip install pyinstaller
+pyinstaller empaquetado/PropulsionGUI.spec
+dist/PropulsionGUI.app/Contents/MacOS/PropulsionGUI --autoprueba   # en macOS
+```
+
+El resultado queda en `dist/`. La opción `--autoprueba` abre la ventana, corre un vuelo y la cierra, y sirve para comprobar que el ejecutable quedó bien. En Windows y Linux el ejecutable está en `dist/PropulsionGUI/`.
+
 ## Instalación
 
 Hace falta Python 3 con `tkinter`. Está probado con Python 3.12. El Python de Homebrew no trae `tkinter`; en ese caso hay que instalar también el paquete `python-tk` o usar otra distribución.
@@ -348,6 +380,7 @@ Simulador/
 Archivos/            curvas de empuje, tabla de Cd y datos del vuelo real
 Extras/              scripts sueltos de análisis y prototipos
 tests/               pruebas automáticas
+empaquetado/         receta de PyInstaller para el ejecutable
 docs/                documentación del código, sección por sección
 ```
 
