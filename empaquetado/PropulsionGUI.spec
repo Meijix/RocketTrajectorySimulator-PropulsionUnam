@@ -29,6 +29,9 @@ a = Analysis(
     [os.path.join(RAIZ, "Simulador", "GUI", "PropulsionGUI.py")],
     pathex=[RAIZ],
     datas=datas,
+    # Pillow carga estos dos al dibujar imágenes en Tk (los iconos de la barra de matplotlib);
+    # PyInstaller no los detecta solo y en Linux el ejecutable fallaba al abrir
+    hiddenimports=["PIL._tkinter_finder", "PIL._imagingtk"],
     # Paquetes instalados que la interfaz no usa
     excludes=["tkintermapview", "seaborn", "pytest", "IPython", "PyQt5", "PyQt6", "PySide2", "PySide6"],
 )
