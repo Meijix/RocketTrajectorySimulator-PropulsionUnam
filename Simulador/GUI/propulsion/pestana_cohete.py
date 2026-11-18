@@ -132,7 +132,7 @@ class PestanaCohete(ctk.CTkFrame):
             return
         e = estabilidad
         estado, color = estado_margen(e["margen"])
-        self.tarjetas["masa"].fijar(f"{e['masa']:.1f} kg", f"{e['masa_seca']:.1f} kg sin propelente")
-        self.tarjetas["cg"].fijar(f"{e['cg']:.2f} m", f"{e['cg_seco']:.2f} m sin propelente", Tema.AZUL)
+        self.tarjetas["masa"].fijar(f"{e['masa']:.1f} kg", f"{e['masa_seca']:.1f} kg en seco")
+        self.tarjetas["cg"].fijar(f"{e['cg']:.2f} m", f"{e['cg_seco']:.2f} m en seco", Tema.AZUL)
         self.tarjetas["cp"].fijar(f"{e['cp']:.2f} m", f"longitud {e['longitud']:.3f} m", Tema.ROJO)
         self.tarjetas["margen"].fijar(f"{e['margen']:.2f} cal", estado, color)

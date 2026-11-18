@@ -73,7 +73,7 @@ class App(ctk.CTk):
         nombre.grid(row=0, column=0, sticky="w", padx=(0, 20))
         ctk.CTkLabel(nombre, text="Simulador de vuelo", font=fuente(20, negrita=True), text_color=Tema.TEXTO, anchor="w").pack(anchor="w")
         ctk.CTkLabel(nombre, text="Propulsión UNAM", font=fuente(12), text_color=Tema.TENUE, anchor="w").pack(anchor="w")
-        self.navegacion = Selector(cabeza, [(n, n) for n, _ in self.PESTANAS], self.mostrar_pestana)
+        self.navegacion = Selector(cabeza, [(n, n) for n, _ in self.PESTANAS], self.mostrar_pestana, ancho=96)
         self.navegacion.grid(row=0, column=1, sticky="w")
         self._dibujar_trama(cabeza).grid(row=0, column=2, sticky="e")
 

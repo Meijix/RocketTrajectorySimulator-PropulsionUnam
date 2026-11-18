@@ -79,13 +79,14 @@ def deslizador(master, variable, desde, hasta, pasos, formato="{:.0f}"):
 class Selector(ctk.CTkFrame):
     """Grupo de botones del que solo uno está elegido (pestañas, modos, recuperación)."""
 
-    def __init__(self, master, opciones, al_elegir, vertical=False, alto=40):
+    def __init__(self, master, opciones, al_elegir, vertical=False, alto=40, ancho=140):
+        """`ancho` es el ancho mínimo de cada botón; si el texto no cabe, el botón crece."""
         super().__init__(master, fg_color="transparent")
         self.al_elegir = al_elegir
         self.valor = None
         self.botones = {}
         for i, (valor, texto) in enumerate(opciones):
-            b = ctk.CTkButton(self, text=texto, corner_radius=alto // 2, height=alto, border_width=1,
+            b = ctk.CTkButton(self, text=texto, corner_radius=alto // 2, height=alto, width=ancho, border_width=1,
                               font=fuente(13), command=lambda v=valor: self.elegir(v))
             if vertical:
                 b.grid(row=i, column=0, sticky="ew", pady=3)
