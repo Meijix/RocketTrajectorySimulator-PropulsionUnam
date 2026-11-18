@@ -250,6 +250,30 @@ class Cohete:
       oxidante.calc_Ix()
       grano.calc_Ix()
 
+    def flujo_masico(self, t):
+      """Masa de propelente que sale por la tobera por unidad de tiempo [kg/s] en el instante t."""
+      if t < 0 or t > self.t_MECO:
+        return 0.0
+      if self.masa_segun_impulso:
+        consumido = (self._masa_oxi[0] - self._masa_oxi[-1]) + (self._masa_grano[0] - self._masa_grano[-1])
+        return consumido * self.calc_empuje_magn(t) / self.I_total
+      if t > self._t_masa[-1]:
+        return 0.0
+      # Derivada numerica de la tabla de masa
+      if not hasattr(self, '_flujo_tabla'):
+        self._flujo_tabla = -np.gradient(self._masa_oxi + self._masa_grano, self._t_masa)
+      return float(np.interp(t, self._t_masa, self._flujo_tabla))
+
+    def coef_amortiguamiento_aero(self):
+      """Suma de CN_i * (x_i - x_CG)^2 sobre los componentes con fuerza normal [m^2].
+
+      x_i es el centro de presion de cada componente. Es el factor geometrico del momento de
+      amortiguamiento aerodinamico del cabeceo; depende del CG, que cambia durante el quemado.
+      """
+      x_cg = self.CG[2]
+      return sum(comp.CN * (comp.posicion[2] + comp.CP[2] - x_cg)**2
+                 for comp in self.componentes.values() if comp.CN)
+
     def actualizar_masa(self, t):
       # Actualizar masa de motor
       self.actualizar_masas_motor(t)

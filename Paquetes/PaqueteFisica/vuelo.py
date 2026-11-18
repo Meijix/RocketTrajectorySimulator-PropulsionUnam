@@ -34,6 +34,7 @@ class Vuelo:
         self.impacto = None
         self.pasos = 0          # pasos de integracion de la ultima simulacion
         self.evaluaciones = 0   # evaluaciones de fun_derivs de la ultima simulacion
+        self.amortiguamiento = True   # incluir los momentos de amortiguamiento del cabeceo
 
         #hacer una lista de etapas de vuelo
         #self. etapas = [enriel , motorON, apogeo, droguerec, mainrec]
@@ -121,7 +122,36 @@ class Vuelo:
         # input()
         return Dvec, Nvec
 
-    def accangular(self, theta, Dvec, Nvec, Gvec, Tvec, state):
+    def torca_amortiguamiento(self, t, state, v_rel):
+        """Momento que se opone a la velocidad angular de cabeceo [N m]: M = -(C_aero + C_chorro) * omega.
+
+        Amortiguamiento aerodinamico. Cuando el cohete gira con velocidad angular omega, un
+        componente a distancia d del CG se mueve de lado a velocidad omega*d, lo que cambia
+        su angulo de ataque local en omega*d/v y su fuerza normal en q*A*CN*omega*d/v. Esa
+        fuerza, con brazo d, da un momento contrario al giro. Sumando sobre los componentes:
+            C_aero = (1/2) * rho * v * A * suma( CN_i * (x_i - x_CG)^2 )
+
+        Amortiguamiento por el chorro. Los gases que salen por la tobera se llevan momento
+        angular; con flujo masico mdot y la salida de la tobera a distancia l del CG:
+            C_chorro = mdot * l^2
+        Solo actua mientras el motor esta encendido.
+
+        (Coeficientes de amortiguamiento de Mandell, Caporaso y Bengen, "Topics in Advanced
+        Model Rocketry", MIT Press, 1973, usados tambien por OpenRocket.)
+        """
+        omega = state[7]
+        z = state[2]
+        c_aero = 0.0
+        if z <= self.atmosfera.h_max:
+            _, rho, _, _ = self.atmosfera.calc_propiedades(z)
+            c_aero = 0.5 * rho * np.linalg.norm(v_rel) * self.vehiculo.A * self.vehiculo.coef_amortiguamiento_aero()
+        c_chorro = 0.0
+        if t is not None:
+            brazo_tobera = self.vehiculo.longtotal - self.vehiculo.CG[2]
+            c_chorro = self.vehiculo.flujo_masico(t) * brazo_tobera**2
+        return -(c_aero + c_chorro) * omega
+
+    def accangular(self, theta, Dvec, Nvec, Gvec, Tvec, state, t=None):
         # Calcular brazo de momentos
         # r es un vector que apunta del CG al CP, en coords de cuerpo del cohete,
         grav = Gvec[2] # gravedad en z
@@ -169,6 +199,9 @@ class Vuelo:
         # se toma la componente y (perpendicular al plano de vuelo ZX) y se
         # multiplica por -1 porque el eje y apunta hacia "adentro"
         Torca = -tau_tot[1]
+        # Amortiguamiento del cabeceo (aerodinamico y por el chorro del motor)
+        if self.amortiguamiento:
+            Torca += self.torca_amortiguamiento(t, state, v_rel)
         #Torca = Torca*10
         accang = Torca / self.vehiculo.Ix # se debe usar el momento de inercia actualizado
         #angaccels.append(accang)
@@ -242,7 +275,7 @@ class Vuelo:
             accel = self.restringir_al_riel(pos, vel, theta, accel)
         else:
             # aceleracion angular
-            _, accang, _ = self.accangular(theta, Dvec, Nvec, Gvec, Tvec, state)
+            _, accang, _ = self.accangular(theta, Dvec, Nvec, Gvec, Tvec, state, t)
 
         derivs = np.concatenate((vel, accel, [omega], [accang]))
         #print(derivs)
@@ -452,7 +485,7 @@ class Vuelo:
             Gvec = np.array([0, 0, -grav])
 
             accel = Gvec + Dvec/self.vehiculo.masa + Nvec/self.vehiculo.masa + Tvec/self.vehiculo.masa
-            palanca, accang, torca = self.accangular(theta, Dvec, Nvec, Gvec, Tvec, estado)
+            palanca, accang, torca = self.accangular(theta, Dvec, Nvec, Gvec, Tvec, estado, t)
             if self.en_riel(pos):
                 accel = self.restringir_al_riel(pos, vel, theta, accel)
                 accang = 0.0
