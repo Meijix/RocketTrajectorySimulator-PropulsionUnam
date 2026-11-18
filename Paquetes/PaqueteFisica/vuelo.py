@@ -109,7 +109,8 @@ class Vuelo:
         # velocidad, que no es perpendicular a nada y empujaba al cohete de lado.)
         v_plano = math.hypot(v_rel_hat[0], v_rel_hat[2])
         if v_plano > 0:
-            Nhat = -np.sign(alpha) * np.array((v_rel_hat[2], 0.0, -v_rel_hat[0])) / v_plano
+            # sign(sin(alpha)) y no sign(alpha): alpha no esta acotado a (-180, 180] grados
+            Nhat = -np.sign(np.sin(alpha)) * np.array((v_rel_hat[2], 0.0, -v_rel_hat[0])) / v_plano
         else:
             Nhat = np.zeros(3)
         # Nmag = 0    # DEBUG: apagar normal
