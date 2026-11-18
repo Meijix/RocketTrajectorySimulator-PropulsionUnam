@@ -75,7 +75,7 @@ class Vuelo:
         #Calcular las componentes del empuje
         #La direccion del empuje es longitudinal hacia la nariz
         zbhat = np.array((np.cos(theta), 0, np.sin(theta)))
-        Tmag = self.vehiculo.calc_empuje_magn(t)*1.1 #factor de eficiencia
+        Tmag = self.vehiculo.calc_empuje_magn(t)
         Tvec = Tmag * zbhat
         return Tvec
 
@@ -95,7 +95,6 @@ class Vuelo:
             alpha = self.calc_alpha(v_rel, theta)
         
         Dmag, Nmag, Cd, mach = self.calc_arrastre_normal(pos, v_rel, alpha)
-        Dmag = Dmag*0.9
         #print(Cd,mach)
         #print(Dmag,"mag arrastre")
         #Fuerza normal
