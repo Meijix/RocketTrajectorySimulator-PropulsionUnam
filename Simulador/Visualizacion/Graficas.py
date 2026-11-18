@@ -15,11 +15,14 @@ from Paquetes.utils.angulos import nice_angle, normalize_angle
 from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson, muestra_tiempos
 from Paquetes.utils.dibujar_cohete2 import *
 from Simulador.src.condiciones_init import *
+import os
+# Raiz del repositorio (las rutas se resuelven respecto a ella, no a una maquina concreta)
+RAIZ = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 #Elegir que vuelo se va a graficar
-archivo_csv = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-0\datos.csv'
+archivo_csv = os.path.join(RAIZ, 'Simulador', 'Resultados', 'OutputFiles', 'VueloLibre-DOP853-100', 'datos.csv')
 #########################
-archivo_json = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-0\datos.json'
+archivo_json = os.path.join(RAIZ, 'Simulador', 'Resultados', 'OutputFiles', 'VueloLibre-DOP853-100', 'datos.json')
 
 
 ###############################################

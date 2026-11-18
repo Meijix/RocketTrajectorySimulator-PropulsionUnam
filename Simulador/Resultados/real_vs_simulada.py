@@ -3,9 +3,12 @@
 #un mismo integrador
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
+# Raiz del repositorio (las rutas se resuelven respecto a ella, no a una maquina concreta)
+RAIZ = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 # Datos experimentales
-df_exp = pd.read_csv(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Archivos\AlturavsTiempo-Xitle2.csv')
+df_exp = pd.read_csv(os.path.join(RAIZ, 'Archivos', 'AlturavsTiempo-Xitle2.csv'))
 # Extraer los datos experimentales
 altitude = df_exp['ALTURA [km]']*1000 # Convertir a metros
 time = df_exp['tiempo [s]']-10 # Restar el tiempo de ignición
@@ -15,14 +18,14 @@ t_apogeo_exp = time[altitude.idxmax()]
 ####################################################
 
 TipoVuelo = 'VueloLibre'
-integrador='RungeKutta4'
-eficiencias = [100, 90, 80, 70, 60]
+integrador='DOP853'
+eficiencias = [100]  # solo existe la carpeta de 100 % (ya no hay factor de eficiencia en vuelo.py)
 datos = {}
 #Extraer los datos de las simulaciones
 #Lee datos de las carpetas {TipoVuelo}-{integrador}-{efi}
 for efi in eficiencias:
     #print("Eficiencia:",efi)
-    ruta = f'C:/Users/Natalia/OneDrive/Archivos/Tesis/GithubCode/SimuladorVueloNat/3DOF-Rocket-PU/Simulador/Resultados/OutputFiles/{TipoVuelo}-{integrador}-{efi}/datos.csv'
+    ruta = os.path.join(RAIZ, 'Simulador', 'Resultados', 'OutputFiles', f'{TipoVuelo}-{integrador}-{efi}', 'datos.csv')
     #Nombre dependiendo de la eficiencia
     df_simu = pd.read_csv(ruta)
     #Extraer los datos

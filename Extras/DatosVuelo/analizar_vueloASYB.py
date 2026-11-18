@@ -5,8 +5,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.signal import savgol_filter
+import os
+# Raiz del repositorio (las rutas se resuelven respecto a ella, no a una maquina concreta)
+RAIZ = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-df = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\DatosVuelo\ASYB.csv')
+df = pd.read_csv(os.path.join(RAIZ, 'Archivos', 'DatosVuelo', 'ASYB.csv'))
 
 #pasos de tiempo en milisegundos entre cada recepcion de datos
 diffs = df["time"].to_numpy()[1:]-df["time"].to_numpy()[:-1]

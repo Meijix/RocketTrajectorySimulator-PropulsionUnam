@@ -13,9 +13,12 @@ from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson, muestr
 from Paquetes.utils.dibujar_cohete2 import dibujar_cohete2, acomodar_cohete2
 from Paquetes.utils.funciones import guardar_animacion
 from Simulador.src.XitleFile import Xitle
+import os
+# Raiz del repositorio (las rutas se resuelven respecto a ella, no a una maquina concreta)
+RAIZ = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 # Leer datos de simulación
-datos_simulacion = pd.read_csv(r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-0\datos.csv')
+datos_simulacion = pd.read_csv(os.path.join(RAIZ, 'Simulador', 'Resultados', 'OutputFiles', 'VueloLibre-DOP853-100', 'datos.csv'))
 (tiempos, _, _, thetas, omegas, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) = extraer_datoscsv(datos_simulacion)
 
 #Longitud de los componentes para el dibujo
@@ -28,7 +31,7 @@ fin_height=Xitle.componentes['Aletas'].span
 rear_boat=Xitle.componentes['Boattail'].dR
 
 
-ruta_json=r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-0\datos.json'
+ruta_json=os.path.join(RAIZ, 'Simulador', 'Resultados', 'OutputFiles', 'VueloLibre-DOP853-100', 'datos.json')
 # Leer los datos de la simulación desde el archivo JSON
 with open(ruta_json, 'r', encoding= 'utf-8') as f:
     datos = json.load(f)
