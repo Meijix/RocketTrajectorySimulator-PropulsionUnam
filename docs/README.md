@@ -14,6 +14,7 @@ These pages describe how the simulator is put together, one section of the code 
 | [Data files](data-files.md) | [Archivos/](../Archivos/) |
 | [Tests](tests.md) | [tests/](../tests/) |
 | [Extras](extras.md) | [Extras/](../Extras/) |
+| [Xitle II design report](reporte-xitle2.md) | what the simulator says about the rocket and its 2024 flight, in Spanish |
 
 The code, its comments and its variable names are in Spanish. Each page gives the Spanish name next to its meaning the first time it appears.
 

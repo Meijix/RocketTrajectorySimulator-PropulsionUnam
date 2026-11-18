@@ -384,7 +384,7 @@ empaquetado/         receta de PyInstaller para el ejecutable
 docs/                documentación del código, sección por sección
 ```
 
-La documentación de cada sección del código está en [docs/](./docs/README.md) (en inglés).
+La documentación de cada sección del código está en [docs/](./docs/README.md) (en inglés). El [reporte de diseño del Xitle II](./docs/reporte-xitle2.md) reúne los números del cohete, su interpretación y la comparación con el vuelo real.
 
 `Simulador/GUI/GUI.py` es la interfaz anterior. Se conserva como referencia; las que se mantienen son `ModernGUI.py` y `PropulsionGUI.py`, que comparten `backend.py`.
 
