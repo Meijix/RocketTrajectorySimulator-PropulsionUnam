@@ -1,343 +1,263 @@
-# Rocket-Sim UNAM: Simulador de Vuelo de Cohetes 3-DOF
+# Simulador de vuelo de cohetes (3-DOF) — Propulsión UNAM
 
-![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python&logoColor=white)
-![Licencia](https://img.shields.io/badge/Licencia-MIT-green)
-![Estado](https://img.shields.io/badge/Estado-Activo-brightgreen)
-![UNAM](https://img.shields.io/badge/UNAM-Propulsi%C3%B3n-gold)
+Simulador de la trayectoria de un cohete suborbital. Resuelve el movimiento en el plano de vuelo: traslación más el ángulo de cabeceo. Lo escribí como parte de mi tesis de licenciatura en Matemáticas (Facultad de Ciencias, UNAM), *Simulación Numérica de la Dinámica de un Cohete Híbrido*, trabajando con el equipo Propulsión UNAM de la Facultad de Ingeniería. El cohete de referencia es el Xitle II, un cohete híbrido con óxido nitroso como oxidante que el equipo voló en 2024.
 
-<p align="center">
-  <img src="docs/images/logo-propulsion.svg" alt="Logo Propulsión UNAM" width="400"/>
-</p>
+Mi tesis completa está en el repositorio: [Tesis_UNAM_NataliaMejBau_COMPLETAFINAL.pdf](./Tesis_UNAM_NataliaMejBau_COMPLETAFINAL.pdf).
 
-**Rocket-Sim UNAM** es un simulador numérico avanzado para la dinámica de vuelo de cohetes suborbitales, con un motor de **3 Grados de Libertad (3-DOF)** y una interfaz gráfica moderna. Este proyecto nació como parte de la tesis de licenciatura en Matemáticas de Natalia Edith Mejia Bautista y fue desarrollado en colaboración con el equipo **Propulsión UNAM** de la Facultad de Ingeniería de la UNAM.
+## Qué hace
 
----
+- Arma el cohete a partir de sus piezas (nariz, tubos, aletas, boattail, tanques, carga interna) y calcula masa, centro de gravedad, centro de presión y momento de inercia. La masa cambia durante el quemado según la tabla del motor.
+- Integra el vuelo desde el riel hasta el impacto con empuje tomado de una curva medida, arrastre con Cd en función del Mach, fuerza normal, gravedad variable con la altura y viento con ráfagas.
+- Usa la altitud del sitio y la temperatura, presión y viento del día del lanzamiento.
+- Da las coordenadas donde cae el cohete y las muestra en un mapa real junto con el sitio de lanzamiento.
+- Permite desplegar un paracaídas en el apogeo.
+- Deja elegir el integrador: Euler, RK2, RK4 y Runge-Kutta-Fehlberg, que programé yo, o los de SciPy (RK23, RK45, DOP853, LSODA, BDF).
+- Tiene una interfaz gráfica para cambiar el cohete y las condiciones de lanzamiento sin tocar el código, y scripts para graficar, animar y comparar contra los datos del vuelo real.
 
-## Tabla de Contenidos
-
-- [Descripción General](#descripción-general)
-- [Características Principales](#características-principales)
-- [Capturas de Pantalla](#capturas-de-pantalla)
-- [Instalación y Ejecución](#instalación-y-ejecución)
-- [Uso Básico](#uso-básico)
-- [Arquitectura Técnica](#arquitectura-técnica)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-- [Métodos Numéricos Disponibles](#métodos-numéricos-disponibles)
-- [Validación](#validación)
-- [Casos de Estudio Simples](#casos-de-estudio-simples)
-- [Créditos y Autoría](#créditos-y-autoría)
-- [Cómo Contribuir](#cómo-contribuir)
-- [Licencia](#licencia)
-- [Posibles Mejoras (Roadmap)](#posibles-mejoras-roadmap)
-
----
-
-## Descripción General
-
-El objetivo principal de este simulador es proporcionar una herramienta robusta y de código abierto para el **diseño, análisis y validación de trayectorias de cohetes experimentales**. Está diseñado para ser utilizado por equipos estudiantiles de cohetería, investigadores y como recurso educativo en cursos de ingeniería aeroespacial y dinámica de vuelo.
-
-Este software traduce los complejos modelos matemáticos de la mecánica de vuelo a una plataforma interactiva y accesible, permitiendo a los usuarios:
-
-- **Evaluar la estabilidad** de un diseño antes de su manufactura.
-- **Predecir con precisión** el apogeo, la zona de impacto y otros parámetros críticos del vuelo.
-- **Optimizar el rendimiento** del vehículo a través de la simulación de múltiples escenarios.
-- **Incrementar la seguridad** en los lanzamientos experimentales.
-
-El desarrollo y la validación de este simulador constituyen el núcleo de la tesis de licenciatura **"Simulación Numérica de la Dinámica de un Cohete Híbrido"**.
-
-> **[Consulta la tesis completa aquí (PDF)](./Tesis_UNAM_NataliaMejBau_COMPLETAFINAL.pdf)**
-
----
-
-## Características Principales
-
-| Característica | Descripción |
-|---|---|
-| **Motor de Simulación 3-DOF** | Modela traslación (x, y, z) y rotación pitch del cohete como cuerpo rígido |
-| **Interfaz Gráfica Intuitiva** | Desarrollada con `CustomTkinter`, permite definir todos los aspectos del cohete y la simulación sin necesidad de escribir código |
-| **Definición Modular de Cohetes** | Construye un cohete a partir de componentes detallados: ojiva, cuerpo, aletas, motor, tanques, sistemas internos, etc. |
-| **Métodos Numéricos Avanzados** | Suite de integradores de EDOs de alto orden con control de paso adaptativo (DOP853, RK45, BDF, LSODA, entre otros) |
-| **Análisis de Estabilidad Estática** | Cálculo automático y en tiempo real del Centro de Gravedad (CG), Centro de Presión (CP) y margen estático |
-| **Modelo Atmosférico Completo** | Modelo ISA de 8 capas que cubre desde la tropósfera hasta la mesopausa (0–84,852 m) |
-| **Modelado de Viento** | Viento 3D con modelos de ráfaga estocásticos: escalón, rampa lineal y coseno |
-| **Visualización Completa** | Gráficas detalladas y animaciones 3D de trayectoria, orientación, velocidades y fuerzas aerodinámicas |
-| **Importación de Datos** | Carga de curvas de empuje y coeficientes de arrastre desde archivos CSV |
-| **Mapa Interactivo** | Visualización del sitio de lanzamiento y trayectoria proyectada con `tkintermapview` |
-| **Sistema de Paracaídas** | Simulación de la fase de recuperación con despliegue de paracaídas |
-
----
-
-## Capturas de Pantalla
+## Cómo se ve
 
 <table>
   <tr>
-    <td><img src="docs/images/definicion-cohete.svg" alt="Pestaña de Definición del Cohete" width="400"/></td>
-    <td><img src="docs/images/analisis-estabilidad.svg" alt="Análisis de Estabilidad" width="400"/></td>
+    <td align="center"><img src="docs/images/esquema-cohete.png" alt="Esquema del Xitle II con CG y CP" width="330"/></td>
+    <td align="center"><img src="docs/images/resultados-vuelo.png" alt="Gráficas del vuelo simulado del Xitle II" width="560"/></td>
   </tr>
   <tr>
-    <td align="center"><em>Definición modular y detallada del cohete.</em></td>
-    <td align="center"><em>Cálculo en tiempo real de CG, CP y margen estático.</em></td>
-  </tr>
-  <tr>
-    <td><img src="docs/images/resultados-simulacion.svg" alt="Resultados de la Simulación" width="400"/></td>
-    <td><img src="docs/images/animacion-vuelo.svg" alt="Animación de Vuelo" width="400"/></td>
-  </tr>
-  <tr>
-    <td align="center"><em>Gráficas completas de los resultados del vuelo.</em></td>
-    <td align="center"><em>Animación 3D de la trayectoria y orientación.</em></td>
+    <td align="center">Esquema del Xitle II con su CG y CP.</td>
+    <td align="center">Vuelo libre del Xitle II con DOP853.</td>
   </tr>
 </table>
 
-> **Nota:** Las imágenes actuales son diagramas ilustrativos. Para reemplazarlas con capturas reales del simulador, coloca archivos PNG en la carpeta `docs/images/` y actualiza las rutas en este README.
+<p align="center">
+  <img src="docs/images/mapa-vuelo.png" alt="Mapa con la trayectoria simulada y la trayectoria GPS del vuelo real" width="620"/><br>
+  Vuelo del Xitle II en Spaceport America: trayectoria simulada y trayectoria GPS real.
+</p>
 
----
+Las tres figuras las dibuja el programa (son las que aparecen dentro de la interfaz, guardadas a archivo); no son capturas de la ventana.
 
-## Instalación y Ejecución
+## Instalación
 
-### Requisitos Previos
+Hace falta Python 3 con `tkinter`. Está probado con Python 3.12. El Python de Homebrew no trae `tkinter`; en ese caso hay que instalar también el paquete `python-tk` o usar otra distribución.
 
-- Python 3.9 o superior
-- Git para clonar el repositorio
-
-### Pasos
-
-1. **Clona el repositorio de GitHub:**
-    ```bash
-    git clone https://github.com/Meijix/RocketTrajectorySimulator-PropulsionUnam.git
-    cd RocketTrajectorySimulator-PropulsionUnam
-    ```
-
-2. **Crea y activa un entorno virtual (recomendado):**
-    ```bash
-    python -m venv venv
-    ```
-    ```bash
-    # En macOS/Linux:
-    source venv/bin/activate
-
-    # En Windows:
-    .\venv\Scripts\activate
-    ```
-
-3. **Instala las dependencias:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-### Dependencias
-
-| Librería | Uso |
-|---|---|
-| `numpy` | Cálculos numéricos y álgebra lineal |
-| `scipy` | Integradores de EDOs avanzados e interpolación |
-| `pandas` | Manipulación de datos tabulares |
-| `matplotlib` | Generación de gráficas científicas |
-| `customtkinter` | Framework de interfaz gráfica moderna |
-| `tkintermapview` | Visualización de mapas interactivos |
-
----
-
-## Uso Básico
-
-1. **Iniciar el Simulador:**
-    Ejecuta el siguiente comando desde la **carpeta raíz** del proyecto:
-    ```bash
-    python -m Simulador.GUI.ModernGUI
-    ```
-
-2. **Definir un Cohete:**
-    - Ve a la pestaña **"Cohete"**.
-    - Introduce las dimensiones, masas y posiciones de cada componente.
-    - Carga el archivo de la curva de empuje del motor (formato CSV).
-
-3. **Actualizar y Validar:**
-    - Haz clic en el botón **"Actualizar Cohete"**.
-    - Ve a la pestaña **"Estabilidad"** para verificar que el margen estático sea positivo (idealmente entre 1 y 2 calibres).
-
-4. **Correr la Simulación:**
-    - Ve a la pestaña **"Simulación"** y configura los parámetros del entorno (ubicación, viento, riel de lanzamiento) y el integrador numérico.
-    - Haz clic en **"Ejecutar Simulación"**.
-
-5. **Interpretar los Resultados:**
-    - La aplicación te llevará automáticamente a la pestaña **"Resultados"**, donde verás las gráficas del vuelo.
-    - En la pestaña **"Animaciones"** podrás visualizar la trayectoria en 3D.
-
----
-
-## Arquitectura Técnica
-
-El simulador se construye sobre tres pilares fundamentales:
-
-### Modelo de Vuelo 3-DOF
-
-El motor de simulación resuelve las ecuaciones de movimiento de un cohete modelado como cuerpo rígido con 3 grados de libertad: traslación en los ejes x, y, z y rotación pitch. Las fuerzas consideradas incluyen:
-
-- **Empuje:** Interpolado a partir de curvas experimentales del motor (archivo CSV).
-- **Arrastre aerodinámico:** Coeficiente de arrastre dependiente del número de Mach (Cd = f(M)).
-- **Fuerza normal:** Calculada en función del ángulo de ataque (alpha).
-- **Gravedad:** Modelo dependiente de la altitud con correcciones geopotenciales.
-- **Viento:** Vectores 3D con modelos estocásticos de ráfagas.
-
-### Modelo Atmosférico
-
-Implementación del modelo ISA (International Standard Atmosphere) con 8 capas atmosféricas, proporcionando valores de presión, temperatura, densidad y velocidad del sonido a cualquier altitud entre 0 y 84,852 m.
-
-### Componentes del Cohete
-
-Cada componente del cohete (ojiva, cilindros, aletas, boattail, etc.) incluye cálculos individuales de:
-
-- Centro de Gravedad (CG)
-- Centro de Presión (CP)
-- Momento de inercia (Ix)
-- Masa y posición longitudinal
-
-Esto permite un análisis de estabilidad preciso componente a componente.
-
----
-
-## Estructura del Proyecto
-
-```
-RocketTrajectorySimulator-PropulsionUnam/
-├── Simulador/
-│   ├── GUI/
-│   │   └── ModernGUI.py              # Interfaz gráfica principal (CustomTkinter)
-│   ├── src/
-│   │   ├── VueloLibre.py             # Simulación de vuelo libre
-│   │   ├── VueloParacaidas.py        # Simulación con paracaídas
-│   │   ├── XitleFile.py              # Configuración del cohete Xitle II
-│   │   ├── vehiculo_general.py       # Framework general para vehículos
-│   │   └── condiciones_init.py       # Plantilla de condiciones iniciales
-│   ├── Visualizacion/
-│   │   ├── Graficas.py               # Gráficas 2D de resultados
-│   │   ├── anim_trayectoria.py       # Animación 3D de trayectoria
-│   │   ├── anim_ang.py               # Animación de ángulos de orientación
-│   │   ├── anim_completa.py          # Animación integrada completa
-│   │   └── compare_integ.py          # Comparación entre integradores
-│   ├── Resultados/
-│   │   ├── listas_resultados.py      # Agregación de resultados
-│   │   └── real_vs_simulada.py       # Comparación simulado vs. real
-│   ├── VarParams/
-│   │   ├── variacion_parametros.py   # Barrido paramétrico
-│   │   └── comparacion.py            # Análisis comparativo
-│   └── CasosSimples/                 # Casos de estudio simplificados
-│       └── Simples/
-│           ├── caso1.py              # Tiro parabólico básico
-│           ├── caso2.py              # Gravedad + arrastre
-│           └── caso3.py              # Dinámica completa
-├── Paquetes/
-│   ├── PaqueteFisica/
-│   │   ├── cohete.py                 # Clase Cohete (masa, CG, CP, empuje)
-│   │   ├── componentes.py            # Componentes: Cono, Cilindro, Aletas, Boattail
-│   │   ├── vuelo.py                  # Motor de simulación de vuelo
-│   │   ├── atmosfera.py              # Modelo atmosférico ISA (8 capas)
-│   │   ├── viento.py                 # Modelos de viento y ráfagas
-│   │   └── riel.py                   # Modelo del riel de lanzamiento
-│   ├── PaqueteEDOs/
-│   │   └── integradores.py           # Suite de integradores numéricos
-│   └── utils/
-│       ├── funciones.py              # Funciones auxiliares y constantes
-│       ├── angulos.py                # Utilidades de ángulos de Euler
-│       └── dibujar_cohete2.py        # Dibujo esquemático 2D del cohete
-├── Archivos/
-│   ├── CurvasEmpuje/                 # Curvas de empuje de motores (CSV)
-│   └── DatosVuelo/                   # Datos de telemetría reales
-├── Extras/
-│   ├── DatosVuelo/                   # Scripts de análisis de datos de vuelo
-│   ├── DatosMotor/                   # Herramientas para datos de motores
-│   ├── Visual/                       # Prototipos de visualización 3D
-│   └── NoImplementadoAun/            # Módulos en desarrollo (6-DOF, estructural)
-├── docs/
-│   └── images/                       # Imágenes del README y documentación
-├── requirements.txt                  # Dependencias del proyecto
-├── Tesis_UNAM_NataliaMejBau_COMPLETAFINAL.pdf  # Tesis de licenciatura
-└── README.md
+```bash
+git clone https://github.com/Meijix/RocketTrajectorySimulator-PropulsionUnam.git
+cd RocketTrajectorySimulator-PropulsionUnam
+python -m venv venv
+source venv/bin/activate        # en Windows: .\venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
----
+Dependencias: `numpy`, `scipy`, `pandas`, `matplotlib`, `customtkinter`, `tkintermapview`, `tqdm` y `seaborn`.
 
-## Métodos Numéricos Disponibles
+## Uso
 
-El simulador ofrece múltiples integradores de ecuaciones diferenciales ordinarias (EDOs) para resolver las ecuaciones de movimiento:
+Todo se ejecuta desde la carpeta raíz del repositorio.
 
-| Método | Orden | Paso Adaptativo | Descripción |
-|---|---|---|---|
-| **Euler** | 1 | No | Método explícito de primer orden (referencia) |
-| **Runge-Kutta 2 (RK2)** | 2 | No | Método de segundo orden |
-| **Runge-Kutta 4 (RK4)** | 4 | No | Método clásico de cuarto orden |
-| **RKF45** | 4/5 | Sí | Runge-Kutta-Fehlberg con control de error |
-| **DOP853** | 8/5/3 | Sí | Dormand-Prince de alto orden (recomendado) |
-| **RK45** | 4/5 | Sí | Runge-Kutta adaptativo (vía `scipy`) |
-| **LSODA** | Variable | Sí | Conmutación automática stiff/non-stiff |
-| **BDF** | Variable | Sí | Método multipaso para sistemas stiff |
+### Interfaz gráfica
 
-> **Recomendación:** Para la mayoría de las simulaciones, **DOP853** ofrece el mejor balance entre precisión y rendimiento.
+```bash
+python -m Simulador.GUI.ModernGUI
+```
 
----
+La ventana abre con los datos del Xitle II ya cargados, así que se puede simular de inmediato.
 
-## Validación
+1. **Cohete.** Dimensiones, masas y posiciones de cada componente. La posición Z se mide desde la punta de la nariz hasta el frente de la pieza. "Actualizar Cohete" redibuja el esquema con el CG y el CP.
+2. **Tablas de Datos.** Curva de empuje, Cd contra Mach y masa del motor. Se pueden importar otros CSV, con las mismas columnas que los de `Archivos/`.
+3. **Simulación.** Sitio de lanzamiento (coordenadas y altitud), atmósfera del día, viento, riel (longitud, elevación y azimut), paso de tiempo, integrador y si el vuelo lleva paracaídas.
+4. **Análisis (CG-CP).** Tabla por componente y margen estático al despegue y con los tanques vacíos.
+5. **Resultados.** Tras "Ejecutar Simulación" aparecen el resumen del vuelo, con las coordenadas donde cae el cohete, y las gráficas. "Exportar CSV" guarda la trayectoria, con latitud y longitud de cada punto.
+6. **Mapa.** Mapa real de la zona (OpenStreetMap) con el sitio de lanzamiento, la trayectoria sobre el terreno, el apogeo y el punto de impacto con sus coordenadas. "Abrir mapa interactivo" lo abre en el navegador, donde se puede acercar y mover. Si el lanzamiento es desde el sitio del vuelo real, se dibuja también la trayectoria GPS medida.
 
-Los resultados del simulador han sido rigurosamente validados mediante la comparación con:
+"Guardar Datos" y "Cargar Datos" escriben y leen la configuración completa en un archivo JSON.
 
-1. **Soluciones Analíticas:** Para casos simplificados (tiro parabólico con arrastre lineal y cuadrático), demostrando la precisión del motor numérico.
-2. **Datos Experimentales:** Comparación con datos de telemetría del vuelo real del cohete **Xitle II** de Propulsión UNAM, obteniendo una correlación excelente (**error < 1% en apogeo**).
-3. **Software Comercial:** Contraste con simuladores estándar de la industria como **OpenRocket**, demostrando una mayor precisión en la predicción de la trayectoria bajo condiciones de viento.
+Por defecto el sitio, la atmósfera y el viento son los del vuelo real del Xitle II (Spaceport America, 22 de junio de 2024). Para otro lanzamiento basta cambiar las coordenadas, la altitud y el azimut, y elegir el viento constante.
 
-> Ver Capítulo 5 de la [tesis](./Tesis_UNAM_NataliaMejBau_COMPLETAFINAL.pdf) para un análisis detallado de la validación.
+Tres avisos:
 
----
+- El mapa necesita conexión a internet. Sin ella, la trayectoria se dibuja sobre un fondo en blanco y las coordenadas se muestran igual.
+- En la pestaña "Simulación" hay además un mapa pequeño del sitio que solo funciona con Tk 8. Con Tk 9 la librería de ese mapa cierra el programa, así que en su lugar se muestran las coordenadas. La pestaña "Mapa" funciona con cualquier versión.
+- De los dos paracaídas del formulario solo se simula el drogue, que se abre en el apogeo. El principal cuenta como masa.
 
-## Casos de Estudio Simples
+### Sin interfaz
 
-El directorio `Simulador/CasosSimples/Simples/` contiene casos simplificados ideales para aprender los fundamentos de la simulación:
+```bash
+python -m Simulador.src.VueloLibre        # sin paracaídas
+python -m Simulador.src.VueloParacaidas   # con paracaídas
+```
 
-| Caso | Archivo | Descripción |
-|---|---|---|
-| Caso 1 | `caso1.py` | Tiro parabólico básico (solo gravedad) |
-| Caso 2 | `caso2.py` | Gravedad + arrastre aerodinámico |
-| Caso 3 | `caso3.py` | Dinámica completa con empuje, arrastre y gravedad |
+El cohete se define en `Simulador/src/XitleFile.py` y las condiciones (riel, viento, paso, integrador) en `Simulador/src/condiciones_init.py`. Los resultados se guardan en `Simulador/Resultados/OutputFiles/` como CSV y JSON.
 
-Estos casos son útiles para validar el motor numérico contra soluciones analíticas conocidas y para entender paso a paso cómo funciona el simulador.
+Con esos archivos trabajan los scripts de `Simulador/Visualizacion/` (gráficas y animaciones) y `Simulador/Resultados/real_vs_simulada.py`, que compara la altura simulada con la medida.
 
----
+### Pruebas
 
-## Créditos y Autoría
+```bash
+pip install -r requirements-dev.txt
+python -m pytest tests
+```
 
-Este proyecto es el resultado del trabajo de tesis para obtener el título de Matemática por la Facultad de Ciencias de la UNAM.
+Tardan medio minuto. Comparan la atmósfera con la ISA, los integradores con soluciones analíticas y varios vuelos completos entre sí.
 
-- **Autora Principal:** Natalia Edith Mejia Bautista
-- **Asesores de Tesis:** Dra. Ursula X. Iturrarán Viveros, Dr. Juan Claudio Toledo Roy
+## El modelo
 
-En colaboración con el equipo **Propulsión UNAM**, quienes proporcionaron los datos experimentales y fueron la principal fuente de inspiración y validación para este proyecto.
+El estado del cohete es posición, velocidad, ángulo de cabeceo y velocidad angular. Las fuerzas son:
 
----
+- **Empuje.** Interpolado de la curva del motor, a lo largo del eje del cohete.
+- **Arrastre.** Con el Cd interpolado de una tabla contra el número de Mach. El paracaídas, cuando está abierto, suma su propio arrastre.
+- **Fuerza normal.** Proporcional al seno del ángulo de ataque. Aplicada en el centro de presión, es la que endereza al cohete.
+- **Gravedad.** Disminuye con la altura.
+- **Viento.** Horizontal, con ráfagas. Puede ser constante o un perfil que cambia con la altura. Cada segundo se sortean una ráfaga, que se suma a la rapidez base, y una pequeña desviación de la dirección, y se interpola entre sorteos. Las ráfagas tienen además una componente vertical pequeña, de media cero. Con una semilla, el viento se repite igual en cada corrida.
 
-## Cómo Contribuir
+Mientras el cohete está en el riel no gira.
 
-Las contribuciones son bienvenidas. Si deseas mejorar el simulador:
+### Sitio, atmósfera y viento del día
 
-1. Haz un **fork** del repositorio.
-2. Crea una rama para tu funcionalidad: `git checkout -b feature/nueva-funcionalidad`
-3. Realiza tus cambios y haz commit: `git commit -m "Agrega nueva funcionalidad"`
-4. Haz push a tu rama: `git push origin feature/nueva-funcionalidad`
-5. Abre un **Pull Request** describiendo tus cambios.
+El origen del simulador es el sitio de lanzamiento. El eje x apunta hacia donde se inclina el riel (su azimut, medido desde el norte), y con eso cada punto de la trayectoria se convierte a latitud y longitud.
 
-Si encuentras un bug o tienes una sugerencia, abre un [issue](https://github.com/Meijix/RocketTrajectorySimulator-PropulsionUnam/issues).
+La atmósfera es la estándar (ISA) por capas, ajustada al sitio y al día con tres datos: la altitud del sitio, la diferencia de temperatura respecto a la ISA y la presión medida en el sitio. La presión a cada altura sale de integrar el equilibrio hidrostático desde el sitio, y la densidad de la ecuación de gas ideal. Sin esos datos queda la ISA al nivel del mar.
 
----
+Para el vuelo real del Xitle II los valores están en `Archivos/DatosVuelo/condiciones_2024-06-22.json`, con sus fuentes:
+
+| Dato | Valor | De dónde sale |
+| --- | --- | --- |
+| Sitio | 32.94753° N, 106.91019° O, 1395 m s. n. m. (Spaceport America) | primer punto GPS del rastreador |
+| Fecha y hora | 22 de junio de 2024, hacia las 12:20 hora local | registro GPS y nombre del archivo |
+| Azimut del lanzamiento | 220° | rumbo de la trayectoria GPS |
+| Elevación del riel | 84° | la que reproduce la trayectoria GPS |
+| Temperatura en superficie | 28 a 31 °C (ISA + 20 °C en toda la columna) | reanálisis ERA5 y archivo de pronósticos |
+| Presión en el sitio | 868.5 hPa | ídem |
+| Viento en superficie | 1 a 2 m/s del oeste-noroeste, ráfagas de 2 a 5 m/s | ídem |
+| Viento en altura | 3 m/s a 6 km y 7 m/s a 7.7 km, del sur-suroeste | ídem |
+
+Los datos meteorológicos son de modelo (Open-Meteo), no mediciones en la plataforma. Con ISA + 20 °C el modelo reproduce las alturas de 700, 600, 500 y 400 hPa de ese día con menos de 0.5 % de error en la presión. El viento se usa como perfil con la altura, con la dirección en convención meteorológica (de dónde viene, en grados desde el norte).
+
+Los centros de presión y los coeficientes de fuerza normal de la nariz, las aletas y el boattail salen de las fórmulas de Barrowman. El desarrollo completo está en mi tesis.
+
+### Integradores
+
+| Nombre en el código | Método | Paso |
+| --- | --- | --- |
+| `Euler` | Euler explícito, orden 1 | fijo |
+| `RungeKutta2` | Heun (trapecio explícito), orden 2 | fijo |
+| `RungeKutta4` | Runge-Kutta clásico, orden 4 | fijo |
+| `RKF45` | Runge-Kutta-Fehlberg 4(5) | adaptativo |
+| `RK23` (SciPy) | Bogacki-Shampine 3(2) | adaptativo |
+| `RK45` (SciPy) | Dormand-Prince 5(4) | adaptativo |
+| `DOP853` (SciPy) | Dormand-Prince de orden 8, con estimadores de orden 5 y 3 | adaptativo |
+| `LSODA` (SciPy) | Adams y BDF con cambio automático | adaptativo |
+| `BDF` (SciPy) | Diferenciación hacia atrás, orden 1 a 5 | adaptativo |
+
+Los cuatro primeros los programé para la tesis y están en `Paquetes/PaqueteEDOs/integradores.py`. Los demás son los de `scipy.integrate.solve_ivp`.
+
+Ojo con los nombres: el `RK45` de SciPy no es Runge-Kutta-Fehlberg sino Dormand-Prince 5(4). Los dos son pares de orden 4 y 5, pero con coeficientes distintos. El Fehlberg es `RKF45`.
+
+En los métodos de paso fijo el paso configurado es el que se usa siempre. En los adaptativos es el paso máximo. La integración se detiene al tocar el suelo.
+
+La lista de métodos, con sus nombres, está en un solo lugar (`Paquetes/PaqueteEDOs/metodos.py`) y de ahí la toman el simulador, la interfaz y todas las comparaciones.
+
+### Comparación de los integradores en el vuelo completo
+
+```bash
+python -m Simulador.Visualizacion.compare_integ
+```
+
+Simula el mismo vuelo con los nueve métodos y los compara con una solución de referencia (DOP853 con un paso cinco veces menor). Guarda la tabla y las figuras en `Simulador/Resultados/OutputFiles/ComparacionIntegradores/`. Para el vuelo libre del Xitle II con paso de 0.01 s:
+
+| Método | Apogeo | Diferencia de apogeo con la referencia | Evaluaciones de f | Tiempo de cómputo |
+| --- | --- | --- | --- | --- |
+| Euler | 7416 m | −0.59 m | 8 466 | 3.0 s |
+| RK2 | 7417 m | 0.39 m | 16 932 | 4.4 s |
+| RK4 | 7417 m | 0.09 m | 33 864 | 7.3 s |
+| RKF45 | 7417 m | 0.04 m | 51 108 | 10.5 s |
+| RK23 | 7417 m | −0.05 m | 25 418 | 6.2 s |
+| RK45 | 7417 m | −0.08 m | 50 798 | 10.5 s |
+| DOP853 | 7417 m | −0.02 m | 101 600 | 18.7 s |
+| BDF | 7417 m | −0.10 m | 17 241 | 5.3 s |
+| LSODA | 7417 m | −0.10 m | 12 382 | 3.9 s |
+
+Los tiempos dependen de la máquina; las evaluaciones de f no.
+
+## Comparación con el vuelo real
+
+El Xitle II voló el 22 de junio de 2024 en Spaceport America. Hay tres registros: la trayectoria GPS del rastreador Featherweight, la altura de la telemetría ASYB y la curva de altura contra tiempo. El cohete bajó sin paracaídas: el último punto GPS lo muestra a 399 m de altura cayendo a 273 m/s.
+
+La simulación usa el sitio, la atmósfera y el viento de ese día (vuelo libre, DOP853):
+
+| | Vuelo real | Simulación |
+| --- | --- | --- |
+| Apogeo sobre el sitio | 6573 m (GPS), 6569 m (curva de altura) | 7417 m |
+| Tiempo al apogeo | unos 40 s | 42.2 s |
+| Distancia horizontal en el apogeo | 2532 m | 2660 m |
+| Rumbo de la trayectoria | 220° | 221° |
+| Punto de caída | último GPS en 32.91602°, −106.94135°, a 4553 m del sitio | 32.91453°, −106.94387°, a 4831 m |
+| Velocidad de caída | 273 m/s a 399 m de altura | 287 m/s en el impacto |
+
+La trayectoria sobre el terreno coincide bien: el impacto simulado queda a 288 m del último punto GPS, que todavía estaba en el aire. El apogeo, en cambio, sale 12.9 % por encima del medido.
+
+Esa diferencia no viene de la atmósfera ni del integrador. Para igualar el apogeo medido haría falta bajar el empuje un 11 % o subir el arrastre un 49 %, así que lo que hay que revisar es la curva de empuje (es de una prueba estática, no del vuelo), la masa del cohete o la tabla de Cd. Como referencia, OpenRocket da 5955 m.
+
+Los datos del vuelo están en `Archivos/` y la discusión completa en el capítulo 5 de la tesis. Las cifras de la tesis las obtuve con una versión anterior del código, que suponía atmósfera al nivel del mar, y no coinciden con las de esta tabla.
+
+## Casos simples
+
+`Simulador/CasosSimples/Simples/` tiene tres problemas con solución analítica para comparar los nueve métodos entre sí, variando el paso de tiempo:
+
+- `caso1.py`: movimiento vertical con gravedad y masa constante.
+- `caso2.py`: gravedad y arrastre lineal.
+- `caso3.py`: gravedad y arrastre cuadrático.
+
+Los métodos de paso fijo se corren con seis pasos distintos. Los adaptativos, con esos mismos valores como paso máximo y además con paso libre.
+
+Cada script guarda, en la carpeta con su nombre:
+
+- `tabla_metodos.csv`: una fila por método y paso, con el número de pasos, las evaluaciones de f, el tiempo de cómputo y los errores de posición y velocidad.
+- `figuras/`: todas las gráficas, numeradas en el orden en que se muestran.
+
+Las imágenes sueltas que hay en esas carpetas son anteriores: solo incluyen seis métodos y llaman RK45 a lo que era Dormand-Prince.
+
+## Organización del repositorio
+
+```text
+Paquetes/
+  PaqueteFisica/     cohete, componentes, vuelo, atmósfera, viento, riel
+  PaqueteEDOs/       integradores propios y catálogo de todos los métodos
+  utils/             lectura y guardado de datos, dibujo del cohete
+Simulador/
+  GUI/               ModernGUI.py (interfaz) y backend.py (conexión con el simulador)
+  src/               definición del Xitle II, condiciones iniciales y scripts de vuelo
+  Visualizacion/     gráficas y animaciones
+  Resultados/        resultados guardados y comparación con el vuelo real
+  VarParams/         barridos de parámetros
+  CasosSimples/      casos de prueba de los integradores
+Archivos/            curvas de empuje, tabla de Cd y datos del vuelo real
+Extras/              scripts sueltos de análisis y prototipos
+tests/               pruebas automáticas
+```
+
+`Simulador/GUI/GUI.py` es la interfaz anterior. Se conserva como referencia, pero la que se mantiene es `ModernGUI.py`.
+
+## Limitaciones conocidas
+
+- El modelo es plano: no hay alabeo ni guiñada. El viento cruzado desplaza al cohete de lado por arrastre, pero no lo hace girar hacia el viento.
+- Solo se simula un paracaídas, abierto en el apogeo.
+- El apogeo simulado del Xitle II queda 13 % por encima del medido (ver la comparación con el vuelo real).
+- La atmósfera del día se describe con un solo ajuste de temperatura para toda la columna; no usa un sondeo completo.
+- Algunos scripts de `Extras/` y `Simulador/VarParams/` los dejé a medias y no corren tal cual.
+
+## Pendientes
+
+- Pasar a seis grados de libertad.
+- Dos etapas de recuperación (drogue y principal).
+- Análisis de dispersión por Monte Carlo.
+- Cálculos estructurales.
+
+## Créditos
+
+- Autora: Natalia Edith Mejia Bautista.
+- Mis asesores de tesis: Dra. Ursula X. Iturrarán Viveros y Dr. Juan Claudio Toledo Roy.
+- Propulsión UNAM aportó el cohete, las pruebas del motor y los datos del vuelo.
+
+Para reportar errores o proponer cambios, abre un [issue](https://github.com/Meijix/RocketTrajectorySimulator-PropulsionUnam/issues) o un pull request.
 
 ## Licencia
 
-Este proyecto se distribuye bajo la **Licencia MIT**. Eres libre de usar, modificar y distribuir este software, siempre y cuando se incluya el aviso de copyright original.
-
----
-
-## Posibles Mejoras (Roadmap)
-
-- [ ] Ampliar a modelo de **6 Grados de Libertad** (6-DOF) con ángulos de Euler completos.
-- [ ] Añadir soporte para **cohetes multietapa**.
-- [ ] Integrar un módulo de **simulación de Monte Carlo** para análisis de dispersión.
-- [ ] Desarrollar modelos aerodinámicos más avanzados para motores sólidos y **sistemas de control activo (TVC)**.
-- [ ] Agregar **cálculos estructurales** (cargas, esfuerzos, flameo).
-- [ ] Empaquetar el simulador como una **aplicación ejecutable** independiente.
-- [ ] Implementar **exportación de reportes** en PDF con los resultados de la simulación.
+MIT. Ver [LICENSE](./LICENSE).
