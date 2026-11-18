@@ -66,7 +66,7 @@ PARAMS_XITLE = {
     "main_mass": 1.7, "main_pos_z": 1.4, "main_len": 0.30,
     # --- Propelentes ---
     "oxidante_mass": 12.0, "oxidante_pos_z": 2.156, "oxidante_len": 1.33, "oxidante_diam": 0.1461,
-    "grano_mass": 4.0, "grano_pos_z": 3.573, "grano_length": 0.505, "grano_outer_diam": 0.158, "grano_inner_diam": 0.334,
+    "grano_mass": 4.0, "grano_pos_z": 3.573, "grano_length": 0.505, "grano_outer_diam": 0.158, "grano_inner_diam": 0.0334,
     # --- Entorno y simulación ---
     # Sitio y día del vuelo real del Xitle II (Archivos/DatosVuelo/condiciones_2024-06-22.json)
     "launch_lat": 32.94753, "launch_lon": -106.91019, "launch_alt": 1395, "launch_date": "2024-06-22",
@@ -182,6 +182,12 @@ def validar_parametros(params):
         if clave.endswith("_mass") or clave == "motor_mass_inert":
             if _num(params, clave) < 0:
                 raise ValueError(f"La masa '{clave}' no puede ser negativa.")
+    # Un tubo no puede tener el hueco más ancho que su exterior
+    huecos = [(f"{pref}_diam_int", f"{pref}_diam_ext", visible) for _, pref, visible in _TUBOS_EXTERNOS]
+    huecos.append(("grano_inner_diam", "grano_outer_diam", "Grano"))
+    for interior, exterior, visible in huecos:
+        if _num(params, exterior) <= 0 or not 0 <= _num(params, interior) < _num(params, exterior):
+            raise ValueError(f"{visible}: el diámetro interior debe ser menor que el exterior (y este, mayor que 0).")
     if _num(params, "fin_num") < 3:
         raise ValueError("El número de aletas debe ser al menos 3.")
     angulo = _num(params, "rail_angle")

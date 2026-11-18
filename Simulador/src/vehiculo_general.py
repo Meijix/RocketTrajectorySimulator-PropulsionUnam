@@ -111,7 +111,7 @@ oxidante_diam_int = 0
 grano_masa = 4.0
 grano_longitud = 0.505
 grano_diam_ext = 0.158
-grano_diam_int = 0.334
+grano_diam_int = 0.0334  # diametro del canal central
 #grano_posicion = np.array([0.0, 0.0, valvulas.bottom[2]])
 
 #Componentes externos

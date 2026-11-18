@@ -43,7 +43,7 @@ aletas= Aletas("Aletas", 1.1, np.array([0.0, 0.0, CC.bottom[2]]), diam_ext, 4, 0
 
 #Combustibles del cohete
 oxidante = Cilindro("Oxidante", 12.0, np.array([0.0, 0.0, transfer.bottom[2]]), 1.33, 0.1461, 0)
-grano = Cilindro("Grano", 7.0 , np.array([0.0, 0.0, valvulas.bottom[2]]), 0.505 , 0.158, 0.334)
+grano = Cilindro("Grano", 7.0 , np.array([0.0, 0.0, valvulas.bottom[2]]), 0.505 , 0.158, 0.0334)  # (longitud, diametro exterior, diametro del canal)
 
 # Tablas de Cd, empuje y masa
 #tabla_Cd_fpath = '../Archivos/cdmachXitle.csv'
