@@ -1,4 +1,5 @@
 """Pestaña Resultados."""
+import time
 from tkinter import filedialog, messagebox
 
 import customtkinter as ctk
@@ -6,23 +7,31 @@ import numpy as np
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 
 from Simulador.GUI import backend
+from .graficas import PANELES, CapaMovil, Cursor, dibujar_serie, eventos_del_vuelo
 from .tema import Tema, fuente
-from .widgets import Tarjeta, boton, colocar_figura, estilo_ejes, figura, panel
+from .ventana_grafica import VentanaGrafica
+from .widgets import Tarjeta, boton, colocar_figura, figura, panel
 
 
 class PestanaResultados(ctk.CTkFrame):
-    """Cifras del vuelo y seis gráficas con un cursor de tiempo común."""
+    """Cifras del vuelo y seis gráficas con un cursor de tiempo común.
 
-    SERIES = (("z", "Altitud", "z (m)", Tema.AMARILLO), ("velocidad", "Velocidad", "|v| (m/s)", Tema.AZUL),
-              ("aceleracion", "Aceleración", "|a| (m/s²)", Tema.ROJO), ("mach", "Número de Mach", "Mach", Tema.VERDE))
+    El cursor se mueve de tres formas: con el control deslizante, pasando el ratón sobre una
+    gráfica o con el botón de reproducir. Un doble clic sobre una gráfica la abre en grande.
+    """
+
     TARJETAS = (("apogeo", "Apogeo"), ("vel_max", "Velocidad máxima"), ("riel", "Salida del riel"),
                 ("impacto", "Impacto"), ("distancia", "Cayó a"), ("margen", "Margen estático mínimo"))
+    VELOCIDADES = {"1×": 1.0, "5×": 5.0, "20×": 20.0}   # segundos de vuelo por segundo de reloj
+    CUADRO_MS = 33                                       # pausa entre cuadros al reproducir
 
     def __init__(self, master, app):
         super().__init__(master, fg_color="transparent")
         self.app = app
-        self.df = None
+        self.df = self.resumen = None
         self.cursores = []
+        self.instante = 0.0
+        self.reproduciendo = False
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)
 
@@ -36,16 +45,22 @@ class PestanaResultados(ctk.CTkFrame):
 
         control = panel(self)
         control.grid(row=1, column=0, sticky="ew", pady=8)
-        control.grid_columnconfigure(1, weight=1)
-        ctk.CTkLabel(control, text="Recorre el vuelo", font=fuente(12), text_color=Tema.TEXTO_2).grid(row=0, column=0, padx=(16, 8), pady=10)
+        control.grid_columnconfigure(2, weight=1)
+        self.boton_reproducir = boton(control, "▶  Reproducir", self.alternar_reproduccion, state="disabled", width=130)
+        self.boton_reproducir.grid(row=0, column=0, padx=(12, 6), pady=8)
+        self.velocidad = ctk.CTkOptionMenu(control, values=list(self.VELOCIDADES), width=70, height=36, corner_radius=18,
+                                           fg_color=Tema.FONDO, button_color=Tema.BORDE_CAMPO, button_hover_color=Tema.TENUE,
+                                           text_color=Tema.TEXTO, dropdown_fg_color=Tema.PANEL, font=fuente(13))
+        self.velocidad.set("5×")
+        self.velocidad.grid(row=0, column=1, padx=(0, 10))
         self.tiempo = ctk.CTkSlider(control, from_=0, to=1, progress_color=Tema.AMARILLO, button_color=Tema.AMARILLO,
-                                    button_hover_color=Tema.AMARILLO_CLARO, fg_color=Tema.BORDE, command=self._mover_cursor,
+                                    button_hover_color=Tema.AMARILLO_CLARO, fg_color=Tema.BORDE, command=self.ir_a,
                                     state="disabled")
-        self.tiempo.grid(row=0, column=1, sticky="ew")
-        self.lectura = ctk.CTkLabel(control, text="", font=fuente(12, mono=True), text_color=Tema.TEXTO, width=330, anchor="w")
-        self.lectura.grid(row=0, column=2, padx=12)
+        self.tiempo.grid(row=0, column=2, sticky="ew")
+        self.lectura = ctk.CTkLabel(control, text="", font=fuente(12, mono=True), text_color=Tema.TEXTO, width=430, anchor="w")
+        self.lectura.grid(row=0, column=3, padx=12)
         self.exportar = boton(control, "Exportar CSV", self.exportar_csv, state="disabled", border_color=Tema.TEXTO)
-        self.exportar.grid(row=0, column=3, padx=(0, 12), pady=8)
+        self.exportar.grid(row=0, column=4, padx=(0, 12), pady=8)
 
         self.marco = panel(self)
         self.marco.grid(row=2, column=0, sticky="nsew")
@@ -54,18 +69,23 @@ class PestanaResultados(ctk.CTkFrame):
         self.fig = figura(9, 5)
         self.lienzo = colocar_figura(self.fig, self.marco)
         self.lienzo.get_tk_widget().grid(row=0, column=0, sticky="nsew", padx=10, pady=(10, 0))
-        barra = NavigationToolbar2Tk(self.lienzo, self.marco, pack_toolbar=False)   # zoom, desplazamiento y guardar imagen
-        barra.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 6))
+        self.barra = NavigationToolbar2Tk(self.lienzo, self.marco, pack_toolbar=False)   # zoom, desplazamiento y guardar imagen
+        self.barra.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 6))
+        self.capa = CapaMovil(self.lienzo)
+        self.lienzo.mpl_connect("motion_notify_event", self._al_mover_raton)
+        self.lienzo.mpl_connect("button_press_event", self._al_hacer_clic)
         self.limpiar()
 
     def limpiar(self, mensaje="Los resultados de la simulación se mostrarán aquí."):
-        self.df = None
+        self.detener()
+        self.df = self.resumen = None
         self.cursores = []
+        self.capa.vaciar()
         self.fig.clear()
         self.fig.text(0.5, 0.5, mensaje, color=Tema.TENUE, ha="center", va="center", fontsize=12)
         self.lienzo.draw_idle()
-        self.tiempo.configure(state="disabled")
-        self.exportar.configure(state="disabled")
+        for control in (self.tiempo, self.exportar, self.boton_reproducir):
+            control.configure(state="disabled")
         self.lectura.configure(text="")
         for tarjeta in self.tarjetas.values():
             tarjeta.fijar("--")
@@ -96,59 +116,91 @@ class PestanaResultados(ctk.CTkFrame):
         t["distancia"].fijar(f"{r['distancia']:.0f} m", f"rumbo {r['rumbo_impacto']:.0f}° · {r['lat_impacto']:.5f}°, {r['lon_impacto']:.5f}°")
         t["margen"].fijar(f"{r['margen_min']:.2f} cal", backend.etiqueta(r["integrador"]))
 
+        self.detener()
+        self.t_final = float(df["t"].iloc[-1])
         self._graficar(df, r)
-        self.exportar.configure(state="normal")
-        self.tiempo.configure(state="normal", from_=0, to=float(df["t"].iloc[-1]))
-        self.tiempo.set(r["t_apogeo"])
-        self._mover_cursor(r["t_apogeo"])
+        for control in (self.exportar, self.boton_reproducir):
+            control.configure(state="normal")
+        self.tiempo.configure(state="normal", from_=0, to=self.t_final)
+        self.ir_a(r["t_apogeo"])
 
     def _graficar(self, df, r):
         self.fig.clear()
+        self.capa.vaciar()
         self.cursores = []
-        eventos = [(r["t_MECO"], Tema.NARANJA, "fin de quemado"), (r["t_apogeo"], Tema.VERDE, "apogeo")]
-        if r.get("t_principal") is not None:
-            eventos.append((r["t_principal"], "#C28BFF", "paracaídas principal"))
-
-        def cursor(ax, columna_x, columna_y, color):
-            punto, = ax.plot([], [], marker="o", color="white", markeredgecolor=color, markeredgewidth=2, markersize=7, zorder=5)
-            self.cursores.append((punto, columna_x, columna_y))
-
-        for posicion, (columna, nombre, eje_y, color) in enumerate(self.SERIES, start=1):
+        cabeceo = df["theta"].to_numpy(dtype=float)
+        for posicion, serie in enumerate(PANELES, start=1):
             ax = self.fig.add_subplot(2, 3, posicion)
-            ax.plot(df["t"], df[columna], color=color, linewidth=1.4)
-            for instante, tono, _ in eventos:
-                if instante <= df["t"].iloc[-1]:
-                    ax.axvline(instante, color=tono, linestyle="--", linewidth=0.9)
-            estilo_ejes(ax, nombre, "Tiempo (s)", eje_y)
-            cursor(ax, "t", columna, color)
+            t, x, y = dibujar_serie(ax, df, r, serie)
+            # En la trayectoria el cursor es un cohete pequeño que gira con el ángulo de cabeceo
+            self.cursores.append(Cursor(self.capa, ax, serie, t, x, y, cabeceo=cabeceo if serie.x != "t" else None))
+        self.lecturas = [c for c in self.cursores if c.serie.y in ("z", "velocidad", "mach") and c.serie.x == "t"]
+        self.cabeceo = (df["t"].to_numpy(dtype=float), cabeceo)
 
-        # Ángulo de ataque: solo entre la salida del riel y el apogeo (después no es representativo)
-        tramo = df[(df["t"] >= (r["t_salida_riel"] or 0.0)) & (df["t"] <= r["t_apogeo"])]
-        ax = self.fig.add_subplot(2, 3, 5)
-        ax.plot(tramo["t"], tramo["alpha"], color=Tema.NARANJA, linewidth=1.4)
-        estilo_ejes(ax, "Ángulo de ataque (riel a apogeo)", "Tiempo (s)", "α (°)")
-        cursor(ax, "t", "alpha", Tema.NARANJA)
-        self.tramo_alpha = (float(tramo["t"].iloc[0]), float(tramo["t"].iloc[-1])) if len(tramo) else (0.0, 0.0)
-
-        ax = self.fig.add_subplot(2, 3, 6)
-        ax.plot(df["x"], df["z"], color=Tema.TEXTO, linewidth=1.4)
-        estilo_ejes(ax, "Trayectoria (plano de vuelo)", "x (m)", "z (m)")
-        cursor(ax, "x", "z", Tema.TEXTO)
-
-        leyenda = "Líneas punteadas: " + ", ".join(f"{nombre} ({instante:.1f} s)" for instante, _, nombre in eventos)
-        self.fig.text(0.5, 0.008, leyenda, ha="center", fontsize=8, color=Tema.TENUE)
+        leyenda = "Líneas punteadas: " + ", ".join(f"{nombre} ({instante:.1f} s)" for instante, _, nombre in eventos_del_vuelo(r))
+        self.fig.text(0.5, 0.008, leyenda + ".  Pasa el cursor sobre una gráfica para leerla; doble clic para ampliarla.",
+                      ha="center", fontsize=8, color=Tema.TENUE)
         self.fig.tight_layout(pad=1.4, rect=(0, 0.02, 1, 1))
+        self.lienzo.draw_idle()
 
-    def _mover_cursor(self, instante):
-        """Coloca el punto de cada gráfica en el instante elegido y actualiza la lectura."""
+    # ------------------------------------------------------------- Cursor de tiempo
+    def ir_a(self, instante):
+        """Lleva el cursor de todas las gráficas, el control deslizante y la lectura a un instante."""
         if self.df is None:
             return
-        df, t = self.df, float(instante)
-        leer = lambda columna: float(np.interp(t, df["t"], df[columna]))
-        for punto, columna_x, columna_y in self.cursores:
-            if columna_y == "alpha" and not self.tramo_alpha[0] <= t <= self.tramo_alpha[1]:
-                punto.set_data([], [])   # el ángulo de ataque solo se grafica hasta el apogeo
-            else:
-                punto.set_data([leer(columna_x)], [leer(columna_y)])
-        self.lienzo.draw_idle()
-        self.lectura.configure(text=f"t = {t:5.1f} s   z = {leer('z'):6.0f} m   v = {leer('velocidad'):5.1f} m/s   Mach {leer('mach'):.2f}")
+        self.instante = t = float(min(max(float(instante), 0.0), self.t_final))
+        self.tiempo.set(t)
+        for cursor in self.cursores:
+            cursor.mover(t)
+        self.capa.actualizar()
+        valores = "   ".join(c.serie.formato.format(c.valor(t)) for c in self.lecturas)
+        self.lectura.configure(text=f"t = {t:5.1f} s   {valores}   θ = {np.interp(t, *self.cabeceo):.0f}°")
+
+    def _sin_herramienta(self):
+        """True si no está activo el zoom ni el desplazamiento de la barra de matplotlib."""
+        return getattr(self.barra.mode, "name", "NONE") == "NONE"
+
+    def _cursor_de(self, evento):
+        return next((c for c in self.cursores if c.ax is evento.inaxes), None)
+
+    def _al_mover_raton(self, evento):
+        cursor = self._cursor_de(evento)
+        if cursor is None or self.reproduciendo or not self._sin_herramienta():
+            return
+        instante = cursor.instante_en(evento)
+        if instante is not None:
+            self.ir_a(instante)
+
+    def _al_hacer_clic(self, evento):
+        cursor = self._cursor_de(evento)
+        if cursor is not None and evento.dblclick and self._sin_herramienta():
+            VentanaGrafica(self, self.df, self.resumen, cursor.serie)
+
+    # ----------------------------------------------------------------- Reproducción
+    def alternar_reproduccion(self):
+        if self.reproduciendo:
+            return self.detener()
+        if self.df is None:
+            return
+        if self.instante >= self.t_final - 1e-6:
+            self.ir_a(0.0)   # ya estaba al final: vuelve a empezar
+        self.reproduciendo = True
+        self.boton_reproducir.configure(text="❚❚  Pausar")
+        self._ultimo_cuadro = time.perf_counter()
+        self.after(self.CUADRO_MS, self._avanzar)
+
+    def detener(self):
+        self.reproduciendo = False
+        self.boton_reproducir.configure(text="▶  Reproducir")
+
+    def _avanzar(self):
+        """Avanza el vuelo según el tiempo real transcurrido, para que la rapidez no dependa del equipo."""
+        if not self.reproduciendo or self.df is None:
+            return
+        ahora = time.perf_counter()
+        paso = (ahora - self._ultimo_cuadro) * self.VELOCIDADES[self.velocidad.get()]
+        self._ultimo_cuadro = ahora
+        self.ir_a(self.instante + paso)
+        if self.instante >= self.t_final - 1e-6:
+            return self.detener()
+        self.after(self.CUADRO_MS, self._avanzar)
