@@ -31,7 +31,7 @@ from Simulador.src import dia_de_vuelo
 
 # Todos los métodos del catálogo; DOP853 primero porque es el que se usa por defecto
 INTEGRADORES = ["DOP853"] + [clave for clave in CLAVES_VUELO if clave != "DOP853"]
-RECUPERACION = ["Vuelo libre (sin paracaídas)", "Paracaídas drogue en el apogeo"]
+RECUPERACION = ["Vuelo libre (sin paracaídas)", "Paracaídas drogue en el apogeo", "Dos etapas: drogue en el apogeo y principal"]
 VIENTOS = ["Perfil del día del vuelo (22-jun-2024)", "Constante (campos de abajo)"]
 GEOMETRIAS_NARIZ = {"ogiva": "ogiva", "Cónico": "conica", "Elíptico": "eliptica", "Parabólico": "parabolica"}
 
@@ -62,8 +62,8 @@ PARAMS_XITLE = {
     "avionics_mass": 1.8, "avionics_pos_z": 0.20, "avionics_len": 0.21,
     "cu_mass": 4.3, "cu_pos_z": 0.50, "cu_len": 0.3,
     "motor_mass_inert": 0.0, "motor_pos_z": 3.573, "motor_len": 0.5,
-    "drogue_mass": 0.6, "drogue_pos_z": 1.0, "drogue_len": 0.17, "drogue_chute_diam": 0.944, "drogue_cd": 0.8,
-    "main_mass": 1.7, "main_pos_z": 1.4, "main_len": 0.30,
+    "drogue_mass": 0.6, "drogue_pos_z": 1.0, "drogue_len": 0.17, "drogue_chute_diam": 0.944, "drogue_cd": 0.8, "drogue_fill": 8,
+    "main_mass": 1.7, "main_pos_z": 1.4, "main_len": 0.30, "main_chute_diam": 1.514, "main_cd": 2.0, "main_deploy_alt": 450, "main_fill": 8,
     # --- Propelentes ---
     "oxidante_mass": 12.0, "oxidante_pos_z": 2.156, "oxidante_len": 1.33, "oxidante_diam": 0.1461,
     "grano_mass": 4.0, "grano_pos_z": 3.573, "grano_length": 0.505, "grano_outer_diam": 0.158, "grano_inner_diam": 0.0334,
@@ -199,6 +199,16 @@ def validar_parametros(params):
         raise ValueError("La altitud del sitio debe estar entre -500 m y 6000 m sobre el nivel del mar.")
     _presion_sitio(params)
     _semilla(params)
+    if params.get("recovery", RECUPERACION[0]) not in RECUPERACION:
+        raise ValueError(f"Modo de recuperación desconocido: {params.get('recovery')!r}.")
+    if params.get("recovery") in RECUPERACION[1:] and (_num(params, "drogue_chute_diam") <= 0 or _num(params, "drogue_cd") <= 0):
+        raise ValueError("El diámetro y el coeficiente de arrastre del drogue deben ser mayores que 0.")
+    if _num(params, "drogue_fill") < 0 or _num(params, "main_fill") < 0:
+        raise ValueError("La constante de llenado de los paracaídas no puede ser negativa (0 = apertura instantánea).")
+    if params.get("recovery") == RECUPERACION[2]:
+        for clave in ("main_chute_diam", "main_cd", "main_deploy_alt"):
+            if _num(params, clave) <= 0:
+                raise ValueError(f"El campo '{clave}' del paracaídas principal debe ser mayor que 0.")
     if params.get("integrator", "DOP853") not in INTEGRADORES:
         raise ValueError(f"Integrador desconocido: {params.get('integrator')!r}.")
 
@@ -289,10 +299,15 @@ def ejecutar_simulacion(params, rutas, estado_cb=None, con_mapa=False):
     riel = Torrelanzamiento(n("rail_len"), n("rail_angle"))
     cohete = construir_cohete(params, rutas, riel)
 
-    con_paracaidas = params.get("recovery", RECUPERACION[0]) == RECUPERACION[1]
+    recuperacion = params.get("recovery", RECUPERACION[0])
+    con_paracaidas = recuperacion in RECUPERACION[1:]
+    dos_etapas = recuperacion == RECUPERACION[2]
     if con_paracaidas:
         area = math.pi * n("drogue_chute_diam") ** 2 / 4
-        cohete.agregar_paracaidas(Parachute(n("drogue_cd"), area))
+        cohete.agregar_paracaidas(Parachute(n("drogue_cd"), area, k_llenado=n("drogue_fill")))
+    if dos_etapas:
+        area = math.pi * n("main_chute_diam") ** 2 / 4
+        cohete.agregar_paracaidas_principal(Parachute(n("main_cd"), area, k_llenado=n("main_fill")), n("main_deploy_alt"))
 
     viento = crear_viento(params)
     vuelo = Vuelo(cohete, crear_atmosfera(params), viento)
@@ -328,7 +343,23 @@ def ejecutar_simulacion(params, rutas, estado_cb=None, con_mapa=False):
         "arrastre": np.linalg.norm(np.array(Dvecs), axis=1),
         "normal": np.linalg.norm(np.array(Nvecs), axis=1),
         "viento": v_mags, "viento_x": v_vecs[:, 0], "viento_y": v_vecs[:, 1], "viento_z": v_vecs[:, 2],
+        "fuerza_paracaidas": vuelo.fuerzas_paracaidas,
     })
+
+    def carga_de_apertura(apertura):
+        """Tiempo de llenado, fuerza máxima del paracaídas en la apertura [N] y esa fuerza en g."""
+        if apertura is None:
+            return None, None, None
+        t_apertura, t_llenado = apertura
+        tramo = df[(df["t"] >= t_apertura) & (df["t"] <= t_apertura + t_llenado + 2.0)]
+        if tramo.empty:
+            return float(t_llenado), None, None
+        i = tramo["fuerza_paracaidas"].idxmax()
+        fuerza = float(tramo["fuerza_paracaidas"].loc[i])
+        return float(t_llenado), fuerza, fuerza / (float(df["masa"].loc[i]) * 9.80665)
+
+    llenado_drogue, fuerza_drogue, g_drogue = carga_de_apertura(vuelo.apertura_drogue)
+    llenado_principal, fuerza_principal, g_principal = carga_de_apertura(vuelo.apertura_main)
 
     # Coordenadas geográficas de la trayectoria
     lat0, lon0, azimut = n("launch_lat"), n("launch_lon"), n("rail_azimuth")
@@ -340,6 +371,14 @@ def ejecutar_simulacion(params, rutas, estado_cb=None, con_mapa=False):
     resumen = {
         "integrador": integrador,
         "paracaidas": con_paracaidas,
+        "recuperacion": recuperacion,
+        # Inflado de los paracaídas: tiempo de llenado y carga máxima de apertura
+        "llenado_drogue": llenado_drogue, "fuerza_apertura_drogue": fuerza_drogue, "g_apertura_drogue": g_drogue,
+        "llenado_principal": llenado_principal, "fuerza_apertura_principal": fuerza_principal, "g_apertura_principal": g_principal,
+        # Paracaídas principal: cuándo se abrió, a qué altura y a qué velocidad bajaba con el drogue
+        "t_principal": None if vuelo.tiempo_despliegue_main is None else float(vuelo.tiempo_despliegue_main),
+        "altura_principal": None if vuelo.tiempo_despliegue_main is None else float(np.interp(vuelo.tiempo_despliegue_main, df["t"], df["z"])),
+        "vel_antes_principal": None if vuelo.tiempo_despliegue_main is None else float(np.interp(vuelo.tiempo_despliegue_main - 0.05, df["t"], df["velocidad"])),
         "masa_despegue": float(df["masa"].iloc[0]),
         "t_MECO": float(cohete.t_MECO),
         "impulso_total": float(cohete.I_total),

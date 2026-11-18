@@ -293,10 +293,15 @@ class RocketTab(customtkinter.CTkScrollableFrame):
         frame = self.create_interno_frame(master, "🪂 Drogue", "drogue", "drogue_mass", "Masa", row, column)
         self.campo(frame, "drogue_chute_diam", "Diám. Paracaídas", 4, "m")
         self.campo(frame, "drogue_cd", "Coef. Arrastre", 5)
+        self.campo(frame, "drogue_fill", "Const. de llenado", 6)
 
     def create_main_chute_frame(self, master, row, column):
-        """Paracaídas principal: solo cuenta como masa (su despliegue aún no se simula)"""
-        self.create_interno_frame(master, "🪂 Main (solo masa)", "main", "main_mass", "Masa", row, column)
+        """Paracaídas principal: se abre en el descenso, a la altura indicada sobre el sitio"""
+        frame = self.create_interno_frame(master, "🪂 Main (Principal)", "main", "main_mass", "Masa", row, column)
+        self.campo(frame, "main_chute_diam", "Diám. Paracaídas", 4, "m")
+        self.campo(frame, "main_cd", "Coef. Arrastre", 5)
+        self.campo(frame, "main_deploy_alt", "Alt. Despliegue", 6, "m")
+        self.campo(frame, "main_fill", "Const. de llenado", 7)
 
     def create_oxidante_frame(self, master, row, column):
         """Oxidante"""
@@ -558,7 +563,7 @@ class SimulationEnvironmentTab(customtkinter.CTkScrollableFrame):
     def create_simulation_frame(self, row, column):
         """Frame de Simulación"""
         frame = self.create_frame("Simulación:", row, column)
-        self.campo(frame, "sim_max_time", "Tiempo Máximo (s):", 1)
+        self.campo(frame, "sim_max_time", "Tiempo Máximo (s):", 1)   # la simulación termina antes si hay impacto
         self.campo(frame, "sim_time_step", "Paso de Tiempo (s):", 2)
         self.create_labeled_widget(frame, "option", "integrator", "Método Integración:",
                                    backend.PARAMS_XITLE["integrator"], 3, backend.INTEGRADORES)
@@ -748,13 +753,22 @@ class ResultsTab(customtkinter.CTkFrame):
             if r["t_impacto"] is None:
                 self.labels["impacto"].configure(text=f"Sin impacto antes de t = {r['t_final']:.0f} s")
             else:
-                self.labels["impacto"].configure(text=f"Impacto: {r['t_impacto']:.1f} s a {r['vel_impacto']:.1f} m/s")
+                texto = f"Impacto: {r['t_impacto']:.1f} s a {r['vel_impacto']:.1f} m/s"
+                if r.get("t_principal") is not None:
+                    texto += f" · principal abierto a {r['altura_principal']:.0f} m (bajaba a {r['vel_antes_principal']:.0f} m/s)"
+                    if r.get("fuerza_apertura_principal") is not None:
+                        texto += f", carga de apertura {r['fuerza_apertura_principal']:.0f} N ({r['g_apertura_principal']:.1f} g)"
+                self.labels["impacto"].configure(text=texto)
             self.labels["margen"].configure(text=f"Margen estático mín.: {r['margen_min']:.2f} cal")
 
             # 2. Figura con seis gráficas
             fig = Figure(figsize=(9, 6), dpi=100, facecolor="#FFFFFF")
             t = df["t"]
             eventos = [(r["t_MECO"], "orange", "Fin de quemado"), (r["t_apogeo"], "green", "Apogeo")]
+            leyenda_eventos = "Líneas punteadas: naranja = fin de quemado, verde = apogeo"
+            if r.get("t_principal") is not None:
+                eventos.append((r["t_principal"], "purple", "Paracaídas principal"))
+                leyenda_eventos += ", morado = apertura del paracaídas principal"
 
             def panel(pos, y, titulo, ylabel, color):
                 ax = fig.add_subplot(2, 3, pos)
@@ -783,7 +797,7 @@ class ResultsTab(customtkinter.CTkFrame):
             ax.set_title("Trayectoria (plano de vuelo)", fontsize=10); ax.set_xlabel("x (m)", fontsize=8); ax.set_ylabel("z (m)", fontsize=8)
             ax.tick_params(labelsize=8); ax.grid(True, linestyle="--", alpha=0.5)
 
-            fig.text(0.5, 0.005, "Líneas punteadas: naranja = fin de quemado, verde = apogeo", ha="center", fontsize=8, color="#444444")
+            fig.text(0.5, 0.005, leyenda_eventos, ha="center", fontsize=8, color="#444444")
             fig.tight_layout(pad=1.5, rect=(0, 0.02, 1, 1))
 
             # 3. Dibujar el canvas y la barra de herramientas en el plot_frame
