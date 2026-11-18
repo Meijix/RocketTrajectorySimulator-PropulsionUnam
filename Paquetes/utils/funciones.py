@@ -181,6 +181,7 @@ def guardar_datos_json(cohete_actual,vuelo1, max_altitude, max_speed, accels, ac
         'tiempo_salida_riel': vuelo1.tiempo_salida_riel,
         'tiempo_apogeo': vuelo1.tiempo_apogeo,
         'tiempo_impacto': vuelo1.tiempo_impacto,
+        'tiempo_despliegue_principal': getattr(vuelo1, 'tiempo_despliegue_main', None),
         'max_altitude': max_altitude,
         'max_speed': max_speed,
         'max_acceleration_linear': float(np.max(np.linalg.norm(np.asarray(accels), axis=1))),   # magnitud maxima

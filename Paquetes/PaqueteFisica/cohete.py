@@ -57,9 +57,15 @@ class Cohete:
         self.cargar_tablas_motor(tabla_empuje_fpath, tabla_masa_fpath)
         self.cargar_tabla_Cd(tabla_Cd_fpath)
 
+        # Recuperacion. Paracaidas 1 (drogue): se abre en el apogeo.
         self.parachute_added = False
         self.parachute_active1 = None
         self.parachute1 = None
+        # Paracaidas principal: se abre durante el descenso, a una altura dada sobre el sitio.
+        self.main_added = False
+        self.main_active = False
+        self.parachute_main = None
+        self.altura_despliegue_main = None
 
     def calcular_propiedades(self):
         # Recalculate the properties of the rocket
@@ -74,8 +80,26 @@ class Cohete:
       self.parachute_active1 = False
       self.parachute1 = parachute_n
 
-    #def activar_paracaidas(self, parachute_n):
-      #self.parachute_active1 = True
+    def agregar_paracaidas_principal(self, parachute_n, altura_despliegue):
+      """Paracaidas principal: se abre al bajar por la altura indicada [m sobre el sitio].
+
+      Con drogue y principal el descenso es en dos etapas: rapido con el drogue desde el
+      apogeo y lento con el principal cerca del suelo. Si el apogeo queda por debajo de esa
+      altura, el principal se abre en el apogeo.
+      """
+      if altura_despliegue <= 0:
+        raise ValueError("La altura de despliegue del paracaidas principal debe ser mayor que 0.")
+      self.main_added = True
+      self.main_active = False
+      self.parachute_main = parachute_n
+      self.altura_despliegue_main = altura_despliegue
+
+    def quitar_paracaidas(self):
+      """Deja el cohete sin recuperacion (vuelo libre)."""
+      self.parachute_added = False
+      self.parachute_active1 = False
+      self.main_added = False
+      self.main_active = False
 
     # Calcular el área transversal efectiva del cohete (según fuselaje)
     # Método calc_A corregido en Paquetes/PaqueteFisica/cohete.py
@@ -285,6 +309,40 @@ class Cohete:
     
 #Clase para Paracaidas
 class Parachute:
-    def __init__(self, cd, area_trans):
+    """Paracaidas: coeficiente de arrastre, area y modelo de inflado.
+
+    El paracaidas no se abre de golpe. Su area de arrastre crece desde cero hasta Cd*A
+    durante un tiempo de llenado
+        t_llenado = k_llenado * D / v
+    donde D es el diametro del paracaidas y v la velocidad respecto al aire en el momento
+    de abrirse (formula del tiempo de llenado de Knacke, "Parachute Recovery Systems Design
+    Manual"; k_llenado vale alrededor de 8 para paracaidas circulares planos). Durante el
+    llenado,
+        Cd*A(t) = Cd*A * (tiempo transcurrido / t_llenado) ** exponente
+    Con exponente = 2 el area crece como el cuadrado del tiempo, es decir, el diametro
+    inflado crece a ritmo constante. k_llenado = 0 da la apertura instantanea.
+    """
+    T_LLENADO_MAX = 3.0   # [s] tope del tiempo de llenado (si se abre casi sin velocidad)
+
+    def __init__(self, cd, area_trans, k_llenado=8.0, exponente=2.0):
         self.cd = cd
         self.Area_trans = area_trans
+        self.k_llenado = k_llenado
+        self.exponente = exponente
+        self.diametro = math.sqrt(4.0 * area_trans / math.pi)
+
+    def tiempo_llenado(self, velocidad):
+        """Tiempo que tarda en inflarse si se abre a la velocidad dada [s]."""
+        if self.k_llenado <= 0:
+            return 0.0
+        if velocidad <= 0:
+            return self.T_LLENADO_MAX
+        return min(self.k_llenado * self.diametro / velocidad, self.T_LLENADO_MAX)
+
+    def area_arrastre(self, transcurrido, t_llenado):
+        """Cd*A [m2] cuando ha pasado `transcurrido` segundos desde que empezo a abrirse."""
+        if transcurrido < 0:
+            return 0.0
+        if t_llenado <= 0 or transcurrido >= t_llenado:
+            return self.cd * self.Area_trans
+        return self.cd * self.Area_trans * (transcurrido / t_llenado) ** self.exponente

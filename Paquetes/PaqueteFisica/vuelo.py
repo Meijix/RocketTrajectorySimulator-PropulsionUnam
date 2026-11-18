@@ -30,6 +30,11 @@ class Vuelo:
         self.tiempo_salida_riel = None
         self.tiempo_apogeo = None
         self.tiempo_impacto = None
+        self.tiempo_despliegue_main = None   # instante en que se abre el paracaidas principal
+        self.apertura_drogue = None          # (instante de apertura, tiempo de llenado) del drogue
+        self.apertura_main = None            # idem del paracaidas principal
+        self.t_actual = 0.0                  # instante que se esta evaluando
+        self.fuerza_paracaidas = 0.0
         self.apogeo = None
         self.impacto = None
         self.pasos = 0          # pasos de integracion de la ultima simulacion
@@ -39,6 +44,19 @@ class Vuelo:
         #hacer una lista de etapas de vuelo
         #self. etapas = [enriel , motorON, apogeo, droguerec, mainrec]
         #para cada etapa guardar el tiempo en que ocurrio y sus valores máximos
+
+    def _area_arrastre(self, paracaidas, apertura):
+        """Cd*A de un paracaidas en el instante actual; `apertura` es (instante de apertura, tiempo de llenado)."""
+        if apertura is None:              # activado a mano, sin registro de apertura: abierto del todo
+            return paracaidas.cd * paracaidas.Area_trans
+        t_apertura, t_llenado = apertura
+        return paracaidas.area_arrastre(self.t_actual - t_apertura, t_llenado)
+
+    def _registrar_apertura(self, paracaidas, t, estado):
+        """(instante de apertura, tiempo de llenado) segun la velocidad respecto al aire al abrirse."""
+        estado = np.asarray(estado, dtype=float)
+        velocidad = np.linalg.norm(estado[3:6] - self.viento.vector_en(t, estado[2]))
+        return (t, paracaidas.tiempo_llenado(velocidad))
 
     def calc_arrastre_normal(self, pos, vel, alpha):
         altura = pos[2] #self.posicion[2]
@@ -56,13 +74,15 @@ class Vuelo:
         # f_normal = 0.5 * rho * CN * A * vel_mag**2 * np.sin(alpha)**2
         f_normal = (0.5 * rho * vel_mag**2) * A * abs(np.sin(alpha)) * CNalpha
 
+        # Paracaidas abiertos: cada uno suma su arrastre (el drogue sigue abierto con el principal)
+        # Su area de arrastre crece durante el llenado (ver la clase Parachute)
+        f_paracaidas = 0.0
         if self.vehiculo.parachute_active1 == True:
-            coef_par = self.vehiculo.parachute1.cd
-            area_par = self.vehiculo.parachute1.Area_trans
-            f_paracaidas = 0.5 * rho * coef_par * area_par * vel_mag**2
-            f_arrastre = f_arrastre  + f_paracaidas
-        else:
-            pass
+            f_paracaidas += 0.5 * rho * self._area_arrastre(self.vehiculo.parachute1, self.apertura_drogue) * vel_mag**2
+        if self.vehiculo.main_active:
+            f_paracaidas += 0.5 * rho * self._area_arrastre(self.vehiculo.parachute_main, self.apertura_main) * vel_mag**2
+        f_arrastre += f_paracaidas
+        self.fuerza_paracaidas = f_paracaidas   # fuerza de los paracaidas en esta evaluacion [N]
         #print(f_paracaidas)
 
         # if alpha == 0:
@@ -229,6 +249,7 @@ class Vuelo:
         # state, posicion y velocidad son estados intermedios
         #no necsariamente los del cohete
         self.evaluaciones += 1   # numero de evaluaciones de las derivadas (costo de la integracion)
+        self.t_actual = t
         pos = state[0:3]
         vel = state[3:6]
         #velocidadvector.append(vel)
@@ -291,27 +312,55 @@ class Vuelo:
         # Cruce por cero (hacia abajo) de la altitud, ignorando el primer segundo
         return state[2] if t > 1 else 1.0
 
-    def _integrar_scipy(self, estado, t_max, dt, integrador):
-        """Integra con solve_ivp por fases: ascenso hasta el apogeo y descenso hasta el impacto.
+    def _en_apogeo(self, t, estado):
+        """Registra el apogeo y abre el drogue (y el principal, si el apogeo queda bajo su altura)."""
+        altitud = estado[2]
+        self.tiempo_apogeo = t
+        self.apogeo = altitud
+        if self.vehiculo.parachute_added:
+            self.vehiculo.parachute_active1 = True
+            self.apertura_drogue = self._registrar_apertura(self.vehiculo.parachute1, t, estado)
+        if self._main_pendiente() and altitud <= self.vehiculo.altura_despliegue_main:
+            self._abrir_main(t, estado)
 
-        El paracaidas se activa entre fases, de modo que si afecta a la trayectoria.
+    def _main_pendiente(self):
+        """Hay paracaidas principal y todavia no se ha abierto."""
+        return self.vehiculo.main_added and not self.vehiculo.main_active
+
+    def _abrir_main(self, t, estado):
+        self.vehiculo.main_active = True
+        self.tiempo_despliegue_main = t
+        self.apertura_main = self._registrar_apertura(self.vehiculo.parachute_main, t, estado)
+
+    def _integrar_scipy(self, estado, t_max, dt, integrador):
+        """Integra con solve_ivp por fases: ascenso hasta el apogeo, descenso con el drogue
+        hasta la altura del paracaidas principal y descenso final hasta el impacto.
+
+        Los paracaidas se abren entre fases, de modo que si afectan a la trayectoria.
         La integracion termina en el impacto (o en t_max si no lo hay).
         """
         tiempos = np.array([0.0])
         sim = np.array([estado], dtype=float)
         t0, y0 = 0.0, np.array(estado, dtype=float)
 
+        def evento(funcion):
+            g = lambda t, y: funcion(t, y)
+            g.direction, g.terminal = -1, True
+            return g
+
         while t0 < t_max:
-            en_ascenso = self.tiempo_apogeo is None
-            apogeo = lambda t, y: self._evento_apogeo(t, y)
-            apogeo.direction, apogeo.terminal = -1, True
-            impacto = lambda t, y: self._evento_impacto(t, y)
-            impacto.direction, impacto.terminal = -1, True
-            eventos = [apogeo, impacto] if en_ascenso else [impacto]
+            # Eventos de esta fase, con el impacto siempre al final
+            fase = []
+            if self.tiempo_apogeo is None:
+                fase.append(("apogeo", evento(self._evento_apogeo)))
+            elif self._main_pendiente():
+                altura = self.vehiculo.altura_despliegue_main
+                fase.append(("main", evento(lambda t, y: y[2] - altura)))
+            fase.append(("impacto", evento(self._evento_impacto)))
 
             paso = min(dt, t_max - t0)
             solucion = solve_ivp(self.fun_derivs, (t0, t_max), y0, method=integrador,
-                                 events=eventos, first_step=paso, max_step=dt)
+                                 events=[g for _, g in fase], first_step=paso, max_step=dt)
             if solucion.status == -1:
                 raise RuntimeError(f"solve_ivp ({integrador}) fallo: {solucion.message}")
 
@@ -320,18 +369,15 @@ class Vuelo:
             sim = np.concatenate((sim, solucion.y.T[1:]))
             t0, y0 = solucion.t[-1], solucion.y[:, -1]
 
-            hubo_apogeo = en_ascenso and len(solucion.t_events[0]) > 0
-            hubo_impacto = len(solucion.t_events[-1]) > 0
-
-            if hubo_impacto:
+            ocurridos = [nombre for (nombre, _), ts in zip(fase, solucion.t_events) if len(ts) > 0]
+            if "impacto" in ocurridos:
                 self.tiempo_impacto = t0
                 break
-            if hubo_apogeo:
-                self.tiempo_apogeo = t0
-                self.apogeo = y0[2]
-                # Recuperacion: desplegar el paracaidas en el apogeo
-                if self.vehiculo.parachute_added:
-                    self.vehiculo.parachute_active1 = True
+            if "apogeo" in ocurridos:
+                self._en_apogeo(t0, y0)
+                continue
+            if "main" in ocurridos:
+                self._abrir_main(t0, y0)
                 continue
             break   # se alcanzo t_max sin eventos
 
@@ -378,11 +424,10 @@ class Vuelo:
 
             # Apogeo
             if self.tiempo_apogeo is None and altitud > 5 and altitud < estado[2]:
-                self.tiempo_apogeo = t_nuevo
-                self.apogeo = altitud
-                # Recuperacion: desplegar el paracaidas en el apogeo
-                if self.vehiculo.parachute_added:
-                    self.vehiculo.parachute_active1 = True
+                self._en_apogeo(t_nuevo, nuevo_estado)       # abre el drogue
+            # Paracaidas principal: al bajar por su altura de despliegue
+            elif self.tiempo_apogeo is not None and self._main_pendiente() and altitud <= self.vehiculo.altura_despliegue_main:
+                self._abrir_main(t_nuevo, nuevo_estado)
 
             # Impacto: se interpola linealmente dentro del paso hasta z = 0
             if altitud < 0 and t_nuevo > 1:
@@ -418,6 +463,10 @@ class Vuelo:
         self.apogeo = None
         self.impacto = None
         self.vehiculo.parachute_active1 = False
+        self.vehiculo.main_active = False
+        self.tiempo_despliegue_main = None
+        self.apertura_drogue = None
+        self.apertura_main = None
         self.vehiculo.actualizar_masa(0.0)
         self.viento.reiniciar_rafagas()
         self.pasos = 0
@@ -442,6 +491,7 @@ class Vuelo:
         CPs, CGs, masavuelo = [], [], []
         viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs = [], [], []
 
+        self.fuerzas_paracaidas = []   # fuerza de los paracaidas en cada punto guardado [N]
         for t, estado in zip(tiempos, sim):
             estado = np.asarray(estado)
             pos = estado[0:3]
@@ -449,10 +499,14 @@ class Vuelo:
             theta = estado[6]
             altitud = pos[2]
 
+            self.t_actual = t
             self.vehiculo.actualizar_masa(t)
             self.vehiculo.parachute_active1 = bool(
                 self.vehiculo.parachute_added
                 and self.tiempo_apogeo is not None and t >= self.tiempo_apogeo)
+            self.vehiculo.main_active = bool(
+                self.vehiculo.main_added
+                and self.tiempo_despliegue_main is not None and t >= self.tiempo_despliegue_main)
             v_viento = self.viento.vector_en(t, altitud)
 
             # Salida del riel
@@ -475,6 +529,7 @@ class Vuelo:
             Tvec = self.calc_empuje(t, theta)
             _, _, Cd, mach = self.calc_arrastre_normal(pos, vrel, alpha)
             Dvec, Nvec = self.calc_aero(pos, vrel, theta)
+            self.fuerzas_paracaidas.append(self.fuerza_paracaidas)
             Tvecs.append(Tvec)
             Dvecs.append(Dvec)
             Nvecs.append(Nvec)
