@@ -73,8 +73,8 @@ PARAMS_XITLE = {
     "atm_delta_t": 20, "atm_pressure_hpa": 868.5,
     "wind_mode": VIENTOS[0],
     "wind_base_speed": 2, "wind_from": 195, "wind_mean_speed": 1, "wind_speed_var": 1, "wind_angle_var": 15, "wind_seed": "",
-    "rail_len": 10, "rail_angle": 84, "rail_azimuth": 220,
-    "sim_max_time": 400, "sim_time_step": 0.01, "integrator": "DOP853", "recovery": RECUPERACION[0],
+    "rail_len": 10, "rail_angle": 83, "rail_azimuth": 220,
+    "sim_max_time": 1000, "sim_time_step": 0.01, "integrator": "DOP853", "recovery": RECUPERACION[0],
 }
 
 # (clave del diccionario de componentes, prefijo de los campos, nombre visible)

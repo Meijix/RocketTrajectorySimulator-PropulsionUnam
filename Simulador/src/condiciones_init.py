@@ -17,9 +17,9 @@ from Simulador.src.dia_de_vuelo import cargar_condiciones, crear_atmosfera, crea
 condiciones = cargar_condiciones()
 
 #riel inicial
-# Angulo de elevacion de 84 grados: es el que reproduce la trayectoria GPS del vuelo real
-# (con 87 grados el cohete caeria a 2.5 km del sitio; el real cayo a unos 4.6 km)
-riel = Torrelanzamiento(10, 84)
+# Angulo de elevacion de 83 grados: es el que reproduce la trayectoria GPS del vuelo real
+# (apogeo a 2.5 km del sitio y caida a unos 4.6 km; con 87 grados caeria a 2 km)
+riel = Torrelanzamiento(10, 83)
 azimut_riel = condiciones['lanzamiento']['azimut_riel_grados']  # rumbo hacia el que se inclina el riel (grados desde el norte)
 #lugar de lanzamiento
 latitud_cord = condiciones['sitio']['latitud']
@@ -52,7 +52,7 @@ estado=np.array([x0, y0, z0, vx0, vy0, vz0, theta0, omega0])
 #print(estado)
 #Parametros de la simulacion
 dt = 0.01 #0.1 #[s]
-t_max = 400 #[s]
+t_max = 1000 #[s] tiempo maximo; la simulacion termina antes si hay impacto
 dt_out = dt  # intervalo de guardado; debe ser multiplo de dt (si es menor, limita el paso de los integradores propios)
 integrador_actual = 'RungeKutta4'
 #integrador_actual = 'Euler'

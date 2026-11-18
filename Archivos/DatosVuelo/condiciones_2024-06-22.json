@@ -12,6 +12,8 @@
     "hora_local": "12:20",
     "zona_horaria": "America/Denver (UTC-6)",
     "azimut_riel_grados": 220,
+    "elevacion_riel_grados": 83,
+    "nota_elevacion": "No hay registro del ángulo del riel. 83° es el que reproduce la trayectoria GPS: apogeo a 2.5 km del sitio y caída a unos 4.6 km",
     "nota_azimut": "Rumbo del trayecto GPS durante el ascenso (219° a 221° desde el norte, sentido horario)",
     "nota_hora": "Minuto y segundo del GPS (20:34 despegue); la hora se dedujo del nombre del archivo KML (12_37_13)"
   },
