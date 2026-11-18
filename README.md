@@ -72,7 +72,12 @@ Hay una segunda interfaz, `PropulsionGUI`, con los colores del equipo: fondo neg
   </tr>
 </table>
 
-Son capturas de la ventana con el Xitle II, después de simular un vuelo libre con DOP853.
+Son capturas de la ventana con el Xitle II, después de simular un vuelo libre con DOP853. En la de Resultados el vuelo está detenido a los 19.8 s y el cohete de la trayectoria muestra el cabeceo de ese instante.
+
+<p align="center">
+  <img src="docs/images/propulsion-grafica-ampliada.png" alt="Ventana con la gráfica del empuje ampliada y la lectura bajo el cursor" width="620"/><br>
+  Una gráfica ampliada con doble clic: el empuje, con el valor que hay bajo el cursor.
+</p>
 
 ## Instalación
 
@@ -128,7 +133,7 @@ Tiene las mismas siete pestañas y usa el mismo motor de simulación. También a
 2. **Tablas de Datos.** Una tarjeta por tabla (empuje, arrastre y masa del motor) con el archivo en uso. "Importar CSV" carga otro archivo y "Visualizar" lo grafica. Si la tabla de masa dura distinto que la curva de empuje, lo avisa debajo de la gráfica.
 3. **Simulación.** Los datos del sitio con un mapa de los alrededores, una brújula que muestra hacia dónde apunta el riel y de dónde viene el viento, y los parámetros de la integración. El azimut, la elevación y la temperatura se pueden escribir o mover con el control deslizante. El viento se elige entre el perfil del día del vuelo y uno constante, y la recuperación entre vuelo libre, drogue, o drogue y principal. Abajo a la derecha hay una lista que dice si todo está listo para simular o qué dato hay que corregir.
 4. **Análisis (CG-CP).** La tabla por componente y, a un lado, masa, CG, CP y margen estático. Un selector cambia entre el cohete al despegue y sin propelente, y una barra muestra en qué zona cae el margen: inestable, marginal o estable.
-5. **Resultados.** Las cifras del vuelo en tarjetas y seis gráficas. El control "Recorre el vuelo" mueve un punto por las seis gráficas a la vez y muestra el tiempo, la altura, la velocidad y el Mach de ese instante. La barra bajo las gráficas sirve para acercar, desplazar y guardar la imagen. "Exportar CSV" guarda la trayectoria.
+5. **Resultados.** Las cifras del vuelo en tarjetas y seis gráficas con un cursor de tiempo común, que se mueve de tres maneras: pasando el ratón sobre cualquier gráfica, con el control deslizante o con "Reproducir", que recorre el vuelo solo a 1, 5 o 20 veces la velocidad real. Junto al control se leen el tiempo, la altura, la velocidad, el Mach y el ángulo de cabeceo de ese instante. En la gráfica de la trayectoria el cursor es un cohete pequeño que se inclina según el cabeceo. Un doble clic sobre una gráfica la abre en una ventana grande, donde un menú cambia la variable (empuje, arrastre, masa, margen estático y otras) y el valor se lee al pasar el ratón. La barra bajo las gráficas sirve para acercar, desplazar y guardar la imagen. "Exportar CSV" guarda la trayectoria.
 6. **Mapa.** El mapa de la zona con el sitio, el apogeo, el impacto y, si el lanzamiento es desde el sitio del vuelo real, la trayectoria GPS. Dos interruptores muestran u ocultan la trayectoria simulada y la real. A la derecha están las coordenadas, "Copiar coordenadas de impacto" y "Abrir mapa interactivo".
 7. **Cargas.** La compresión, el cortante y el momento flector a lo largo del cohete, con el viento simulado y con la ráfaga de diseño. Arriba, en tarjetas, la compresión y el momento máximos, el margen de pandeo del fuselaje, la velocidad de flameo de las aletas y la carga de apertura del paracaídas; el pandeo y el flameo salen en verde si cumplen y en rojo si no. Usa el material de cada tramo y el espesor de las aletas elegidos en "Cohete". "Exportar CSV" guarda las cargas.
 

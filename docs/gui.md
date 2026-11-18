@@ -117,7 +117,7 @@ A test checks that every backend parameter has a field. If a parameter is added 
 | Tablas de Datos | `PestanaTablas` | one card per table and a warning when the mass table and the thrust curve have different durations |
 | Simulación | `PestanaSimulacion` | a map of the site, a compass with the rail and the wind, sliders, and a checklist that says whether the run can start |
 | Análisis (CG-CP) | `PestanaAnalisis` | a switch between liftoff and empty tanks, and a bar with the unstable, marginal and stable ranges |
-| Resultados | `PestanaResultados` | cards with the flight figures and a time slider that moves a marker on the six plots |
+| Resultados | `PestanaResultados` | cards with the flight figures, a time cursor shared by the six plots, playback, and a larger window for any plot |
 | Mapa | `PestanaMapa` | switches that show or hide the simulated track and the GPS track |
 | Cargas | `PestanaCargas` | cards with the largest compression and bending moment, the buckling margin, the fin flutter speed and the parachute opening load, in green or red depending on whether the check passes |
 
@@ -126,6 +126,28 @@ A test checks that every backend parameter has a field. If a parameter is added 
 The Cargas tab plots the compression, the shear and the bending moment along the rocket, with one curve for the simulated wind and one for the design gust. The vertical lines are the limits of the fuselage sections. The cards above the plots summarize the structural check made with the materials chosen in the Cohete tab, and a button exports the envelope as CSV.
 
 ![Loads tab of PropulsionGUI](images/propulsion-pestana-cargas.png)
+
+### Interactive plots
+
+The six plots of the Resultados tab share one time cursor. `PestanaResultados.ir_a` moves it, and three things call that method. The slider calls it when dragged. The mouse calls it when it passes over a plot. The Reproducir button calls it on a timer, at 1, 5 or 20 times real speed, and uses the clock to decide how far to advance so the speed does not depend on the computer.
+
+The pieces are in [graficas.py](../Simulador/GUI/propulsion/graficas.py).
+
+| Class | Role |
+| --- | --- |
+| `Serie` | one curve of the flight, with its columns, axis labels, color and number format |
+| `Cursor` | the marker that points at one instant on a plotted series |
+| `CapaMovil` | redraws only the cursors |
+
+`SERIES` lists every curve the interface can plot, and `PANELES` is the first six, the ones the tab shows. Adding a curve means adding one `Serie`.
+
+`CapaMovil` keeps a copy of the figure as it looked after the last full draw. To move a cursor it restores that copy and paints the cursors on top, which matplotlib calls blitting. Without it, following the mouse would redraw six plots of several thousand points on every movement.
+
+In the trajectory plot the cursor is the outline of a rocket, rotated by the pitch angle of that instant.
+
+A double click on a plot opens `VentanaGrafica`, defined in [ventana_grafica.py](../Simulador/GUI/propulsion/ventana_grafica.py). It shows one series at full size with a menu to change the variable, the matplotlib toolbar and the value under the mouse. Hovering and double click are ignored while the zoom or pan tool of the toolbar is active.
+
+![Enlarged plot window](images/propulsion-grafica-ampliada.png)
 
 The rocket drawing is a matplotlib figure. `dibujar_cohete` gives every patch the key of its part, and the tab finds the patch under a click to select that part. Internal parts and propellants are drawn as a band along the axis, above the tubes, so both can be clicked.
 
