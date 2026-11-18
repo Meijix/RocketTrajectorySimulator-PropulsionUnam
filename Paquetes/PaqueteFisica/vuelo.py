@@ -102,7 +102,14 @@ class Vuelo:
         Dvec = - Dmag * v_rel_hat
         # La normal siempre produce un momento de giro estabilizador (siempre
         # y cuando el CP esté atrás del CG)
-        Nhat = -np.sign(alpha) * np.array((v_rel_hat[2], v_rel_hat[1], -v_rel_hat[0]))
+        # La normal vive en el plano de cabeceo (XZ) y es perpendicular a la velocidad
+        # relativa proyectada en ese plano. (Antes llevaba ademas la componente y de la
+        # velocidad, que no es perpendicular a nada y empujaba al cohete de lado.)
+        v_plano = math.hypot(v_rel_hat[0], v_rel_hat[2])
+        if v_plano > 0:
+            Nhat = -np.sign(alpha) * np.array((v_rel_hat[2], 0.0, -v_rel_hat[0])) / v_plano
+        else:
+            Nhat = np.zeros(3)
         # Nmag = 0    # DEBUG: apagar normal
         Nvec = Nmag * Nhat
         # print("alpha=", degrees(alpha))
