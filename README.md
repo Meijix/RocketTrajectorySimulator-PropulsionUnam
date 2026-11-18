@@ -275,15 +275,15 @@ Simula el mismo vuelo con los nueve métodos y los compara con una solución de 
 
 | Método | Apogeo | Diferencia de apogeo con la referencia | Evaluaciones de f | Tiempo de cómputo |
 | --- | --- | --- | --- | --- |
-| Euler | 7068 m | 0.93 m | 8 311 | 1.9 s |
-| RK2 | 7067 m | −0.13 m | 16 620 | 2.7 s |
-| RK4 | 7067 m | 0.04 m | 33 240 | 4.8 s |
-| RKF45 | 7067 m | 0.01 m | 50 352 | 6.9 s |
-| RK23 | 7067 m | −0.18 m | 24 968 | 3.9 s |
-| RK45 | 7067 m | −0.18 m | 49 880 | 6.5 s |
-| DOP853 | 7067 m | 0.12 m | 99 812 | 11.9 s |
-| BDF | 7067 m | −0.25 m | 16 918 | 3.5 s |
-| LSODA | 7067 m | −0.12 m | 12 280 | 2.3 s |
+| Euler | 7083 m | 0.77 m | 8 320 | 2.0 s |
+| RK2 | 7082 m | −0.09 m | 16 638 | 3.0 s |
+| RK4 | 7083 m | 0.05 m | 33 276 | 4.9 s |
+| RKF45 | 7083 m | 0.01 m | 50 352 | 7.1 s |
+| RK23 | 7082 m | −0.16 m | 24 992 | 4.1 s |
+| RK45 | 7082 m | −0.17 m | 49 928 | 6.9 s |
+| DOP853 | 7083 m | 0.11 m | 99 920 | 12.7 s |
+| BDF | 7082 m | −0.22 m | 16 910 | 3.7 s |
+| LSODA | 7082 m | −0.07 m | 12 263 | 2.5 s |
 
 Los tiempos dependen de la máquina; las evaluaciones de f no.
 
@@ -309,9 +309,9 @@ Con el viento del vuelo simulado el ángulo de ataque es muy pequeño y casi no 
 
 | Carga máxima | Viento simulado | Con ráfaga de 9 m/s |
 | --- | --- | --- |
-| Compresión | 2338 N, junto a la cola, a los 2.4 s (empuje máximo) | igual |
-| Cortante | 13 N | 126 N |
-| Momento flector | 9 N·m | 82 N·m, a 2.8 m de la punta, a los 10.4 s (Mach 1) |
+| Compresión | 2387 N, junto a la cola, a los 2.4 s (empuje máximo) | igual |
+| Cortante | 8 N | 101 N |
+| Momento flector | 5 N·m | 57 N·m, a 2.5 m de la punta, a los 10.5 s (Mach 1) |
 
 El análisis es cuasiestático: en cada instante de la trayectoria se equilibran las fuerzas aplicadas con las de inercia del cohete como cuerpo rígido. No incluye vibraciones ni la deformación elástica del fuselaje. La carga de apertura de los paracaídas se obtiene aparte, de la simulación del descenso.
 
@@ -319,7 +319,7 @@ El análisis es cuasiestático: en cada instante de la trayectoria se equilibran
 
 Con esas cargas, `Paquetes/PaqueteFisica/resistencia.py` comprueba el fuselaje y las aletas. El material de cada tramo del fuselaje y el material y el espesor de las aletas se eligen en la pestaña "Cohete" de las dos interfaces. Por defecto son los del Xitle II: fuselaje de fibra de carbono, coples de aluminio 6061-T6 y aletas de tejido de carbono 0/90 de 3 mm. Las propiedades de cada material y el factor de seguridad (1.5) están en `Archivos/estructura_xitle.json`, con sus fuentes; ahí se pueden corregir o añadir materiales. El resultado se da como margen: `resistencia / (factor × carga) − 1`; si es positivo, cumple.
 
-- **Fuselaje.** Cada tramo cilíndrico se comprueba a compresión y flexión combinadas contra el pandeo de pared delgada (fórmula clásica con el factor de reducción por imperfecciones de NASA SP-8007) y contra la resistencia a compresión del material. Para el Xitle II las cargas de vuelo quedan muy lejos del pandeo: el tramo más cargado es el tanque, con margen de +67, y un tubo de 1.5 mm de pared pandearía con unos 390 kN de compresión, frente a los 2.3 kN del vuelo.
+- **Fuselaje.** Cada tramo cilíndrico se comprueba a compresión y flexión combinadas contra el pandeo de pared delgada (fórmula clásica con el factor de reducción por imperfecciones de NASA SP-8007) y contra la resistencia a compresión del material. Para el Xitle II las cargas de vuelo quedan muy lejos del pandeo: el tramo más cargado es el tanque, con margen de +80, y un tubo de 1.5 mm de pared pandearía con unos 390 kN de compresión, frente a los 2.4 kN del vuelo.
 - **Aletas.** Se compara la velocidad del cohete con la velocidad de flameo de NACA TN 4197 a lo largo del ascenso. Las aletas del Xitle II (tejido 0/90, módulo de cortante de 5 GPa, 3 mm) flamearían a 265 m/s y el cohete llega a 342 m/s: no cumplen, y harían falta 4.7 mm. Con capas a ±45° (unos 18 GPa) el flameo sube a 503 m/s y bastan 3 mm.
 
 Las propiedades de la fibra de carbono son valores de catálogo: hay que sustituirlos por los del laminado real. El espesor de pared del fuselaje sale de los diámetros de `XitleFile.py`, que dan 1.5 mm. La fórmula de flameo es una estimación para aletas delgadas en régimen subsónico; cerca de Mach 1 es solo orientativa.
@@ -332,14 +332,14 @@ La simulación usa el sitio, la atmósfera y el viento de ese día (vuelo libre,
 
 | | Vuelo real | Simulación |
 | --- | --- | --- |
-| Apogeo sobre el sitio | 6573 m (GPS), 6569 m (curva de altura) | 7067 m |
+| Apogeo sobre el sitio | 6573 m (GPS), 6569 m (curva de altura) | 7083 m |
 | Tiempo al apogeo | unos 40 s | 41.7 s |
-| Distancia horizontal en el apogeo | 2532 m | 2533 m |
+| Distancia horizontal en el apogeo | 2532 m | 2471 m |
 | Rumbo de la trayectoria | 220° | 221° |
-| Punto de caída | último GPS en 32.91602°, −106.94135°, a 4553 m del sitio | 32.91599°, −106.94232°, a 4614 m |
-| Velocidad de caída | 273 m/s a 399 m de altura | 283 m/s en el impacto |
+| Punto de caída | último GPS en 32.91602°, −106.94135°, a 4553 m del sitio | 32.91678°, −106.94153°, a 4499 m |
+| Velocidad de caída | 273 m/s a 399 m de altura | 285 m/s en el impacto |
 
-La trayectoria sobre el terreno coincide bien: el impacto simulado queda a 90 m del último punto GPS, que todavía estaba en el aire. La elevación del riel se ajustó para eso, así que no es una predicción independiente. El apogeo sale 7.5 % por encima del medido.
+La trayectoria sobre el terreno coincide bien: el impacto simulado queda a 86 m del último punto GPS, que todavía estaba en el aire. La elevación del riel se ajustó para eso, así que no es una predicción independiente. El apogeo sale 7.8 % por encima del medido.
 
 Esa diferencia no viene de la atmósfera ni del integrador. Para igualar el apogeo medido haría falta bajar el empuje un 5 % o subir el arrastre un 25 %, así que lo que hay que revisar es la curva de empuje (es de una prueba estática, no del vuelo), la masa del cohete o la tabla de Cd. Como referencia, OpenRocket da 5955 m.
 
@@ -392,7 +392,7 @@ La documentación de cada sección del código está en [docs/](./docs/README.md
 
 - El modelo es plano: no hay alabeo ni guiñada. El viento cruzado desplaza al cohete de lado por arrastre, pero no lo hace girar hacia el viento.
 - El inflado de los paracaídas es un modelo sencillo (área que crece en un tiempo de llenado), con las constantes de un paracaídas circular plano. No incluye la masa de aire que arrastra el paracaídas ni la elasticidad de las líneas, así que la carga de apertura es una estimación.
-- El apogeo simulado del Xitle II queda 7 % por encima del medido (ver la comparación con el vuelo real).
+- El apogeo simulado del Xitle II queda 8 % por encima del medido (ver la comparación con el vuelo real).
 - La fuerza normal se aplica perpendicular a la velocidad relativa, no al eje del cohete. Para ángulos de ataque pequeños es equivalente.
 - El centro de presión y los coeficientes de fuerza normal son los de Barrowman, válidos en régimen subsónico y ángulos pequeños; se usan sin corrección hasta Mach 1.
 - El empuje es el de la prueba estática, sin corregir por la menor presión ambiente en altura.
