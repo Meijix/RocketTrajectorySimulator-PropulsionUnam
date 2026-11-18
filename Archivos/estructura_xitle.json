@@ -1,0 +1,57 @@
+{
+  "descripcion": "Materiales y espesores del Xitle II para la comprobación de resistencia (pandeo del fuselaje y flameo de las aletas)",
+  "factor_seguridad": 1.5,
+  "nota_factor": "1.5 es el factor de seguridad último habitual en estructuras aeroespaciales. Se aplica a las cargas: la estructura debe resistir 1.5 veces la carga máxima calculada",
+  "materiales": {
+    "fibra_de_carbono": {
+      "nombre": "Fibra de carbono 0/90",
+      "E_Pa": 70000000000.0,
+      "G_Pa": 5000000000.0,
+      "nu": 0.1,
+      "resistencia_compresion_Pa": 570000000.0,
+      "densidad_kg_m3": 1600,
+      "fuente": "Valores típicos de catálogo para laminado de tejido de carbono estándar con epoxi, 50 % de fibra en volumen (tablas de ACP Composites y de RS). Dependen mucho del tejido, la resina y la fabricación: conviene sustituirlos por los del laminado real",
+      "nota_G": "5 GPa es el módulo de cortante en el plano de un laminado 0/90. Si el laminado lleva capas a ±45° (casi isótropo), G sube a unos 17-20 GPa y E baja a unos 45-50 GPa"
+    },
+    "fibra_de_carbono_casi_isotropa": {
+      "nombre": "Fibra de carbono casi isótropa (0/90 y ±45)",
+      "E_Pa": 48000000000.0,
+      "G_Pa": 18000000000.0,
+      "nu": 0.3,
+      "resistencia_compresion_Pa": 400000000.0,
+      "densidad_kg_m3": 1600,
+      "fuente": "Estimación para un laminado de tejido de carbono con capas a 0/90 y ±45 en partes iguales: el módulo E baja respecto al 0/90 y el de cortante sube a E/(2(1+nu)). Valores orientativos; conviene sustituirlos por los del laminado real"
+    },
+    "fibra_de_vidrio": {
+      "nombre": "Fibra de vidrio 0/90",
+      "E_Pa": 25000000000.0,
+      "G_Pa": 4000000000.0,
+      "nu": 0.2,
+      "resistencia_compresion_Pa": 425000000.0,
+      "densidad_kg_m3": 1900,
+      "fuente": "Valores típicos de catálogo para laminado de tejido de vidrio E con epoxi, 50 % de fibra en volumen. Orientativos"
+    },
+    "aluminio_6061_T6": {
+      "nombre": "Aluminio 6061-T6",
+      "E_Pa": 68900000000.0,
+      "G_Pa": 26000000000.0,
+      "nu": 0.33,
+      "resistencia_compresion_Pa": 276000000.0,
+      "densidad_kg_m3": 2700,
+      "fuente": "Valores estándar de la aleación (límite elástico 276 MPa)"
+    }
+  },
+  "fuselaje": {
+    "material_por_defecto": "fibra_de_carbono",
+    "material_por_tramo": {
+      "Coples": "aluminio_6061_T6"
+    },
+    "nota_espesor": "El espesor de pared de cada tramo se toma de sus diámetros exterior e interior en la definición del cohete: (d_ext - d_int) / 2. En XitleFile.py eso da 1.5 mm para los tubos (d_int = d_ext - 0.003)",
+    "nota_materiales": "Fuselaje de fibra de carbono; coples y piezas de unión de aluminio (dato del equipo)"
+  },
+  "aletas": {
+    "material": "fibra_de_carbono",
+    "espesor_m": 0.003,
+    "nota": "Aletas del Xitle II: tejido de carbono 0/90 de 3 mm de espesor (dato del equipo)"
+  }
+}
