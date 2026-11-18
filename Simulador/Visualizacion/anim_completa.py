@@ -15,9 +15,12 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson, muestra_tiempos
 from Paquetes.utils.dibujar_cohete2 import dibujar_cohete2  # Función para dibujar el cohete
+import os
+# Raiz del repositorio (las rutas se resuelven respecto a ella, no a una maquina concreta)
+RAIZ = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 
-ruta=r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-RungeKutta4-100\datos.csv'
+ruta=os.path.join(RAIZ, 'Simulador', 'Resultados', 'OutputFiles', 'VueloLibre-DOP853-100', 'datos.csv')
 # Leer datos de simulación
 datos_simulacion = pd.read_csv(ruta)
 (tiempos, posiciones, _, thetas, omegas, CPs, CGs, _,
@@ -26,7 +29,7 @@ datos_simulacion = pd.read_csv(ruta)
             accels, _, accangs, Gammas, Alphas, torcas, _, _) = extraer_datoscsv(datos_simulacion)
 
 
-ruta_json=r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-RungeKutta4-100\datos.json'
+ruta_json=os.path.join(RAIZ, 'Simulador', 'Resultados', 'OutputFiles', 'VueloLibre-DOP853-100', 'datos.json')
 with open(ruta_json, 'r', encoding='utf-8') as f:
     datos = json.load(f)
 (_, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto, max_altitude, _, _, _) = extraer_datosjson(datos)

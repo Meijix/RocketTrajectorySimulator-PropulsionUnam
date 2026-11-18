@@ -1,6 +1,6 @@
-Simulador/__pycache__
-Archivos/__pycache__
-Extras/__pycache__
-.../__pycache__
-*/__pycache__/*
-
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.DS_Store

@@ -1,9 +1,40 @@
+"""Integradores de EDOs escritos para el simulador.
+
+Todos comparten la misma interfaz:
+
+    nuevo_estado, dt_usado = integrador.step(t, estado, dt)
+
+`dt_usado` es el paso que realmente se dio (el tiempo avanza de t a t + dt_usado).
+Los métodos de paso fijo devuelven el mismo dt que reciben. Los adaptativos pueden
+reducirlo, y dejan en `integrador.dt_sugerido` el paso recomendado para el siguiente.
+
+Nombres y su correspondencia teórica
+------------------------------------
+Propios (este archivo):
+    Euler            Euler explícito, orden 1.
+    RungeKutta2      Método de Heun (trapecio explícito), orden 2.
+    RungeKutta4      Runge-Kutta clásico, orden 4.
+    RKF45            Runge-Kutta-Fehlberg 4(5) (Fehlberg, 1969), paso adaptativo.
+    EulerAdaptativo  Euler con duplicación de paso (estimación de error de Richardson).
+    HeunAdaptativo   Par embebido Euler-Heun 1(2).
+
+De SciPy (scipy.integrate.solve_ivp), que NO son los de arriba:
+    'RK45'    Dormand-Prince 5(4) (Dormand y Prince, 1980). No es Fehlberg.
+    'RK23'    Bogacki-Shampine 3(2).
+    'DOP853'  Dormand-Prince de orden 8 con estimadores de orden 5 y 3 (código DOP853
+              de Hairer, Nørsett y Wanner; coeficientes de Prince y Dormand, 1981).
+    'LSODA'   Adams (no rígido) / BDF (rígido) con cambio automático (ODEPACK).
+    'BDF'     Fórmulas de diferenciación hacia atrás de orden variable 1 a 5.
+"""
 from scipy.integrate import solve_ivp
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 # 1. Método de Euler
 class Euler:
+    orden = 1
+
     def __init__(self, fun_derivs):
         self.fun_derivadas = fun_derivs
 
@@ -11,12 +42,15 @@ class Euler:
         #Aplicar método de Euler para obtener nuevo estado
         state_new = state + (dt * self.fun_derivadas(t, state))
         return state_new, dt
-    
-#2. Runge-Kutta 4
+
+
+# 2. Runge-Kutta 4 (clásico)
 class RungeKutta4:
+    orden = 4
+
     def __init__(self, fun_derivs):
         self.fun_derivadas = fun_derivs
-    
+
     def step(self, t, state, dt):
         k1 = self.fun_derivadas(t, state)
         k2 = self.fun_derivadas(t + dt/2, state + k1 * dt/2)
@@ -24,9 +58,12 @@ class RungeKutta4:
         k4 = self.fun_derivadas(t + dt, state + k3 * dt)
         new_state = state + dt * (k1 + 2*k2 + 2*k3 + k4) / 6
         return new_state, dt
-    
-# 3. Runge-Kutta 2
+
+
+# 3. Runge-Kutta 2: método de Heun (trapecio explícito)
 class RungeKutta2:
+    orden = 2
+
     def __init__(self, fun_derivs):
         self.fun_derivadas = fun_derivs
 
@@ -35,111 +72,132 @@ class RungeKutta2:
         k2 = self.fun_derivadas(t + dt, state + k1 * dt)
         new_state = state + dt * (k1 + k2) / 2
         return new_state, dt
-    
 
-# 4. Método de Runge-Kutt-Fehlberg 45
-class RKF45:
-    def __init__(self, fun_derivs):
+
+class _Adaptativo:
+    """Control de paso común a los métodos adaptativos.
+
+    El error de cada variable se mide relativo a su tolerancia, atol + rtol*|y|, y se toma
+    el máximo. El paso se acepta si ese error escalado es <= 1. El nuevo paso es
+
+        dt_nuevo = dt * q,   q = S * (1 / (2*error)) ** (1 / (p + 1))
+
+    con p el orden de la fórmula de menor orden del par (para RKF45, p = 4: es la regla
+    q = (tol / (2*error))**(1/4) de Burden y Faires, con el factor de seguridad S). q se
+    limita a [q_min, q_max] para que el paso no cambie bruscamente.
+    """
+    def __init__(self, fun_derivs, rtol=1e-6, atol=1e-8, S=0.9, q_min=0.1, q_max=4.0, dt_min=1e-10):
         self.fun_derivadas = fun_derivs
-        self.tol=1e-2
-        self.S= 0.9
+        self.rtol, self.atol = rtol, atol
+        self.S, self.q_min, self.q_max = S, q_min, q_max
+        self.dt_min = dt_min
+        self.dt_sugerido = None      # paso recomendado para el siguiente step
+        self.rechazados = 0          # pasos repetidos por exceder la tolerancia
+
+    def _intento(self, t, state, dt):
+        """Devuelve (solución que se propaga, estimación del error local) para un paso dt."""
+        raise NotImplementedError
 
     def step(self, t, state, dt):
-        tol=self.tol
-        #S=self.S #no se ocupa???
-
-        retry = True
-        while retry:
-            k1 = dt*self.fun_derivadas(t, state)
-            k2 = dt*self.fun_derivadas(t + dt/4, state + (k1/4))
-            k3 = dt*self.fun_derivadas(t + (dt*3/8), state + (k1*3/32) + (k2*9/32) )
-            k4 = dt*self.fun_derivadas(t + (dt*12/13), state + (k1*1932/2197) - (k2*7200/2197) + (k3*7296/2197))
-            k5 = dt*self.fun_derivadas(t + dt, state + (k1*439/216) - (k2*8) + (k3*3680/513) - (k4*845/4104))
-            k6 = dt*self.fun_derivadas(t + dt/2, state - (k1*8/27) + (k2 *2) -  (k3*3544/2565) + (k4*1859/4104) - (k5*11/40))
-
-            ykp = state + 25/216*k1 + 1408/2565*k3 + 2197/4101*k4 - k5/5
-            zkp = state + 16/135*k1 + 6656/12825*k3 + 28561/56430*k4 - 9/50*k5 + 2/55*k6
-
-            
-            errs = np.abs(zkp - ykp)
-            errmax = max(errs)
-            #print("errmax={} {} tol={}".format(errmax, ">" if errmax>tol else "<", tol))
-            # print("dt_nuevo=", dt_nuevo)
-
-            if errmax < tol:
-                # Errores aceptables, ya no iterar más, aumentar dt
-                #print("Error aceptable")
-                retry = False
+        state = np.asarray(state, dtype=float)
+        while True:
+            nuevo, diferencia = self._intento(t, state, dt)
+            escala = self.atol + self.rtol * np.maximum(np.abs(state), np.abs(nuevo))
+            error = np.max(np.abs(diferencia) / escala)
+            if error == 0:
+                q = self.q_max
             else:
-                # Errores demasiado grandes, reducir dt y repetir paso
-                #print("Error no aceptable, repitiendo iteración")
-                dt_nuevo = dt * (tol / (2*errmax))**0.25
-                retry = True
-                dt = dt_nuevo
+                q = self.S * (1.0 / (2.0 * error)) ** (1.0 / (self.orden_error + 1))
+                q = min(self.q_max, max(self.q_min, q))
+            if error <= 1.0 or dt <= self.dt_min:
+                self.dt_sugerido = dt * q
+                return nuevo, dt
+            # Error demasiado grande: reducir el paso y repetir
+            self.rechazados += 1
+            dt = max(dt * min(q, 1.0), self.dt_min)
 
-        return zkp, dt
-    
+
+# 4. Método de Runge-Kutta-Fehlberg 4(5)
+class RKF45(_Adaptativo):
+    """Runge-Kutta-Fehlberg 4(5): seis etapas, soluciones embebidas de orden 4 y 5.
+
+    Coeficientes de Fehlberg (1969), los mismos de Burden y Faires, "Análisis numérico".
+    La diferencia entre las dos soluciones estima el error local de la de orden 4. Se
+    propaga la de orden 5 (extrapolación local), como hacen la mayoría de las
+    implementaciones; Fehlberg propagaba originalmente la de orden 4.
+    """
+    orden = 5
+    orden_error = 4
+
+    # Tabla de Butcher
+    C = np.array([0, 1/4, 3/8, 12/13, 1, 1/2])
+    A = [
+        [],
+        [1/4],
+        [3/32, 9/32],
+        [1932/2197, -7200/2197, 7296/2197],
+        [439/216, -8, 3680/513, -845/4104],
+        [-8/27, 2, -3544/2565, 1859/4104, -11/40],
+    ]
+    B4 = np.array([25/216, 0, 1408/2565, 2197/4104, -1/5, 0])
+    B5 = np.array([16/135, 0, 6656/12825, 28561/56430, -9/50, 2/55])
+
+    def _intento(self, t, state, dt):
+        k = []
+        for i in range(6):
+            y = state + dt * sum(a * kj for a, kj in zip(self.A[i], k)) if i else state
+            k.append(self.fun_derivadas(t + self.C[i] * dt, y))
+        k = np.array(k)
+        y4 = state + dt * (self.B4 @ k)
+        y5 = state + dt * (self.B5 @ k)
+        return y5, y5 - y4
+
 
 #############################################
-#Metodo de Euler adaptivo
-class AdaptiveEuler:
-    def __init__(self, fun_derivs):
-        self.fun_derivadas = fun_derivs
-        self.tol = 1e-4
-        self.S = 0.9
+# 5. Euler adaptativo (duplicación de paso)
+class EulerAdaptativo(_Adaptativo):
+    """Euler con duplicación de paso: compara un paso dt con dos pasos dt/2.
 
-    def step(self, t, state, dt):
-        retry = True
-        tol = self.tol
-        S = self.S
+    La diferencia estima el error del paso completo (orden 1). Se propaga la solución de
+    los dos medios pasos, que es la más precisa.
+    """
+    orden = 1
+    orden_error = 1
 
-        while retry:
-            # Estimar el paso de Euler con un paso completo
-            state_full = state + dt * self.fun_derivadas(t, state)
+    def __init__(self, fun_derivs, rtol=1e-4, atol=1e-6, **kw):
+        super().__init__(fun_derivs, rtol=rtol, atol=atol, **kw)
 
-            # Estimar el paso de Euler con dos pasos a la mitad
-            dt_half = dt / 2
-            state_half = state + dt_half * self.fun_derivadas(t, state)
-            state_half = state_half + dt_half * self.fun_derivadas(t + dt_half, state_half)
+    def _intento(self, t, state, dt):
+        f0 = self.fun_derivadas(t, state)
+        completo = state + dt * f0
+        medio = state + dt / 2 * f0
+        medio = medio + dt / 2 * self.fun_derivadas(t + dt / 2, medio)
+        return medio, medio - completo
 
-            # Calcular el error
-            error = np.linalg.norm(state_half - state_full)
 
-            # Calcular nuevo tamaño de paso basado en el error
-            if error < tol:
-                # Si el error es aceptable, incrementar el tamaño del paso
-                dt_new = S * dt * (tol / error) ** 0.5
-                retry = False  # No necesitamos repetir el paso
-                return state_full, dt_new
-            else:
-                # Si el error es demasiado grande, reducir el tamaño del paso y repetir
-                dt_new = S * dt * (tol / error) ** 0.5
-                dt = dt_new  # Actualizar dt para el próximo intento
+# 6. Heun adaptativo: par embebido Euler-Heun 1(2)
+class HeunAdaptativo(_Adaptativo):
+    """Par embebido Euler (orden 1) - Heun (orden 2). Se propaga la solución de Heun.
 
-## Metodo Dormand-Prince 853
-class DormanPrince853:
-    def __init__(self, fun_derivs, tol=1e-4, S=0.9):
-        self.fun_derivadas = fun_derivs
-        self.tol = tol
-        self.S = S
+    Esta clase se llamaba antes `DormanPrince853`, pero nunca fue ese método: el
+    Dormand-Prince 8(5,3) real tiene 12 etapas y está disponible como 'DOP853' en SciPy.
+    """
+    orden = 2
+    orden_error = 1
 
-    def step(self, t, state, dt):
-        # Estimar el paso de Runge-Kutta 2 con un paso completo
+    def __init__(self, fun_derivs, rtol=1e-4, atol=1e-6, **kw):
+        super().__init__(fun_derivs, rtol=rtol, atol=atol, **kw)
+
+    def _intento(self, t, state, dt):
         k1 = self.fun_derivadas(t, state)
         k2 = self.fun_derivadas(t + dt, state + dt * k1)
-        state_full = state + dt * (k1 + k2) / 2
-        # Calcular el error
-        error = np.linalg.norm(k2 - k1)
-        # Calcular nuevo tamaño de paso basado en el error
-        if error < self.tol:
-            # Si el error es aceptable, incrementar el tamaño del paso
-            dt_new = self.S * dt * (self.tol / error) ** 0.5
-            return state_full, dt_new
-        else:
-            # Si el error es demasiado grande, reducir el tamaño del paso y repetir
-            dt_new = self.S * dt * (self.tol / error) ** 0.5
-            return state, dt_new
+        euler = state + dt * k1
+        heun = state + dt * (k1 + k2) / 2
+        return heun, heun - euler
 
+
+# Nombre anterior, por compatibilidad con scripts existentes
+AdaptiveEuler = EulerAdaptativo
 
 
 if __name__ == '__main__':
@@ -166,15 +224,11 @@ if __name__ == '__main__':
 
 
     #Elegir el integrador
-    #integrador = AdaptiveEuler(fun_derivadas)
-    #integrador = RKF45(fun_derivadas)
     integrador = Euler(fun_derivadas_ejemplo)
     integrador = RungeKutta4(fun_derivadas_ejemplo)
     integrador = RKF45(fun_derivadas_ejemplo)
-    #integrador = AdaptiveEuler(fun_derivadas_ejemplo) ##masomenos funciona
-    #integrador = AdaptiveRungeKutta4(fun_derivadas_ejemplo) ##este metodo no funciona
-    #integrador = AdaptiveRungeKutta2(fun_derivadas_ejemplo) ##este metodo no funciona
-    #integrador = DormanPrince853(fun_derivadas_ejemplo) ##este metodo no funciona
+    #integrador = EulerAdaptativo(fun_derivadas_ejemplo)
+    #integrador = HeunAdaptativo(fun_derivadas_ejemplo)
 
     #state = np.array([1, 0])
     # Definir las condiciones iniciales
@@ -189,14 +243,14 @@ if __name__ == '__main__':
     state = state0
 
     while t < t_max:
-        estado_nuevo, dt_new = integrador.step(t, state, dt)
-        #print(f'Iteración {it}: t={t:.2f}, state={state}')
-        #print('dt_new', dt_new)
+        estado_nuevo, dt_usado = integrador.step(t, state, min(dt, t_max - t))
         state = estado_nuevo
+        t += dt_usado
         t_values.append(t)
         state_values.append(estado_nuevo)
         it += 1
-        t += dt_new
+        # Los métodos adaptativos proponen el siguiente paso
+        dt = getattr(integrador, 'dt_sugerido', None) or dt
 
     #Solucion exacta
     time = np.linspace(0, t_max, 10000)

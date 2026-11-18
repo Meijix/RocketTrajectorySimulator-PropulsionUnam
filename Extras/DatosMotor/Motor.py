@@ -65,7 +65,7 @@ m_grano=motorMassTable['grano'].max()
 m_prop=m_grano+m_oxidante
 # Calcular el área de la curva empuje vs tiempo utilizando la regla del trapecio
 #Vamos a probar otro tipo de integracion para mejorarlo?
-I_total = np.trapz(y=motorThrustTable['thrust'], x=motorThrustTable['time'])
+I_total = (getattr(np, 'trapezoid', None) or np.trapz)(y=motorThrustTable['thrust'], x=motorThrustTable['time'])
 I=I_total/(m_prop*9.81)
 T_avg=I_total/t_MECO
 

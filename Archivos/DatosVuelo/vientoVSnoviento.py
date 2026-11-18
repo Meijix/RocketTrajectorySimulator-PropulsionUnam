@@ -2,10 +2,13 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+# Raiz del repositorio (las rutas se resuelven respecto a ella, no a una maquina concreta)
+RAIZ = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 # --- Rutas de archivos ---
-ruta_simulada = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GitHubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-110\datos.csv'
-ruta_simulada2 = r'C:\Users\Natalia\OneDrive\Archivos\Tesis\GitHubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-0\datos.csv'
+ruta_simulada = os.path.join(RAIZ, 'Simulador', 'Resultados', 'OutputFiles', 'VueloLibre-DOP853-110', 'datos.csv')
+ruta_simulada2 = os.path.join(RAIZ, 'Simulador', 'Resultados', 'OutputFiles', 'VueloLibre-DOP853-100', 'datos.csv')
 
 
 # --- Cargar datos ---

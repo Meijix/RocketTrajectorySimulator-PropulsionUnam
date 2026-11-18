@@ -10,6 +10,9 @@ from Paquetes.PaqueteFisica.cohete import *
 
 #Se agrega pq se necesita el riel en el objeto cohete
 from Simulador.src import condiciones_init as c_init
+import os
+# Raiz del repositorio (las rutas se resuelven respecto a ella, no a una maquina concreta)
+RAIZ = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 #Dimensiones principales del cohete
 diam_ext = 0.152
@@ -139,13 +142,13 @@ grano = Cilindro("Grano", grano_masa , np.array([0.0, 0.0, valvulas.bottom[2]]),
 
 # Tablas de Cd, empuje y masa
 tabla_Cd_fpath = '../Archivos/cdmachXitle.csv'
-tabla_Cd_fpath = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\cdmachXitle.csv'
+tabla_Cd_fpath = os.path.join(RAIZ, 'Archivos', 'cdmachXitle.csv')
 
 tabla_empuje_fpath = '../Archivos/MegaPunisherBien.csv'
-tabla_empuje_fpath = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\MegaPunisherBien.csv'
+tabla_empuje_fpath = os.path.join(RAIZ, 'Archivos', 'CurvasEmpuje', 'MegaPunisherBien.csv')
 tabla_masa_fpath = '../Archivos/MegaPunisherFatMasadot.csv'
 
-tabla_masa_fpath = r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\MegaPunisherFatMasadot.csv'
+tabla_masa_fpath = os.path.join(RAIZ, 'Archivos', 'CurvasEmpuje', 'MegaPunisherFatMasadot.csv')
 
 #Lista de componentes y creación del vehículo completo
 #Debe ser un diccionario con un nombre corto para cada componente

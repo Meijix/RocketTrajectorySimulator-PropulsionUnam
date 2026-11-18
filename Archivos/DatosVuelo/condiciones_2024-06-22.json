@@ -1,0 +1,49 @@
+{
+  "descripcion": "Sitio y condiciones atmosféricas del vuelo del Xitle II (Spaceport America Cup 2024)",
+  "sitio": {
+    "nombre": "Spaceport America, Nuevo México, EE. UU.",
+    "latitud": 32.94753,
+    "longitud": -106.91019,
+    "altitud_m": 1395,
+    "fuente": "Primer punto GPS del rastreador Featherweight antes del despegue (Archivos/DatosVuelo/FTW.csv); altitud de la estación de tierra"
+  },
+  "lanzamiento": {
+    "fecha": "2024-06-22",
+    "hora_local": "12:20",
+    "zona_horaria": "America/Denver (UTC-6)",
+    "azimut_riel_grados": 220,
+    "nota_azimut": "Rumbo del trayecto GPS durante el ascenso (219° a 221° desde el norte, sentido horario)",
+    "nota_hora": "Minuto y segundo del GPS (20:34 despegue); la hora se dedujo del nombre del archivo KML (12_37_13)"
+  },
+  "vuelo_medido": {
+    "apogeo_sobre_sitio_m": 6573,
+    "apogeo_latitud": 32.93000,
+    "apogeo_longitud": -106.92751,
+    "ultimo_punto_latitud": 32.91602,
+    "ultimo_punto_longitud": -106.94135,
+    "ultimo_punto_altura_sobre_sitio_m": 399,
+    "nota": "El último punto GPS está a 399 m de altura bajando a 273 m/s; el impacto ocurrió unos 55 m más adelante sobre el mismo rumbo"
+  },
+  "atmosfera": {
+    "temperatura_superficie_C": 29.8,
+    "presion_sitio_Pa": 86850,
+    "delta_T_ISA_K": 20,
+    "humedad_relativa_pct": 45,
+    "nota": "delta_T ajustado a las temperaturas en 700 hPa (12.0 °C a 3208 m) y 500 hPa (-3.3 °C a 5938 m). Con delta_T = 20 K el modelo reproduce las alturas de 700, 600, 500 y 400 hPa con error de presión menor a 0.5 %"
+  },
+  "viento": {
+    "rafaga_media_ms": 1.0,
+    "rafaga_desviacion_ms": 1.0,
+    "variacion_direccion_grados": 15,
+    "niveles": [
+      {"altitud_msnm": 1405, "rapidez_ms": 1.5, "direccion_desde_grados": 290, "nivel": "10 m sobre el suelo"},
+      {"altitud_msnm": 1535, "rapidez_ms": 0.5, "direccion_desde_grados": 320, "nivel": "850 hPa"},
+      {"altitud_msnm": 3208, "rapidez_ms": 1.6, "direccion_desde_grados": 78, "nivel": "700 hPa"},
+      {"altitud_msnm": 4477, "rapidez_ms": 2.9, "direccion_desde_grados": 129, "nivel": "600 hPa"},
+      {"altitud_msnm": 5938, "rapidez_ms": 3.3, "direccion_desde_grados": 219, "nivel": "500 hPa"},
+      {"altitud_msnm": 7673, "rapidez_ms": 7.4, "direccion_desde_grados": 210, "nivel": "400 hPa"}
+    ],
+    "nota": "direccion_desde: de dónde viene el viento, en grados desde el norte en sentido horario (convención meteorológica)"
+  },
+  "fuente_meteorologica": "Open-Meteo: reanálisis ERA5 (archive-api.open-meteo.com) y archivo de pronósticos (historical-forecast-api.open-meteo.com), valores de las 12:00 hora local en la celda del sitio. Son datos de modelo, no mediciones en la plataforma"
+}

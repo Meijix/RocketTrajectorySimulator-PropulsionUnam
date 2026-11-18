@@ -2,9 +2,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import os
+# Raiz del repositorio (las rutas se resuelven respecto a ella, no a una maquina concreta)
+RAIZ = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 #df = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\Copia de FthrWtTRAKR_06-22-2024_12_37_13.csv')
-df = pd.read_csv(r'C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\DatosVuelo\FTW.csv')
+df = pd.read_csv(os.path.join(RAIZ, 'Archivos', 'DatosVuelo', 'FTW.csv'))
 
 ifirst = 934
 t_apogeo = 43

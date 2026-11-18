@@ -1,73 +1,116 @@
-#Comparar los resultados de los diferentes métodos de integración
+#Comparar los resultados de los diferentes métodos de integración en el vuelo completo
+#
+# Simula el mismo vuelo (mismo cohete, mismas condiciones y mismo viento) con todos los
+# métodos del catálogo (Paquetes/PaqueteEDOs/metodos.py), guarda una tabla de resultados
+# y grafica las trayectorias. Ejecutar desde la raíz:
+#     python -m Simulador.Visualizacion.compare_integ
 
 # Importar librerías
-#Graficar los resultados de la simulacion
-import matplotlib.pyplot as plt
-import pandas as pd
-import json
-import sys
+import contextlib
+import io
 import os
+import sys
+import time
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 # Agregar la ruta del directorio que contiene los paquetes al sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+RAIZ = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(RAIZ)
 
 #Importar paquetes propios de carpeta superior Paquetes
 from Paquetes.utils.angulos import nice_angle
-from Paquetes.utils.funciones import extraer_datoscsv, extraer_datosjson
-#from Simulador.src.condiciones_init import *
+from Paquetes.utils.figuras import guardar_figuras_al_mostrar
+from Paquetes.PaqueteEDOs.metodos import METODOS
+from Paquetes.PaqueteFisica.vuelo import Vuelo
+from Simulador.src import condiciones_init as c_init
+from Simulador.src.XitleFile import Xitle
+
+CARPETA = os.path.join(RAIZ, 'Simulador', 'Resultados', 'OutputFiles', 'ComparacionIntegradores')
+guardar_figuras_al_mostrar(os.path.join(CARPETA, 'figuras'))
 
 #Indicar el tipo de vuelo
 TipoVuelo = 'VueloLibre'
-#TipoVuelo = 'VueloParacaidas'
-#Integradores a comparar
-integradores = ['Euler', 'RungeKutta2', 'RungeKutta4', 'RK45', 'RK23', 'DOP853', 'BDF', 'LSODA']
+#Integradores a comparar: todos los del catálogo, con su nombre corto
+integradores = list(METODOS)
+dt = c_init.dt              # paso (métodos de paso fijo) o paso máximo (adaptativos)
+dt_referencia = dt / 5      # la solución de referencia usa DOP853 con un paso cinco veces menor
+
+
+def simular(clave, paso):
+    """Vuelo libre del Xitle II con el integrador indicado. Devuelve el objeto Vuelo, tiempos, estados y el tiempo de cómputo."""
+    Xitle.parachute_added = False
+    vuelo = Vuelo(Xitle, c_init.atmosfera_actual, c_init.viento_actual)
+    inicio = time.perf_counter()
+    with contextlib.redirect_stdout(io.StringIO()):
+        salida = vuelo.simular_vuelo(c_init.estado.copy(), c_init.t_max, paso, paso, clave)
+    return vuelo, np.array(salida[0]), np.array(salida[1]), time.perf_counter() - inicio
+
+
+print(f"Solución de referencia: DOP853 con paso máximo {dt_referencia:g} s ...")
+_, t_ref, sim_ref, _ = simular('DOP853', dt_referencia)
+apogeo_ref = sim_ref[:, 2].max()
+t_impacto_ref = t_ref[-1]
 
 #Iniciar un diccionario para guardar los datos de los diferentes integradores
 #Cada integrador tiene un diccionario con los datos de la simulación
-#Ejemplos de datos: posiciones, velocidades, aceleraciones, etc.
 info = {}
-
-#Acceder a las carpetas de ese tipo de vuelo
+filas = []
 for integrador in integradores:
-    carpeta = f'C:/Users/Natalia/OneDrive/Archivos/Tesis/GithubCode/SimuladorVueloNat/3DOF-Rocket-PU/Simulador/Resultados/OutputFiles/{TipoVuelo}-{integrador}'
-    archivo_csv = f'{carpeta}/datos.csv'
-    archivo_json = f'{carpeta}/datos.json'
+    m = METODOS[integrador]
+    print(f"Simulando con {m.corto} ({m.nombre}) ...")
+    vuelo, tiempos, sim, t_computo = simular(m.clave, dt)
+    posiciones, velocidades = sim[:, 0:3], sim[:, 3:6]
+    rapidez = np.linalg.norm(velocidades, axis=1)
 
-    # Leer los datos de la simulación desde el archivo CSV
-    datos_csv = pd.read_csv(archivo_csv)
-    # Extraer los datos del csv
-    (tiempos, posiciones, velocidades, thetas, omegas, CPs, CGs, _,
-    viento_vuelo_mags, viento_vuelo_dirs, viento_vuelo_vecs, wind_xs, wind_ys, wind_zs,
-    Dmags, Nmags, Tmags, Dxs, Dys, Dzs, Nxs, Nys, Nzs, Txs, Tys, Tzs, Tvecs, Dvecs, Nvecs,
-    accels, palancas, accangs, Gammas, Alphas, torcas, Cds, Machs) = extraer_datoscsv(datos_csv)
+    info[integrador] = {
+        'tiempos': tiempos,
+        'posiciones': posiciones,
+        'velocidades': velocidades,
+        'thetas': sim[:, 6],
+        'omegas': sim[:, 7],
+        'apogeo': posiciones[:, 2].max(),
+        'velocidad_max': rapidez.max(),
+        'tiempo_impacto': vuelo.tiempo_impacto,
+        'tiempo_apogeo': vuelo.tiempo_apogeo,
+        'tiempo_salida_riel': vuelo.tiempo_salida_riel,
+    }
 
-    #########################################
-    # Leer los datos de la simulación desde el archivo JSON
-    with open(archivo_json, 'r', encoding='utf-8') as f:
-        datos_json = json.load(f)
-    # Extraer los datos del json
-    (d_ext, t_MECO, tiempo_salida_riel, tiempo_apogeo, tiempo_impacto,
-        max_altitude, max_speed, max_acceleration_linear, max_acceleration_angular) = extraer_datosjson(datos_json)
-    #Guardar los datos en el diccionario
-    info[integrador] = {}
-    #del csv
-    info[integrador]['tiempos'] = tiempos
-    info[integrador]['posiciones'] = posiciones
-    info[integrador]['velocidades'] = velocidades
-    info[integrador]['thetas'] = thetas
-    info[integrador]['omegas'] = omegas
-    #del json
-    info[integrador]['apogeo'] = max_altitude
-    info[integrador]['velocidad_max'] = max_speed
-    info[integrador]['aceleracion_max'] = max_acceleration_linear
-    info[integrador]['aceleracion_max_angular'] = max_acceleration_angular
-    info[integrador]['tiempo_impacto'] = tiempo_impacto
-    info[integrador]['tiempo_apogeo'] = tiempo_apogeo
-    #info[integrador]['tiempo_MECO'] = t_MECO
-    info[integrador]['tiempo_salida_riel'] = tiempo_salida_riel
+    # Diferencia con la referencia a lo largo de todo el vuelo (altitud interpolada en los mismos tiempos)
+    comunes = tiempos[tiempos <= t_ref[-1]]
+    diferencia = np.interp(comunes, tiempos, posiciones[:, 2]) - np.interp(comunes, t_ref, sim_ref[:, 2])
+    filas.append({
+        'Método': m.corto,
+        'Nombre': m.nombre,
+        'Implementación': m.origen,
+        'Paso': m.paso,
+        'Apogeo [m]': info[integrador]['apogeo'],
+        't apogeo [s]': vuelo.tiempo_apogeo,
+        't impacto [s]': vuelo.tiempo_impacto,
+        'Vel. máxima [m/s]': rapidez.max(),
+        'Pasos': vuelo.pasos,
+        'Evaluaciones de f': vuelo.evaluaciones,
+        'Tiempo de cómputo [s]': t_computo,
+        'Dif. apogeo vs ref. [m]': info[integrador]['apogeo'] - apogeo_ref,
+        'Dif. t impacto vs ref. [s]': vuelo.tiempo_impacto - t_impacto_ref,
+        'RMS altitud vs ref. [m]': np.sqrt(np.mean(diferencia**2)),
+    })
 
+# Tabla de resultados con todos los métodos
+tabla = pd.DataFrame(filas)
+os.makedirs(CARPETA, exist_ok=True)
+ruta_tabla = os.path.join(CARPETA, 'tabla_integradores.csv')
+tabla.to_csv(ruta_tabla, index=False)
+print()
+print(f"{TipoVuelo} del Xitle II, dt = {dt:g} s. Referencia: DOP853 con paso máximo {dt_referencia:g} s "
+      f"(apogeo {apogeo_ref:.2f} m, impacto {t_impacto_ref:.3f} s)")
+print(tabla.drop(columns=['Nombre']).to_string(index=False, float_format=lambda v: f"{v:.4g}"))
+print(f"Tabla guardada en: {ruta_tabla}")
 
 ###########################################################
+
 #Graficar las posiciones de los diferentes integradores
 plt.figure()
 for integrador in integradores:

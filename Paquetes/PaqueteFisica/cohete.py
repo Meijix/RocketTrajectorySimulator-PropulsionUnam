@@ -168,7 +168,9 @@ class Cohete:
 
       # Calcular el área de la curva empuje vs tiempo utilizando la regla del trapecio
       #Vamos a probar otro tipo de integracion para mejorarlo?
-      self.I_total = np.trapz(y=self.motorThrustTable['thrust'], x=self.motorThrustTable['time'])
+      # np.trapz se eliminó en NumPy 2.0 (ahora np.trapezoid); se soportan ambas versiones
+      trapecio = getattr(np, 'trapezoid', None) or np.trapz
+      self.I_total = trapecio(y=self.motorThrustTable['thrust'], x=self.motorThrustTable['time'])
 
     def calc_Cd(self, mach):
       return np.interp(mach, self.CdTable['mach'], self.CdTable['cd'])

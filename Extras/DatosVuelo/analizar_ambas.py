@@ -1,10 +1,13 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+import os
+# Raiz del repositorio (las rutas se resuelven respecto a ella, no a una maquina concreta)
+RAIZ = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 # Load the three uploaded files
-file1_path = r"C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\DatosVuelo\ASYB.csv"
-file2_path = r"C:\Users\Natalia\OneDrive\Tesis\GithubCode\3DOF-Rocket-PU\Archivos\DatosVuelo\FTW.csv"
-file3_path = r"C:\Users\Natalia\OneDrive\Archivos\Tesis\GithubCode\SimuladorVueloNat\3DOF-Rocket-PU\Simulador\Resultados\OutputFiles\VueloLibre-DOP853-100\datos.csv"
+file1_path = os.path.join(RAIZ, 'Archivos', 'DatosVuelo', 'ASYB.csv')
+file2_path = os.path.join(RAIZ, 'Archivos', 'DatosVuelo', 'FTW.csv')
+file3_path = os.path.join(RAIZ, 'Simulador', 'Resultados', 'OutputFiles', 'VueloLibre-DOP853-100', 'datos.csv')
 # Load CSV files
 print("Ruta1:", file1_path)
 print("Ruta2:", file2_path)
