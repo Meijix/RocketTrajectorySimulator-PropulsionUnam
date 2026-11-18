@@ -4,3 +4,7 @@ __pycache__/
 venv/
 .pytest_cache/
 .DS_Store
+
+# Ejecutables construidos con PyInstaller
+build/
+dist/
