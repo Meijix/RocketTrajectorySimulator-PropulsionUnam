@@ -18,19 +18,17 @@ from Simulador.src.XitleFile import Xitle
 cohete_actual = Xitle
 TipoVuelo = 'VueloParacaidas'
 
-### EMPEZAR SIN PARACAIDAS
-#quitar el paracaidas
-cohete_actual.parachute_added = False
-#desactivar el paracaidas
-cohete_actual.parachute_active1 = False
-
-######################################
-#####Agregar paracaidas
-Mainchute = Parachute(1.2, 0.802) #Crear paracaidas principal
-print(Xitle.parachute_active1)
-cohete_actual.agregar_paracaidas(Mainchute)
-print("Paracaidas activado:",Xitle.parachute_active1)
-print("Paracaidas agregado:", Xitle.parachute_added)
+### Recuperacion en dos etapas (la configuracion del Xitle definida en XitleFile.py):
+###   drogue: se abre en el apogeo
+###   principal: se abre al bajar por ALTURA_MAIN metros sobre el sitio
+cohete_actual.quitar_paracaidas()
+drogue = Parachute(0.8, 0.7)        # (coeficiente de arrastre, area en m2)
+principal = Parachute(2.0, 1.8)
+ALTURA_MAIN = 450                    # [m sobre el sitio]
+cohete_actual.agregar_paracaidas(drogue)
+cohete_actual.agregar_paracaidas_principal(principal, ALTURA_MAIN)
+# Solo drogue: comentar la linea de agregar_paracaidas_principal
+print("Drogue agregado:", Xitle.parachute_added, "| Principal agregado:", Xitle.main_added)
 #########################################3
 
 inicio = time.time()

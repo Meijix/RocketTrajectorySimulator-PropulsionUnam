@@ -20,10 +20,8 @@ cohete_actual = Xitle
 #vehiculo inestable
 #cohete_actual = XitleMod
 
-#quitar el paracaidas
-cohete_actual.parachute_added = False
-#desactivar el paracaidas
-cohete_actual.parachute_active1 = False
+#quitar los paracaidas (drogue y principal)
+cohete_actual.quitar_paracaidas()
 
 #Crear el vuelo
 vuelo1 = Vuelo(cohete_actual, c_init.atmosfera_actual, c_init.viento_actual)

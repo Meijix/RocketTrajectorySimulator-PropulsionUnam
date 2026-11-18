@@ -41,7 +41,7 @@ dt_referencia = dt / 5      # la solución de referencia usa DOP853 con un paso 
 
 def simular(clave, paso):
     """Vuelo libre del Xitle II con el integrador indicado. Devuelve el objeto Vuelo, tiempos, estados y el tiempo de cómputo."""
-    Xitle.parachute_added = False
+    Xitle.quitar_paracaidas()
     vuelo = Vuelo(Xitle, c_init.atmosfera_actual, c_init.viento_actual)
     inicio = time.perf_counter()
     with contextlib.redirect_stdout(io.StringIO()):

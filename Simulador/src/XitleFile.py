@@ -94,10 +94,11 @@ print("Longitud del fuselaje",Xitle.long_fuselaje)
 #Drogue
 drogue = Parachute(0.8, 0.7)
 Xitle.agregar_paracaidas(drogue)
-#Ahorita solo permite un paracaidas, se puede modificar para que permita más de uno
-""" #Mainchute
+#Mainchute: se abre durante el descenso, a 450 m sobre el sitio (recuperacion en dos etapas)
 mainchute = Parachute(2.0, 1.8)
-Xitle.agregar_paracaidas(mainchute) """
+ALTURA_MAIN = 450
+Xitle.agregar_paracaidas_principal(mainchute, ALTURA_MAIN)
+#Para un vuelo sin recuperacion: Xitle.quitar_paracaidas()
 
 #print(Xitle)
 
