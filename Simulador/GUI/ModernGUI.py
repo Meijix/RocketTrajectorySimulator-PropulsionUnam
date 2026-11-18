@@ -33,6 +33,8 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from Simulador.GUI import backend, mapa
+from Simulador.Visualizacion.graficas_cargas import graficar_envolvente, tabla_envolvente, texto_maximos
+from Paquetes.PaqueteFisica import resistencia
 
 class ColorPalette:
     # Fondo y estructura
@@ -219,6 +221,8 @@ class RocketTab(customtkinter.CTkScrollableFrame):
         self.campo(frame, f"{prefijo}_pos_z", "Posición Z", 3, "m")
         self.campo(frame, f"{prefijo}_diam_ext", "Diámetro Ext", 4, "m")
         self.campo(frame, f"{prefijo}_diam_int", "Diámetro Int", 5, "m")
+        self.create_labeled_widget(frame, "option", f"{prefijo}_material", "Material", backend.PARAMS_XITLE[f"{prefijo}_material"], 6,
+                                   values=list(backend.MATERIALES))
 
     def create_interno_frame(self, master, title, prefijo, campo_masa, etiqueta_masa, row, column):
         """Componente interno: masa, posición y longitud."""
@@ -277,6 +281,9 @@ class RocketTab(customtkinter.CTkScrollableFrame):
         self.campo(frame, "fin_tip_chord", "Cuerda Punta", 6, "m")
         self.campo(frame, "fin_xr", "Retraso c. punta", 7, "m")
         self.campo(frame, "fin_sweep", "Ángulo barrido", 8, "°")
+        self.campo(frame, "fin_thickness", "Espesor", 9, "m")
+        self.create_labeled_widget(frame, "option", "fin_material", "Material", backend.PARAMS_XITLE["fin_material"], 10,
+                                   values=list(backend.MATERIALES))
 
     def create_avionica_frame(self, master, row, column):
         self.create_interno_frame(master, "📡 Aviónica", "avionics", "avionics_mass", "Masa", row, column)
@@ -567,6 +574,7 @@ class SimulationEnvironmentTab(customtkinter.CTkScrollableFrame):
         self.campo(frame, "sim_time_step", "Paso de Tiempo (s):", 2)
         self.create_labeled_widget(frame, "option", "integrator", "Método Integración:",
                                    backend.PARAMS_XITLE["integrator"], 3, backend.INTEGRADORES)
+        self.campo(frame, "load_gust", "Ráfaga de diseño (m/s):", 5)
         self.create_labeled_widget(frame, "option", "recovery", "Recuperación:",
                                    backend.PARAMS_XITLE["recovery"], 4, backend.RECUPERACION, width=230)
 
@@ -941,6 +949,78 @@ class MapTab(customtkinter.CTkFrame):
             self.show_placeholder_message()
 
 
+class LoadsTab(customtkinter.CTkFrame):
+    """Cargas estructurales durante el ascenso: fuerza axial, cortante y momento flector a lo largo del cohete."""
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+        self.env = None
+        self.canvas = None
+        self.toolbar = None
+
+        info = customtkinter.CTkFrame(self)
+        info.grid(row=0, column=0, sticky="ew", padx=10, pady=(10, 0))
+        info.grid_columnconfigure(0, weight=1)
+        self.texto = customtkinter.CTkLabel(info, text="", justify="left", anchor="w", font=customtkinter.CTkFont(size=13))
+        self.texto.grid(row=0, column=0, sticky="w", padx=12, pady=8)
+        self.export_button = customtkinter.CTkButton(info, text="Exportar CSV", state="disabled", command=self.export_csv)
+        self.export_button.grid(row=0, column=1, padx=10, pady=8)
+
+        self.plot_frame = customtkinter.CTkFrame(self)
+        self.plot_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+        self.plot_frame.grid_columnconfigure(0, weight=1)
+        self.plot_frame.grid_rowconfigure(0, weight=1)
+        self.show_placeholder_message()
+
+    def show_placeholder_message(self):
+        for widget in self.plot_frame.winfo_children():
+            widget.destroy()
+        self.canvas = None; self.toolbar = None
+        self.texto.configure(text="Cargas a lo largo del cohete durante el ascenso (hasta el apogeo).")
+        customtkinter.CTkLabel(self.plot_frame, text="Ejecute una simulación para ver la fuerza axial, el cortante y el momento flector.",
+                               font=customtkinter.CTkFont(size=16)).grid(row=0, column=0, sticky="nsew")
+
+    def export_csv(self):
+        if self.env is None: return
+        filepath = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV Files", "*.csv")], title="Exportar cargas")
+        if not filepath: return
+        try:
+            tabla_envolvente(self.env).to_csv(filepath, index=False)
+        except Exception as e:
+            messagebox.showerror("Error al Exportar", f"No se pudo guardar el archivo:\n{e}")
+
+    def display(self, resumen):
+        env = resumen.get("cargas")
+        if env is None:
+            self.show_placeholder_message(); return
+        self.env = env
+        lineas = texto_maximos(env)
+        if resumen.get("fuerza_apertura_principal") is not None:
+            lineas.append(f"Apertura del paracaídas principal: {resumen['fuerza_apertura_principal']:.0f} N ({resumen['g_apertura_principal']:.1f} g)")
+        elif resumen.get("fuerza_apertura_drogue") is not None:
+            lineas.append(f"Apertura del drogue: {resumen['fuerza_apertura_drogue']:.0f} N ({resumen['g_apertura_drogue']:.1f} g)")
+        if resumen.get("resistencia"):
+            lineas += resistencia.texto_resumen(resumen["resistencia"])
+        self.texto.configure(text="\n".join(lineas))
+        self.export_button.configure(state="normal")
+        for widget in self.plot_frame.winfo_children():
+            widget.destroy()
+        try:
+            fig = Figure(figsize=(9, 7), dpi=100, facecolor="#FFFFFF")
+            graficar_envolvente(fig, env)
+            self.canvas = FigureCanvasTkAgg(fig, master=self.plot_frame)
+            self.canvas.draw()
+            self.canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+            self.toolbar = NavigationToolbar2Tk(self.canvas, self.plot_frame, pack_toolbar=False)
+            self.toolbar.update()
+            self.toolbar.grid(row=1, column=0, sticky="ew")
+        except Exception as e:
+            messagebox.showerror("Cargas", f"No se pudieron dibujar las cargas:\n{e}")
+            self.show_placeholder_message()
+
+
 class StabilityTab(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
@@ -995,13 +1075,14 @@ class App(customtkinter.CTk):
         self.left_frame.grid_rowconfigure(0, weight=1); self.left_frame.grid_columnconfigure(0, weight=1)
         self.right_frame = customtkinter.CTkFrame(self.main_frame); self.right_frame.grid_rowconfigure(1, weight=1); self.right_frame.grid_columnconfigure(0, weight=1)
         self.tab_view = customtkinter.CTkTabview(self.left_frame, command=self._on_tab_change); self.tab_view.grid(row=0, column=0, sticky="nsew")
-        self.tab_view.add("Cohete"); self.tab_view.add("Tablas de Datos"); self.tab_view.add("Simulación"); self.tab_view.add("Análisis (CG-CP)"); self.tab_view.add("Resultados"); self.tab_view.add("Mapa")
+        self.tab_view.add("Cohete"); self.tab_view.add("Tablas de Datos"); self.tab_view.add("Simulación"); self.tab_view.add("Análisis (CG-CP)"); self.tab_view.add("Resultados"); self.tab_view.add("Mapa"); self.tab_view.add("Cargas")
         self.rocket_tab = RocketTab(self.tab_view.tab("Cohete")); self.rocket_tab.pack(expand=True, fill="both")
         self.data_tables_tab = DataTablesTab(self.tab_view.tab("Tablas de Datos")); self.data_tables_tab.pack(expand=True, fill="both")
         self.sim_env_tab = SimulationEnvironmentTab(self.tab_view.tab("Simulación")); self.sim_env_tab.pack(expand=True, fill="both")
         self.stability_tab = StabilityTab(self.tab_view.tab("Análisis (CG-CP)")); self.stability_tab.pack(expand=True, fill="both")
         self.results_tab = ResultsTab(self.tab_view.tab("Resultados")); self.results_tab.pack(expand=True, fill="both")
         self.map_tab = MapTab(self.tab_view.tab("Mapa")); self.map_tab.pack(expand=True, fill="both")
+        self.loads_tab = LoadsTab(self.tab_view.tab("Cargas")); self.loads_tab.pack(expand=True, fill="both")
         self.vis_label = customtkinter.CTkLabel(self.right_frame, text="Visualización del Cohete", font=customtkinter.CTkFont(size=16, weight="bold")); self.vis_label.grid(row=0, column=0, padx=10, pady=10)
         self.vis_canvas_frame = customtkinter.CTkFrame(self.right_frame); self.vis_canvas_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
         self.vis_canvas_frame.grid_rowconfigure(0, weight=1); self.vis_canvas_frame.grid_columnconfigure(0, weight=1)
@@ -1073,6 +1154,7 @@ class App(customtkinter.CTk):
         self.update_status(f"Simulación completada con {backend.etiqueta(resumen['integrador'])}: apogeo {resumen['apogeo']:.0f} m en t = {resumen['t_apogeo']:.1f} s")
         self.results_tab.display_results(df, resumen)
         self.map_tab.display(df, resumen)
+        self.loads_tab.display(resumen)
         # Con Tk 8, marcar también el impacto y la trayectoria en el mapa de la pestaña "Simulación"
         widget_mapa = self.sim_env_tab.map_widget
         if widget_mapa is not None:

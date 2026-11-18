@@ -19,6 +19,7 @@ if RAIZ not in sys.path:
     sys.path.insert(0, RAIZ)
 
 from Paquetes.PaqueteEDOs.metodos import CLAVES_VUELO, etiqueta  # noqa: F401 (etiqueta la usa la GUI)
+from Paquetes.PaqueteFisica import cargas, resistencia
 from Paquetes.PaqueteFisica.atmosfera import atmosfera
 from Paquetes.PaqueteFisica.cohete import Cohete, Parachute
 from Paquetes.PaqueteFisica.componentes import Aletas, Boattail, Cilindro, Cono
@@ -33,6 +34,9 @@ from Simulador.src import dia_de_vuelo
 INTEGRADORES = ["DOP853"] + [clave for clave in CLAVES_VUELO if clave != "DOP853"]
 RECUPERACION = ["Vuelo libre (sin paracaídas)", "Paracaídas drogue en el apogeo", "Dos etapas: drogue en el apogeo y principal"]
 VIENTOS = ["Perfil del día del vuelo (22-jun-2024)", "Constante (campos de abajo)"]
+# Materiales para la comprobación de resistencia: nombre visible -> clave en Archivos/estructura_xitle.json
+MATERIALES = {datos["nombre"]: clave for clave, datos in resistencia.cargar_estructura()["materiales"].items()}
+CARBONO, ALUMINIO = "Fibra de carbono 0/90", "Aluminio 6061-T6"
 GEOMETRIAS_NARIZ = {"ogiva": "ogiva", "Cónico": "conica", "Elíptico": "eliptica", "Parabólico": "parabolica"}
 
 # Diámetro de los componentes internos (aviónica, carga útil, paracaídas plegados, motor)
@@ -50,6 +54,9 @@ PARAMS_XITLE = {
     # --- Componentes externos ---
     "nose_len": 0.81, "nose_mass": 0.8, "nose_pos_z": 0.0, "nose_diam": 0.152, "nose_shape": "ogiva",
     "coples_len": 0.176, "coples_mass": 1.5, "coples_pos_z": 0.81, "coples_diam_ext": 0.152, "coples_diam_int": 0.149,
+    # Materiales del Xitle II: fuselaje de fibra de carbono, coples de aluminio
+    "coples_material": ALUMINIO, "tubo_recup_material": CARBONO, "transfer_material": CARBONO,
+    "tanque_vacio_material": CARBONO, "valvulas_material": CARBONO, "cc_material": CARBONO,
     "tubo_recup_len": 0.92, "tubo_recup_mass": 2.3, "tubo_recup_pos_z": 0.986, "tubo_recup_diam_ext": 0.152, "tubo_recup_diam_int": 0.149,
     "transfer_len": 0.25, "transfer_mass": 1.0, "transfer_pos_z": 1.906, "transfer_diam_ext": 0.152, "transfer_diam_int": 0.149,
     "tanque_vacio_len": 1.25, "tanque_vacio_mass": 8.7, "tanque_vacio_pos_z": 2.156, "tanque_vacio_diam_ext": 0.152, "tanque_vacio_diam_int": 0.149,
@@ -57,7 +64,7 @@ PARAMS_XITLE = {
     "cc_len": 0.573, "cc_mass": 4.3, "cc_pos_z": 3.573, "cc_diam_ext": 0.152, "cc_diam_int": 0.102,
     "bt_len": 0.12, "bt_mass": 0.251, "bt_pos_z": 4.146, "bt_diam_front": 0.152, "bt_diam_rear": 0.132, "bt_espesor": 0.003,
     "fin_num": 4, "fin_mass": 1.1, "fin_pos_z": 4.146, "fin_span": 0.11, "fin_root_chord": 0.3, "fin_tip_chord": 0.1,
-    "fin_xr": 0.2, "fin_sweep": 25,
+    "fin_xr": 0.2, "fin_sweep": 25, "fin_thickness": 0.003, "fin_material": CARBONO,   # aletas: tejido 0/90 de 3 mm
     # --- Componentes internos ---
     "avionics_mass": 1.8, "avionics_pos_z": 0.20, "avionics_len": 0.21,
     "cu_mass": 4.3, "cu_pos_z": 0.50, "cu_len": 0.3,
@@ -74,7 +81,7 @@ PARAMS_XITLE = {
     "wind_mode": VIENTOS[0],
     "wind_base_speed": 2, "wind_from": 195, "wind_mean_speed": 1, "wind_speed_var": 1, "wind_angle_var": 15, "wind_seed": "",
     "rail_len": 10, "rail_angle": 83, "rail_azimuth": 220,
-    "sim_max_time": 1000, "sim_time_step": 0.01, "integrator": "DOP853", "recovery": RECUPERACION[0],
+    "sim_max_time": 1000, "sim_time_step": 0.01, "load_gust": 9, "integrator": "DOP853", "recovery": RECUPERACION[0],
 }
 
 # (clave del diccionario de componentes, prefijo de los campos, nombre visible)
@@ -166,6 +173,18 @@ def vuelo_real():
         return None
 
 
+def estructura_desde_parametros(params):
+    """Datos para la comprobación de resistencia: el catálogo de materiales del archivo y, de los
+    formularios, el material de cada tramo del fuselaje y el material y el espesor de las aletas."""
+    estructura = resistencia.cargar_estructura()
+    material = lambda clave: MATERIALES[params.get(clave, PARAMS_XITLE[clave])]
+    estructura["fuselaje"]["material_por_tramo"] = {visible: material(f"{pref}_material")
+                                                    for _, pref, visible in _TUBOS_EXTERNOS}
+    estructura["aletas"]["material"] = material("fin_material")
+    estructura["aletas"]["espesor_m"] = _num(params, "fin_thickness")
+    return estructura
+
+
 def _pos(z):
     return np.array([0.0, 0.0, z])
 
@@ -203,6 +222,13 @@ def validar_parametros(params):
         raise ValueError(f"Modo de recuperación desconocido: {params.get('recovery')!r}.")
     if params.get("recovery") in RECUPERACION[1:] and (_num(params, "drogue_chute_diam") <= 0 or _num(params, "drogue_cd") <= 0):
         raise ValueError("El diámetro y el coeficiente de arrastre del drogue deben ser mayores que 0.")
+    for clave in [f"{pref}_material" for _, pref, _ in _TUBOS_EXTERNOS] + ["fin_material"]:
+        if params.get(clave, PARAMS_XITLE[clave]) not in MATERIALES:
+            raise ValueError(f"Material desconocido en '{clave}': {params.get(clave)!r}. Disponibles: {', '.join(MATERIALES)}.")
+    if _num(params, "fin_thickness") <= 0:
+        raise ValueError("El espesor de las aletas debe ser mayor que 0.")
+    if _num(params, "load_gust") < 0:
+        raise ValueError("La ráfaga de diseño no puede ser negativa (0 = no calcularla).")
     if _num(params, "drogue_fill") < 0 or _num(params, "main_fill") < 0:
         raise ValueError("La constante de llenado de los paracaídas no puede ser negativa (0 = apertura instantánea).")
     if params.get("recovery") == RECUPERACION[2]:
@@ -402,6 +428,21 @@ def ejecutar_simulacion(params, rutas, estado_cb=None, con_mapa=False):
         "margen_min": float(df["margen"].min()),
         "t_final": float(df["t"].iloc[-1]),
     }
+    # Cargas estructurales durante el ascenso (fuerza axial, cortante y momento flector)
+    avisar("Calculando las cargas estructurales...")
+    resumen["cargas"] = cargas.envolvente(vuelo, tiempos, sim, rafaga=n("load_gust"))
+
+    # Comprobación de resistencia con los materiales elegidos (propiedades en Archivos/estructura_xitle.json):
+    # pandeo del fuselaje y flameo de las aletas durante el ascenso
+    try:
+        ascenso = df["t"] <= resumen["t_apogeo"]
+        v_aire = np.sqrt((df["vx"] - df["viento_x"]) ** 2 + (df["vy"] - df["viento_y"]) ** 2 + (df["vz"] - df["viento_z"]) ** 2)
+        resumen["resistencia"] = resistencia.verificar(vuelo, resumen["cargas"], df["z"][ascenso], v_aire[ascenso],
+                                                       estructura_desde_parametros(params))
+    except Exception as error:
+        print(f"No se pudo hacer la comprobación de resistencia: {error}")
+        resumen["resistencia"] = None
+
     # Vuelo real, si el lanzamiento simulado es desde el mismo sitio (a menos de 1 km)
     real = vuelo_real()
     if real and distancia_y_rumbo(lat0, lon0, *real["sitio"])[0] < 1000:
